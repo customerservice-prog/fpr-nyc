@@ -1,0 +1,795 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(cuid())
+  username String @unique
+  password String
+  name String
+  role String @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id String @id @default(cuid())
+  name String
+  slug String @unique
+  description String?
+  picture String?
+  displayToCustomer Boolean @default(true)
+  scheduleProfile String?
+  pricingProfile String @default("standard")
+  sortOrder Int @default(0)
+  bookableAfter DateTime?
+  bookableAfterMessage String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items Item[]
+}
+
+model Item {
+  id String @id @default(cuid())
+  name String
+  slug String @unique
+  description String?
+  type String @default("Regular")
+  cost Float
+  quantity Int @default(1)
+  sortOrder Int @default(0)
+  picture String?
+  displayToCustomer Boolean @default(true)
+  scheduleProfile String?
+  categoryId String
+  category Category @relation(fields: [categoryId], references: [id])
+  status String @default("Available")
+  attentionNotes String?
+  lastInspectedAt DateTime?
+  bookableAfter DateTime?
+  bookableAfterMessage String?
+  specialDisplayName String?
+  sku String?
+  setupArea String?
+  actualSize String?
+  attendants Int?
+  ageGroup String?
+  additionalImages String[] @default([])
+  colorOptions String[] @default([])
+  taxable Boolean @default(true)
+  setupFee Float?
+  internalNotes String?
+  suggestedAddonIds String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orderItems OrderItem[]
+}
+
+model Customer {
+  id String @id @default(cuid())
+  firstName String
+  lastName String
+  email String
+  phone String?
+  company String?
+  secondaryPhone String?
+  secondaryEmail String?
+  customerType String @default("Customer")
+  address String?
+  city String?
+  state String?
+  zip String?
+  notes String?
+  creditStatus String @default("good")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders Order[]
+  rainchecks Raincheck[]
+}
+
+model Driver {
+  id String @id @default(cuid())
+  name String
+  phone String?
+  email String?
+  vehicleInfo String?
+  isActive Boolean @default(true)
+  notes String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deliveryOrders Order[] @relation("DeliveryDriver")
+  pickupOrders Order[] @relation("PickupDriver")
+  pin String? @unique
+  locations DriverLocation[]
+  timeEntries DriverTimeEntry[]
+}
+
+model Order {
+  id String @id @default(cuid())
+  orderNumber String @unique
+  customerId String
+  customer Customer @relation(fields: [customerId], references: [id])
+  status String @default("active")
+  source String @default("online")
+  eventDate DateTime
+  eventEndDate DateTime?
+  eventAddress String?
+  eventCity String?
+  eventState String?
+  eventZip String?
+  eventTimeSlot String?
+  pickupTimeSlot String?
+  deliveryType String @default("delivery")
+  deliveryFee Float @default(0)
+  deliveryDistance Float?
+  subtotal Float @default(0)
+  rentalDays Int @default(1)
+  durationLabel String?
+  durationFee Float @default(0)
+  specialRequestFee Float @default(0)
+  specialRequestNames String?
+  taxAmount Float @default(0)
+  taxRate Float @default(0)
+  couponCode String?
+  couponDiscount Float @default(0)
+  raincheckId String?
+  raincheck Raincheck? @relation(fields: [raincheckId], references: [id])
+  raincheckApplied Float @default(0)
+  damageWaiver Boolean @default(false)
+  damageWaiverFee Float @default(0)
+  depositAmount Float @default(0)
+  tipAmount Float @default(0)
+  totalAmount Float @default(0)
+  amountPaid Float @default(0)
+  balanceDue Float @default(0)
+  stripeCustomerId String?
+  savedPaymentMethodId String?
+  autopayEnabled Boolean @default(false)
+  autoChargeStatus String?
+  autoChargeAttemptedAt DateTime?
+  notes String?
+  internalNotes String?
+  stripePaymentId String?
+  contractSignedAt DateTime?
+  contractSignatureName String?
+  contractSignatureIp String?
+  incompleteFollowUpSentAt DateTime?
+  incompleteFollowUp3SentAt DateTime?
+  incompleteFollowUp7SentAt DateTime?
+  lastMinuteFeeAmount Float @default(0)
+  driverId String?
+  driver Driver? @relation("DeliveryDriver", fields: [driverId], references: [id])
+  pickupDriverId String?
+  pickupDriver Driver? @relation("PickupDriver", fields: [pickupDriverId], references: [id])
+  routeSequence Int?
+  pickupRouteSequence Int?
+  setupSurface String?
+  isPublicPark Boolean @default(false)
+  referenceSource String?
+  locationName String?
+  generalDiscount Float @default(0)
+  overrideTravelFee Float?
+  overrideDepositAmount Float?
+  overrideTaxAmount Float?
+  overrideDamageWaiverFee Float?
+  miscellaneousFees Float @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items OrderItem[]
+  payments Payment[]
+  deliveredAt DateTime?
+  pickedUpAt DateTime?
+  deliveryPhoto String?
+  pickupPhoto String?
+  prePayReminderSentAt DateTime?
+  prePayReminderDisabled Boolean @default(false)
+  balanceReminderSentAt DateTime?
+  preRentalReminderSentAt DateTime?
+  thankYouSentAt DateTime?
+  oneYearReminderSentAt DateTime?
+}
+
+model OrderItem {
+  id String @id @default(cuid())
+  orderId String
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  itemId String?
+  item Item? @relation(fields: [itemId], references: [id])
+  itemName String
+  quantity Int
+  unitPrice Float
+  total Float
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id String @id @default(cuid())
+  orderId String
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount Float
+  method String @default("card")
+  stripePaymentId String? @unique
+  notes String?
+  status String @default("succeeded")
+  pendingAmount Float?
+  recordedByName String?
+  createdAt DateTime @default(now())
+}
+
+model ClosedDate {
+  id String @id @default(cuid())
+  date DateTime @unique
+  reason String?
+  createdAt DateTime @default(now())
+}
+
+model ServiceArea {
+  id String @id @default(cuid())
+  city String
+  state String @default("NY")
+  zip String
+  region String?
+  baseFee Float @default(0)
+  createdAt DateTime @default(now())
+}
+
+model ContactMessage {
+  id String @id @default(cuid())
+  name String
+  email String
+  phone String?
+  eventDate DateTime?
+  message String
+  isRead Boolean @default(false)
+  createdAt DateTime @default(now())
+}
+
+model EmploymentApplication {
+  id String @id @default(cuid())
+  name String
+  phone String?
+  email String
+  position String?
+  message String?
+  availability String?
+  experience String?
+  whyWorkWithUs String?
+  createdAt DateTime @default(now())
+}
+
+model Coupon {
+  id String @id @default(cuid())
+  code String @unique
+  discountType String @default("percentage")
+  discountAmount Float
+  expiresAt DateTime?
+  isActive Boolean @default(true)
+  usageCount Int @default(0)
+  createdAt DateTime @default(now())
+}
+
+model DepositRule {
+  id String @id @default(cuid())
+  type String @default("percentage")
+  amount Float @default(25)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model TaxRate {
+  id String @id @default(cuid())
+  rate Float @default(8)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model PricingTier {
+  id String @id @default(cuid())
+  label String
+  minDays Int
+  maxDays Int?
+  percent Float @default(0)
+  sortOrder Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SpecialRequestFee {
+  id String @id @default(cuid())
+  name String
+  amount Float @default(0)
+  isActive Boolean @default(true)
+  sortOrder Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CompanySettings {
+  id String @id @default(cuid())
+  businessName String @default("Friendly Party Rental")
+  phone String?
+  email String?
+  address String?
+  city String?
+  state String?
+  zip String?
+  timeZone String @default("America/New_York")
+  updatedAt DateTime @updatedAt
+}
+
+model GalleryImage {
+  id String @id @default(cuid())
+  url String
+  caption String?
+  sortOrder Int @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Task {
+  id String @id @default(cuid())
+  title String
+  completed Boolean @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Meeting {
+  id String @id @default(cuid())
+  customerName String
+  email String?
+  scheduledAt DateTime?
+  notes String?
+  zoomLink String?
+  completed Boolean @default(false)
+  pending Boolean @default(false)
+  token String? @unique
+  createdAt DateTime @default(now())
+  zoomMeetingId String?
+  zoomPassword String?
+}
+
+model OrderCounter {
+  id String @id @default("global")
+  value Int @default(9000)
+}
+
+model AutomaticMessage {
+  id String @id @default(cuid())
+  name String
+  daysToSend Int @default(0)
+  sendOption String @default("Before Order Starts")
+  fromEmail String?
+  subject String
+  content String
+  filter String @default("Active Only")
+  enabled Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderSettings {
+  id String @id @default(cuid())
+  requireDamageWaiver Boolean @default(false)
+  allowOnlineOrders Boolean @default(true)
+  autoAcceptOrders Boolean @default(true)
+  minimumNoticeHours Int @default(24)
+  defaultDepositPercent Float @default(25)
+  allowPartialPayments Boolean @default(true)
+  requirePhoneNumber Boolean @default(true)
+  cancellationWindowHours Int @default(48)
+  reminderDaysBeforeDelivery Int @default(1)
+  reminderDaysBeforePickup Int @default(1)
+  reminderDaysBeforeBalance Int @default(3)
+  updatedAt DateTime @updatedAt
+}
+
+model Reference {
+  id String @id @default(cuid())
+  name String
+  isActive Boolean @default(true)
+  sortOrder Int @default(0)
+  createdAt DateTime @default(now())
+}
+
+model SetupSurface {
+  id String @id @default(cuid())
+  name String
+  isActive Boolean @default(true)
+  sortOrder Int @default(0)
+  createdAt DateTime @default(now())
+}
+
+model LoyaltyCreditType {
+  id String @id @default(cuid())
+  name String
+  type String @default("Credit")
+  amount Float @default(0)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model ItemExtra {
+  id String @id @default(cuid())
+  itemId String @unique
+  sortOrder Int @default(0)
+  costOfGoods Float @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+model ScheduleProfile {
+  id String @id @default(cuid())
+  name String
+  description String?
+  daysOfWeek String @default("Mon,Tue,Wed,Thu,Fri,Sat,Sun")
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model BulkPricingRule {
+  id String @id @default(cuid())
+  name String
+  minQuantity Int @default(2)
+  discountType String @default("Percent")
+  discountValue Float @default(0)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Addon {
+  id String @id @default(cuid())
+  name String
+  description String?
+  price Float @default(0)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model AutoChargeSettings {
+  id String @id @default(cuid())
+  enabled Boolean @default(false)
+  daysBeforeEvent Int @default(3)
+  chargeRemainingBalance Boolean @default(true)
+  notifyCustomer Boolean @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+model RecurringProfile {
+  id String @id @default(cuid())
+  name String
+  frequency String @default("Monthly")
+  dayOfMonth Int?
+  dayOfWeek String?
+  notes String?
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model RegisterSetup {
+
+  id String @id @default(cuid())
+  name String
+  location String?
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model ProductSharingSetting {
+  id String @id @default(cuid())
+  shareAcrossLocations Boolean @default(false)
+  notes String?
+  updatedAt DateTime @updatedAt
+}
+
+model Adjustment {
+  id String @id @default(cuid())
+  name String
+  type String @default("Percent")
+  value Float @default(0)
+  appliesTo String @default("Order")
+  isActive Boolean @default(true)
+  sortOrder Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AvailabilityRuleSet {
+  id String @id @default(cuid())
+  name String
+  startDate DateTime?
+  endDate DateTime?
+  maxQuantity Int?
+  minDaysNotice Int @default(0)
+  isActive Boolean @default(true)
+  notes String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SystemSetting {
+  id String @id @default(cuid())
+  category String
+  key String
+  value String?
+  updatedAt DateTime @updatedAt
+  @@unique([category, key])
+}
+
+model TextLog {
+  id String @id @default(cuid())
+  toPhone String
+  message String
+  status String @default("Not Sent")
+  createdAt DateTime @default(now())
+}
+
+model IntegrationConnection {
+  id String @id @default(cuid())
+  provider String @unique
+  apiKey String?
+  apiSecret String?
+  accountId String?
+  isEnabled Boolean @default(false)
+  notes String?
+  updatedAt DateTime @updatedAt
+}
+
+model Location {
+  id String @id @default(cuid())
+  name String
+  address String?
+  city String?
+  state String?
+  zip String?
+  phone String?
+  isActive Boolean @default(true)
+  isDefault Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CompanyType {
+  id String @id @default(cuid())
+  name String
+  sortOrder Int @default(0)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model CompanyRole {
+  id String @id @default(cuid())
+  name String
+  sortOrder Int @default(0)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model GeneralDocument {
+  id String @id @default(cuid())
+  name String
+  fileUrl String?
+  category String?
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model SourceCodeSnippet {
+  id String @id @default(cuid())
+  name String
+  location String @default("head")
+  code String
+  isActive Boolean @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+model SetupSurvey {
+  id String @id @default(cuid())
+  name String
+  questions String
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model AutomaticTextMessage {
+  id String @id @default(cuid())
+  name String
+  daysToSend Int @default(0)
+  sendOption String @default("Before Order Starts")
+  message String
+  filter String @default("Active Only")
+  sendOnlyTo String?
+  sendBccTo String?
+  disableMessage Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TextMessageTemplate {
+  id String @id @default(cuid())
+  name String
+  content String
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model EmailTemplateOrder {
+  id String @id @default(cuid())
+  name String
+  subject String
+  content String
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EmailTemplateMarketing {
+  status String @default("draft")
+  scheduledAt DateTime?
+  segment String?
+  manualRecipients String?
+  sentAt DateTime?
+  recipientCount Int?
+  sendError String?
+  id String @id @default(cuid())
+  name String
+  subject String
+  renderedHtml String?
+  content String
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ErsMailMessage {
+  id String @id @default(cuid())
+  toAddress String
+  fromAddress String?
+  subject String
+  body String
+  status String @default("Sent")
+  sentAt DateTime @default(now())
+}
+
+model ContractOption {
+  id String @id @default(cuid())
+  name String
+  content String
+  requireSignature Boolean @default(true)
+  isActive Boolean @default(true)
+  sortOrder Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WebsitePage {
+  id String @id @default(cuid())
+  slug String @unique
+  title String
+  content String?
+  isPublished Boolean @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+model GeneralImage {
+  id String @id @default(cuid())
+  name String
+  url String
+  category String?
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model NavigationItem {
+  id String @id @default(cuid())
+  label String
+  url String
+  sortOrder Int @default(0)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+
+model PremiumFeature {
+  id String @id @default(cuid())
+  name String
+  description String?
+  isEnabled Boolean @default(false)
+  updatedAt DateTime @updatedAt
+}
+
+model ResponsiveSetting {
+  id String @id @default(cuid())
+  device String
+  cssOverrides String?
+  isActive Boolean @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+model ConversionBooster {
+  id String @id @default(cuid())
+  name String
+  type String @default("popup")
+  content String?
+  triggerRule String?
+  isActive Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WeddingPackage {
+  id String @id @default(cuid())
+  name String
+  description String?
+  price Float @default(0)
+  guests Int @default(0)
+  image String?
+  items Json
+  popular Boolean @default(false)
+  signature Boolean @default(false)
+  sortOrder Int @default(0)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Raincheck {
+  id String @id @default(cuid())
+  customerId String
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  amount Float
+  remainingAmount Float @default(0)
+  reason String?
+  issuedAt DateTime @default(now())
+  expiresAt DateTime?
+  redeemedAt DateTime?
+  redeemedOrderId String?
+  orders Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DriverLocation {
+  id String @id @default(cuid())
+  driverId String
+  driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  lat Float
+  lng Float
+  recordedAt DateTime @default(now())
+}
+
+
+model DriverTimeEntry {
+  id String @id @default(cuid())
+  driverId String
+  driver Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  clockIn DateTime @default(now())
+  clockOut DateTime?
+  createdAt DateTime @default(now())
+}
+
+
+model ThemeSettings {
+  id String @id @default(cuid())
+  headerStyle Int @default(1)
+  footerStyle String @default("dark")
+  storeBackgroundImage String?
+  storeBackgroundTint String @default("none")
+  categoryDisplayStyle String @default("boxed")
+  colorTheme String @default("theme1")
+  btnPrimaryColor String @default("#F5A31B")
+  btnPrimaryColorBg String @default("#F5A31B")
+  headerFont String @default("default")
+  headerFont2 String @default("default")
+  categoryCarouselCount Int @default(12)
+  globalCustomCode String?
+  updatedAt DateTime @updatedAt
+}
+
+
+model PageCustomCode {
+  id String @id @default(cuid())
+  slug String @unique
+  code String
+  updatedAt DateTime @updatedAt
+}

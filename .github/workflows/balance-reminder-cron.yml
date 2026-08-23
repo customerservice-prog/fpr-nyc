@@ -1,0 +1,13 @@
+name: Balance Reminders
+
+on:
+  schedule:
+    - cron: '5 13 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  call-endpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call balance reminder endpoint
+        run: curl -f -X GET https://www.friendlypartyrental.com/api/cron/balance-reminder

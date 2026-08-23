@@ -1,0 +1,117 @@
+export const dynamic = 'force-dynamic'
+
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { sendEmail } from '@/lib/email'
+import { BUSINESS } from '@/lib/utils'
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.friendlypartyrental.com'
+
+function resumeLink(orderId: string) {
+    return SITE_URL + '/pay/' + orderId
+}
+
+function buildEmail(stage: 0 | 3 | 7, firstName: string, orderId: string) {
+    const link = resumeLink(orderId)
+    const name = firstName || 'there'
+    if (stage === 0) {
+        return {
+            subject: 'Quick question about your event setup, ' + name,
+            html: '<p>Hi ' + name + ',</p><p>I noticed you were exploring rental options with us for your event but didn\'t get a chance to finish your order. We know event planning keeps you busy, so if you have any questions or would like a hand finishing up, we\'re happy to help.</p><p>You can pick up right where you left off here:</p><p><a href="' + link + '">' + link + '</a></p><p>Thanks,<br/>The ' + BUSINESS.name + ' Team</p>',
+        }
+    }
+    if (stage === 3) {
+        return {
+            subject: 'Checking in on your event quote, ' + name,
+            html: '<p>Hi ' + name + ',</p><p>Just checking back on the quote you started for your upcoming event. Availability for your date and items can change, so if you\'d like to move forward, now is a great time to complete your booking.</p><p><a href="' + link + '">' + link + '</a></p><p>Thanks,<br/>The ' + BUSINESS.name + ' Team</p>',
+        }
+    }
+    return {
+        subject: 'Final check-in on your event quote, ' + name,
+        html: '<p>Hi ' + name + ',</p><p>This is just a final check-in about the quote you started for your event. If you\'d still like to book, simply click below to complete your order. If your plans have changed, no action is needed on your end.</p><p><a href="' + link + '">' + link + '</a></p><p>Thanks,<br/>The ' + BUSINESS.name + ' Team</p>',
+    }
+}
+async function hasAlreadyConverted(email: string, excludeOrderId: string) {
+    const converted = await prisma.order.findFirst({ where: { id: { not: excludeOrderId }, customer: { email }, OR: [{ status: { not: 'quote' } }, { amountPaid: { gt: 0 } }] } })
+    return !!converted
+}
+
+export async function GET(request: NextRequest) {
+    const authHeader = request.headers.get('authorization')
+    const cronSecret = process.env.CRON_SECRET
+    if (cronSecret && authHeader !== 'Bearer ' + cronSecret) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const now = new Date()
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000)
+    const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+
+    const results = { stage0: 0, stage3: 0, stage7: 0 }
+
+    const stage0Orders = await prisma.order.findMany({
+        where: {
+            status: 'quote',
+            amountPaid: 0, source: { not: 'admin' },
+            createdAt: { lte: oneHourAgo },
+            incompleteFollowUpSentAt: null,
+        },
+        include: { customer: true },
+    })
+    for (const order of stage0Orders) {
+        if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
+        const email = buildEmail(0, order.customer?.firstName || '', order.id)
+        if (order.customer?.email) {
+            await sendEmail({ to: order.customer.email, subject: email.subject, html: email.html })
+        }
+            if (order.customer && order.source !== 'admin') {
+                                await sendEmail({
+                                                        to: BUSINESS.email,
+                                                        subject: 'Abandoned online order - ' + (order.customer.firstName || 'Unknown') + ' ' + (order.customer.lastName || ''),
+                                                        html: '<p>A customer started an order online but did not finish checking out.</p><p>Customer: ' + order.customer.firstName + ' ' + order.customer.lastName + '<br/>Email: ' + (order.customer.email || 'N/A') + '<br/>Phone: ' + (order.customer.phone || 'N/A') + '</p><p><a href="' + SITE_URL + '/admin/orders/' + order.id + '">View this order in the admin panel</a></p>',
+                                })
+            }
+        await prisma.order.update({ where: { id: order.id }, data: { incompleteFollowUpSentAt: now } })
+        results.stage0++
+    }
+
+    const stage3Orders = await prisma.order.findMany({
+        where: {
+            status: 'quote',            amountPaid: 0, source: { not: 'admin' },
+            createdAt: { lte: threeDaysAgo },
+            incompleteFollowUp3SentAt: null,
+        },
+        include: { customer: true },
+    })
+        for (const order of stage3Orders) {
+            if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
+        const email = buildEmail(3, order.customer?.firstName || '', order.id)
+        if (order.customer?.email) {
+            await sendEmail({ to: order.customer.email, subject: email.subject, html: email.html })
+        }
+        await prisma.order.update({ where: { id: order.id }, data: { incompleteFollowUp3SentAt: now } })
+        results.stage3++
+    }
+
+    const stage7Orders = await prisma.order.findMany({
+        where: {
+            status: 'quote',
+            amountPaid: 0, source: { not: 'admin' },
+            createdAt: { lte: sevenDaysAgo },
+            incompleteFollowUp7SentAt: null,
+        },
+        include: { customer: true },
+    })
+    for (const order of stage7Orders) {
+        if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
+        const email = buildEmail(7, order.customer?.firstName || '', order.id)
+        if (order.customer?.email) {
+            await sendEmail({ to: order.customer.email, subject: email.subject, html: email.html })
+        }
+        await prisma.order.update({ where: { id: order.id }, data: { incompleteFollowUp7SentAt: now } })
+        results.stage7++
+    }
+
+    return NextResponse.json({ ok: true, ...results })
+}

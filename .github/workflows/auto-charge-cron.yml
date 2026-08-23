@@ -1,0 +1,13 @@
+name: Auto Charge (Autopay)
+
+on:
+  schedule:
+    - cron: '0 14 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  call-endpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call auto charge endpoint
+        run: curl -f -X GET https://www.friendlypartyrental.com/api/cron/auto-charge

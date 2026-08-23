@@ -1,0 +1,13 @@
+name: One Year Reminders
+
+on:
+  schedule:
+    - cron: '20 13 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  call-endpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call one year reminder endpoint
+        run: curl -f -X GET https://www.friendlypartyrental.com/api/cron/one-year-reminder

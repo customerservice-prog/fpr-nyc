@@ -1,0 +1,12 @@
+name: Marketing Scheduled Send
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}
+jobs:
+  call-endpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call marketing scheduled send endpoint
+        run: |
+          curl -f -X GET https://www.friendlypartyrental.com/api/cron/marketing-scheduled-send -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"        

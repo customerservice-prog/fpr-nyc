@@ -28,19 +28,19 @@ export default async function HomePage() {
           categoryPictures = {}
     }
   const packagesRaw = await getSyncedWeddingPackages()
-        const packages = packagesRaw.map((p) => ({ ...p, items: Array.isArray(p.items) ? (p.items as string[]) : [], image: p.image || undefined })); let popularItems: any[] = []; try { popularItems = await prisma.item.findMany({ where: { displayToCustomer: true, status: 'Available' }, orderBy: { sortOrder: 'asc' }, take: 10, select: { id: true, name: true, specialDisplayName: true, slug: true, cost: true, picture: true, category: { select: { name: true } } } }) } catch { popularItems = [] }; const mobileCategorySlugs = ['tent-rentals','bounce-house-rentals','table-chair-rentals','weddings','linen-rentals','dance-floor-stage-rentals','photobooth-rentals','concession-machine-rentals','yard-game-rentals','event-lighting-rentals','generator-rentals','heater-fan-rentals','party-rental-packages','beverage-food-service','foam-party-machine-rentals','inflatable-movie-screen-rentals','party-rental-accessories']; const mobileCategories = mobileCategorySlugs.map((slug) => PUBLIC_CATEGORIES.find((c) => c.slug === slug)).filter((c): c is (typeof PUBLIC_CATEGORIES)[number] => Boolean(c)).map((c) => ({ slug: c.slug, name: c.slug === 'bounce-house-rentals' ? 'Bounce Houses & Water Slides' : c.name.replace(' — Syracuse, NY', ''), href: c.href, image: categoryPictures[c.slug] || c.image }))
+        const packages = packagesRaw.map((p) => ({ ...p, items: Array.isArray(p.items) ? (p.items as string[]) : [], image: p.image || undefined })); let popularItems: any[] = []; try { popularItems = await prisma.item.findMany({ where: { displayToCustomer: true, status: 'Available' }, orderBy: { sortOrder: 'asc' }, take: 10, select: { id: true, name: true, specialDisplayName: true, slug: true, cost: true, picture: true, category: { select: { name: true } } } }) } catch { popularItems = [] }; const mobileCategorySlugs = ['tent-rentals','bounce-house-rentals','table-chair-rentals','weddings','linen-rentals','dance-floor-stage-rentals','photobooth-rentals','concession-machine-rentals','yard-game-rentals','event-lighting-rentals','generator-rentals','heater-fan-rentals','party-rental-packages','beverage-food-service','foam-party-machine-rentals','inflatable-movie-screen-rentals','party-rental-accessories']; const mobileCategories = mobileCategorySlugs.map((slug) => PUBLIC_CATEGORIES.find((c) => c.slug === slug)).filter((c): c is (typeof PUBLIC_CATEGORIES)[number] => Boolean(c)).map((c) => ({ slug: c.slug, name: c.slug === 'bounce-house-rentals' ? 'Bounce Houses & Water Slides' : c.name.replace(' — Greenville, SC', ''), href: c.href, image: categoryPictures[c.slug] || c.image }))
   return (
     <div>
-      <div className="md:hidden"><MobileHome categories={mobileCategories} popularItems={popularItems.map((it: any) => ({ id: it.id, name: it.specialDisplayName || it.name, slug: it.slug, cost: it.cost, picture: it.slug ? `/api/item-image/${it.slug}?v=${IMAGE_CACHE_BUST}` : (it.picture || null), status: null, category: it.category }))} packages={packages.map((p: any) => ({ id: p.id, name: p.name, price: p.price, guests: p.guests, image: p.image, popular: p.popular, signature: p.signature }))} weddingImage={packages[0]?.image || null} seoSection={<section className="max-w-4xl mx-auto px-4 py-8 space-y-6 text-sm text-body"><p>Friendly Party Rental provides reliable and affordable party rentals in Syracuse, NY, Minoa, and surrounding Central New York communities.</p><p>Serving Syracuse, Minoa, Cicero, Manlius, Camillus, Baldwinsville, Clay, Cazenovia, Liverpool, and surrounding Central New York areas.</p></section>} /></div><div className="hidden md:block"><HeroSection /></div>
+      <div className="md:hidden"><MobileHome categories={mobileCategories} popularItems={popularItems.map((it: any) => ({ id: it.id, name: it.specialDisplayName || it.name, slug: it.slug, cost: it.cost, picture: it.slug ? `/api/item-image/${it.slug}?v=${IMAGE_CACHE_BUST}` : (it.picture || null), status: null, category: it.category }))} packages={packages.map((p: any) => ({ id: p.id, name: p.name, price: p.price, guests: p.guests, image: p.image, popular: p.popular, signature: p.signature }))} weddingImage={packages[0]?.image || null} seoSection={<section className="max-w-4xl mx-auto px-4 py-8 space-y-6 text-sm text-body"><p>Friendly Party Rental provides reliable and affordable party rentals in Greenville, SC and surrounding Upstate South Carolina communities.</p><p>Serving Greenville, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, Piedmont, and surrounding Upstate South Carolina areas.</p></section>} /></div><div className="hidden md:block"><HeroSection /></div>
 
       {/* Intro Section */}<div className="hidden md:block">
       <section className="max-w-4xl mx-auto px-4 py-12 text-center">
-        <h1 className="text-3xl font-bold text-dark mb-6">Party Rentals in Syracuse, NY &amp; Surrounding Areas</h1>
+        <h1 className="text-3xl font-bold text-dark mb-6">Party Rentals in Greenville, SC &amp; Surrounding Areas</h1>
         <div className="space-y-4 text-body">
-          <p>Friendly Party Rental provides reliable and affordable party rentals in Syracuse, NY, Minoa, and surrounding Central New York communities. We offer tent rentals, table and chair rentals, and event essentials for weddings, birthdays, graduations, and outdoor events.</p>
-          <p>Based in Minoa, NY, we proudly serve the Syracuse area with clean equipment, on-time delivery, and friendly local service. We make event planning simple and stress-free.</p>
+          <p>Friendly Party Rental provides reliable and affordable party rentals in Greenville, SC and surrounding Upstate South Carolina communities. We offer tent rentals, table and chair rentals, and event essentials for weddings, birthdays, graduations, and outdoor events.</p>
+          <p>Based in Greenville, SC, we proudly serve the Upstate with clean equipment, on-time delivery, and friendly local service. We make event planning simple and stress-free.</p>
           <p>Browse our rental categories below to find everything you need for your event.</p>
-          <p>Serving Syracuse, Minoa, Cicero, Manlius, Camillus, Baldwinsville, Clay, Cazenovia, Liverpool, and surrounding Central New York areas.</p>
+          <p>Serving Greenville, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, Piedmont, and surrounding Upstate South Carolina areas.</p>
         </div>
         <Link href="/order-by-date" className="btn-gold mt-8 inline-block">Book Your Party Rentals Online</Link>
       </section>
@@ -49,7 +49,7 @@ export default async function HomePage() {
       <section className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-8">
           {[
-            { title: 'Local & Family-Owned', text: 'Based in Minoa, NY, we proudly serve Syracuse and surrounding Central New York communities with friendly, reliable local service you can trust.' },
+            { title: 'Local & Family-Owned', text: 'Based in Greenville, SC, we proudly serve the Upstate South Carolina community with friendly, reliable local service you can trust.' },
             { title: 'Clean, Event-Ready Equipment', text: 'All of our party rental equipment is professionally cleaned, inspected, and ready to use so your event looks great and runs smoothly.' },
             { title: 'On-Time Delivery & Pickup', text: 'We show up when we say we will. Our team provides dependable delivery and pickup so you can focus on enjoying your event.' },
           ].map((item) => (
@@ -161,16 +161,16 @@ className="w-full h-full"
       {/* SEO Sections */}
       <section className="max-w-4xl mx-auto px-4 py-12 space-y-8">
         <div>
-          <h2 className="text-xl font-bold text-dark mb-3">Party Rentals Serving Syracuse, NY and Central New York</h2>
-          <p className="text-body text-sm">Friendly Party Rental has proudly served the Syracuse, NY area for more than a decade as a family-owned and operated business based in Minoa. If you're searching for party rentals near me, we deliver quality event equipment throughout Central New York, including Cicero, Manlius, Liverpool, and Camillus. Whether you are planning a backyard birthday party, a corporate picnic, or a full wedding reception, our team has the inventory and experience to help your event come together smoothly.</p>
+          <h2 className="text-xl font-bold text-dark mb-3">Party Rentals Serving Greenville, SC and Upstate South Carolina</h2>
+          <p className="text-body text-sm">Friendly Party Rental is bringing over a decade of party rental experience to the Greenville, SC area as a family-owned and operated business. If you're searching for party rentals near me, we deliver quality event equipment throughout the Upstate, including Greer, Simpsonville, Mauldin, and Easley. Whether you are planning a backyard birthday party, a corporate picnic, or a full wedding reception, our team has the inventory and experience to help your event come together smoothly.</p>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-dark mb-3">Tent Rentals in Syracuse, NY</h2>
-          <p className="text-body text-sm">We stock pole tents, frame tents, and high-peak tents in sizes ranging from compact 10x10 canopies for graduation parties up to expansive 40x80 tents that can seat 300 or more guests, a popular search for <Link href="/category/tent-rentals" className="underline">tent rentals near me</Link> across Syracuse and the surrounding towns. Every tent is cleaned, inspected, and installed by our experienced crew, and we can add sidewalls, lighting, or flooring based on your event's needs. Our team pulls permits when required and coordinates directly with your venue to keep setup simple.</p>
+          <h2 className="text-xl font-bold text-dark mb-3">Tent Rentals in Greenville, SC</h2>
+          <p className="text-body text-sm">We stock pole tents, frame tents, and high-peak tents in sizes ranging from compact 10x10 canopies for graduation parties up to expansive 40x80 tents that can seat 300 or more guests, a popular search for <Link href="/category/tent-rentals" className="underline">tent rentals near me</Link> across Greenville and the surrounding towns. Every tent is cleaned, inspected, and installed by our experienced crew, and we can add sidewalls, lighting, or flooring based on your event's needs. Our team pulls permits when required and coordinates directly with your venue to keep setup simple.</p>
         </div>
         <div>
           <h2 className="text-xl font-bold text-dark mb-3">Table and Chair Rentals</h2>
-          <p className="text-body text-sm">Our inventory includes 6ft and 8ft banquet tables, 60-inch and 48-inch round tables, and cocktail tables for mingling, along with white plastic folding chairs, padded resin chairs, and gold or white Chiavari chairs. If you're looking for <Link href="/category/table-chair-rentals" className="underline">table and chair rentals near me</Link>, these pieces are a great fit for weddings, graduations, corporate gatherings, and backyard celebrations throughout Syracuse and Central New York. A delivery fee based on distance from our Minoa location applies and is shown at checkout.</p>
+          <p className="text-body text-sm">Our inventory includes 6ft and 8ft banquet tables, 60-inch and 48-inch round tables, and cocktail tables for mingling, along with white plastic folding chairs, padded resin chairs, and gold or white Chiavari chairs. If you're looking for <Link href="/category/table-chair-rentals" className="underline">table and chair rentals near me</Link>, these pieces are a great fit for weddings, graduations, corporate gatherings, and backyard celebrations throughout Greenville and the Upstate. A delivery fee applies based on your location and is shown at checkout.</p>
         </div>
         <div>
           <h2 className="text-xl font-bold text-dark mb-3">Bounce House Rentals</h2>
@@ -181,8 +181,8 @@ className="w-full h-full"
           <p className="text-body text-sm">Round out your event with <Link href="/category/linen-rentals" className="underline">table linens</Link>, napkins, and sashes available in a range of colors, plus <Link href="/category/concession-machine-rentals" className="underline">concession favorites</Link> like popcorn machines, cotton candy makers, snow cone machines, and hot dog rollers. We also carry dance floors, staging, event lighting, heaters, fans, and yard games to help complete your setup.</p>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-dark mb-3">Wedding Rentals in Syracuse</h2>
-          <p className="text-body text-sm">Planning a wedding in Syracuse or elsewhere in Central New York? Friendly Party Rental offers everything from intimate backyard ceremonies to large, all-inclusive receptions, including Chiavari chairs, farmhouse cross-back chairs, floor-length linens, arches and arbors, candelabras, charger plates, sweetheart tables, backdrops, greenery walls, uplighting, and welcome signs.</p>
+          <h2 className="text-xl font-bold text-dark mb-3">Wedding Rentals in Greenville, SC</h2>
+          <p className="text-body text-sm">Planning a wedding in Greenville or elsewhere in Upstate South Carolina? Friendly Party Rental offers everything from intimate backyard ceremonies to large, all-inclusive receptions, including Chiavari chairs, farmhouse cross-back chairs, floor-length linens, arches and arbors, candelabras, charger plates, sweetheart tables, backdrops, greenery walls, uplighting, and welcome signs.</p>
           <p className="text-body text-sm">Our wedding tents range from 20x40 for smaller ceremonies up to 40x80 for receptions of 300 or more guests, with sidewall, climate control, and lighting options available. Call 315-884-1498 or browse our wedding packages below to start planning delivery and setup for your big day.</p>
         </div>
       </section>
@@ -219,10 +219,10 @@ className="w-full h-full"
         <h2 className="text-2xl font-bold text-dark mb-6 text-center">Why Choose Friendly Party Rental</h2>
         <div className="space-y-4 text-body">
           <p>
-            Family-owned and serving Central New York for over 10 years, we have built our reputation on dependable delivery, clean equipment, fair pricing, and professional setup. We are fully insured and our delivery and setup crews are background-checked, so you can book with confidence.
+            Family-owned with over 10 years of party rental experience, we're bringing that same dependable delivery, clean equipment, fair pricing, and professional setup to Greenville, SC. We are fully insured and our delivery and setup crews are background-checked, so you can book with confidence.
           </p>
           <p className="font-bold text-dark">
-            Serving Syracuse, Minoa, Cicero, Manlius, Camillus, Baldwinsville, Clay, Cazenovia, Liverpool, and surrounding Central New York areas.
+            Serving Greenville, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, Piedmont, and surrounding Upstate South Carolina areas.
           </p>
         </div>
       </section><section className="max-w-4xl mx-auto px-4 py-12 text-center"><p className="text-secondary uppercase tracking-[0.3em] text-xs font-bold mb-3">A Complete Solution</p><h2 className="text-2xl font-bold text-dark mb-4">Full-Service Event Planning — All In-House</h2><p className="text-body max-w-2xl mx-auto mb-6">From tents and tables to timelines and setup, we plan and provide it all, so there is no need to hire a separate event planner. One team, one contract, one point of contact from booking to breakdown.</p><Link href="/event-planning" className="btn-primary inline-block px-8 uppercase text-sm tracking-wide">Learn About Event Planning</Link></section>

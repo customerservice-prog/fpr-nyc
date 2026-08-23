@@ -4,8 +4,8 @@ import { safeJsonLd } from '@/lib/jsonLd'
 
 export const metadata: Metadata = {
   title: 'Frequently Asked Questions',
-  description: 'Answers to common questions about booking, delivery, setup, equipment safety, and rental policies for party rentals in Syracuse, NY and Central New York.',
-  alternates: { canonical: 'https://www.friendlypartyrental.com/frequently_asked_questions' },
+  description: 'Answers to common questions about booking, delivery, setup, equipment safety, and rental policies for party rentals in Greenville, SC and Upstate South Carolina.',
+  alternates: { canonical: 'https://friendly-party-rental-greenville-sc-production.up.railway.app/frequently_asked_questions' },
 }
 
 const faqSections = [
@@ -24,8 +24,8 @@ const faqSections = [
   {
     title: 'DELIVERY, SETUP & PICKUP',
     items: [
-      { question: 'Does the price include delivery and setup?', answer: 'Tent delivery and setup is included for most Onondaga County locations. Table and chair setup is available for an additional fee.' },
-      { question: 'What areas do you serve?', answer: 'Syracuse, Minoa, Cicero, Liverpool, Manlius, DeWitt, Camillus, Fayetteville, Baldwinsville, Skaneateles, and surrounding CNY.' },
+      { question: 'Does the price include delivery and setup?', answer: 'Tent delivery and setup is included for most Greenville County locations. Table and chair setup is available for an additional fee.' },
+      { question: 'What areas do you serve?', answer: 'Greenville, Taylors, Greer, Simpsonville, Mauldin, Travelers Rest, Fountain Inn, Piedmont, Berea, and surrounding Upstate South Carolina.' },
       { question: 'When do you set up?', answer: 'Setup is coordinated in advance based on your event schedule.' },
       { question: 'Does setup time count toward my rental period?', answer: 'No.' },
       { question: 'What if my event starts early in the morning?', answer: 'Early setups are available.' },
@@ -62,7 +62,7 @@ const faqSections = [
       { question: 'What surfaces can you set up on?', answer: 'Grass, pavement, turf, gravel, concrete.' },
       { question: 'Do I need a permit for a backyard tent?', answer: 'Usually no for residential. Large tents at commercial venues may need permits.' },
       { question: 'Can you do a free yard assessment?', answer: 'Yes. Call 315-884-1498.' },
-      { question: 'Do you serve all of CNY?', answer: 'Yes, Onondaga County and surrounding areas.' },
+      { question: 'Do you serve all of Upstate South Carolina?', answer: 'Yes, Greenville County and surrounding areas.' },
     ],
   },
 ]
@@ -91,7 +91,7 @@ export default function FAQPage() {
       />
       <h1 className="text-3xl font-bold text-dark mb-2 text-center">Frequently Asked Questions</h1>
       <p className="text-body text-center mb-10">
-        Get answers to the most common questions about party rental in Syracuse, NY
+        Get answers to the most common questions about party rental in Greenville, SC
       </p>
 
       <div className="space-y-10">

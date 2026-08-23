@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'About Us',
-  description: 'Learn about Friendly Party Rental, a family-owned party rental company based in Minoa, NY serving Syracuse and Central New York for over 10 years with clean, reliable rental equipment.',
-  alternates: { canonical: 'https://www.friendlypartyrental.com/about_us' },
+  description: 'Learn about Friendly Party Rental, a family-owned party rental company now serving Greenville, SC and the Upstate with over 10 years of party rental experience and clean, reliable equipment.',
+  alternates: { canonical: 'https://www.friendlypartyrentalsc.com/about_us' },
 }
 
 export default function AboutPage() {
@@ -12,12 +12,12 @@ export default function AboutPage() {
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="text-center mb-12">
         <h1 className="text-3xl font-bold text-dark mb-3">About Friendly Party Rental</h1>
-        <p className="text-body text-lg">Local. Reliable. Clean, event-ready rentals for Syracuse & Central New York.</p>
+        <p className="text-body text-lg">Local. Reliable. Clean, event-ready rentals for Greenville, SC & the Upstate.</p>
       </div>
 
       <div className="space-y-6 text-body mb-12">
         <p>
-          Friendly Party Rental is a family-owned party rental company based in Minoa, NY, proudly serving Syracuse and Central New York communities. For over 10 years, we have been helping families, schools, businesses, and organizations create memorable events with reliable rental equipment and friendly local service.
+          Friendly Party Rental is a family-owned party rental company now proudly serving Greenville, SC and the surrounding Upstate South Carolina communities. With over 10 years of party rental experience, we are excited to bring that same reliable equipment and friendly local service to our newest location.
         </p>
         <p>
           Our inventory includes tents, tables, chairs, linens, dance floors, generators, event lighting, popcorn machines, cotton candy machines, and much more. Every piece of equipment is professionally cleaned, inspected, and prepared before every rental so your event looks great and runs smoothly.

@@ -20,11 +20,11 @@ function wrapEmail(bodyHtml: string, recipient: string, origin: string): string 
 <title>Friendly Party Rental</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f4f6fb;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:#f4f6fb;">Party & event rentals delivered and set up for you across Central New York.</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:#f4f6fb;">Party & event rentals delivered and set up for you across Upstate South Carolina.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f6fb;"><tr><td align="center" style="padding:0;">
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;margin:0 auto;">
 <tr><td style="background-color:#0b3d91;padding:22px 24px;text-align:center;border-radius:0;">
-<img src="https://www.friendlypartyrental.com/images/logo.png" width="150" alt="Friendly Party Rental" style="display:inline-block;max-width:150px;height:auto;border:0;" />
+<img src="https://friendly-party-rental-greenville-sc-production.up.railway.app/images/logo.png" width="150" alt="Friendly Party Rental" style="display:inline-block;max-width:150px;height:auto;border:0;" />
 </td></tr>
 <tr><td style="height:4px;background-color:#f5a623;line-height:4px;font-size:4px;">&nbsp;</td></tr>
 <tr><td style="background-color:#ffffff;padding:12px 10px;text-align:center;border-bottom:1px solid #e5e7eb;">
@@ -71,18 +71,18 @@ ${bodyHtml}
 </td></tr>
 <tr><td style="background-color:#0b3d91;padding:20px 24px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
 <div style="color:#ffffff;font-size:16px;font-weight:bold;padding-bottom:4px;">Free delivery, setup &amp; pickup included</div>
-<div style="color:#cfe0ff;font-size:13px;">Serving Syracuse & Central New York since day one</div>
+<div style="color:#cfe0ff;font-size:13px;">Serving Greenville & Upstate South Carolina since day one</div>
 <div style="padding-top:12px;"><a href="${origin}/quote" style="display:inline-block;background-color:#f5a623;color:#1a1a1a;font-size:15px;font-weight:bold;text-decoration:none;padding:12px 28px;border-radius:6px;">Request a Free Quote</a></div>
 </td></tr>
 <tr><td style="background-color:#ffffff;padding:24px 32px;font-family:Arial,Helvetica,sans-serif;text-align:center;border-top:1px solid #e5e7eb;">
 <div style="font-size:15px;font-weight:bold;color:#1a1a1a;">Friendly Party Rental</div>
-<div style="font-size:13px;color:#6b7280;padding-top:4px;">330 Costello Parkway, Minoa, NY 13116</div>
+<div style="font-size:13px;color:#6b7280;padding-top:4px;">Greenville, SC (exact address provided after booking)</div>
 <div style="font-size:13px;color:#6b7280;padding-top:2px;">315-884-1498 &nbsp;&bull;&nbsp; customerservice@friendlypartyrental.com</div>
-<div style="padding-top:8px;"><a href="${origin}" style="color:#0b3d91;font-size:13px;font-weight:bold;text-decoration:none;">www.friendlypartyrental.com</a></div>
+<div style="padding-top:8px;"><a href="${origin}" style="color:#0b3d91;font-size:13px;font-weight:bold;text-decoration:none;">friendly-party-rental-greenville-sc-production.up.railway.app</a></div>
 <div style="font-size:11px;color:#6b7280;line-height:1.6;padding-top:16px;border-top:1px solid #e5e7eb;margin-top:16px;">
 You are receiving this email because you are a customer of Friendly Party Rental.<br />
 <a href="${unsubUrl}" style="color:#6b7280;text-decoration:underline;">Unsubscribe from marketing emails</a><br />
-&copy; ${year} Friendly Party Rental, Minoa, NY. All rights reserved.
+&copy; ${year} Friendly Party Rental, Greenville, SC. All rights reserved.
 </div>
 </td></tr>
 </table>

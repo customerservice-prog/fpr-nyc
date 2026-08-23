@@ -3,9 +3,9 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Local Wedding Vendors We Recommend',
-  description: 'A short list of local Central New York wedding vendors that Friendly Party Rental is happy to recommend.',
+  description: 'A short list of local Upstate South Carolina wedding vendors that Friendly Party Rental is happy to recommend.',
   alternates: {
-    canonical: 'https://www.friendlypartyrental.com/wedding-vendors',
+    canonical: 'https://friendly-party-rental-greenville-sc-production.up.railway.app/wedding-vendors',
   },
   robots: { index: true, follow: true },
 }
@@ -17,7 +17,7 @@ export default function WeddingVendorsPage() {
       <p className="text-body mb-6">
         Planning a wedding takes more than tents and tables. While Friendly Party Rental
         handles your rentals, decor, and event equipment, we are often asked for
-        recommendations on other parts of the day. Here are a few local Central New York
+        recommendations on other parts of the day. Here are a few local Upstate South Carolina
         vendors we are happy to point our couples toward. We do not have formal
         partnerships with these businesses, they are simply local vendors whose work
         we respect. We would recommend contacting a couple of options in each category to
@@ -26,42 +26,42 @@ export default function WeddingVendorsPage() {
 
       <h2 className="text-xl font-bold text-dark mb-3">Catering</h2>
       <p className="text-body mb-6">
-        <a href="https://www.scratchfarmhousecatering.com" target="_blank" rel="noopener noreferrer" className="underline">Scratch Farmhouse Catering</a> (Skaneateles Junction) - farm-to-table catering for
-        weddings and events. 315-730-5708
+        <a href="https://www.reevescatering.com" target="_blank" rel="noopener noreferrer" className="underline">Reeves Catering</a> (Greenville) - full-service catering for
+        weddings and events. 864-275-0021
       </p>
 
       <h2 className="text-xl font-bold text-dark mb-3">Bar Service</h2>
       <p className="text-body mb-6">
-        <a href="https://www.msmixermb.com" target="_blank" rel="noopener noreferrer" className="underline">Ms Mixer Mobile Bar</a> (Liverpool) - dry-hire mobile bartending; you supply the
-        alcohol, they supply the bar service. 315-706-7725
+        <a href="https://southernlibationsevents.com" target="_blank" rel="noopener noreferrer" className="underline">Southern Libations</a> (Greenville) - dry-hire mobile bartending; you supply the
+        alcohol, they supply the bar service. 864-906-8400
       </p>
 
       <h2 className="text-xl font-bold text-dark mb-3">DJ / MC</h2>
       <p className="text-body mb-6">
-        <a href="https://www.scsoundmachine.com" target="_blank" rel="noopener noreferrer" className="underline">Salt City Sound Machine</a> (Syracuse) - wedding DJ, MC, and event coordination.
-        315-558-0272
+        <a href="https://uptownentertainmentdj.com" target="_blank" rel="noopener noreferrer" className="underline">Uptown Entertainment</a> (Greenville) - wedding DJ, MC, and event production.
+        864-275-4779
       </p>
 
       <h2 className="text-xl font-bold text-dark mb-3">Photography</h2>
       <p className="text-body mb-6">
-        <a href="https://www.aliciapiercephotography.com" target="_blank" rel="noopener noreferrer" className="underline">Alicia Pierce Photography</a> (Baldwinsville) - wedding and engagement photography.
+        <a href="https://kendramartinphotography.com" target="_blank" rel="noopener noreferrer" className="underline">Kendra Martin Photography</a> (Greenville) - wedding and engagement photography.
       </p>
 
       <h2 className="text-xl font-bold text-dark mb-3">Videography</h2>
       <p className="text-body mb-6">
-        <a href="https://www.jmayervideo.com" target="_blank" rel="noopener noreferrer" className="underline">Mayer Video</a> (Skaneateles) - cinematic wedding films.
+        <a href="https://mpmweddings.com" target="_blank" rel="noopener noreferrer" className="underline">MPM Weddings</a> (Greenville) - cinematic wedding films.
       </p>
 
       <h2 className="text-xl font-bold text-dark mb-3">Florist</h2>
       <p className="text-body mb-6">
-        <a href="https://www.whistlestopflorist.com" target="_blank" rel="noopener noreferrer" className="underline">Whistlestop Florist</a> (East Syracuse) - fresh floral arrangements and bouquets.
-        315-656-2236
+        <a href="https://bellabloomsdesigns.com" target="_blank" rel="noopener noreferrer" className="underline">Bella Blooms</a> (Greenville) - fresh floral arrangements and bouquets.
+        864-483-1453
       </p>
 
       <h2 className="text-xl font-bold text-dark mb-3">Cake / Dessert</h2>
       <p className="text-body mb-6">
-        <a href="https://www.sugarblossomcakeshop.com" target="_blank" rel="noopener noreferrer" className="underline">Sugar Blossom Cake Shop</a> (Liverpool) - custom wedding cakes and dessert displays.
-        315-214-5637
+        <a href="https://couturecakesofgreenville.com" target="_blank" rel="noopener noreferrer" className="underline">Couture Cakes of Greenville</a> (Greenville) - custom wedding cakes and dessert displays.
+        864-288-6610
       </p>
 
       <div className="text-center">

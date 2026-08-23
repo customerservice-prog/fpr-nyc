@@ -22,7 +22,7 @@ export default function HeroSection() {
     <Link href="/order-by-date">
     <Image
       src={HERO_BADGES.book}
-      alt="Syracuse's #1 Party Rental"
+      alt="Greenville's #1 Party Rental"
       width={220}
       height={220}
       className="w-[160px] md:w-[220px] h-[160px] md:h-[220px] rounded-full border-[5px] border-white object-cover hover:scale-105 transition-transform"

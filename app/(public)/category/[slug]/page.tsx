@@ -68,14 +68,14 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
 
     const faqs = [
         {
-                        q: 'How much does it cost to rent ' + categoryLower + ' in Syracuse, NY?',
+                        q: 'How much does it cost to rent ' + categoryLower + ' in Greenville, SC?',
                         a: minPrice
                             ? 'Pricing starts at $' + minPrice.toFixed(2) + '/day and depends on the specific item, quantity, and rental duration. Call 315-884-1498 for an exact quote.'
                                             : 'Pricing depends on the specific item, quantity, and rental duration. Call 315-884-1498 for an exact quote.',
         },
         {
                         q: 'Do you deliver ' + categoryLower + ' near me?',
-                        a: 'Yes. We deliver, set up, and pick up throughout Syracuse, Minoa, Cicero, Manlius, Camillus, Baldwinsville, Liverpool, and the surrounding Central New York area.',
+                        a: 'Yes. We deliver, set up, and pick up throughout Greenville, Taylors, Greer, Simpsonville, Mauldin, Travelers Rest, Fountain Inn, and the surrounding Upstate South Carolina area.',
         },
         {
                         q: 'How far in advance should I book ' + categoryLower + '?',
@@ -95,7 +95,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
                 }),
         }
 
-    const introText = categoryLabel + ' from Friendly Party Rental serve Syracuse, NY and the surrounding Central New York communities, including Minoa, Cicero, Manlius, Camillus, Baldwinsville, and Liverpool. Every rental includes delivery, setup, and pickup, and our team can help you choose the right options for your event.'
+    const introText = categoryLabel + ' from Friendly Party Rental serve Greenville, SC and the surrounding Upstate South Carolina communities, including Taylors, Greer, Simpsonville, Mauldin, Travelers Rest, and Fountain Inn. Every rental includes delivery, setup, and pickup, and our team can help you choose the right options for your event.'
 
     const introEl = createElement('p', { className: 'text-gray-700 mb-10 leading-relaxed' }, introText)
 

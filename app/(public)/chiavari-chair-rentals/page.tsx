@@ -2,11 +2,11 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { safeJsonLd } from '@/lib/jsonLd'
 
-const BASE_URL = 'https://www.friendlypartyrental.com'
+const BASE_URL = 'https://friendly-party-rental-greenville-sc-production.up.railway.app'
 
 export const metadata: Metadata = {
-  title: 'Chiavari Chair Rentals in Syracuse, NY',
-  description: 'Rent gold, white, and mahogany chiavari chairs in Syracuse, NY and Central New York. Ideal for weddings and upscale events. Fast online booking, delivery, and setup.',
+  title: 'Chiavari Chair Rentals in Greenville, SC',
+  description: 'Rent gold, white, and mahogany chiavari chairs in Greenville, SC and Upstate South Carolina. Ideal for weddings and upscale events. Fast online booking, delivery, and setup.',
   alternates: { canonical: `${BASE_URL}/chiavari-chair-rentals` },
 }
 
@@ -15,7 +15,7 @@ export default function ChiavariChairRentalsPage() {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: 'Chiavari Chair Rentals',
-    description: 'Chiavari chair rental options in Syracuse, NY and Central New York.',
+    description: 'Chiavari chair rental options in Greenville, SC and Upstate South Carolina.',
     url: `${BASE_URL}/chiavari-chair-rentals`,
   }
 
@@ -26,9 +26,9 @@ export default function ChiavariChairRentalsPage() {
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <div className="max-w-5xl mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold text-dark mb-2">Chiavari Chair Rentals in Syracuse, NY</h1>
+        <h1 className="text-3xl font-bold text-dark mb-2">Chiavari Chair Rentals in Greenville, SC</h1>
         <p className="text-body mb-8">
-          Planning a wedding or upscale event in Central New York? Friendly Party Rental supplies chiavari chairs in gold, white, and mahogany finishes throughout Syracuse, Minoa, Cicero, Manlius, Camillus, Baldwinsville, Clay, Cazenovia, and Liverpool, NY. Choose the finish that fits your event below, or call us to coordinate a large wedding order alongside tables, linens, and a tent.
+          Planning a wedding or upscale event in Upstate South Carolina? Friendly Party Rental supplies chiavari chairs in gold, white, and mahogany finishes throughout Greenville, Taylors, Greer, Simpsonville, Mauldin, Travelers Rest, Fountain Inn, Piedmont, and Berea, SC. Choose the finish that fits your event below, or call us to coordinate a large wedding order alongside tables, linens, and a tent.
         </p>
 
         <h2 className="font-bold text-dark mb-4 text-xl">Chiavari Chair Options</h2>
@@ -83,7 +83,7 @@ export default function ChiavariChairRentalsPage() {
           </div>
           <div>
             <p className="font-bold text-dark text-sm">Do you deliver chiavari chairs to my town?</p>
-            <p className="text-body text-sm">We regularly deliver to Syracuse, Minoa, Cicero, Manlius, Camillus, Baldwinsville, Clay, Cazenovia, and Liverpool, NY. Call (315) 884-1498 if your town isn&#39;t listed — we may still be able to help.</p>
+            <p className="text-body text-sm">We regularly deliver to Greenville, Taylors, Greer, Simpsonville, Mauldin, Travelers Rest, Fountain Inn, Piedmont, and Berea, SC. Call (315) 884-1498 if your town isn&#39;t listed — we may still be able to help.</p>
           </div>
           <div>
             <p className="font-bold text-dark text-sm">Can I order chiavari chairs along with tables, linens, and a tent for my wedding?</p>
@@ -91,9 +91,9 @@ export default function ChiavariChairRentalsPage() {
           </div>
         </div>
 
-        <h2 className="font-bold text-dark mb-4 text-xl">Why Syracuse Couples Choose Friendly Party Rental</h2>
+        <h2 className="font-bold text-dark mb-4 text-xl">Why Greenville Couples Choose Friendly Party Rental</h2>
         <p className="text-body text-sm mb-2">
-          Family-owned and operated, based in Minoa, NY, with 10+ years serving Central New York. Fully insured, with clean, inspected equipment and dependable delivery and pickup.
+          Family-owned and operated, bringing more than a decade of party rental experience to Greenville and the rest of Upstate South Carolina. Fully insured, with clean, inspected equipment and dependable delivery and pickup.
         </p>
       </div>
     </>

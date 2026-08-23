@@ -75,8 +75,8 @@ export const BUSINESS = {
   phone: '315-884-1498',
   text: '315-884-1498',
   email: 'customerservice@friendlypartyrental.com',
-  address: '330 Costello Parkway, Minoa, NY 13116',
-  serviceArea: 'Syracuse & Nearby Cities',
+  address: 'Greenville, SC',
+  serviceArea: 'Greenville & Nearby Upstate SC Cities',
   hours: 'Mon-Fri: 8am-6pm, Sat: 8am-4pm, Sun: By Appointment',
   facebook: 'https://www.facebook.com/friendlypartyrental',
   instagram: 'https://www.instagram.com/friendlypartyrental',
@@ -84,7 +84,7 @@ export const BUSINESS = {
   yelp: 'https://www.yelp.com/biz/friendly-party-rental',
   tiktok: 'https://www.tiktok.com/@friendlypartyrental',
   twitter: 'https://twitter.com/friendlypartyrent',
-  mapUrl: 'https://maps.google.com/?q=330+Costello+Parkway+Minoa+NY+13116',
+  mapUrl: 'https://maps.google.com/?q=Greenville+SC',
 }
 
 export const NAV_RENTALS = [
@@ -122,7 +122,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'bounce-house-rentals',
-        name: 'Bounce House Rentals — Syracuse, NY',
+        name: 'Bounce House Rentals — Greenville, SC',
         slug: 'bounce-house-rentals',
         href: '/category/bounce-house-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Mar-10--2026--04_18_04-PM.png',
@@ -130,7 +130,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'tent-rentals',
-        name: 'Tent Rentals — Syracuse, NY',
+        name: 'Tent Rentals — Greenville, SC',
         slug: 'tent-rentals',
         href: '/category/tent-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_38_16-AM.png',
@@ -138,7 +138,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'table-chair-rentals',
-        name: 'Table & Chair Rentals — Syracuse, NY',
+        name: 'Table & Chair Rentals — Greenville, SC',
         slug: 'table-chair-rentals',
         href: '/category/table-chair-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_38_40-AM.png',
@@ -146,7 +146,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'concession-machine-rentals',
-        name: 'Concession Machine Rentals — Syracuse, NY',
+        name: 'Concession Machine Rentals — Greenville, SC',
         slug: 'concession-machine-rentals',
         href: '/category/concession-machine-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_42_03-AM.png',
@@ -154,7 +154,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'generator-rentals',
-        name: 'Generator Rentals — Syracuse, NY',
+        name: 'Generator Rentals — Greenville, SC',
         slug: 'generator-rentals',
         href: '/category/generator-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_40_58-AM.png',
@@ -162,7 +162,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'yard-game-rentals',
-        name: 'Yard Game Rentals — Syracuse, NY',
+        name: 'Yard Game Rentals — Greenville, SC',
         slug: 'yard-game-rentals',
         href: '/category/yard-game-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_37_29-AM.png',
@@ -170,7 +170,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'photobooth-rentals',
-        name: 'Photobooth Rentals — Syracuse, NY',
+        name: 'Photobooth Rentals — Greenville, SC',
         slug: 'photobooth-rentals',
         href: '/category/photobooth-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_39_03-AM.png',
@@ -178,7 +178,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'foam-party-machine-rentals',
-        name: 'Foam Party Machine Rentals — Syracuse, NY',
+        name: 'Foam Party Machine Rentals — Greenville, SC',
         slug: 'foam-party-machine-rentals',
         href: '/category/foam-party-machine-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_48_33-AM.png',
@@ -186,7 +186,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'event-lighting-rentals',
-        name: 'Event Lighting Rentals — Syracuse, NY',
+        name: 'Event Lighting Rentals — Greenville, SC',
         slug: 'event-lighting-rentals',
         href: '/category/event-lighting-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_40_24-AM.png',
@@ -194,7 +194,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'linen-rentals',
-        name: 'Linen & Tablecloth Rentals — Syracuse, NY',
+        name: 'Linen & Tablecloth Rentals — Greenville, SC',
         slug: 'linen-rentals',
         href: '/category/linen-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_40_05-AM.png',
@@ -202,7 +202,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'dance-floor-stage-rentals',
-        name: 'Dance Floor & Stage Rentals — Syracuse, NY',
+        name: 'Dance Floor & Stage Rentals — Greenville, SC',
         slug: 'dance-floor-stage-rentals',
         href: '/category/dance-floor-stage-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_41_14-AM.png',
@@ -210,7 +210,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'heater-fan-rentals',
-        name: 'Heater & Fan Rentals — Syracuse, NY',
+        name: 'Heater & Fan Rentals — Greenville, SC',
         slug: 'heater-fan-rentals',
         href: '/category/heater-fan-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_47_00-AM.png',
@@ -218,7 +218,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'inflatable-movie-screen-rentals',
-        name: 'Inflatable Movie Screen Rentals — Syracuse, NY',
+        name: 'Inflatable Movie Screen Rentals — Greenville, SC',
         slug: 'inflatable-movie-screen-rentals',
         href: '/category/inflatable-movie-screen-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_49_44-AM.png',
@@ -226,7 +226,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'beverage-food-service',
-        name: 'Beverage & Food Service Rentals — Syracuse, NY',
+        name: 'Beverage & Food Service Rentals — Greenville, SC',
         slug: 'beverage-food-service',
         href: '/category/beverage-food-service',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_44_30-AM.png',
@@ -234,7 +234,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'party-rental-packages',
-        name: 'Party Rental Packages — Syracuse, NY',
+        name: 'Party Rental Packages — Greenville, SC',
         slug: 'party-rental-packages',
         href: '/category/party-rental-packages',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_39_22-AM.png',
@@ -250,7 +250,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'party-rental-accessories',
-        name: 'Party Rental Accessories — Syracuse, NY',
+        name: 'Party Rental Accessories — Greenville, SC',
         slug: 'party-rental-accessories',
         href: '/category/party-rental-accessories',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Jun-9--2026--05_10_38-AM.png',
@@ -358,69 +358,4 @@ export const WEDDING_PACKAGES = [
   },
 ]
 
-export const REVIEWS = [
-  {
-        id: 'review-1',
-        author: 'Larissa B.',
-        rating: 5,
-        date: '2026-06-22',
-        text: 'This company was easy to work with and the tent was fantastic. We even had a Tornado Watch the day after they put the tent up, and I was so nervous, but it stayed in place! The installers were professional and helpful, and quick. I would definitely recommend this company to others.',
-        source: 'Google',
-  },
-  {
-        id: 'review-2',
-        author: 'M C',
-        rating: 5,
-        date: '2026-06-15',
-        text: 'Excellent services! Highly recommend - I needed something quick for a bday party, my daughter recommended him last minute so I messaged Jacob and he answered in a timely manner, came out the same day, did an absolutely amazing job setting up, very kind and courteous. Extremely great service.',
-        source: 'Google',
-  },
-  {
-        id: 'review-3',
-        author: 'Jennie Karoleski',
-        rating: 5,
-        date: '2026-06-11',
-        text: 'This was our first time hiring Friendly Party Rentals and everything went very smoothly. We ordered 24 of the Resin chairs with pads and 2 tables. The items were in good condition and delivered on time. I would definitely rent from Friendly Party Rental, price was very fair for delivery and pick up.',
-        source: 'Google',
-  },
-  {
-        id: 'review-4',
-        author: 'Angela Radakovich',
-        rating: 5,
-        date: '2026-06-04',
-        text: 'Working with Friendly Party Rental to rent some chairs for our graduation party was very easy, even though we live out of town. Nicole was an excellent communicator and helped us with a smooth pick up and drop off. Thanks!!',
-        source: 'Google',
-  },
-  {
-        id: 'review-5',
-        author: 'Lainie Cox',
-        rating: 5,
-        date: '2026-06-04',
-        text: 'We used them for a big graduation party at Syracuse this past weekend and they were so amazing and easy to work with!!! Highly recommend!!!',
-        source: 'Google',
-  },
-  {
-        id: 'review-6',
-        author: 'Mary McCormick',
-        rating: 5,
-        date: '2026-06-03',
-        text: 'Excellent service and communication. Would highly recommend.',
-        source: 'Google',
-  },
-  {
-        id: 'review-7',
-        author: 'Bonnie Brown',
-        rating: 5,
-        date: '2026-06-03',
-        text: 'Reliable and responsive.',
-        source: 'Google',
-  },
-  {
-        id: 'review-8',
-        author: 'Rose Talavera-Wright',
-        rating: 5,
-        date: '2026-06-02',
-        text: 'We rented chairs for my gender reveal which ended early due to weather but they were on time and came early to pick the chairs up which was super helpful! We will be renting again!!',
-        source: 'Google',
-  },
-  ]
+export const REVIEWS: Array<{ id: string; author: string; rating: number; date: string; text: string; source: string }> = []

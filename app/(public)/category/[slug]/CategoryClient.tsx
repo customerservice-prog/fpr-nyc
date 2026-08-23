@@ -625,17 +625,17 @@ if (notFoundTriggered) {
 
       <section className="mt-12 border-t pt-8 text-body">
         <h2 className="text-xl font-bold text-dark mb-3">
-          {category?.name || slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} Delivered Throughout Syracuse, NY
+          {category?.name || slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} Delivered Throughout Greenville, SC
         </h2>
         <p className="mb-3">
           Friendly Party Rental proudly supplies {(category?.name || 'rentals').toLowerCase()} for birthdays, graduations,
-          weddings, corporate events, and backyard parties across Syracuse, NY and the surrounding Central New York
+          weddings, corporate events, and backyard parties across Greenville, SC and the surrounding Upstate South Carolina
           communities. Whether you are planning a small backyard gathering or a large wedding reception, our team
           delivers, sets up, and picks up your rental so you can focus on your event.
         </p>
         <p>
-          We regularly deliver to Syracuse, Minoa, Cicero, Manlius, Camillus, Baldwinsville, Clay, Cazenovia, and
-          Liverpool, NY. Don&apos;t see your town listed? Give us a call at (315) 884-1498 &mdash; we may still be able
+          We regularly deliver to Greenville, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, and
+          Piedmont, SC. Don&apos;t see your town listed? Give us a call at (315) 884-1498 &mdash; we may still be able
           to deliver to you.
         </p>
       </section>

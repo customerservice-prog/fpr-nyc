@@ -68,7 +68,7 @@ export default function GalleryPage() {
         Real Events, Real Setups, Real Smiles
       </p>
       <p className="text-center text-body mb-6">
-        Browse photos from birthdays, weddings, graduations, and events across Central New York.
+        Browse photos from birthdays, weddings, graduations, and events across Upstate South Carolina.
       </p>
 
       <div className="relative rounded-3xl bg-gradient-to-br from-amber-600 via-yellow-500 to-amber-800 p-[6px] shadow-2xl shadow-amber-900/40">

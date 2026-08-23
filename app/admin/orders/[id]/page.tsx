@@ -654,7 +654,7 @@ return (
 <div className="print-header hidden items-center justify-between border-b-2 border-gray-800 pb-4 mb-6">
 <div>
 <h1 className="text-2xl font-bold">Friendly Party Rental</h1>
-<p className="text-sm">Syracuse, NY and surrounding Central New York areas</p>
+<p className="text-sm">Greenville, SC and surrounding Upstate South Carolina areas</p>
 </div>
 <div className="text-right">
 <h2 className="text-xl font-bold">RENTAL AGREEMENT</h2>

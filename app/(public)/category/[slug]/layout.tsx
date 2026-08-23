@@ -2,13 +2,13 @@ import type { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import { safeJsonLd } from '@/lib/jsonLd'
 
-const BASE_URL = 'https://www.friendlypartyrental.com'
+const BASE_URL = 'https://friendlypartyrentalsc.com'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   try {
     const category = await prisma.category.findUnique({ where: { slug: (await params).slug } })
     if (!category) return {}
-const fallbackDescription = `Rent ${category.name} in Syracuse, NY from Friendly Party Rental. Fast online booking, delivery, and setup throughout Central New York.`
+const fallbackDescription = `Rent ${category.name} in Greenville, SC from Friendly Party Rental. Fast online booking, delivery, and setup throughout Upstate South Carolina.`
         const description =
                 category.description && category.description.length >= 120
             ? category.description
@@ -16,7 +16,7 @@ const fallbackDescription = `Rent ${category.name} in Syracuse, NY from Friendly
     const canonical = `${BASE_URL}/category/${category.slug}`
     const isLowValueDuplicateIntent = category.slug === 'weddings'
     return {
-title:       `${category.name} | Syracuse, NY`,
+title:       `${category.name} | Greenville, SC`,
       description,
       alternates: { canonical },
       robots: isLowValueDuplicateIntent ? { index: false, follow: true } : undefined,
@@ -49,7 +49,7 @@ export default async function CategoryLayout({
         name: category.name,
         description:
           category.description ||
-          `Rent ${category.name} in Syracuse, NY from Friendly Party Rental.`,
+          `Rent ${category.name} in Greenville, SC from Friendly Party Rental.`,
         url: `${BASE_URL}/category/${category.slug}`,
       }
     }

@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
   },
 })
 
-const LOGO_URL = 'https://www.friendlypartyrental.com/images/logo.png'
+const LOGO_URL = 'https://friendly-party-rental-greenville-sc-production.up.railway.app/images/logo.png'
 
 export async function sendEmail({
   to,

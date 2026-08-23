@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Gallery',
-  description: 'See real party rental setups from Friendly Party Rental including tents, tables, chairs, and more from birthdays, weddings, and graduations across Syracuse and Central New York.',
-  alternates: { canonical: 'https://www.friendlypartyrental.com/gallery' },
+  description: 'See real party rental setups from Friendly Party Rental including tents, tables, chairs, and more from birthdays, weddings, and graduations across Greenville, SC and the Upstate.',
+  alternates: { canonical: 'https://www.friendlypartyrentalsc.com/gallery' },
 }
 
 export default function GalleryLayout({ children }: { children: React.ReactNode }) {

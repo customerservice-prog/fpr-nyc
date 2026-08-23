@@ -13,9 +13,8 @@ const nextConfig = {
   },
   images: {
     domains: [
-      'www.friendlypartyrental.com',
-      'friendlypartyrental.com',
-      'friendlypartyrentalsyracuse.com',
+      'www.friendlypartyrentalsc.com',
+      'friendlypartyrentalsc.com',
       'images.unsplash.com',
       'files.sysers.com',
     ],
@@ -26,7 +25,6 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      { source: '/:path*', has: [{ type: 'host', value: 'friendlypartyrentalsyracuse.com' }], destination: 'https://www.friendlypartyrental.com/:path*', permanent: true },
       { source: '/index.html', destination: '/', permanent: true },
       { source: '/home', destination: '/', permanent: true },
       { source: '/view_gallery', destination: '/gallery', permanent: true },
@@ -49,7 +47,6 @@ const nextConfig = {
       { source: '/category/generator', destination: '/category/generator-rentals', permanent: true },
       { source: '/category/folding_chairs-_throne_chairs', destination: '/category/table-chair-rentals', permanent: true },
       { source: '/items/bounce_house__plus__waterslide_combo_package', destination: '/items/bounce-house-water-slide-combo-package', permanent: true },
-      { source: '/items/water-slide-bounce-house-combo-package-syracuse-ny', destination: '/items/bounce-house-water-slide-combo-package', permanent: true },
       { source: '/items/flower_wall', destination: '/items/greenery-and-floral-wall-8x8', permanent: true },
     ]
   },

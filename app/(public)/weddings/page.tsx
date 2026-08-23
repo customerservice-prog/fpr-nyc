@@ -16,9 +16,9 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: 'Wedding Rental Packages in Syracuse, NY',
-  description: 'Wedding rental packages in Syracuse, NY starting at $345, from backyard elopements to 200-guest estate receptions. Tents, chairs, linens, arches, lighting, and dance floors -- delivery, setup, and pickup included. Call 315-884-1498.',
-  alternates: { canonical: 'https://www.friendlypartyrental.com/weddings' },
+  title: 'Wedding Rental Packages in Greenville, SC',
+  description: 'Wedding rental packages in Greenville, SC starting at $345, from backyard elopements to 200-guest estate receptions. Tents, chairs, linens, arches, lighting, and dance floors -- delivery, setup, and pickup included. Call 315-884-1498.',
+  alternates: { canonical: 'https://friendly-party-rental-greenville-sc-production.up.railway.app/weddings' },
 }
 export const dynamic = 'force-dynamic'
 const faqItems = [
@@ -35,8 +35,8 @@ const faqItems = [
     answer: 'We recommend booking 4-8 weeks in advance for summer weekends. Popular dates in peak season book quickly, so early booking ensures availability.',
   },
   {
-    question: 'Do you deliver wedding rentals outside Syracuse?',
-    answer: 'Yes, we serve Syracuse, Minoa, Cicero, Manlius, Camillus, Baldwinsville, Liverpool, and surrounding Central New York communities.',
+    question: 'Do you deliver wedding rentals outside Greenville?',
+    answer: 'Yes, we serve Greenville, Taylors, Greer, Simpsonville, Mauldin, Travelers Rest, Fountain Inn, and surrounding Upstate South Carolina communities.',
   },
   {
     question: 'What if it rains on my wedding day?',
@@ -121,7 +121,7 @@ export default async function WeddingsPage() {
             <span className="hidden md:inline text-primary">•</span>
             <span>Fully Insured</span>
             <span className="hidden md:inline text-primary">•</span>
-            <span>Serving Central New York</span>
+            <span>Serving Upstate South Carolina</span>
           </div>
         </div>
       </div>
@@ -196,7 +196,7 @@ export default async function WeddingsPage() {
           <div>
             <h2 className={`${playfair.className} text-2xl font-bold text-dark mb-4 text-center`}>Full Wedding Rental Services</h2>
             <p className="text-body mb-4">
-              Friendly Party Rental is your one-stop shop for wedding rentals in Syracuse and Central New York. From intimate backyard ceremonies to grand estate receptions, we provide everything you need to create the perfect wedding day. Prefer to have our team plan and coordinate everything for you? We also offer <Link href="/event-planning" className="text-secondary underline font-semibold">full-service event planning</Link>, so you do not need to hire a separate planner.
+              Friendly Party Rental is your one-stop shop for wedding rentals in Greenville and Upstate South Carolina. From intimate backyard ceremonies to grand estate receptions, we provide everything you need to create the perfect wedding day. Prefer to have our team plan and coordinate everything for you? We also offer <Link href="/event-planning" className="text-secondary underline font-semibold">full-service event planning</Link>, so you do not need to hire a separate planner.
             </p>
           </div>
 
@@ -215,7 +215,7 @@ export default async function WeddingsPage() {
           </div>
 
           <div>
-            <h2 className={`${playfair.className} text-xl font-bold text-dark mb-6 text-center`}>Why Syracuse Couples Choose Us</h2>
+            <h2 className={`${playfair.className} text-xl font-bold text-dark mb-6 text-center`}>Why Greenville Couples Choose Us</h2>
             <div className="grid sm:grid-cols-2 gap-5">
               {whyChooseUs.map((item) => (
                 <div key={item.label} className="flex items-center gap-4 bg-white border border-primary/20 p-5 rounded-xl shadow-sm">

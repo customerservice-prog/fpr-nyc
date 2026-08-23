@@ -97,7 +97,7 @@ export default function ContractPage({ params }: { params: Promise<{ id: string 
     <div className="max-w-3xl mx-auto px-4 py-12">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-dark mb-1">Friendly Party Rental</h1>
-        <p className="text-body">Syracuse, NY and surrounding Central New York areas</p>
+        <p className="text-body">Greenville, SC and surrounding Upstate South Carolina areas</p>
       </div>
 
       <div className="bg-gray-50 p-6 rounded-lg mb-8 space-y-1">

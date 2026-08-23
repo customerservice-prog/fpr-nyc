@@ -28,7 +28,7 @@ export default function ItemGallery({ slug, name, hasPicture, additionalImages }
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={activeImage}
-        alt={`${name} rental in Syracuse, NY`}
+        alt={`${name} rental in Greenville, SC`}
         className="w-full rounded-lg object-cover border"
       />
       {images.length > 1 && (

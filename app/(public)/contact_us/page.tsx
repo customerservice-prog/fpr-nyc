@@ -58,7 +58,7 @@ export default function ContactPage() {
             <div className="rounded-lg overflow-hidden border">
               <iframe
                 title="Friendly Party Rental location map"
-                src="https://www.google.com/maps?q=330+Costello+Parkway,+Minoa,+NY+13116&output=embed"
+                src="https://www.google.com/maps?q=Greenville,+SC&output=embed"
                 width="100%"
                 height="250"
                 style={{ border: 0 }}
@@ -85,7 +85,7 @@ export default function ContactPage() {
           <div>
             <h2 className="text-xl font-bold text-dark mb-3">Why Customers Choose Us</h2>
             <p className="text-body text-sm">
-              Friendly Party Rental is a family-owned business with over 10 years of experience serving Syracuse and Central New York. We provide clean, event-ready equipment, dependable delivery, and friendly local service that makes event planning simple and stress-free.
+              Friendly Party Rental is a family-owned business with over 10 years of experience serving Greenville and Upstate South Carolina. We provide clean, event-ready equipment, dependable delivery, and friendly local service that makes event planning simple and stress-free.
             </p>
           </div>
         </div>

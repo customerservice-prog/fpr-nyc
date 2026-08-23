@@ -15,9 +15,9 @@ const roboto = Roboto({
   display: 'swap',
 })
 
-const SITE_URL = 'https://www.friendlypartyrental.com'
+const SITE_URL = 'https://www.friendlypartyrentalsc.com'
 const SITE_DESCRIPTION =
-  'Friendly Party Rental provides reliable and affordable party rentals in Syracuse, NY, Minoa, and surrounding Central New York communities. Tent, bounce house, table and chair rentals with fast online booking.'
+  'Friendly Party Rental is your local Carolina party rental company providing reliable and affordable party rentals in Greenville, SC and surrounding Upstate South Carolina communities. Tent, bounce house, table and chair rentals with fast online booking.'
 
 const LOCAL_BUSINESS_JSONLD = {
   '@context': 'https://schema.org',
@@ -28,22 +28,20 @@ const LOCAL_BUSINESS_JSONLD = {
   url: SITE_URL,
   address: {
     '@type': 'PostalAddress',
-      streetAddress: '330 Costello Parkway',
-    addressLocality: 'Minoa',
-    addressRegion: 'NY',
+    addressLocality: 'Greenville',
+    addressRegion: 'SC',
     addressCountry: 'US',
-    postalCode: '13116',
   },
   areaServed: [
-    'Syracuse, NY',
-    'Minoa, NY',
-    'Cicero, NY',
-    'Manlius, NY',
-    'Camillus, NY',
-    'Baldwinsville, NY',
-    'Clay, NY',
-    'Cazenovia, NY',
-    'Liverpool, NY',
+    'Greenville, SC',
+    'Greer, SC',
+    'Simpsonville, SC',
+    'Mauldin, SC',
+    'Easley, SC',
+    'Travelers Rest, SC',
+    'Spartanburg, SC',
+    'Anderson, SC',
+    'Piedmont, SC',
   ],
   priceRange: '$$',
 }
@@ -51,29 +49,29 @@ const LOCAL_BUSINESS_JSONLD = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Friendly Party Rental | Party Rentals in Syracuse, NY',
+    default: 'Friendly Party Rental | Carolina Party Rentals in Greenville, SC',
     template: '%s | Friendly Party Rental',
   },
   description: SITE_DESCRIPTION,
   keywords: [
-    'party rentals Syracuse NY',
-    'tent rentals Syracuse',
-    'bounce house rentals Syracuse',
-    'table and chair rentals CNY',
-    'wedding rentals Syracuse',
-    'Minoa party rentals',
+    'party rentals Greenville SC',
+    'Carolina party rental',
+    'tent rentals Greenville',
+    'bounce house rentals Greenville SC',
+    'table and chair rentals Upstate SC',
+    'wedding rentals Greenville SC',
   ],
   alternates: {
     canonical: SITE_URL,
   },
   openGraph: {
-    title: 'Friendly Party Rental | Party Rentals in Syracuse, NY',
+    title: 'Friendly Party Rental | Carolina Party Rentals in Greenville, SC',
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     siteName: 'Friendly Party Rental',
     locale: 'en_US',
     type: 'website',
-          images: [{ url: `${SITE_URL}/images/logo.png`, width: 1731, height: 909, alt: 'Friendly Party Rental' }],
+    images: [{ url: `${SITE_URL}/images/logo.png`, width: 1731, height: 909, alt: 'Friendly Party Rental' }],
   },
   robots: {
     index: true,

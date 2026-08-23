@@ -6,9 +6,9 @@ import { Playfair_Display } from 'next/font/google'
 const playfair = Playfair_Display({ weight: ['600', '700'], subsets: ['latin'], display: 'swap' })
 
 export const metadata: Metadata = {
-  title: 'Event Planning Services in Syracuse, NY',
-  description: 'Full-service event planning from Friendly Party Rental. We plan and provide your rentals, so you do not need to hire a separate event planner. Serving Syracuse and Central New York.',
-  alternates: { canonical: 'https://www.friendlypartyrental.com/event-planning' },
+  title: 'Event Planning Services in Greenville, SC',
+  description: 'Full-service event planning from Friendly Party Rental. We plan and provide your rentals, so you do not need to hire a separate event planner. Serving Greenville and Upstate South Carolina.',
+  alternates: { canonical: 'https://friendly-party-rental-greenville-sc-production.up.railway.app/event-planning' },
 }
 
 const faqItems = [
@@ -136,7 +136,7 @@ export default function EventPlanningPage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 pt-12"><div className="grid grid-cols-1 sm:grid-cols-3 gap-6"><img src="/images/event-planning/outdoor-tent-setup/image.png" alt="Real outdoor party tent setup by Friendly Party Rental" className="w-full h-56 object-cover rounded-xl shadow-lg ring-1 ring-[#D4AF37]/30 hover:shadow-xl transition-shadow duration-300" /><img src="/images/event-planning/tent-patio-setup/image.png" alt="Real tent and patio party setup with string lights by Friendly Party Rental" className="w-full h-56 object-cover rounded-xl shadow-lg ring-1 ring-[#D4AF37]/30 hover:shadow-xl transition-shadow duration-300" /><img src="/images/event-planning/ceremony-deck/image.png" alt="Real outdoor wedding ceremony setup with rows of white chairs on a deck" className="w-full h-56 object-cover rounded-xl shadow-lg ring-1 ring-[#D4AF37]/30 hover:shadow-xl transition-shadow duration-300" /></div><p className="text-center text-body text-sm mt-4">Real events we have planned and set up across Central New York</p></div><div className="max-w-7xl mx-auto px-4 py-16">
+      <div className="max-w-6xl mx-auto px-4 pt-12"><div className="grid grid-cols-1 sm:grid-cols-3 gap-6"><img src="/images/event-planning/outdoor-tent-setup/image.png" alt="Real outdoor party tent setup by Friendly Party Rental" className="w-full h-56 object-cover rounded-xl shadow-lg ring-1 ring-[#D4AF37]/30 hover:shadow-xl transition-shadow duration-300" /><img src="/images/event-planning/tent-patio-setup/image.png" alt="Real tent and patio party setup with string lights by Friendly Party Rental" className="w-full h-56 object-cover rounded-xl shadow-lg ring-1 ring-[#D4AF37]/30 hover:shadow-xl transition-shadow duration-300" /><img src="/images/event-planning/ceremony-deck/image.png" alt="Real outdoor wedding ceremony setup with rows of white chairs on a deck" className="w-full h-56 object-cover rounded-xl shadow-lg ring-1 ring-[#D4AF37]/30 hover:shadow-xl transition-shadow duration-300" /></div><p className="text-center text-body text-sm mt-4">Real events we have planned and set up across Upstate South Carolina</p></div><div className="max-w-7xl mx-auto px-4 py-16">
         <div id="packages" className="text-center mb-4">
           <p className="text-secondary uppercase tracking-[0.3em] text-xs font-bold mb-3">Clear, Upfront Pricing</p>
           <h2 className={`${playfair.className} text-3xl md:text-4xl font-bold text-dark mb-3`}>Event Planning Packages</h2>

@@ -474,7 +474,7 @@ if (notFoundTriggered) {
                 </>
               ) : (
                 <>
-                  <p className="text-xs text-gray-500 mb-3">Pickup location: 330 Costello Parkway, Minoa, NY</p>
+                  <p className="text-xs text-gray-500 mb-3">Pickup location: Greenville, SC (exact address provided after booking)</p>
                   <h2 className="font-bold text-dark mb-3">What time would you like to pick up your order?</h2>
                   <div className="space-y-2 mb-4">
                     {APPOINTMENT_SLOTS.map((slot) => (

@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { safeJsonLd } from '@/lib/jsonLd'
 
-const BASE_URL = 'https://friendly-party-rental-greenville-sc-production.up.railway.app'
+const BASE_URL = 'https://www.friendlypartyrentalsc.com'
 
 export const metadata: Metadata = {
   title: 'Chiavari Chair Rentals in Greenville, SC',

@@ -18,7 +18,7 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: 'Wedding Rental Packages in Greenville, SC',
   description: 'Wedding rental packages in Greenville, SC starting at $345, from backyard elopements to 200-guest estate receptions. Tents, chairs, linens, arches, lighting, and dance floors -- delivery, setup, and pickup included. Call 315-884-1498.',
-  alternates: { canonical: 'https://friendly-party-rental-greenville-sc-production.up.railway.app/weddings' },
+  alternates: { canonical: 'https://www.friendlypartyrentalsc.com/weddings' },
 }
 export const dynamic = 'force-dynamic'
 const faqItems = [

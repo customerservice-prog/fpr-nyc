@@ -5,7 +5,7 @@ import { safeJsonLd } from '@/lib/jsonLd'
 export const metadata: Metadata = {
   title: 'Frequently Asked Questions',
   description: 'Answers to common questions about booking, delivery, setup, equipment safety, and rental policies for party rentals in Greenville, SC and Upstate South Carolina.',
-  alternates: { canonical: 'https://friendly-party-rental-greenville-sc-production.up.railway.app/frequently_asked_questions' },
+  alternates: { canonical: 'https://www.friendlypartyrentalsc.com/frequently_asked_questions' },
 }
 
 const faqSections = [

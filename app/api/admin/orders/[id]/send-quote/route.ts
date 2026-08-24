@@ -27,7 +27,7 @@ export async function POST(
                 return NextResponse.json({ error: 'This order is canceled. Automatic quote/receipt emails are blocked for canceled orders. Use the manual cancellation message option instead if you need to notify this customer.' }, { status: 400 })
     }
 
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.friendlypartyrental.com'
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.friendlypartyrentalsc.com'
         const payLink = `${origin}/pay/${order.id}`
 
     const amountDue = order.amountPaid > 0

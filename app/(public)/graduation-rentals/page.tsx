@@ -39,7 +39,7 @@ export default function GraduationRentalsPage() {
             <p className="text-body text-sm mb-4">
               One 20&#39; x 30&#39; pole tent, 8 six-foot plastic folding tables, and 64 white plastic folding chairs. A great fit for a graduation open house or backyard celebration.
             </p>
-            <Link href="/items/graduation-party-package-small-seats-64-syracuse-ny" className="inline-block bg-primary text-white px-4 py-2 rounded font-bold">
+            <Link href="/category/party-rental-packages" className="inline-block bg-primary text-white px-4 py-2 rounded font-bold">
               Check Availability &amp; Book
             </Link>
           </div>
@@ -49,7 +49,7 @@ export default function GraduationRentalsPage() {
             <p className="text-body text-sm mb-4">
               One 30&#39; x 30&#39; pole tent, 10 tables, and 100 chairs. Our largest graduation setup for celebrating with a big crowd of family and friends.
             </p>
-            <Link href="/items/graduation-party-package-large-seats-100-syracuse-ny" className="inline-block bg-primary text-white px-4 py-2 rounded font-bold">
+            <Link href="/category/party-rental-packages" className="inline-block bg-primary text-white px-4 py-2 rounded font-bold">
               Check Availability &amp; Book
             </Link>
           </div>

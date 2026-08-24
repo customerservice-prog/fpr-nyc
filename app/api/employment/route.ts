@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       })
                   try {
                       const emailContent = employmentApplicationEmail({ name, phone, email, position, availability, experience, message })
-                      await sendEmail({ to: 'customerservice@friendlypartyrental.com', subject: emailContent.subject, html: emailContent.html })
+                      await sendEmail({ to: 'customerservice@friendlypartyrentalsc.com', subject: emailContent.subject, html: emailContent.html })
             } catch (emailError) {
                       console.error('Employment application email error:', emailError)
             }

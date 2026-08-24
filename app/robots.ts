@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: ['/', '/api/item-image/', '/api/category-image/'],      
       disallow: ['/admin', '/api/', '/checkout', '/pay'],
     },
-    sitemap: 'https://www.friendlypartyrental.com/sitemap.xml',
+    sitemap: 'https://www.friendlypartyrentalsc.com/sitemap.xml',
   }
 }

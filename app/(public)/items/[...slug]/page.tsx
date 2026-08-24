@@ -52,12 +52,12 @@ async function findItem(slugParts: string[]) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
   const item = await findItem((await params).slug)
   if (!item) {
-    return { title: 'Friendly Party Rental | Party Rentals in Syracuse, NY' }
+    return { title: 'Friendly Party Rental | Party Rentals in Greenville, SC' }
   }
-  const desc = (item.description || `Rent the ${item.name} in Syracuse, NY from Friendly Party Rental.`).slice(0, 160)
+  const desc = (item.description || `Rent the ${item.name} in Greenville, SC from Friendly Party Rental.`).slice(0, 160)
   const canonical = `${BASE_URL}/items/${item.slug}`
   return {
-    title: `${item.name} Rental - Syracuse, NY`,
+    title: `${item.name} Rental - Greenville, SC`,
     description: desc,
     alternates: { canonical },
     openGraph: {

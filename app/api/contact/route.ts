@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     })
 
     await sendEmail({
-      to: 'customerservice@friendlypartyrental.com',
+      to: 'customerservice@friendlypartyrentalsc.com',
       subject: emailContent.subject,
       html: emailContent.html,
     })

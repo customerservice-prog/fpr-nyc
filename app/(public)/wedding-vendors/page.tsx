@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'Local Wedding Vendors We Recommend',
   description: 'A short list of local Upstate South Carolina wedding vendors that Friendly Party Rental is happy to recommend.',
   alternates: {
-    canonical: 'https://friendly-party-rental-greenville-sc-production.up.railway.app/wedding-vendors',
+    canonical: 'https://www.friendlypartyrentalsc.com/wedding-vendors',
   },
   robots: { index: true, follow: true },
 }

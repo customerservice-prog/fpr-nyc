@@ -74,7 +74,7 @@ export const BUSINESS = {
   legalName: 'Friendly Party Rental L.L.C.',
   phone: '315-884-1498',
   text: '315-884-1498',
-  email: 'customerservice@friendlypartyrental.com',
+  email: 'customerservice@friendlypartyrentalsc.com',
   address: 'Greenville, SC',
   serviceArea: 'Greenville & Nearby Upstate SC Cities',
   hours: 'Mon-Fri: 8am-6pm, Sat: 8am-4pm, Sun: By Appointment',

@@ -37,7 +37,7 @@ interface Stop {
   lng: number | null
 }
 
-const SYRACUSE_CENTER: [number, number] = [43.0481, -76.1474]
+const GREENVILLE_CENTER: [number, number] = [34.8526, -82.3940]
 const ROUTE_COLORS = ['#1e3a8a', '#7c3aed', '#0d9488', '#b45309', '#be185d', '#4338ca', '#0369a1', '#65a30d']
 
 function groupStopsByDriver(stops: Stop[]) {
@@ -153,7 +153,7 @@ export default function TruckTrackerPage() {
   useEffect(() => {
     if (!mapReady || !mapRef.current || leafletMapRef.current) return
     const L = (window as any).L
-    leafletMapRef.current = L.map(mapRef.current).setView(SYRACUSE_CENTER, 11)
+    leafletMapRef.current = L.map(mapRef.current).setView(GREENVILLE_CENTER, 11)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(leafletMapRef.current)

@@ -103,7 +103,7 @@ const suggestedAddons = item.suggestedAddonIds && item.suggestedAddonIds.length 
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: item.name,
-    description: item.description || `Rent the ${item.name} in Syracuse, NY from Friendly Party Rental.`,
+    description: item.description || `Rent the ${item.name} in Greenville, SC from Friendly Party Rental.`,
       image: item.picture ? [`${BASE_URL}/api/item-image/${item.slug}?v=${item.updatedAt.getTime()}`] : undefined,
     category: item.category!.name,
     url: `${BASE_URL}/items/${item.slug}`,
@@ -113,7 +113,7 @@ const suggestedAddons = item.suggestedAddonIds && item.suggestedAddonIds.length 
       price: Number(item.cost).toFixed(2),
       availability: 'https://schema.org/InStock',
       url: `${BASE_URL}/category/${item.category!.slug}`,
-      areaServed: 'Syracuse, NY',
+      areaServed: 'Greenville, SC',
     },
   }
 

@@ -8,7 +8,7 @@ import SuggestedAddons from '@/components/public/SuggestedAddons'
 
 export const dynamic = 'force-dynamic'
 
-const BASE_URL = 'https://www.friendlypartyrental.com'
+const BASE_URL = 'https://friendlypartyrentalsc.com'
 
 function cleanSlug(raw: string) {
   let s = decodeURIComponent(raw)

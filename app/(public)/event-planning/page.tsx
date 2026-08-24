@@ -8,7 +8,7 @@ const playfair = Playfair_Display({ weight: ['600', '700'], subsets: ['latin'], 
 export const metadata: Metadata = {
   title: 'Event Planning Services in Greenville, SC',
   description: 'Full-service event planning from Friendly Party Rental. We plan and provide your rentals, so you do not need to hire a separate event planner. Serving Greenville and Upstate South Carolina.',
-  alternates: { canonical: 'https://friendly-party-rental-greenville-sc-production.up.railway.app/event-planning' },
+  alternates: { canonical: 'https://www.friendlypartyrentalsc.com/event-planning' },
 }
 
 const faqItems = [

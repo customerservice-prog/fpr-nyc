@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { sendEmail } from '@/lib/email'
 import { BUSINESS } from '@/lib/utils'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.friendlypartyrental.com'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.friendlypartyrentalsc.com'
 
 function resumeLink(orderId: string) {
     return SITE_URL + '/pay/' + orderId

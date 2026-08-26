@@ -228,7 +228,7 @@ export default function CheckoutPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-dark mb-1">State {watch('deliveryType') !== 'pickup' ? '*' : ''}</label>
-            <input {...register('eventState', { required: watch('deliveryType') !== 'pickup' })} defaultValue="NY" className="w-full border rounded px-3 py-2" /></div>
+            <input {...register('eventState', { required: watch('deliveryType') !== 'pickup' })} defaultValue="SC" className="w-full border rounded px-3 py-2" /></div>
           <div>
             <label className="block text-sm font-medium text-dark mb-1">Zip {watch('deliveryType') !== 'pickup' ? '*' : ''}</label>
             <input {...register('eventZip', { required: watch('deliveryType') !== 'pickup' })} className="w-full border rounded px-3 py-2" />

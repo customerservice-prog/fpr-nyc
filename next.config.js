@@ -17,6 +17,7 @@ const nextConfig = {
       'friendlypartyrentalsc.com',
       'images.unsplash.com',
       'files.sysers.com',
+      '315.ourers.com',
     ],
     localPatterns: [
       { pathname: '/**' },      ],

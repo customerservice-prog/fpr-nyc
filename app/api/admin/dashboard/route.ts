@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const rangeEnd = endOfMonth(refDate)
 
   const collectedToday = await prisma.payment.aggregate({
-        where: { createdAt: { gte: dayStart, lte: dayEnd } },
+                where: { createdAt: { gte: dayStart, lte: dayEnd }, OR: [{ recordedByName: null }, { NOT: { recordedByName: { contains: 'historical backfill', mode: 'insensitive' } } }] },
         _sum: { amount: true },
   })
 
@@ -36,6 +36,10 @@ export async function GET(request: NextRequest) {
         where: {
                 eventDate: { gte: rangeStart, lte: rangeEnd },
                                 status: { notIn: ['canceled', 'quote'] },
+                                OR: [
+                                        { amountPaid: { gt: 0 } },
+                                        { scheduleApprovedUnpaid: true },
+                                ],
         },
         include: {
                 customer: {

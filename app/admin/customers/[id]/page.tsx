@@ -282,17 +282,22 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
 
       <h2 className="text-lg font-semibold mt-6 mb-4">Orders</h2>
       <div className="bg-white rounded shadow">
-        {customer.orders.map((o) => (
+        {customer.orders.map((o) =>  {
+          const statusBadgeClass = o.status === 'active' ? 'badge badge-active' : o.status === 'quote' ? 'badge badge-quote' : o.status === 'canceled' ? 'badge badge-canceled' : o.status === 'completed' ? 'badge badge-completed' : 'badge badge-incomplete'
+                    const statusLabel = o.status.charAt(0).toUpperCase() + o.status.slice(1)
+                              return (
           <div key={o.id} className="flex justify-between items-center border-b px-4 py-3">
             <div>
               <Link href={`/admin/orders/${o.id}`} className="text-secondary hover:underline font-medium">
                 {o.orderNumber}
               </Link>
+                          <span className={statusBadgeClass + ' ml-2'}>{statusLabel}</span>
               <span className="text-sm text-body ml-2">{formatDate(o.eventDate)}</span>
             </div>
             <span className="font-medium">{formatCurrency(o.totalAmount)}</span>
           </div>
-        ))}
+        )
+})}
       </div>
 
       <h2 className="text-lg font-semibold mt-8 mb-4">Rainchecks</h2>

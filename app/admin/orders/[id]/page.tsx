@@ -1,10 +1,11 @@
 'use client'
 
-import { use, useEffect, useState } from 'react'
+import { use, useEffect, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { findPoleTentSurfaceIssue } from '@/lib/tentSurfaceRules'
 
 interface OrderDetail {
 id: string
@@ -31,9 +32,9 @@ taxRate?: number | null
 taxAmount?: number | null
 couponCode?: string | null
 couponDiscount?: number | null
-  customerId?: string | null
-  raincheckId?: string | null
-  raincheckApplied?: number | null
+customerId?: string | null
+raincheckId?: string | null
+raincheckApplied?: number | null
 damageWaiver?: boolean
 damageWaiverFee?: number | null
 lastMinuteFeeAmount?: number | null
@@ -43,6 +44,8 @@ amountPaid: number
 balanceDue: number
 notes?: string
 internalNotes?: string
+followUpsPaused?: boolean
+scheduleApprovedUnpaid?: boolean
 contractSignedAt?: string | null
 contractSignatureName?: string | null
 locationName?: string | null
@@ -71,7 +74,16 @@ amount: number
 method: string
 stripePaymentId?: string | null
 notes?: string | null
+recordedByName?: string | null
 createdAt: string
+}>
+contacts?: Array<{
+id: string
+name: string
+role: string
+phone?: string | null
+email?: string | null
+note?: string | null
 }>
 }
 
@@ -116,13 +128,49 @@ return displayHour + ':' + min + ' ' + ampm + ' (Exact Time)'
 return slot
 }
 
+function formatPhoneDisplay(phone?: string | null): string {
+if (!phone) return ''
+const digits = phone.replace(/\D/g, '')
+if (digits.length === 10) return '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6)
+if (digits.length === 11 && digits[0] === '1') return '(' + digits.slice(1, 4) + ') ' + digits.slice(4, 7) + '-' + digits.slice(7)
+return phone
+}
+
+function Section({ title, action, children, accent }: { title: string; action?: ReactNode; children: ReactNode; accent?: string }) {
+return (
+<div className={'bg-white border border-gray-200 rounded-lg shadow-sm p-5' + (accent ? ' border-l-4 ' + accent : '')}>
+<div className="flex items-center justify-between mb-3">
+<h2 className="text-[16px] font-semibold text-dark">{title}</h2>
+{action}
+</div>
+{children}
+</div>
+)
+}
+
+function Advanced({ title, subtitle, open, onToggle, danger, children }: { title: string; subtitle?: string; open: boolean; onToggle: () => void; danger?: boolean; children: ReactNode }) {
+return (
+<div className={'border rounded-lg bg-white ' + (danger ? 'border-red-200' : 'border-gray-200')}>
+<button onClick={onToggle} type="button" className="w-full flex items-center justify-between px-4 py-3 text-left no-print">
+<span>
+<span className={'text-sm font-semibold ' + (danger ? 'text-red-700' : 'text-dark')}>{title}</span>
+{subtitle && <span className="block text-xs text-body mt-0.5">{subtitle}</span>}
+</span>
+<span className="text-body text-sm">{open ? '▾' : '▸'}</span>
+</button>
+{open && <div className="px-4 pb-4 border-t border-gray-100 pt-4">{children}</div>}
+</div>
+)
+}
+
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+const { id } = use(params)
 const router = useRouter()
 const [syncing, setSyncing] = useState(false)
 const [order, setOrder] = useState<OrderDetail | null>(null)
 const [status, setStatus] = useState('')
 const [internalNotes, setInternalNotes] = useState('')
+const [followUpsPaused, setFollowUpsPaused] = useState(false)
 const [customerNotes, setCustomerNotes] = useState('')
 const [setupSurface, setSetupSurface] = useState('')
 const [isPublicPark, setIsPublicPark] = useState(false)
@@ -132,21 +180,23 @@ const [referenceOptions, setReferenceOptions] = useState<{ id: string; name: str
 const [paymentAmount, setPaymentAmount] = useState(''); const [paymentNotes, setPaymentNotes] = useState(''); const [paymentSkipEmail, setPaymentSkipEmail] = useState(true) // default to NOT emailing the customer on manual payment/refund entries; staff can opt in by unchecking
 const [sendingQuote, setSendingQuote] = useState(false)
 const [deleting, setDeleting] = useState(false)
+const [cancelling, setCancelling] = useState(false)
 const [sendingCancellation, setSendingCancellation] = useState(false)
 const [prePayReminderDisabled, setPrePayReminderDisabled] = useState(false)
+const [scheduleApprovedUnpaid, setScheduleApprovedUnpaid] = useState(true)
 const [locationName, setLocationName] = useState('')
 const [generalDiscount, setGeneralDiscount] = useState('0')
 const [overrideTravelFee, setOverrideTravelFee] = useState('')
 const [overrideDepositAmount, setOverrideDepositAmount] = useState('')
 const [overrideTaxAmount, setOverrideTaxAmount] = useState(''); const [overrideDamageWaiverFee, setOverrideDamageWaiverFee] = useState('')
 const [miscellaneousFees, setMiscellaneousFees] = useState('0')
-  const [customerRainchecks, setCustomerRainchecks] = useState<any[]>([])
-  const [selectedRaincheckId, setSelectedRaincheckId] = useState('')
-  const [raincheckAmountInput, setRaincheckAmountInput] = useState('')
-  const [applyingRaincheck, setApplyingRaincheck] = useState(false)
-  const [newRaincheckAmount, setNewRaincheckAmount] = useState('')
-  const [newRaincheckReason, setNewRaincheckReason] = useState('')
-  const [issuingRaincheck, setIssuingRaincheck] = useState(false)
+const [customerRainchecks, setCustomerRainchecks] = useState<any[]>([])
+const [selectedRaincheckId, setSelectedRaincheckId] = useState('')
+const [raincheckAmountInput, setRaincheckAmountInput] = useState('')
+const [applyingRaincheck, setApplyingRaincheck] = useState(false)
+const [newRaincheckAmount, setNewRaincheckAmount] = useState('')
+const [newRaincheckReason, setNewRaincheckReason] = useState('')
+const [issuingRaincheck, setIssuingRaincheck] = useState(false)
 const [editItems, setEditItems] = useState<EditItem[]>([])
 const [editEventDate, setEditEventDate] = useState('')
 const [editEventEndDate, setEditEventEndDate] = useState('')
@@ -166,6 +216,42 @@ const [newItemPrice, setNewItemPrice] = useState('')
 const [savingItems, setSavingItems] = useState(false)
 const [catalogOpen, setCatalogOpen] = useState(false)
 
+// --- UI-only state added for the workspace redesign (no business logic here) ---
+const [moreOpen, setMoreOpen] = useState(false)
+const [scheduleEditing, setScheduleEditing] = useState(false)
+const [addressEditing, setAddressEditing] = useState(false)
+const [itemsEditing, setItemsEditing] = useState(false)
+const [addPaymentOpen, setAddPaymentOpen] = useState(false)
+const [paymentMenuOpenId, setPaymentMenuOpenId] = useState<string | null>(null)
+const [internalNotesEditing, setInternalNotesEditing] = useState(false)
+const [customerNotesEditing, setCustomerNotesEditing] = useState(false)
+const [communicationsOpen, setCommunicationsOpen] = useState(false)
+const [billingOpen, setBillingOpen] = useState(false)
+const [raincheckOpen, setRaincheckOpen] = useState(false)
+const [detailsOpen, setDetailsOpen] = useState(false)
+const [dangerOpen, setDangerOpen] = useState(false)
+const [paymentMethod, setPaymentMethod] = useState('cash')
+const [customerEditOpen, setCustomerEditOpen] = useState(false)
+const [customerFirstName, setCustomerFirstName] = useState('')
+const [customerLastName, setCustomerLastName] = useState('')
+const [customerEmail, setCustomerEmail] = useState('')
+const [customerPhone, setCustomerPhone] = useState('')
+const [customerSecondaryPhone, setCustomerSecondaryPhone] = useState('')
+const [customerSecondaryEmail, setCustomerSecondaryEmail] = useState('')
+const [savingCustomer, setSavingCustomer] = useState(false)
+const [contactsOpen, setContactsOpen] = useState(false)
+const [orderContacts, setOrderContacts] = useState<any[]>([])
+const [contactEditingId, setContactEditingId] = useState<string | null>(null)
+const [contactFormOpen, setContactFormOpen] = useState(false)
+const [contactName, setContactName] = useState('')
+const [contactRole, setContactRole] = useState('Day-Of')
+const [contactPhone, setContactPhone] = useState('')
+const [contactEmail, setContactEmail] = useState('')
+const [contactNote, setContactNote] = useState('')
+const [savingContact, setSavingContact] = useState(false)
+const [receiptRecipientsOpen, setReceiptRecipientsOpen] = useState(false)
+const [receiptRecipients, setReceiptRecipients] = useState<{ label: string; email: string; checked: boolean }[]>([])
+
 const loadOrder = () => {
 fetch('/api/admin/orders/' + id)
 .then((r) => r.json())
@@ -173,11 +259,13 @@ fetch('/api/admin/orders/' + id)
 setOrder(d.order)
 setStatus(d.order.status)
 setInternalNotes(d.order.internalNotes || '')
+setFollowUpsPaused(!!d.order.followUpsPaused)
 setCustomerNotes(d.order.notes || '')
 setSetupSurface(d.order.setupSurface || '')
 setIsPublicPark(!!d.order.isPublicPark)
 setReferenceSource(d.order.referenceSource || '')
 setPrePayReminderDisabled(d.order.prePayReminderDisabled || false)
+setScheduleApprovedUnpaid(d.order.scheduleApprovedUnpaid !== false)
 setLocationName(d.order.locationName || '')
 setGeneralDiscount(String(d.order.generalDiscount || 0))
 setOverrideTravelFee(d.order.overrideTravelFee != null ? String(d.order.overrideTravelFee) : '')
@@ -200,6 +288,13 @@ setEditEventAddress(d.order.eventAddress || '')
 setEditEventCity(d.order.eventCity || '')
 setEditEventZip(d.order.eventZip || '')
 setEditEventState(d.order.eventState || '')
+setCustomerFirstName(d.order.customer.firstName || '')
+setCustomerLastName(d.order.customer.lastName || '')
+setCustomerEmail(d.order.customer.email || '')
+setCustomerPhone(d.order.customer.phone || '')
+setCustomerSecondaryPhone((d.order.customer as any).secondaryPhone || '')
+setCustomerSecondaryEmail((d.order.customer as any).secondaryEmail || '')
+setOrderContacts(d.order.contacts || [])
 })
 .catch(() => {})
 }
@@ -209,17 +304,17 @@ loadOrder()
 // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [id])
 
-  const loadRainchecks = (customerId: string) => {
-    fetch('/api/admin/rainchecks?customerId=' + customerId)
-    .then((r) => r.json())
-    .then((d) => setCustomerRainchecks(d.rainchecks || []))
-    .catch(() => {})
-  }
+const loadRainchecks = (customerId: string) => {
+fetch('/api/admin/rainchecks?customerId=' + customerId)
+.then((r) => r.json())
+.then((d) => setCustomerRainchecks(d.rainchecks || []))
+.catch(() => {})
+}
 
-  useEffect(() => {
-    if (order?.customerId) loadRainchecks(order.customerId)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [order?.customerId])
+useEffect(() => {
+if (order?.customerId) loadRainchecks(order.customerId)
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [order?.customerId])
 
 useEffect(() => {
 fetch('/api/items')
@@ -240,16 +335,24 @@ fetch('/api/admin/references')
 }, [])
 
 const saveOrder = async () => {
+if (order) {
+const poleIssue = findPoleTentSurfaceIssue(order.items, setupSurface)
+if (poleIssue && !window.confirm(poleIssue + '\n\nSave anyway?')) {
+return
+}
+}
 const totals = recalcTotals()
 const res = await fetch('/api/admin/orders/' + id, {
 method: 'PUT',
 headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify({
-  ...totals,
+...totals,
 status,
 internalNotes,
+followUpsPaused,
 notes: customerNotes,
 prePayReminderDisabled,
+scheduleApprovedUnpaid,
 setupSurface,
 isPublicPark,
 referenceSource,
@@ -265,80 +368,81 @@ if (res.ok) toast.success('Order updated')
 else toast.error('Failed to update')
 }
 
-                                                     const applyRaincheck = async () => {
-                                                       if (!selectedRaincheckId) {
-                                                         toast.error('Select a raincheck first')
-                                                         return
-                                                       }
-                                                       const amt = parseFloat(raincheckAmountInput)
-                                                       if (isNaN(amt) || amt < 0) {
-                                                         toast.error('Enter a valid amount')
-                                                         return
-                                                       }
-                                                       setApplyingRaincheck(true)
-                                                       try {
-                                                         const res = await fetch('/api/admin/rainchecks/apply', {
-                                                           method: 'POST',
-                                                           headers: { 'Content-Type': 'application/json' },
-                                                           body: JSON.stringify({ raincheckId: selectedRaincheckId, orderId: id, amount: amt }),
-                                                         })
-                                                         const data = await res.json()
-                                                         if (!res.ok) {
-                                                           toast.error(data.error || 'Failed to apply raincheck')
-                                                           return
-                                                         }
-                                                         toast.success('Raincheck applied')
-                                                         loadOrder()
-                                                         if (order?.customerId) loadRainchecks(order.customerId)
-                                                       } catch {
-                                                         toast.error('Failed to apply raincheck')
-                                                       } finally {
-                                                         setApplyingRaincheck(false)
-                                                       }
-                                                     }
+const applyRaincheck = async () => {
+if (!selectedRaincheckId) {
+toast.error('Select a raincheck first')
+return
+}
+const amt = parseFloat(raincheckAmountInput)
+if (isNaN(amt) || amt < 0) {
+toast.error('Enter a valid amount')
+return
+}
+setApplyingRaincheck(true)
+try {
+const res = await fetch('/api/admin/rainchecks/apply', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ raincheckId: selectedRaincheckId, orderId: id, amount: amt }),
+})
+const data = await res.json()
+if (!res.ok) {
+toast.error(data.error || 'Failed to apply raincheck')
+return
+}
+toast.success('Raincheck applied')
+loadOrder()
+if (order?.customerId) loadRainchecks(order.customerId)
+} catch {
+toast.error('Failed to apply raincheck')
+} finally {
+setApplyingRaincheck(false)
+}
+}
 
-  const issueRaincheck = async () => {
-    if (!order) return
-    const amt = parseFloat(newRaincheckAmount)
-    if (isNaN(amt) || amt <= 0) {
-      toast.error('Enter a valid amount')
-      return
-    }
-    setIssuingRaincheck(true)
-    try {
-      const res = await fetch('/api/admin/rainchecks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: order.customerId, amount: amt, reason: newRaincheckReason }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        toast.error(data.error || 'Failed to issue raincheck')
-        return
-      }
-      toast.success('Raincheck issued')
-      setNewRaincheckAmount('')
-      setNewRaincheckReason('')
-      if (order.customerId) loadRainchecks(order.customerId)
-    } catch {
-      toast.error('Failed to issue raincheck')
-    } finally {
-      setIssuingRaincheck(false)
-    }
-  }
+const issueRaincheck = async () => {
+if (!order) return
+const amt = parseFloat(newRaincheckAmount)
+if (isNaN(amt) || amt <= 0) {
+toast.error('Enter a valid amount')
+return
+}
+setIssuingRaincheck(true)
+try {
+const res = await fetch('/api/admin/rainchecks', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ customerId: order.customerId, amount: amt, reason: newRaincheckReason }),
+})
+const data = await res.json()
+if (!res.ok) {
+toast.error(data.error || 'Failed to issue raincheck')
+return
+}
+toast.success('Raincheck issued')
+setNewRaincheckAmount('')
+setNewRaincheckReason('')
+if (order.customerId) loadRainchecks(order.customerId)
+} catch {
+toast.error('Failed to issue raincheck')
+} finally {
+setIssuingRaincheck(false)
+}
+}
 
 const addPayment = async () => {
 if (!paymentAmount) return; if (!paymentNotes.trim()) { toast.error('Please add a note explaining this payment before saving'); return }
 const res = await fetch('/api/admin/payments', {
 method: 'POST',
 headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ orderId: id, amount: paymentAmount, notes: paymentNotes, skipEmail: paymentSkipEmail }),
+body: JSON.stringify({ orderId: id, amount: paymentAmount, notes: paymentNotes, skipEmail: paymentSkipEmail , method: paymentMethod}),
 })
 if (res.ok) {
 toast.success('Payment recorded')
 setPaymentAmount(''); setPaymentNotes(''); setPaymentSkipEmail(false)
 const d = await fetch('/api/admin/orders/' + id).then((r) => r.json())
 setOrder(d.order)
+setAddPaymentOpen(false)
 } else toast.error('Failed')
 }
 
@@ -474,6 +578,30 @@ setDeleting(false)
 }
 }
 
+const cancelOrder = async () => {
+if (!order) return
+const confirmed = window.confirm(
+'Cancel order ' + order.orderNumber + '? It will be marked Canceled and removed from the schedule. This does not delete the order or issue a refund.'
+)
+if (!confirmed) return
+setCancelling(true)
+try {
+const res = await fetch('/api/admin/orders/' + id, {
+method: 'PUT',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ status: 'canceled' }),
+})
+if (!res.ok) throw new Error('Failed to cancel')
+setStatus('canceled')
+toast.success('Order canceled')
+loadOrder()
+} catch {
+toast.error('Failed to cancel order')
+} finally {
+setCancelling(false)
+}
+}
+
 const selectCatalogItem = (id: string) => {
 setNewItemCatalogId(id)
 const found = catalog.find((c) => c.id === id)
@@ -533,7 +661,7 @@ const lastMinuteFeeAmount = order?.lastMinuteFeeAmount || 0
 const tipAmount = order?.tipAmount || 0
 const taxRate = order?.taxRate || 0
 const adjustedSubtotal = Math.round((editItemsSubtotal + durationFee) * 100) / 100
-  const raincheckAppliedVal = order?.raincheckApplied || 0
+const raincheckAppliedVal = order?.raincheckApplied || 0
 const discountedSubtotal = Math.max(adjustedSubtotal - couponDiscount - generalDiscountVal, 0)
 const taxableBase = discountedSubtotal + deliveryFee + damageWaiverFee + specialRequestFee + lastMinuteFeeAmount + miscFeesVal
 const taxOverrideVal = overrideTaxAmount === '' ? null : parseFloat(overrideTaxAmount)
@@ -547,6 +675,10 @@ const saveItems = async (sendReceiptAfter: boolean) => {
 if (!order) return
 if (editItems.length === 0) {
 toast.error('An order must have at least one item')
+return
+}
+const poleIssue = findPoleTentSurfaceIssue(editItems, setupSurface)
+if (poleIssue && !window.confirm(poleIssue + '\n\nSave items anyway?')) {
 return
 }
 setSavingItems(true)
@@ -577,6 +709,7 @@ toast.success('Items updated')
 if (sendReceiptAfter) {
 await sendQuoteEmail()
 }
+setItemsEditing(false)
 } catch {
 toast.error('Failed to save item changes')
 } finally {
@@ -601,6 +734,7 @@ pickupTimeSlot: editPickupSlot,
 if (!res.ok) throw new Error('Failed to save date/time')
 loadOrder()
 toast.success('Date & time updated')
+setScheduleEditing(false)
 } catch {
 toast.error('Failed to save date/time changes')
 } finally {
@@ -625,10 +759,127 @@ eventState: editEventState,
 if (!res.ok) throw new Error('Failed to save address')
 loadOrder()
 toast.success('Delivery address updated')
+setAddressEditing(false)
 } catch {
 toast.error('Failed to save address changes')
 } finally {
 setSavingAddress(false)
+}
+}
+
+const saveCustomerEdit = async () => {
+if (!order?.customerId) return
+if (!customerFirstName.trim() || !customerEmail.trim()) { toast.error('First name and email are required'); return }
+setSavingCustomer(true)
+try {
+const res = await fetch('/api/admin/customers/' + order.customerId, {
+method: 'PUT',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({
+firstName: customerFirstName.trim(),
+lastName: customerLastName.trim(),
+email: customerEmail.trim(),
+phone: customerPhone.trim(),
+secondaryPhone: customerSecondaryPhone.trim(),
+secondaryEmail: customerSecondaryEmail.trim(),
+}),
+})
+if (!res.ok) throw new Error('Failed to update customer')
+toast.success('Customer profile updated')
+loadOrder()
+setCustomerEditOpen(false)
+} catch {
+toast.error('Failed to update customer')
+} finally {
+setSavingCustomer(false)
+}
+}
+
+const resetContactForm = () => {
+setContactEditingId(null)
+setContactName('')
+setContactRole('Day-Of')
+setContactPhone('')
+setContactEmail('')
+setContactNote('')
+}
+
+const startEditContact = (c: any) => {
+setContactEditingId(c.id)
+setContactName(c.name || '')
+setContactRole(c.role || 'Other')
+setContactPhone(c.phone || '')
+setContactEmail(c.email || '')
+setContactNote(c.note || '')
+setContactFormOpen(true)
+}
+
+const saveContact = async () => {
+if (!order) return
+if (!contactName.trim()) { toast.error('Contact name is required'); return }
+if (!contactPhone.trim() && !contactEmail.trim()) { toast.error('Enter a phone number or email for this contact'); return }
+setSavingContact(true)
+try {
+const payload = { name: contactName.trim(), role: contactRole, phone: contactPhone.trim(), email: contactEmail.trim(), note: contactNote.trim() }
+const url = '/api/admin/orders/' + id + '/contacts' + (contactEditingId ? ('/' + contactEditingId) : '')
+const res = await fetch(url, {
+method: contactEditingId ? 'PUT' : 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify(payload),
+})
+const data = await res.json()
+if (!res.ok) { toast.error(data.error || 'Failed to save contact'); return }
+toast.success(contactEditingId ? 'Contact updated' : 'Contact added')
+resetContactForm()
+setContactFormOpen(false)
+loadOrder()
+} catch {
+toast.error('Failed to save contact')
+} finally {
+setSavingContact(false)
+}
+}
+
+const removeContact = async (contactId: string) => {
+if (!window.confirm('Remove this contact from the order?')) return
+try {
+const res = await fetch('/api/admin/orders/' + id + '/contacts/' + contactId, { method: 'DELETE' })
+if (!res.ok) throw new Error('Failed')
+toast.success('Contact removed')
+loadOrder()
+} catch {
+toast.error('Failed to remove contact')
+}
+}
+
+const openReceiptRecipients = () => {
+if (!order) return
+const options: { label: string; email: string; checked: boolean }[] = []
+options.push({ label: order.customer.firstName + ' ' + order.customer.lastName + ' (Primary)', email: order.customer.email, checked: true })
+if (customerSecondaryEmail) options.push({ label: 'Secondary Contact', email: customerSecondaryEmail, checked: false })
+orderContacts.forEach((c: any) => { if (c.email) options.push({ label: c.name + ' (' + c.role + ')', email: c.email, checked: false }) })
+setReceiptRecipients(options)
+setReceiptRecipientsOpen(true)
+}
+
+const sendReceiptToSelectedRecipients = async () => {
+const emails = receiptRecipients.filter((r) => r.checked).map((r) => r.email)
+if (emails.length === 0) { toast.error('Select at least one recipient'); return }
+setSendingQuote(true)
+try {
+const res = await fetch('/api/admin/orders/' + id + '/send-quote', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ recipients: emails }),
+})
+const data = await res.json()
+if (!res.ok) throw new Error(data.error || 'Failed to send')
+toast.success('Receipt sent to ' + emails.length + ' recipient' + (emails.length === 1 ? '' : 's'))
+setReceiptRecipientsOpen(false)
+} catch (err) {
+toast.error(err instanceof Error ? err.message : 'Failed to send receipt')
+} finally {
+setSendingQuote(false)
 }
 }
 
@@ -642,11 +893,25 @@ const catalogQuery = newItemName.trim().toLowerCase()
 const filteredCatalog = catalogQuery
 ? catalog.filter((c) => (c.name + ' ' + (c.category?.name || '')).toLowerCase().includes(catalogQuery)).slice(0, 50)
 : catalog.slice(0, 50)
-const statusBadgeClass = status === 'active' ? 'badge badge-active' : status === 'quote' ? 'badge badge-quote' : status === 'canceled' ? 'badge badge-canceled' : 'badge badge-incomplete'
+const statusBadgeClass = status === 'active' ? 'badge badge-active' : status === 'quote' ? 'badge badge-quote' : status === 'canceled' ? 'badge badge-canceled' : status === 'completed' ? 'badge badge-completed' : 'badge badge-incomplete'
 const statusLabel = order.status.charAt(0).toUpperCase() + order.status.slice(1)
 
+// --- derived values for the redesigned workspace (presentation only) ---
+const noPaymentYet = order.amountPaid <= 0
+const isPaidInFull = !noPaymentYet && liveTotals.balanceDue <= 0
+const onSchedule = !noPaymentYet || scheduleApprovedUnpaid
+const scheduleReason = !noPaymentYet
+? 'Payment recorded on this order'
+: scheduleApprovedUnpaid
+? 'Manually approved despite no payment'
+: 'No payment recorded and not manually approved'
+const hasBillingOverrides = !!(locationName || (parseFloat(generalDiscount) || 0) > 0 || (parseFloat(miscellaneousFees) || 0) > 0 || overrideTravelFee !== '' || overrideTaxAmount !== '' || overrideDamageWaiverFee !== '' || overrideDepositAmount !== '')
+const hasRaincheckApplied = (order.raincheckApplied || 0) > 0
+const hasAdditionalDetails = !!(setupSurface || isPublicPark || referenceSource)
+const poleTentSurfaceIssue = findPoleTentSurfaceIssue(itemsEditing ? editItems : order.items, setupSurface)
+
 return (
-<div className="p-4 max-w-5xl mx-auto">
+<div className="p-4 max-w-[1500px] mx-auto">
 <style jsx global>{'.print-only { display: none; } @media print { nav { display: none !important; } .no-print { display: none !important; } main { padding-top: 0 !important; } body { background: white !important; } .print-only { display: inline !important; } }'}</style>
 
 <Link href="/admin/orders" className="text-secondary text-sm hover:underline mb-4 block no-print">← Back to Orders</Link>
@@ -664,61 +929,66 @@ return (
 </div>
 
 <div className="mb-6 no-print">
-<div className="flex items-center gap-3 mb-4">
-<h1 className="text-2xl font-bold text-dark">Order {order.orderNumber}</h1>
+<div className="flex flex-wrap items-center gap-3 mb-1">
+<h1 className="text-[28px] leading-tight font-bold text-dark">Order {order.orderNumber}</h1>
 <span className={statusBadgeClass}>{statusLabel}</span>
-{order.balanceDue > 0 && (
-<span className="badge bg-red-50 text-red-700 border border-red-200">Balance Due: {formatCurrency(order.balanceDue)}</span>
-)}
+{isPaidInFull && <span className="badge bg-green-50 text-green-700 border border-green-200">✓ Paid in Full</span>}
+{!isPaidInFull && liveTotals.balanceDue > 0 && <span className="badge bg-amber-50 text-amber-700 border border-amber-200">{formatCurrency(liveTotals.balanceDue)} Due</span>}
 </div>
-<div className="flex flex-wrap gap-2">
-<a href={'/pay/' + id} target="_blank" rel="noopener noreferrer" className="btn-admin inline-flex items-center">Open Payment Page</a>
-<Link href={'/admin/orders/' + id + '/checkout'} className="btn-admin inline-flex items-center">Process Payment</Link>
-<button onClick={sendQuoteEmail} disabled={sendingQuote} className="btn-admin disabled:opacity-50">
-{sendingQuote ? 'Sending...' : order.amountPaid > 0 ? 'Send Updated Receipt' : 'Email Quote to Customer'}
-</button>
-<button onClick={syncWithStripe} disabled={syncing} className="btn-info disabled:opacity-50">{syncing ? 'Syncing...' : 'Sync with Stripe'}</button>
-<button onClick={copyPaymentLink} className="btn-outline">Copy Payment Link</button>
-<button onClick={copyContractLink} className="btn-outline">Copy Contract Link</button>
+<p className="text-sm text-body mb-4">
+{order.customer.firstName} {order.customer.lastName} · {formatDate(order.eventDate)}{order.eventEndDate ? (' – ' + formatDate(order.eventEndDate)) : ''} · {deliveryTypeLabel}
+</p>
+
+<div className="flex flex-wrap items-center gap-2">
+{liveTotals.balanceDue > 0 ? (
+<Link href={'/admin/orders/' + id + '/checkout'} className="btn-admin inline-flex items-center">Take Payment</Link>
+) : (
+<a href={'/pay/' + id} target="_blank" rel="noopener noreferrer" className="btn-outline inline-flex items-center">View Payment Page</a>
+)}
 <a href={'/contract/' + id} target="_blank" rel="noopener noreferrer" className="btn-outline inline-flex items-center">View Contract</a>
-<button onClick={() => window.print()} className="btn-outline">Print</button>
 {order.status === 'canceled' && (
-<button onClick={sendCancellationMessage} disabled={sendingCancellation} className="btn-outline">
+<button onClick={sendCancellationMessage} disabled={sendingCancellation} className="btn-outline disabled:opacity-50">
 {sendingCancellation ? 'Sending...' : 'Send Cancellation Message'}
 </button>
 )}
-<button
-onClick={deleteOrder}
-disabled={deleting}
-className="btn-danger-outline"
->
+<div className="relative">
+<button onClick={() => setMoreOpen((v) => !v)} type="button" className="btn-outline">More ▾</button>
+{moreOpen && (
+<>
+<div className="fixed inset-0 z-20" onClick={() => setMoreOpen(false)} />
+<div className="absolute z-30 mt-1 left-0 w-72 bg-white border border-gray-200 rounded-lg shadow-lg py-1 text-sm">
+<a href={'/pay/' + id} target="_blank" rel="noopener noreferrer" onClick={() => setMoreOpen(false)} className="block px-3 py-2 hover:bg-gray-50 text-dark">Open Payment Page</a>
+<button onClick={() => { setMoreOpen(false); copyPaymentLink() }} type="button" className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-dark">Copy Payment Link</button>
+<button onClick={() => { setMoreOpen(false); (order.amountPaid > 0 ? openReceiptRecipients() : sendQuoteEmail()) }} disabled={sendingQuote} type="button" className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-dark disabled:opacity-50">
+{sendingQuote ? 'Sending...' : order.amountPaid > 0 ? 'Send Updated Receipt' : 'Email Quote to Customer'}
+</button>
+<button onClick={() => { setMoreOpen(false); copyContractLink() }} type="button" className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-dark">Copy Contract Link</button>
+<button onClick={() => { setMoreOpen(false); syncWithStripe() }} disabled={syncing} type="button" className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-dark disabled:opacity-50">{syncing ? 'Syncing...' : 'Sync Payment Status'}</button>
+<button onClick={() => { setMoreOpen(false); window.print() }} type="button" className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-dark">Print</button>
+<div className="border-t border-gray-100 my-1" />
+{order.status !== 'canceled' && (
+<button onClick={() => { setMoreOpen(false); cancelOrder() }} disabled={cancelling} type="button" className="block w-full text-left px-3 py-2 hover:bg-amber-50 text-amber-700 disabled:opacity-50">
+{cancelling ? 'Cancelling...' : 'Cancel Order'}
+</button>
+)}
+<button onClick={() => { setMoreOpen(false); deleteOrder() }} disabled={deleting} type="button" className="block w-full text-left px-3 py-2 hover:bg-red-50 text-red-600 disabled:opacity-50">
 {deleting ? 'Deleting...' : 'Delete Order'}
 </button>
 </div>
-</div>
-
-<div className="grid md:grid-cols-2 gap-6 mb-6">
-<div className="admin-card border-l-4 border-secondary !mb-0">
-<h2 className="admin-card-header">Customer</h2>
-<p className="text-sm">{order.customer.firstName} {order.customer.lastName}</p>
-<p className="text-sm text-body">{order.customer.email}</p>
-<p className="text-sm text-body">{order.customer.phone}</p>
-</div>
-<div className="admin-card border-l-4 border-secondary !mb-0">
-<h2 className="admin-card-header">Event Details</h2>
-<p className="text-sm font-semibold text-dark">{formatDate(order.eventDate)}{order.eventEndDate ? (' - ' + formatDate(order.eventEndDate)) : ''}</p>
-{order.locationName && <p className="text-sm mt-1">{order.locationName}</p>}
-<p className="text-sm text-body mt-1">{order.eventAddress}</p>
-<p className="text-sm text-body">{order.eventCity}, {order.eventState} {order.eventZip}</p>
-<div className="flex flex-wrap gap-2 mt-3">
-<span className="badge bg-blue-50 text-secondary border border-blue-200">{deliveryTypeLabel}</span>
-{order.durationLabel && <span className="badge bg-gray-100 text-dark border border-gray-200">{order.durationLabel}</span>}
+</>
+)}
 </div>
 </div>
 </div>
 
-<div className="admin-card border-l-4 border-admin-green">
-<h2 className="admin-card-header">Drop-Off & Pickup Schedule</h2>
+<div className="grid lg:grid-cols-3 gap-6 items-start">
+<div className="lg:col-span-2 space-y-6 min-w-0">
+<Section
+title="Schedule"
+accent="border-admin-green"
+action={<button onClick={() => setScheduleEditing((v) => !v)} type="button" className="text-secondary text-sm font-medium hover:underline no-print">{scheduleEditing ? 'Cancel' : 'Edit Schedule'}</button>}
+>
+{!scheduleEditing ? (
 <div className="grid md:grid-cols-2 gap-4">
 <div className="rounded-lg border-l-4 border-admin-green bg-green-50 p-4">
 <p className="text-xs font-bold uppercase tracking-wide text-admin-green mb-2">Drop-Off</p>
@@ -729,12 +999,13 @@ className="btn-danger-outline"
 <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-2">Pickup</p>
 <p className="text-sm font-semibold text-dark">{formatDate(order.eventEndDate || order.eventDate)}</p>
 <p className="text-sm text-body mt-1">{pickupTimeLabel || 'No time window selected'}</p>
+{!order.eventEndDate && /^(Next Day|Same Day)/i.test(order.pickupTimeSlot || '') && (
+<p className="text-xs text-amber-700 mt-1 no-print">Schedule data needs review - pickup is marked "{order.pickupTimeSlot}" but no end date is set, so this is showing the drop-off date. Edit Schedule to set the correct pickup day.</p>
+)}
 </div>
 </div>
-</div>
-
-<div className="admin-card border-l-4 border-admin-green">
-<h2 className="admin-card-header">Edit Date & Time</h2>
+) : (
+<div className="no-print">
 <div className="grid md:grid-cols-2 gap-4 mb-3">
 <div>
 <label className="block text-xs text-body mb-1">Event Date</label>
@@ -751,29 +1022,57 @@ className="btn-danger-outline"
 {DROPOFF_SLOT_LABELS.map((label) => (
 <option key={label} value={label}>{label}</option>
 ))}
-  {editDropoffSlot && !DROPOFF_SLOT_LABELS.includes(editDropoffSlot) && (
-  <option value={editDropoffSlot}>{formatTimeSlot(editDropoffSlot)}</option>
-  )}
+{editDropoffSlot && !DROPOFF_SLOT_LABELS.includes(editDropoffSlot) && (
+<option value={editDropoffSlot}>{formatTimeSlot(editDropoffSlot)}</option>
+)}
 </select>
 </div>
 <div>
 <label className="block text-xs text-body mb-1">Pickup Time</label>
-<select value={editPickupSlot} onChange={(e) => setEditPickupSlot(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2">
+<select value={editPickupSlot} onChange={(e) => { const val = e.target.value; setEditPickupSlot(val); if (/^Next Day/i.test(val) && !editEventEndDate && editEventDate) { const d = new Date(editEventDate + 'T00:00:00'); d.setDate(d.getDate() + 1); setEditEventEndDate(d.toISOString().slice(0, 10)) } }} className="w-full border border-gray-300 rounded px-3 py-2">
 <option value="">Select a time window...</option>
 {PICKUP_SLOT_LABELS.map((label) => (
 <option key={label} value={label}>{label}</option>
 ))}
-  {editPickupSlot && !PICKUP_SLOT_LABELS.includes(editPickupSlot) && (
-  <option value={editPickupSlot}>{formatTimeSlot(editPickupSlot)}</option>
-    )}
+{editPickupSlot && !PICKUP_SLOT_LABELS.includes(editPickupSlot) && (
+<option value={editPickupSlot}>{formatTimeSlot(editPickupSlot)}</option>
+)}
 </select>
 </div>
 </div>
-<button onClick={saveDateTime} disabled={savingDateTime} className="btn-admin">{savingDateTime ? 'Saving...' : 'Save Date & Time'}</button>
+<div className="flex gap-2">
+<button onClick={saveDateTime} disabled={savingDateTime} type="button" className="btn-admin">{savingDateTime ? 'Saving...' : 'Save Date & Time'}</button>
+<button onClick={() => setScheduleEditing(false)} type="button" className="btn-outline">Cancel</button>
 </div>
+</div>
+)}
+</Section>
 
-<div className="admin-card border-l-4 border-admin-green">
-<h2 className="admin-card-header">Edit Delivery Address</h2>
+<Section
+title="Delivery Address"
+accent="border-admin-green"
+action={<button onClick={() => setAddressEditing((v) => !v)} type="button" className="text-secondary text-sm font-medium hover:underline no-print">{addressEditing ? 'Cancel' : 'Edit'}</button>}
+>
+{!addressEditing ? (
+<div className="flex items-start justify-between gap-4 flex-wrap">
+<div>
+{order.locationName && <p className="text-sm font-medium text-dark">{order.locationName}</p>}
+<p className="text-sm text-body">{order.eventAddress}</p>
+<p className="text-sm text-body">{order.eventCity}, {order.eventState} {order.eventZip}</p>
+</div>
+{order.deliveryType === 'delivery' && order.eventAddress && (
+<a
+href={'https://maps.google.com/?q=' + encodeURIComponent(order.eventAddress + ', ' + order.eventCity + ', ' + order.eventState + ' ' + order.eventZip)}
+target="_blank"
+rel="noopener noreferrer"
+className="text-secondary text-xs font-medium hover:underline no-print whitespace-nowrap"
+>
+Open Directions →
+</a>
+)}
+</div>
+) : (
+<div className="no-print">
 <div className="grid md:grid-cols-2 gap-4 mb-3">
 <div className="md:col-span-2">
 <label className="block text-xs text-body mb-1">Street Address</label>
@@ -792,28 +1091,41 @@ className="btn-danger-outline"
 <input type="text" value={editEventState} onChange={(e) => setEditEventState(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2" />
 </div>
 </div>
-<button onClick={saveAddress} disabled={savingAddress} className="btn-admin">{savingAddress ? 'Saving...' : 'Save Delivery Address'}</button>
+<div className="flex gap-2">
+<button onClick={saveAddress} disabled={savingAddress} type="button" className="btn-admin">{savingAddress ? 'Saving...' : 'Save Delivery Address'}</button>
+<button onClick={() => setAddressEditing(false)} type="button" className="btn-outline">Cancel</button>
 </div>
+</div>
+)}
+</Section>
 
-<div className="admin-card border-l-4 border-admin-green">
-<h2 className="admin-card-header">Items</h2>
-<p className="text-xs text-body mb-3 no-print bg-blue-50 border border-blue-100 rounded px-3 py-2">Edit the Qty or Unit Price directly below, then click Save Item Changes. No need to remove and re-add an item just to change its quantity.</p>
+<Section
+title="Items"
+accent="border-admin-green"
+action={<button onClick={() => setItemsEditing((v) => !v)} type="button" className="text-secondary text-sm font-medium hover:underline no-print">{itemsEditing ? 'Cancel' : 'Edit Items'}</button>}
+>
+{poleTentSurfaceIssue && (
+<div className="mb-3 rounded border border-yellow-300 bg-yellow-50 px-3 py-2 text-sm text-yellow-800">
+⚠ {poleTentSurfaceIssue}
+</div>
+)}
 <div className="overflow-x-auto">
 <table className="w-full text-sm border border-gray-100 rounded overflow-hidden">
 <thead>
 <tr className="bg-gray-50 border-b border-gray-200">
-<th className="py-2.5 px-3 text-left font-semibold text-dark">Item</th>
+<th className="py-2.5 px-3 text-left font-semibold text-dark w-1/2">Item</th>
 <th className="py-2.5 px-3 text-right font-semibold text-dark">Qty</th>
-<th className="py-2.5 px-3 text-right font-semibold text-dark">Unit Price</th>
+<th className="py-2.5 px-3 text-right font-semibold text-dark">Rate</th>
 <th className="py-2.5 px-3 text-right font-semibold text-dark">Total</th>
-<th className="py-2.5 px-3 text-right font-semibold text-dark no-print">Remove</th>
+{itemsEditing && <th className="py-2.5 px-3 text-right font-semibold text-dark no-print">Remove</th>}
 </tr>
 </thead>
 <tbody>
 {editItems.map((item, idx) => (
 <tr key={idx} className={'border-b border-gray-100 hover:bg-blue-50/60 transition-colors ' + (idx % 2 === 1 ? 'bg-gray-50/50' : '')}>
-<td className="py-2.5 px-3">{item.itemName}</td>
+<td className="py-2.5 px-3 text-[14px] text-dark">{item.itemName}</td>
 <td className="py-2.5 px-3 text-right">
+{itemsEditing ? (
 <input
 type="number"
 min="0"
@@ -821,9 +1133,12 @@ value={item.quantity}
 onChange={(e) => updateItemRow(idx, 'quantity', parseInt(e.target.value) || 0)}
 className="w-16 border border-gray-300 rounded px-2 py-1 text-right text-sm no-print"
 />
-<span className="print-only">{item.quantity}</span>
+) : (
+<span>{item.quantity}</span>
+)}
 </td>
 <td className="py-2.5 px-3 text-right">
+{itemsEditing ? (
 <input
 type="number"
 min="0"
@@ -832,21 +1147,26 @@ value={item.unitPrice}
 onChange={(e) => updateItemRow(idx, 'unitPrice', parseFloat(e.target.value) || 0)}
 className="w-24 border border-gray-300 rounded px-2 py-1 text-right text-sm no-print"
 />
-<span className="print-only">{formatCurrency(item.unitPrice)}</span>
+) : (
+<span>{formatCurrency(item.unitPrice)}</span>
+)}
 </td>
-<td className="py-2.5 px-3 text-right font-medium">{formatCurrency(item.quantity * item.unitPrice)}</td>
+<td className="py-2.5 px-3 text-right font-medium tabular-nums">{formatCurrency(item.quantity * item.unitPrice)}</td>
+{itemsEditing && (
 <td className="py-2.5 px-3 text-right no-print">
-<button onClick={() => removeItemRow(idx)} className="text-red-600 text-xs font-medium hover:underline">Remove</button>
+<button onClick={() => removeItemRow(idx)} type="button" className="text-red-600 text-xs font-medium hover:underline">Remove</button>
 </td>
+)}
 </tr>
 ))}
 {editItems.length === 0 && (
-<tr><td colSpan={5} className="py-3 text-center text-body text-sm">No items on this order</td></tr>
+<tr><td colSpan={itemsEditing ? 5 : 4} className="py-3 text-center text-body text-sm">No items on this order</td></tr>
 )}
 </tbody>
 </table>
 </div>
 
+{itemsEditing && (
 <div className="mt-4 border border-gray-200 rounded p-4 no-print bg-gray-50/50">
 <p className="text-sm font-medium mb-1">Add Item</p>
 <p className="text-xs text-body mb-2">Type to search {catalog.length} catalog items by name or category, or enter a custom item and price.</p>
@@ -895,121 +1215,163 @@ value={newItemPrice}
 onChange={(e) => setNewItemPrice(e.target.value)}
 className="col-span-4 md:col-span-2 border border-gray-300 rounded px-2 py-2 text-sm"
 />
-<button onClick={addItemRow} className="col-span-4 md:col-span-2 btn-admin text-sm">Add Item</button>
+<button onClick={addItemRow} type="button" className="col-span-4 md:col-span-2 btn-admin text-sm">Add Item</button>
 </div>
+</div>
+)}
+
+<div className="mt-3 flex justify-between text-sm text-body">
+<span>{editItems.length} item{editItems.length === 1 ? '' : 's'}</span>
+<span className="font-medium text-dark">Items Subtotal: {formatCurrency(liveTotals.subtotal)}</span>
 </div>
 
-<div className="mt-4 space-y-1 text-sm max-w-xs ml-auto bg-gray-50 rounded p-3">
-<div className="flex justify-between">
-<span className="text-body">Subtotal</span>
-<span>{formatCurrency(liveTotals.subtotal)}</span>
-</div>
-{!!order.durationFee && (
-<div className="flex justify-between">
-<span className="text-body">Multi-Day Rental Fee{order.durationLabel ? (' (' + order.durationLabel + ')') : ''}</span>
-<span>{formatCurrency(order.durationFee || 0)}</span>
-</div>
-)}
-{!!order.specialRequestFee && (
-<div className="flex justify-between">
-<span className="text-body">Special Requests{order.specialRequestNames ? (' (' + order.specialRequestNames + ')') : ''}</span>
-<span>{formatCurrency(order.specialRequestFee || 0)}</span>
-</div>
-)}
-{!!order.couponCode && (
-<div className="flex justify-between text-green-700">
-<span>Coupon ({order.couponCode})</span>
-<span>-{formatCurrency(order.couponDiscount || 0)}</span>
-</div>
-)}
-{parseFloat(generalDiscount) > 0 && (
-<div className="flex justify-between text-green-700">
-<span>General Discount</span>
-<span>-{formatCurrency(parseFloat(generalDiscount) || 0)}</span>
-</div>
-)}
-{(!!order.damageWaiver || (order.damageWaiverFee ?? 0) > 0 || overrideDamageWaiverFee !== '') && (
-<div className="flex justify-between">
-<span className="text-body">Damage Waiver{overrideDamageWaiverFee !== '' ? ' (override)' : ''}</span>
-<span>{formatCurrency(liveTotals.damageWaiverFee || 0)}</span>
-</div>
-)}
-{order.deliveryType === 'delivery' && (
-<div className="flex justify-between">
-<span className="text-body">
-Travel Fee{order.deliveryDistance ? (' (' + order.deliveryDistance.toFixed(1) + ' mi)') : ''}{overrideTravelFee !== '' ? ' (override)' : ''}
-</span>
-<span>{formatCurrency(liveTotals.deliveryFee || 0)}</span>
-</div>
-)}
-{parseFloat(miscellaneousFees) > 0 && (
-<div className="flex justify-between">
-<span className="text-body">Miscellaneous Fees</span>
-<span>{formatCurrency(parseFloat(miscellaneousFees) || 0)}</span>
-</div>
-)}
-<div className="flex justify-between">
-<span className="text-body">Sales Tax{order.taxRate ? (' (' + order.taxRate + '%)') : ''}{overrideTaxAmount !== '' ? ' (override)' : ''}</span>
-<span>{formatCurrency(liveTotals.taxAmount)}</span>
-</div>
-<div className="flex justify-between font-bold border-t border-gray-200 pt-1 mt-1">
-<span>Order Total</span>
-<span>{formatCurrency(liveTotals.totalAmount)}</span>
-</div>
-<div className="flex justify-between">
-<span className="text-body">Paid</span>
-<span>{formatCurrency(order.amountPaid)}</span>
-</div>
-<div className="flex justify-between font-bold text-red-600">
-<span>Balance Due</span>
-<span>{formatCurrency(liveTotals.balanceDue)}</span>
-</div>
-</div>
-
+{itemsEditing && (
 <div className="flex gap-2 mt-4 no-print">
-<button onClick={() => saveItems(false)} disabled={savingItems} className="btn-outline">
-{savingItems ? 'Saving...' : 'Save Item Changes'}
+<button onClick={() => saveItems(false)} disabled={savingItems} type="button" className="btn-admin">
+{savingItems ? 'Saving...' : 'Save Changes'}
 </button>
-<button onClick={() => saveItems(true)} disabled={savingItems} className="btn-admin text-sm">
+<button onClick={() => saveItems(true)} disabled={savingItems} type="button" className="btn-outline">
 {savingItems ? 'Saving...' : 'Save & Send Updated Receipt'}
 </button>
+<button onClick={() => setItemsEditing(false)} type="button" className="btn-outline">Cancel</button>
 </div>
-</div>
+)}
+</Section>
 
-<div className="admin-card border-l-4 border-accent">
-<h2 className="admin-card-header">Payment History</h2>
-{order.payments.map((p) => (
-<div key={p.id} className="flex justify-between items-center text-sm py-2 border-b border-gray-100" title={p.notes || ''}>
-<span>{formatDate(p.createdAt)} — {p.method}{' '}{p.notes && <span className="text-gray-600 text-xs italic ml-1">— {p.notes}</span>}
-{p.stripePaymentId ? (
-<span className="text-green-700 text-xs font-semibold" title="Real Stripe payment — this money is in your account">✅ In your account</span>
-) : (
-<span className="text-amber-600 text-xs font-semibold" title="Historical payment imported from ERS — not in your current Stripe account">📋 ERS history</span>
-)}
-</span>
-<span className="flex items-center gap-2">
-{formatCurrency(p.amount)}
-<button onClick={() => removePayment(p.id)} className="text-red-600 text-xs font-medium hover:underline no-print">Remove</button>
-{p.stripePaymentId && !p.stripePaymentId.startsWith('simulated_') && p.amount > 0 && (
-<button onClick={() => refundPayment(p.id, p.amount)} className="text-orange-600 text-xs font-medium hover:underline no-print ml-2">Refund</button>
-)}
-</span>
+<Section title="Payment History" accent="border-accent" action={<button onClick={() => setAddPaymentOpen((v) => !v)} type="button" className="text-secondary text-sm font-medium hover:underline no-print">{addPaymentOpen ? 'Cancel' : 'Add Manual Payment'}</button>}>
+{order.payments.length === 0 && <p className="text-sm text-body">No payments recorded yet.</p>}
+<div className="divide-y divide-gray-100">
+{order.payments.map((p) => {
+const isRefund = p.amount < 0
+const paymentLabel = isRefund ? 'Refund' : (p.stripePaymentId ? 'Card' : 'Manual Payment')
+const sourceInfo = p.stripePaymentId
+? { text: 'Processed via Stripe', title: 'Real Stripe payment - this money is in your account', cls: 'text-green-700 font-medium' }
+: p.recordedByName
+? { text: 'Manual entry by ' + p.recordedByName, title: 'Recorded manually by staff - not an automatic Stripe charge', cls: 'text-amber-600 font-medium' }
+: { text: 'Imported payment record', title: 'Historical payment record without a linked Stripe charge or staff name', cls: 'text-amber-600 font-medium' }
+return (
+<div key={p.id} className="flex justify-between items-center text-sm py-3">
+<div>
+<p className="font-medium text-dark">{formatDate(p.createdAt)} · {paymentLabel}</p>
+<p className="text-xs text-body mt-0.5">
+{p.notes && <span className="italic mr-2" title="Internal note">{p.notes}</span>}
+<span className={sourceInfo.cls} title={sourceInfo.title}>{sourceInfo.text}</span>
+</p>
 </div>
-))}
-<div className="flex gap-2 mt-3 no-print">
+<div className="flex items-center gap-3">
+<span className={'font-semibold tabular-nums ' + (isRefund ? 'text-red-600' : 'text-dark')}>{isRefund ? '−' : ''}{formatCurrency(Math.abs(p.amount))}</span>
+<div className="relative no-print">
+<button onClick={() => setPaymentMenuOpenId(paymentMenuOpenId === p.id ? null : p.id)} type="button" className="text-body hover:text-dark px-1">⋯</button>
+{paymentMenuOpenId === p.id && (
+<>
+<div className="fixed inset-0 z-20" onClick={() => setPaymentMenuOpenId(null)} />
+<div className="absolute z-30 right-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1 text-sm">
+{p.stripePaymentId && !p.stripePaymentId.startsWith('simulated_') && p.amount > 0 && (
+<button onClick={() => { setPaymentMenuOpenId(null); refundPayment(p.id, p.amount) }} type="button" className="block w-full text-left px-3 py-2 hover:bg-orange-50 text-orange-700">Refund payment</button>
+)}
+{!p.stripePaymentId && (
+<button onClick={() => { setPaymentMenuOpenId(null); removePayment(p.id) }} type="button" className="block w-full text-left px-3 py-2 hover:bg-red-50 text-red-600">Remove manual entry</button>
+)}
+</div>
+</>
+)}
+</div>
+</div>
+</div>
+)
+})}
+</div>
+{addPaymentOpen && (
+<div className="mt-3 border border-gray-200 rounded p-4 no-print bg-gray-50/50">
+<p className="text-sm font-medium mb-2">Add Manual Payment</p>
+<div className="flex flex-wrap gap-2">
 <input
 type="number"
 placeholder="Amount"
 value={paymentAmount}
 onChange={(e) => setPaymentAmount(e.target.value)}
-className="border border-gray-300 rounded px-3 py-1 text-sm"
+className="border border-gray-300 rounded px-3 py-2 text-sm w-32"
 />
-<input type="text" placeholder="Reason / note (required)" value={paymentNotes} onChange={(e) => setPaymentNotes(e.target.value)} className="border border-gray-300 rounded px-3 py-1 text-sm flex-1 min-w-[240px]" /><label className="flex items-center gap-1 text-xs text-gray-600"><input type="checkbox" checked={paymentSkipEmail} onChange={(e) => setPaymentSkipEmail(e.target.checked)} /> Skip email</label><button onClick={addPayment} className="btn-admin text-sm">Add Payment</button>
+<input type="text" placeholder="Reason / note (required)" value={paymentNotes} onChange={(e) => setPaymentNotes(e.target.value)} className="border border-gray-300 rounded px-3 py-2 text-sm flex-1 min-w-[240px]" />
+<select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="border border-gray-300 rounded px-2 py-2 text-sm">
+<option value="cash">Cash</option>
+<option value="check">Check</option>
+<option value="card">Card (charged outside this system)</option>
+<option value="other">Other</option>
+</select>
+<label className="flex items-center gap-1 text-xs text-gray-600"><input type="checkbox" checked={paymentSkipEmail} onChange={(e) => setPaymentSkipEmail(e.target.checked)} /> Skip email</label>
+<button onClick={addPayment} type="button" className="btn-admin text-sm">Save Payment</button>
 </div>
 </div>
+)}
+</Section>
 
-<div className="admin-card border-l-4 border-admin-gold no-print space-y-4">
-<h2 className="admin-card-header mb-1">Admin Overrides & Billing</h2>
+<Section title="Notes" accent="border-gray-400">
+<div className="grid md:grid-cols-2 gap-4">
+<div>
+<div className="flex items-center justify-between mb-1">
+<label className="block text-sm font-medium">Internal Notes</label>
+<button onClick={() => setInternalNotesEditing((v) => !v)} type="button" className="text-secondary text-xs font-medium hover:underline no-print">{internalNotesEditing ? 'Cancel' : 'Edit'}</button>
+</div>
+{internalNotesEditing ? (
+<>
+<textarea
+value={internalNotes}
+onChange={(e) => setInternalNotes(e.target.value)}
+rows={3}
+className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+/>
+<button onClick={() => { saveOrder(); setInternalNotesEditing(false) }} type="button" className="btn-admin text-sm mt-2">Save</button>
+</>
+) : (
+<p className="text-sm text-body whitespace-pre-wrap min-h-[1.5rem]">{internalNotes || 'No internal notes.'}</p>
+)}
+</div>
+<div>
+<div className="flex items-center justify-between mb-1">
+<label className="block text-sm font-medium">Customer Notes</label>
+<button onClick={() => setCustomerNotesEditing((v) => !v)} type="button" className="text-secondary text-xs font-medium hover:underline no-print">{customerNotesEditing ? 'Cancel' : 'Edit'}</button>
+</div>
+{customerNotesEditing ? (
+<>
+<textarea
+value={customerNotes}
+onChange={(e) => setCustomerNotes(e.target.value)}
+rows={3}
+className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+/>
+<button onClick={() => { saveOrder(); setCustomerNotesEditing(false) }} type="button" className="btn-admin text-sm mt-2">Save</button>
+</>
+) : (
+<p className="text-sm text-body whitespace-pre-wrap min-h-[1.5rem]">{customerNotes || 'No customer notes.'}</p>
+)}
+</div>
+</div>
+</Section>
+
+<div className="space-y-3 no-print">
+<Advanced title="Communications" subtitle="Automated email controls for this order" open={communicationsOpen} onToggle={() => setCommunicationsOpen((v) => !v)}>
+<div className="space-y-3">
+<label className="flex items-center gap-2 text-sm">
+<input type="checkbox" checked={followUpsPaused} onChange={(e) => setFollowUpsPaused(e.target.checked)} />
+Pause automated quote follow-up emails for this order
+</label>
+<p className="text-xs text-gray-500 -mt-2">Use this if the customer already replied or you don't want further reminder emails sent.</p>
+<label className="flex items-center gap-2 text-sm">
+<input type="checkbox" checked={prePayReminderDisabled} onChange={(e) => setPrePayReminderDisabled(e.target.checked)} />
+Disable automatic 3-day Pre-Payment Reminder email for this order
+</label>
+<button onClick={saveOrder} type="button" className="btn-admin text-sm">Save</button>
+</div>
+</Advanced>
+
+<Advanced
+title="Billing Overrides"
+subtitle={hasBillingOverrides ? 'This order has manual discounts, fees, or overrides applied' : 'Discounts, manual fees and overrides — none applied'}
+open={billingOpen}
+onToggle={() => setBillingOpen((v) => !v)}
+>
+<div className="space-y-4">
 <div>
 <label className="block text-sm font-medium mb-1">Location Name</label>
 <input
@@ -1035,55 +1397,68 @@ className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
 </div>
 <div>
 <label className="block text-sm font-medium mb-1">Override Tax Amount ($)</label>
-<input type="number" step="0.01" placeholder="Leave blank to use calculated tax" value={overrideTaxAmount} onChange={(e) => setOverrideTaxAmount(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" /></div><div><label className="block text-sm font-medium mb-1">Override Damage Waiver ($)</label><input type="number" step="0.01" placeholder="Leave blank to use calculated damage waiver" value={overrideDamageWaiverFee} onChange={(e) => setOverrideDamageWaiverFee(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
+<input type="number" step="0.01" placeholder="Leave blank to use calculated tax" value={overrideTaxAmount} onChange={(e) => setOverrideTaxAmount(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
+</div>
+<div>
+<label className="block text-sm font-medium mb-1">Override Damage Waiver ($)</label>
+<input type="number" step="0.01" placeholder="Leave blank to use calculated damage waiver" value={overrideDamageWaiverFee} onChange={(e) => setOverrideDamageWaiverFee(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
 </div>
 <div>
 <label className="block text-sm font-medium mb-1">Override Deposit Amount ($)</label>
 <input type="number" step="0.01" placeholder="Leave blank to use calculated deposit" value={overrideDepositAmount} onChange={(e) => setOverrideDepositAmount(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
 </div>
 </div>
-<button onClick={saveOrder} className="btn-admin text-sm">Save Overrides</button>
-  </div>
-
-  <div className="admin-card border-l-4 border-blue-400 no-print space-y-4">
-  <h2 className="admin-card-header mb-1">Raincheck</h2>
-  {(order.raincheckApplied || 0) > 0 && (
-  <p className="text-sm text-gray-700">Currently applied to this order: {formatCurrency(order.raincheckApplied || 0)}</p>
-  )}
-  <div className="grid md:grid-cols-2 gap-4">
-  <div>
-  <label className="block text-sm font-medium mb-1">Customer's Rainchecks</label>
-  <select value={selectedRaincheckId} onChange={(e) => setSelectedRaincheckId(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm">
-  <option value="">-- Select a raincheck --</option>
-  {customerRainchecks.map((rc: any) => (
-  <option key={rc.id} value={rc.id}>{formatCurrency(rc.remainingAmount)} remaining of {formatCurrency(rc.amount)}{rc.reason ? ' - ' + rc.reason : ''}</option>
-  ))}
-  </select>
-  </div>
-  <div>
-  <label className="block text-sm font-medium mb-1">Amount to Apply ($)</label>
-  <input type="number" step="0.01" value={raincheckAmountInput} onChange={(e) => setRaincheckAmountInput(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
-  </div>
-  </div>
-  <button onClick={applyRaincheck} disabled={applyingRaincheck} className="btn-admin text-sm">Apply Raincheck</button>
-  <div className="border-t pt-4">
-  <p className="text-sm font-medium mb-2">Issue a new raincheck for this customer</p>
-  <div className="grid md:grid-cols-2 gap-4">
-  <div>
-  <label className="block text-sm font-medium mb-1">Amount ($)</label>
-  <input type="number" step="0.01" value={newRaincheckAmount} onChange={(e) => setNewRaincheckAmount(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
-  </div>
-  <div>
-  <label className="block text-sm font-medium mb-1">Reason (optional)</label>
-  <input type="text" value={newRaincheckReason} onChange={(e) => setNewRaincheckReason(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
-  </div>
-  </div>
-  <button onClick={issueRaincheck} disabled={issuingRaincheck} className="btn-admin text-sm">Issue Raincheck</button>
-  </div>
+<button onClick={saveOrder} type="button" className="btn-admin text-sm">Save Overrides</button>
 </div>
+</Advanced>
 
-<div className="admin-card border-l-4 border-gray-400 no-print space-y-4">
-<h2 className="admin-card-header">Order Settings & Notes</h2>
+<Advanced
+title="Raincheck"
+subtitle={hasRaincheckApplied ? (formatCurrency(order.raincheckApplied || 0) + ' applied to this order') : 'No raincheck applied to this order'}
+open={raincheckOpen}
+onToggle={() => setRaincheckOpen((v) => !v)}
+>
+<div className="space-y-4">
+<div className="grid md:grid-cols-2 gap-4">
+<div>
+<label className="block text-sm font-medium mb-1">Customer's Rainchecks</label>
+<select value={selectedRaincheckId} onChange={(e) => setSelectedRaincheckId(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+<option value="">-- Select a raincheck --</option>
+{customerRainchecks.map((rc: any) => (
+<option key={rc.id} value={rc.id}>{formatCurrency(rc.remainingAmount)} remaining of {formatCurrency(rc.amount)}{rc.reason ? ' - ' + rc.reason : ''}</option>
+))}
+</select>
+</div>
+<div>
+<label className="block text-sm font-medium mb-1">Amount to Apply ($)</label>
+<input type="number" step="0.01" value={raincheckAmountInput} onChange={(e) => setRaincheckAmountInput(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
+</div>
+</div>
+<button onClick={applyRaincheck} disabled={applyingRaincheck} type="button" className="btn-admin text-sm">Apply Raincheck</button>
+<div className="border-t border-gray-100 pt-4">
+<p className="text-sm font-medium mb-2">Issue a new raincheck for this customer</p>
+<div className="grid md:grid-cols-2 gap-4">
+<div>
+<label className="block text-sm font-medium mb-1">Amount ($)</label>
+<input type="number" step="0.01" value={newRaincheckAmount} onChange={(e) => setNewRaincheckAmount(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
+</div>
+<div>
+<label className="block text-sm font-medium mb-1">Reason (optional)</label>
+<input type="text" value={newRaincheckReason} onChange={(e) => setNewRaincheckReason(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
+</div>
+</div>
+<button onClick={issueRaincheck} disabled={issuingRaincheck} type="button" className="btn-admin text-sm mt-2">Issue Raincheck</button>
+</div>
+</div>
+</Advanced>
+
+<Advanced
+title="Additional Details"
+subtitle={hasAdditionalDetails ? 'Setup surface, park status and referral source on file' : 'Setup surface, park status and referral source'}
+open={detailsOpen}
+onToggle={() => setDetailsOpen((v) => !v)}
+>
+<div className="space-y-4">
 <div>
 <label className="block text-sm font-medium mb-1">Status</label>
 <select value={status} onChange={(e) => setStatus(e.target.value)} className="border border-gray-300 rounded px-3 py-2 text-sm">
@@ -1091,26 +1466,8 @@ className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
 <option value="incomplete">Incomplete</option>
 <option value="quote">Quote</option>
 <option value="canceled">Canceled</option>
+<option value="completed">Completed</option>
 </select>
-</div>
-<div>
-<label className="block text-sm font-medium mb-1">Internal Notes</label>
-<textarea
-value={internalNotes}
-onChange={(e) => setInternalNotes(e.target.value)}
-rows={3}
-className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-/>
-</div>
-
-<div>
-<label className="block text-sm font-medium mb-1">Customer Notes</label>
-<textarea
-value={customerNotes}
-onChange={(e) => setCustomerNotes(e.target.value)}
-rows={3}
-className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-/>
 </div>
 <div>
 <label className="block text-sm font-medium mb-1">Setup Surface</label>
@@ -1119,6 +1476,11 @@ className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
 {setupSurfaceOptions.map((s) => (<option key={s.id} value={s.name}>{s.name}</option>))}
 </select>
 </div>
+{poleTentSurfaceIssue && (
+<div className="rounded border border-yellow-300 bg-yellow-50 px-3 py-2 text-sm text-yellow-800">
+⚠ {poleTentSurfaceIssue}
+</div>
+)}
 <div>
 <label className="block text-sm font-medium mb-1">Is this event at a public park?</label>
 <select value={isPublicPark ? 'yes' : 'no'} onChange={(e) => setIsPublicPark(e.target.value === 'yes')} className="w-full border border-gray-300 rounded px-3 py-2 text-sm">
@@ -1133,10 +1495,263 @@ className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
 {referenceOptions.map((r) => (<option key={r.id} value={r.name}>{r.name}</option>))}
 </select>
 </div>
-<div className="flex items-center gap-2 mt-2"><input type="checkbox" id="prePayReminderDisabled" checked={prePayReminderDisabled} onChange={(e) => setPrePayReminderDisabled(e.target.checked)} /><label htmlFor="prePayReminderDisabled" className="text-sm">Disable automatic 3-day Pre-Payment Reminder email for this order</label></div>
-<button onClick={saveOrder} className="btn-admin">Save Changes</button>
+<button onClick={saveOrder} type="button" className="btn-admin text-sm">Save Changes</button>
+</div>
+</Advanced>
+
+<Advanced title="Danger Zone" subtitle="Cancel or permanently delete this order" open={dangerOpen} onToggle={() => setDangerOpen((v) => !v)} danger>
+<div className="flex flex-wrap gap-2">
+{order.status !== 'canceled' && (
+<button onClick={cancelOrder} disabled={cancelling} type="button" className="btn-outline !border-amber-300 !text-amber-700 hover:!bg-amber-50">
+{cancelling ? 'Cancelling...' : 'Cancel Order'}
+</button>
+)}
+<button onClick={deleteOrder} disabled={deleting} type="button" className="btn-danger-outline">
+{deleting ? 'Deleting...' : 'Delete Order'}
+</button>
+</div>
+</Advanced>
+</div>
 </div>
 
+<div className="space-y-6 lg:sticky lg:top-4">
+<Section title="Customer" action={<button onClick={() => setCustomerEditOpen((v) => !v)} type="button" className="text-secondary text-sm font-medium hover:underline no-print">{customerEditOpen ? 'Cancel' : 'Edit'}</button>}>
+{!customerEditOpen ? (
+<>
+<p className="text-sm font-medium text-dark">{order.customer.firstName} {order.customer.lastName}</p>
+{order.contractSignatureName && order.contractSignatureName.trim().toLowerCase() !== (order.customer.firstName + ' ' + order.customer.lastName).trim().toLowerCase() && (
+<p className="text-xs text-body mt-0.5 italic">Contract signed as "{order.contractSignatureName}"</p>
+)}
+<p className="text-sm mt-1 break-words"><a href={'mailto:' + order.customer.email} className="text-secondary hover:underline">{order.customer.email}</a></p>
+{order.customer.phone && <p className="text-sm mt-0.5"><a href={'tel:' + order.customer.phone} className="text-secondary hover:underline">{formatPhoneDisplay(order.customer.phone)}</a></p>}
+{(customerSecondaryPhone || customerSecondaryEmail) && (
+<div className="mt-2 pt-2 border-t border-gray-100">
+<p className="text-xs font-semibold uppercase tracking-wide text-body">Secondary Contact</p>
+{customerSecondaryEmail && <p className="text-sm mt-0.5"><a href={'mailto:' + customerSecondaryEmail} className="text-secondary hover:underline">{customerSecondaryEmail}</a></p>}
+{customerSecondaryPhone && <p className="text-sm mt-0.5"><a href={'tel:' + customerSecondaryPhone} className="text-secondary hover:underline">{formatPhoneDisplay(customerSecondaryPhone)}</a></p>}
+</div>
+)}
+{orderContacts.length > 0 && (
+<div className="mt-2 pt-2 border-t border-gray-100 space-y-1">
+{orderContacts.map((c) => (
+<p key={c.id} className="text-xs text-body"><span className="font-semibold text-dark">{c.role}:</span> {c.name}{c.phone ? ' - ' + formatPhoneDisplay(c.phone) : ''}{c.email ? ' - ' + c.email : ''}</p>
+))}
+</div>
+)}
+<div className="flex items-center gap-3 mt-3 no-print">
+<button onClick={() => setContactsOpen(true)} type="button" className="text-secondary text-xs font-medium hover:underline">Manage Contacts</button>
+{order.customerId && <a href={'/admin/customers/' + order.customerId} className="text-secondary text-xs font-medium hover:underline">View full profile →</a>}
+</div>
+</>
+) : (
+<div className="space-y-3 no-print">
+<p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">Editing this customer updates their contact information across their customer profile and any other orders they have.</p>
+<div className="grid grid-cols-2 gap-2">
+<div>
+<label className="block text-xs text-body mb-1">First Name</label>
+<input type="text" value={customerFirstName} onChange={(e) => setCustomerFirstName(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" />
+</div>
+<div>
+<label className="block text-xs text-body mb-1">Last Name</label>
+<input type="text" value={customerLastName} onChange={(e) => setCustomerLastName(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" />
+</div>
+</div>
+<div>
+<label className="block text-xs text-body mb-1">Email</label>
+<input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" />
+</div>
+<div>
+<label className="block text-xs text-body mb-1">Phone</label>
+<input type="text" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" />
+</div>
+<div className="grid grid-cols-2 gap-2">
+<div>
+<label className="block text-xs text-body mb-1">Secondary Phone</label>
+<input type="text" value={customerSecondaryPhone} onChange={(e) => setCustomerSecondaryPhone(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" />
+</div>
+<div>
+<label className="block text-xs text-body mb-1">Secondary Email</label>
+<input type="email" value={customerSecondaryEmail} onChange={(e) => setCustomerSecondaryEmail(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" />
+</div>
+</div>
+<div className="flex gap-2">
+<button onClick={saveCustomerEdit} disabled={savingCustomer} type="button" className="btn-admin text-sm">{savingCustomer ? 'Saving...' : 'Save'}</button>
+<button onClick={() => setCustomerEditOpen(false)} type="button" className="btn-outline text-sm">Cancel</button>
+</div>
+</div>
+)}
+</Section>
+
+<Section title="Event">
+<p className="text-sm font-semibold text-dark">{formatDate(order.eventDate)}{order.eventEndDate ? (' - ' + formatDate(order.eventEndDate)) : ''}</p>
+{order.locationName && <p className="text-sm mt-1">{order.locationName}</p>}
+<p className="text-sm text-body mt-1">{order.eventAddress}</p>
+<p className="text-sm text-body">{order.eventCity}, {order.eventState} {order.eventZip}</p>
+<div className="flex flex-wrap gap-2 mt-3">
+<span className="badge bg-blue-50 text-secondary border border-blue-200">{deliveryTypeLabel}</span>
+{order.durationLabel && <span className="badge bg-gray-100 text-dark border border-gray-200">{order.durationLabel}</span>}
+</div>
+</Section>
+
+<Section title="Financial Summary">
+<div className="space-y-1.5 text-sm">
+<div className="flex justify-between"><span className="text-body">Subtotal</span><span className="tabular-nums">{formatCurrency(liveTotals.subtotal)}</span></div>
+{!!order.durationFee && (
+<div className="flex justify-between"><span className="text-body">Multi-Day Fee{order.durationLabel ? (' (' + order.durationLabel + ')') : ''}</span><span className="tabular-nums">{formatCurrency(order.durationFee || 0)}</span></div>
+)}
+{!!order.specialRequestFee && (
+<div className="flex justify-between"><span className="text-body">Special Requests</span><span className="tabular-nums">{formatCurrency(order.specialRequestFee || 0)}</span></div>
+)}
+{!!order.couponCode && (
+<div className="flex justify-between text-green-700"><span>Coupon ({order.couponCode})</span><span className="tabular-nums">-{formatCurrency(order.couponDiscount || 0)}</span></div>
+)}
+{parseFloat(generalDiscount) > 0 && (
+<div className="flex justify-between text-green-700"><span>General Discount</span><span className="tabular-nums">-{formatCurrency(parseFloat(generalDiscount) || 0)}</span></div>
+)}
+{(!!order.damageWaiver || (order.damageWaiverFee ?? 0) > 0 || overrideDamageWaiverFee !== '') && (
+<div className="flex justify-between"><span className="text-body">Damage Waiver{overrideDamageWaiverFee !== '' ? ' (override)' : ''}</span><span className="tabular-nums">{formatCurrency(liveTotals.damageWaiverFee || 0)}</span></div>
+)}
+{order.deliveryType === 'delivery' && (
+<div className="flex justify-between"><span className="text-body">Travel Fee{overrideTravelFee !== '' ? ' (override)' : ''}</span><span className="tabular-nums">{formatCurrency(liveTotals.deliveryFee || 0)}</span></div>
+)}
+{parseFloat(miscellaneousFees) > 0 && (
+<div className="flex justify-between"><span className="text-body">Miscellaneous Fees</span><span className="tabular-nums">{formatCurrency(parseFloat(miscellaneousFees) || 0)}</span></div>
+)}
+<div className="flex justify-between"><span className="text-body">Sales Tax{order.taxRate ? (' (' + order.taxRate + '%)') : ''}{overrideTaxAmount !== '' ? ' (override)' : ''}</span><span className="tabular-nums">{formatCurrency(liveTotals.taxAmount)}</span></div>
+<div className="flex justify-between font-bold border-t border-gray-200 pt-1.5 mt-1.5"><span>Total</span><span className="tabular-nums">{formatCurrency(liveTotals.totalAmount)}</span></div>
+<div className="flex justify-between"><span className="text-body">Paid</span><span className="tabular-nums">{formatCurrency(order.amountPaid)}</span></div>
+<div className={'flex justify-between font-bold ' + (liveTotals.balanceDue > 0 ? 'text-amber-600' : 'text-green-700')}>
+<span>Balance</span><span className="tabular-nums">{formatCurrency(liveTotals.balanceDue)}</span>
+</div>
+</div>
+<div className={'mt-3 text-center text-xs font-semibold rounded py-1.5 ' + (liveTotals.balanceDue > 0 ? 'bg-amber-50 text-amber-700' : 'bg-green-50 text-green-700')}>
+{liveTotals.balanceDue > 0 ? formatCurrency(liveTotals.balanceDue) + ' Due' : 'PAID IN FULL'}
+</div>
+</Section>
+
+<Section title="Schedule Eligibility">
+<div className={'flex items-center gap-2 text-sm font-semibold ' + (onSchedule ? 'text-green-700' : 'text-body')}>
+<span>{onSchedule ? '✓' : '—'}</span>
+<span>{onSchedule ? 'On Schedule' : 'Not on Schedule'}</span>
+</div>
+<p className="text-xs text-body mt-1">{scheduleReason}</p>
+{noPaymentYet && (
+<div className="mt-3 no-print">
+<label className="flex items-center gap-2 text-xs text-body">
+<input type="checkbox" checked={scheduleApprovedUnpaid} onChange={(e) => setScheduleApprovedUnpaid(e.target.checked)} />
+Approve this unpaid order to appear on the schedule
+</label>
+<button onClick={saveOrder} type="button" className="btn-outline text-xs mt-2">Save</button>
+</div>
+)}
+</Section>
+</div>
+</div>
+
+{contactsOpen && (
+<>
+<div className="fixed inset-0 bg-black/40 z-40 no-print" onClick={() => { setContactsOpen(false); setContactFormOpen(false); resetContactForm() }} />
+<div className="fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-white shadow-xl overflow-y-auto no-print">
+<div className="p-5">
+<div className="flex items-center justify-between mb-4">
+<h2 className="text-lg font-semibold text-dark">Manage Contacts</h2>
+<button onClick={() => { setContactsOpen(false); setContactFormOpen(false); resetContactForm() }} type="button" className="text-body hover:text-dark">Close</button>
+</div>
+
+<div className="mb-4 pb-4 border-b border-gray-100">
+<p className="text-xs font-semibold uppercase tracking-wide text-body mb-2">Customer Profile</p>
+<p className="text-sm font-medium text-dark">{order.customer.firstName} {order.customer.lastName} (Primary)</p>
+<p className="text-sm text-body">{order.customer.email}</p>
+{order.customer.phone && <p className="text-sm text-body">{formatPhoneDisplay(order.customer.phone)}</p>}
+</div>
+
+<div className="mb-4 pb-4 border-b border-gray-100">
+<p className="text-xs font-semibold uppercase tracking-wide text-body mb-2">This Order Only</p>
+{orderContacts.length === 0 && <p className="text-sm text-body">No additional contacts on this order.</p>}
+<div className="space-y-3">
+{orderContacts.map((c) => (
+<div key={c.id} className="border border-gray-200 rounded-lg p-3">
+<div className="flex items-center justify-between">
+<p className="text-sm font-medium text-dark">{c.name}</p>
+<span className="text-xs text-body">{c.role}</span>
+</div>
+{c.phone && <p className="text-xs text-body mt-0.5">{formatPhoneDisplay(c.phone)}</p>}
+{c.email && <p className="text-xs text-body mt-0.5">{c.email}</p>}
+{c.note && <p className="text-xs text-body italic mt-1">{c.note}</p>}
+<div className="flex gap-3 mt-2">
+<button onClick={() => startEditContact(c)} type="button" className="text-secondary text-xs font-medium hover:underline">Edit</button>
+<button onClick={() => removeContact(c.id)} type="button" className="text-red-600 text-xs font-medium hover:underline">Remove</button>
+</div>
+</div>
+))}
+</div>
+</div>
+
+{!contactFormOpen ? (
+<button onClick={() => { resetContactForm(); setContactFormOpen(true) }} type="button" className="btn-outline text-sm w-full">+ Add Contact</button>
+) : (
+<div className="border border-gray-200 rounded-lg p-3 space-y-3">
+<p className="text-sm font-medium">{contactEditingId ? 'Edit Contact' : 'Add Contact'} (this order only)</p>
+<div>
+<label className="block text-xs text-body mb-1">Name</label>
+<input type="text" value={contactName} onChange={(e) => setContactName(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" />
+</div>
+<div>
+<label className="block text-xs text-body mb-1">Role</label>
+<select value={contactRole} onChange={(e) => setContactRole(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm">
+<option value="Day-Of">Day-Of Contact</option>
+<option value="Secondary">Secondary Contact</option>
+<option value="Billing">Billing Contact</option>
+<option value="Delivery">Delivery Contact</option>
+<option value="Other">Other</option>
+</select>
+</div>
+<div>
+<label className="block text-xs text-body mb-1">Phone</label>
+<input type="text" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" />
+</div>
+<div>
+<label className="block text-xs text-body mb-1">Email</label>
+<input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" />
+</div>
+<div>
+<label className="block text-xs text-body mb-1">Note (optional)</label>
+<input type="text" placeholder="e.g. Call when truck is 20 minutes away" value={contactNote} onChange={(e) => setContactNote(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" />
+</div>
+<div className="flex gap-2">
+<button onClick={saveContact} disabled={savingContact} type="button" className="btn-admin text-sm">{savingContact ? 'Saving...' : 'Save Contact'}</button>
+<button onClick={() => { setContactFormOpen(false); resetContactForm() }} type="button" className="btn-outline text-sm">Cancel</button>
+</div>
+</div>
+)}
+</div>
+</div>
+</>
+)}
+
+{receiptRecipientsOpen && (
+<>
+<div className="fixed inset-0 bg-black/40 z-40 no-print" onClick={() => setReceiptRecipientsOpen(false)} />
+<div className="fixed inset-0 z-50 flex items-center justify-center p-4 no-print">
+<div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-5">
+<h2 className="text-lg font-semibold text-dark mb-3">Send Updated Receipt</h2>
+<p className="text-xs text-body mb-3">Choose who should receive this receipt.</p>
+<div className="space-y-2 mb-4">
+{receiptRecipients.map((r, idx) => (
+<label key={idx} className="flex items-center gap-2 text-sm">
+<input type="checkbox" checked={r.checked} onChange={(e) => setReceiptRecipients((prev) => prev.map((x, i) => i === idx ? { ...x, checked: e.target.checked } : x))} />
+<span>{r.label} - {r.email}</span>
+</label>
+))}
+</div>
+<div className="flex gap-2">
+<button onClick={sendReceiptToSelectedRecipients} disabled={sendingQuote} type="button" className="btn-admin text-sm">{sendingQuote ? 'Sending...' : 'Send Receipt'}</button>
+<button onClick={() => setReceiptRecipientsOpen(false)} type="button" className="btn-outline text-sm">Cancel</button>
+</div>
+</div>
+</div>
+</>
+)}
 </div>
 )
 }

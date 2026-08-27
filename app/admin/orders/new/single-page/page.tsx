@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { findPoleTentSurfaceIssue } from '@/lib/tentSurfaceRules'
 
 interface CatalogItem {
   id: string
@@ -347,6 +348,10 @@ function NewOrderPageInner() {
     }
     if (hasBounceHouse && !agreeElectricity) {
       toast.error('The electrical requirement for inflatable equipment must be acknowledged')
+      return
+    }
+    const poleIssue = findPoleTentSurfaceIssue(items, form.setupSurface)
+    if (poleIssue && !window.confirm(poleIssue + '\n\nCreate order anyway?')) {
       return
     }
     setSubmitting(true)

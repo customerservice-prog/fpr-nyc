@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Call thank you endpoint
-        run: curl -f -X GET https://www.friendlypartyrental.com/api/cron/thank-you
+        run: curl -f -X GET https://friendlypartyrentalsc.com/api/cron/thank-you

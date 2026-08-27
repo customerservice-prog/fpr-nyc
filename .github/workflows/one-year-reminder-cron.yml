@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Call one year reminder endpoint
-        run: curl -f -X GET https://www.friendlypartyrental.com/api/cron/one-year-reminder
+        run: curl -f -X GET https://friendlypartyrentalsc.com/api/cron/one-year-reminder

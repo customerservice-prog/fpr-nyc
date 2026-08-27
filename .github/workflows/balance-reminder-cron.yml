@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Call balance reminder endpoint
-        run: curl -f -X GET https://www.friendlypartyrental.com/api/cron/balance-reminder
+        run: curl -f -X GET https://friendlypartyrentalsc.com/api/cron/balance-reminder

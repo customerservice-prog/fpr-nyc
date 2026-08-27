@@ -160,6 +160,7 @@ model Order {
   incompleteFollowUpSentAt DateTime?
   incompleteFollowUp3SentAt DateTime?
   incompleteFollowUp7SentAt DateTime?
+  followUpsPaused Boolean @default(false)
   lastMinuteFeeAmount Float @default(0)
   driverId String?
   driver Driver? @relation("DeliveryDriver", fields: [driverId], references: [id])
@@ -181,6 +182,7 @@ model Order {
   updatedAt DateTime @updatedAt
   items OrderItem[]
   payments Payment[]
+  contacts OrderContact[]
   deliveredAt DateTime?
   pickedUpAt DateTime?
   deliveryPhoto String?
@@ -191,6 +193,11 @@ model Order {
   preRentalReminderSentAt DateTime?
   thankYouSentAt DateTime?
   oneYearReminderSentAt DateTime?
+
+  // Staff must explicitly approve an order with $0.00 recorded (amountPaid = 0)
+  // before it appears on the admin schedule/calendar. Existing orders were
+  // backfilled to true; new orders default to false until paid or approved.
+  scheduleApprovedUnpaid Boolean @default(false)
 }
 
 model OrderItem {
@@ -791,5 +798,19 @@ model PageCustomCode {
   id String @id @default(cuid())
   slug String @unique
   code String
+  updatedAt DateTime @updatedAt
+}
+
+
+model OrderContact {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  name      String
+  role      String   @default("Other")
+  phone     String?
+  email     String?
+  note      String?
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

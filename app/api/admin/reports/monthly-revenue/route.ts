@@ -20,7 +20,7 @@ export async function GET() {
     const monthEnd = endOfMonth(date)
 
     const result = await prisma.payment.aggregate({
-      where: { createdAt: { gte: monthStart, lte: monthEnd } },
+      where: { createdAt: { gte: monthStart, lte: monthEnd }, OR: [{ recordedByName: null }, { NOT: { recordedByName: { contains: 'historical backfill', mode: 'insensitive' } } }] },
       _sum: { amount: true },
     })
 

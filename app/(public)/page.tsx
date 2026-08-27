@@ -19,14 +19,17 @@ export default async function HomePage() {
     theme = null
   }
     let categoryPictures: Record<string, string> = {}
-    try {
-    const dbCategories = await prisma.category.findMany({ select: { slug: true, picture: true, updatedAt: true } })
-          categoryPictures = Object.fromEntries(
-                          dbCategories.filter((c) => c.picture).map((c) => [c.slug, `/api/category-image/${c.slug}?v=${c.updatedAt ? new Date(c.updatedAt).toISOString() : IMAGE_CACHE_BUST}`])
-                )
-    } catch {
-          categoryPictures = {}
-    }
+  let extraCategories: (typeof PUBLIC_CATEGORIES)[number][] = []
+  try {
+    const dbCategories = await prisma.category.findMany({ select: { slug: true, name: true, picture: true, updatedAt: true, displayToCustomer: true, sortOrder: true } })
+    categoryPictures = Object.fromEntries(
+      dbCategories.filter((c) => c.picture).map((c) => [c.slug, `/api/category-image/${c.slug}?v=${c.updatedAt ? new Date(c.updatedAt).toISOString() : IMAGE_CACHE_BUST}`])
+      )
+    const knownSlugs = new Set(PUBLIC_CATEGORIES.map((c) => c.slug))
+    extraCategories = dbCategories.filter((c) => c.displayToCustomer && !knownSlugs.has(c.slug)).sort((a, b) => a.sortOrder - b.sortOrder).map((c) => ({ id: c.slug, name: c.name, slug: c.slug, href: `/category/${c.slug}`, image: categoryPictures[c.slug] || '/images/order-by-date.png', count: 0 }))
+  } catch {
+    categoryPictures = {}
+  }
   const packagesRaw = await getSyncedWeddingPackages()
         const packages = packagesRaw.map((p) => ({ ...p, items: Array.isArray(p.items) ? (p.items as string[]) : [], image: p.image || undefined })); let popularItems: any[] = []; try { popularItems = await prisma.item.findMany({ where: { displayToCustomer: true, status: 'Available' }, orderBy: { sortOrder: 'asc' }, take: 10, select: { id: true, name: true, specialDisplayName: true, slug: true, cost: true, picture: true, category: { select: { name: true } } } }) } catch { popularItems = [] }; const mobileCategorySlugs = ['tent-rentals','bounce-house-rentals','table-chair-rentals','weddings','linen-rentals','dance-floor-stage-rentals','photobooth-rentals','concession-machine-rentals','yard-game-rentals','event-lighting-rentals','generator-rentals','heater-fan-rentals','party-rental-packages','beverage-food-service','foam-party-machine-rentals','inflatable-movie-screen-rentals','party-rental-accessories']; const mobileCategories = mobileCategorySlugs.map((slug) => PUBLIC_CATEGORIES.find((c) => c.slug === slug)).filter((c): c is (typeof PUBLIC_CATEGORIES)[number] => Boolean(c)).map((c) => ({ slug: c.slug, name: c.slug === 'bounce-house-rentals' ? 'Bounce Houses & Water Slides' : c.name.replace(' — Greenville, SC', ''), href: c.href, image: categoryPictures[c.slug] || c.image }))
   return (
@@ -129,7 +132,7 @@ className="w-full h-full"
       >
         <h2 className="text-2xl font-bold text-dark mb-8 text-center">Browse Our Rentals</h2>
         <div className={"grid grid-cols-2 md:grid-cols-3 " + (theme?.categoryDisplayStyle === 'minimal-no-gutter' ? 'gap-0' : 'gap-4')}>
-          {PUBLIC_CATEGORIES.slice(0, theme?.categoryCarouselCount || PUBLIC_CATEGORIES.length).map((cat) => (
+          {[...PUBLIC_CATEGORIES.slice(0, theme?.categoryCarouselCount || PUBLIC_CATEGORIES.length), ...extraCategories].map((cat) => (
             <CategoryCard key={cat.slug} name={cat.name} href={cat.href} image={categoryPictures[cat.slug] || cat.image} displayStyle={theme?.categoryDisplayStyle} />
           ))}
         </div>

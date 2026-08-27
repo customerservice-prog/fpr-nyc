@@ -50,6 +50,9 @@ background: white;
 .badge-incomplete {
 @apply bg-gray-200 text-gray-700;
 }
+.badge-completed {
+@apply bg-blue-100 text-blue-800;
+}
 .category-card {
 @apply border-2 border-primary rounded-lg overflow-hidden hover:shadow-lg transition-shadow;
 }

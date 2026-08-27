@@ -1,0 +1,13 @@
+name: Check Email Replies
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  call-endpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call check replies endpoint
+        run: curl -f -X GET https://friendlypartyrentalsc.com/api/cron/check-replies

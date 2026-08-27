@@ -43,49 +43,49 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const now = new Date()
+const [stage0Setting, stage3Setting, stage7Setting] = await Promise.all([prisma.automaticMessage.findFirst({ where: { id: 'cmrcnccto0002uabltdx1eakk' } }), prisma.automaticMessage.findFirst({ where: { id: 'cmrcnccwv0003uablnwo23fgq' } }), prisma.automaticMessage.findFirst({ where: { id: 'cmrcncd030004uable6fvbdep' } })]); const stage0Enabled = stage0Setting?.enabled !== false; const stage3Enabled = stage3Setting?.enabled !== false; const stage7Enabled = stage7Setting?.enabled !== false; const now = new Date()
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000)
     const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
 
-    const results = { stage0: 0, stage3: 0, stage7: 0 }
+const results = { stage0: 0, stage3: 0, stage7: 0 }
 
-    const stage0Orders = await prisma.order.findMany({
-        where: {
-            status: 'quote',
-            amountPaid: 0, source: { not: 'admin' },
-            createdAt: { lte: oneHourAgo },
-            incompleteFollowUpSentAt: null,
-        },
-        include: { customer: true },
-    })
-    for (const order of stage0Orders) {
+const stage0Orders = await prisma.order.findMany({
+    where: {
+        status: 'quote',
+        amountPaid: 0, source: { not: 'admin' },
+        createdAt: { lte: oneHourAgo },
+        incompleteFollowUpSentAt: null, followUpsPaused: false,
+    },
+    include: { customer: true },
+})
+    for (const order of (stage0Enabled ? stage0Orders : [])) {
         if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
         const email = buildEmail(0, order.customer?.firstName || '', order.id)
         if (order.customer?.email) {
             await sendEmail({ to: order.customer.email, subject: email.subject, html: email.html })
         }
-            if (order.customer && order.source !== 'admin') {
-                                await sendEmail({
-                                                        to: BUSINESS.email,
-                                                        subject: 'Abandoned online order - ' + (order.customer.firstName || 'Unknown') + ' ' + (order.customer.lastName || ''),
-                                                        html: '<p>A customer started an order online but did not finish checking out.</p><p>Customer: ' + order.customer.firstName + ' ' + order.customer.lastName + '<br/>Email: ' + (order.customer.email || 'N/A') + '<br/>Phone: ' + (order.customer.phone || 'N/A') + '</p><p><a href="' + SITE_URL + '/admin/orders/' + order.id + '">View this order in the admin panel</a></p>',
-                                })
-            }
+        if (order.customer && order.source !== 'admin') {
+            await sendEmail({
+                to: BUSINESS.email,
+                subject: 'Abandoned online order - ' + (order.customer.firstName || 'Unknown') + ' ' + (order.customer.lastName || ''),
+                html: '<p>A customer started an order online but did not finish checking out.</p><p>Customer: ' + order.customer.firstName + ' ' + order.customer.lastName + '<br/>Email: ' + (order.customer.email || 'N/A') + '<br/>Phone: ' + (order.customer.phone || 'N/A') + '</p><p><a href="' + SITE_URL + '/admin/orders/' + order.id + '">View this order in the admin panel</a></p>',
+            })
+        }
         await prisma.order.update({ where: { id: order.id }, data: { incompleteFollowUpSentAt: now } })
         results.stage0++
     }
 
-    const stage3Orders = await prisma.order.findMany({
-        where: {
-            status: 'quote',            amountPaid: 0, source: { not: 'admin' },
-            createdAt: { lte: threeDaysAgo },
-            incompleteFollowUp3SentAt: null,
-        },
-        include: { customer: true },
-    })
-        for (const order of stage3Orders) {
-            if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
+const stage3Orders = await prisma.order.findMany({
+    where: {
+        status: 'quote', amountPaid: 0, source: { not: 'admin' },
+        createdAt: { lte: threeDaysAgo },
+        incompleteFollowUp3SentAt: null, followUpsPaused: false,
+    },
+    include: { customer: true },
+})
+    for (const order of (stage3Enabled ? stage3Orders : [])) {
+        if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
         const email = buildEmail(3, order.customer?.firstName || '', order.id)
         if (order.customer?.email) {
             await sendEmail({ to: order.customer.email, subject: email.subject, html: email.html })
@@ -94,16 +94,16 @@ export async function GET(request: NextRequest) {
         results.stage3++
     }
 
-    const stage7Orders = await prisma.order.findMany({
-        where: {
-            status: 'quote',
-            amountPaid: 0, source: { not: 'admin' },
-            createdAt: { lte: sevenDaysAgo },
-            incompleteFollowUp7SentAt: null,
-        },
-        include: { customer: true },
-    })
-    for (const order of stage7Orders) {
+const stage7Orders = await prisma.order.findMany({
+    where: {
+        status: 'quote',
+        amountPaid: 0, source: { not: 'admin' },
+        createdAt: { lte: sevenDaysAgo },
+        incompleteFollowUp7SentAt: null, followUpsPaused: false,
+    },
+    include: { customer: true },
+})
+    for (const order of (stage7Enabled ? stage7Orders : [])) {
         if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
         const email = buildEmail(7, order.customer?.firstName || '', order.id)
         if (order.customer?.email) {
@@ -113,5 +113,5 @@ export async function GET(request: NextRequest) {
         results.stage7++
     }
 
-    return NextResponse.json({ ok: true, ...results })
+return NextResponse.json({ ok: true, ...results })
 }

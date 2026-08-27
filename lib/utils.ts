@@ -126,7 +126,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'bounce-house-rentals',
         href: '/category/bounce-house-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Mar-10--2026--04_18_04-PM.png',
-        count: 12,
+        count: 15,
   },
   {
         id: 'tent-rentals',
@@ -134,7 +134,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'tent-rentals',
         href: '/category/tent-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_38_16-AM.png',
-        count: 6,
+        count: 22,
   },
   {
         id: 'table-chair-rentals',
@@ -142,7 +142,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'table-chair-rentals',
         href: '/category/table-chair-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_38_40-AM.png',
-        count: 15,
+        count: 14,
   },
   {
         id: 'concession-machine-rentals',
@@ -150,7 +150,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'concession-machine-rentals',
         href: '/category/concession-machine-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_42_03-AM.png',
-        count: 9,
+        count: 17,
   },
   {
         id: 'generator-rentals',
@@ -158,7 +158,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'generator-rentals',
         href: '/category/generator-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_40_58-AM.png',
-        count: 4,
+        count: 3,
   },
   {
         id: 'yard-game-rentals',
@@ -166,7 +166,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'yard-game-rentals',
         href: '/category/yard-game-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_37_29-AM.png',
-        count: 5,
+        count: 9,
   },
   {
         id: 'photobooth-rentals',
@@ -174,7 +174,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'photobooth-rentals',
         href: '/category/photobooth-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_39_03-AM.png',
-        count: 3,
+        count: 5,
   },
   {
         id: 'foam-party-machine-rentals',
@@ -182,7 +182,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'foam-party-machine-rentals',
         href: '/category/foam-party-machine-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_48_33-AM.png',
-        count: 2,
+        count: 1,
   },
   {
         id: 'event-lighting-rentals',
@@ -190,7 +190,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'event-lighting-rentals',
         href: '/category/event-lighting-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_40_24-AM.png',
-        count: 4,
+        count: 17,
   },
   {
         id: 'linen-rentals',
@@ -198,7 +198,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'linen-rentals',
         href: '/category/linen-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_40_05-AM.png',
-        count: 6,
+        count: 36,
   },
   {
         id: 'dance-floor-stage-rentals',
@@ -206,7 +206,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'dance-floor-stage-rentals',
         href: '/category/dance-floor-stage-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_41_14-AM.png',
-        count: 3,
+        count: 6,
   },
   {
         id: 'heater-fan-rentals',
@@ -214,7 +214,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'heater-fan-rentals',
         href: '/category/heater-fan-rentals',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_47_00-AM.png',
-        count: 4,
+        count: 8,
   },
   {
         id: 'inflatable-movie-screen-rentals',
@@ -230,7 +230,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'beverage-food-service',
         href: '/category/beverage-food-service',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_44_30-AM.png',
-        count: 5,
+        count: 46,
   },
   {
         id: 'party-rental-packages',
@@ -238,7 +238,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'party-rental-packages',
         href: '/category/party-rental-packages',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_39_22-AM.png',
-        count: 6,
+        count: 13,
   },
   {
         id: 'weddings',
@@ -246,7 +246,7 @@ export const PUBLIC_CATEGORIES = [
         slug: 'weddings',
         href: '/category/weddings',
         image: 'https://315.ourers.com/cp/upload/315/categories/victoria-grady_r-tagg-2546-2.jpg',
-        count: 6,
+        count: 23,
   },
   {
         id: 'party-rental-accessories',
@@ -254,7 +254,15 @@ export const PUBLIC_CATEGORIES = [
         slug: 'party-rental-accessories',
         href: '/category/party-rental-accessories',
         image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Jun-9--2026--05_10_38-AM.png',
-        count: 8,
+        count: 6,
+  },
+  {
+    id: 'restroom-rentals',
+    name: 'Restroom Rentals — Greenville, SC',
+    slug: 'restroom-rentals',
+    href: '/category/restroom-rentals',
+    image: 'https://www.friendlypartyrental.com/api/uploads/1ffb3758-6dd6-421a-a5c3-5214648b5d4e.jpg',
+    count: 2,
   },
   ]
 

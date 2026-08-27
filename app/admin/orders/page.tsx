@@ -21,19 +21,22 @@ const [statusFilter, setStatusFilter] = useState('')
 const [search, setSearch] = useState('')
 
 useEffect(() => {
+    let cancelled = false
 const params = new URLSearchParams()
 if (statusFilter) params.set('status', statusFilter)
 if (search) params.set('search', search)
 fetch('/api/admin/orders?' + params)
 .then((r) => r.json())
-.then((d) => setOrders(d.orders || []))
+.then((d) => { if (!cancelled) setOrders(d.orders || []) })
 .catch(() => {})
-}, [statusFilter, search])
+return () => { cancelled = true }
+  }, [statusFilter, search])
 
 const statusBadgeClass = (status: string) => {
 if (status === 'active') return 'badge badge-active'
 if (status === 'quote') return 'badge badge-quote'
 if (status === 'canceled') return 'badge badge-canceled'
+if (status === 'completed') return 'badge badge-completed'
 return 'badge badge-incomplete'
 }
 
@@ -57,6 +60,7 @@ className="border border-gray-300 rounded px-3 py-2 text-sm"
 <option value="incomplete">Incomplete</option>
 <option value="quote">Quote</option>
 <option value="canceled">Canceled</option>
+<option value="completed">Completed</option>
 </select>
 </div>
 <div className="flex-1 min-w-[200px]">

@@ -2,10 +2,10 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
 
-// Warehouse location: 330 Costello Pkwy, Minoa, NY 13116
-const WAREHOUSE_ZIP = '13116'
-const WAREHOUSE_LAT = 43.0772
-const WAREHOUSE_LON = -76.0098
+// Warehouse location: Greenville, SC 29601 (placeholder - update with exact address)
+const WAREHOUSE_ZIP = '29601'
+const WAREHOUSE_LAT = 34.8472
+const WAREHOUSE_LON = -82.406
 
 const MAX_SERVICE_DISTANCE_MILES = 100
 

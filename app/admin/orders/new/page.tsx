@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { findPoleTentSurfaceIssue } from '@/lib/tentSurfaceRules'
+import { findPoleTentSurfaceIssue, findFrameTentSurfaceIssue } from '@/lib/tentSurfaceRules'
 
 interface CatalogItem {
   id: string
@@ -359,7 +359,7 @@ function NewOrderPageInner() {
       toast.error('The electrical requirement for inflatable equipment must be acknowledged')
       return
     }
-    const poleIssue = findPoleTentSurfaceIssue(items, form.setupSurface)
+    const poleIssue = findPoleTentSurfaceIssue(items, form.setupSurface); const frameIssue = findFrameTentSurfaceIssue(items, form.setupSurface); if (frameIssue && !window.confirm(frameIssue + ' Create order anyway?')) { return }
     if (poleIssue && !window.confirm(poleIssue + '\n\nCreate order anyway?')) {
       return
     }

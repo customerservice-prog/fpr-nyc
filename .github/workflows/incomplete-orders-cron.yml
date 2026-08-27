@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Call incomplete orders endpoint
-        run: curl -f -X GET https://www.friendlypartyrental.com/api/cron/incomplete-orders
+        run: curl -f -X GET https://friendlypartyrentalsc.com/api/cron/incomplete-orders

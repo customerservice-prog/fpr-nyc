@@ -71,14 +71,14 @@ export async function POST(request: NextRequest) {
               }
       }
 
-      let customer = await prisma.customer.findFirst({ where: { email } })
+              const normalizedEmail = String(email).trim().toLowerCase(); const normalizedPhone = phone ? String(phone).trim() : null; let customer = await prisma.customer.findFirst({ where: { OR: [{ email: { equals: normalizedEmail, mode: 'insensitive' } }, ...(normalizedPhone ? [{ phone: normalizedPhone }] : [])] } })
           if (!customer) {
                   customer = await prisma.customer.create({
                             data: {
                                         firstName,
                                         lastName,
-                                        email,
-                                        phone: phone || null,
+                                        email: normalizedEmail,
+                                        phone: normalizedPhone,
                                         address: eventAddress || null,
                                         city: eventCity || null,
                                         state: eventState || 'NY',

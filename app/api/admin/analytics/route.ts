@@ -5,22 +5,52 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { GA_MEASUREMENT_ID } from '@/lib/gtag'
+import {
+  calculateGrossBookedRevenue,
+  calculateNetBookedRevenue,
+  calculateCollectedRevenue,
+  calculateOutstandingBalance,
+  calculateRefunds,
+  calculateOrderCounts,
+  calculateAverageOrderValue,
+  calculateCustomerCount,
+  rankItemsByUnits,
+  rankItemsByRevenue,
+  calculateRevenueTrend,
+  topCities,
+  topStates,
+  calculateDeliveryMix,
+  calculateTopCustomers,
+  filterLegitimateOrders,
+  calculateUpcomingBusiness,
+  calculateNeedsAttention,
+  calculateBusinessInsights,
+  calculateBookingLeadTime,
+  calculateCustomerSegments,
+  calculateInventoryUtilization,
+} from '@/lib/analytics/calculations'
 
-// Analytics dashboard data. All figures below are derived from first-party
-// order/customer data stored in our own database. Website visitor traffic
-// (sessions, page views, visitor geography, acquisition sources) and search
-// ranking data live in Google Analytics / Google Search Console and are only
-// available once server-side Google API credentials are configured. We expose
-// the connection status so the UI can show real numbers when connected and a
-// clear "connect" state when not.
+// Analytics dashboard data. All business figures below (revenue, orders,
+// customers, items, rankings, geography, delivery mix) are derived from
+// first-party order/payment/customer data using the centralized calculation
+// functions in lib/analytics/calculations.ts -- add a new function to the
+// calculations module instead so the same metric always means the same
+// thing everywhere in the admin.
+//
+// Website visitor traffic (sessions, page views, visitor geography,
+// acquisition sources) and search ranking data live in Google Analytics /
+// Google Search Console and are only available once server-side Google API
+// credentials are configured. We expose the connection status so the UI can
+// show real numbers when connected and a clear "connect" state when not.
+//
+// The optional ?range= query param (days, or omitted for all-time) narrows
+// the historical totals/rankings/geography/customer figures to orders
+// booked (createdAt) within that window. Forward-looking figures (upcoming
+// business, needs attention, insights) and the fixed 12-month trend are
+// unaffected by this filter, since they answer a different question than
+// "totals for the selected historical window".
 
-type MonthBucket = { month: string; revenue: number; orders: number }
-
-function monthKey(d: Date) {
-  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
-}
-
-export async function GET() {
+export async function GET(request: Request) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if ((session.user as { role?: string }).role !== 'admin') {
@@ -28,15 +58,20 @@ export async function GET() {
   }
 
   const now = new Date()
-  const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1)
+  const { searchParams } = new URL(request.url)
+  const rangeParam = searchParams.get('range')
+  const rangeDays = rangeParam && rangeParam !== 'all' ? Number(rangeParam) : null
+  const rangeStart = rangeDays && !Number.isNaN(rangeDays) ? new Date(now.getTime() - rangeDays * 24 * 60 * 60 * 1000) : null
 
-  const [orders, orderItems, totalCustomers, totalItems] = await Promise.all([
+  const [allOrders, allOrderItems, allPayments, customers, items, totalItemsCount, activeItemsCount] = await Promise.all([
     prisma.order.findMany({
       select: {
         id: true,
+        status: true,
         totalAmount: true,
         amountPaid: true,
-        eventCity: true,
+        balanceDue: true,
+        eventCity: true, eventEndDate: true,
         eventState: true,
         deliveryType: true,
         createdAt: true,
@@ -45,106 +80,57 @@ export async function GET() {
       },
     }),
     prisma.orderItem.findMany({
-      select: { itemName: true, quantity: true, total: true },
+      select: { orderId: true, itemName: true, quantity: true, total: true, itemId: true },
     }),
-    prisma.customer.count(),
+    prisma.payment.findMany({
+      select: { id: true, orderId: true, amount: true, status: true, createdAt: true, recordedByName: true },
+    }),
+    prisma.customer.findMany({
+      select: { id: true, firstName: true, lastName: true, email: true, city: true, state: true },
+    }),
+    prisma.item.findMany({ select: { id: true, name: true, quantity: true } }),
     prisma.item.count(),
+    prisma.item.count({ where: { displayToCustomer: true } }),
   ])
 
-  const totalOrders = orders.length
-  const totalRevenue = orders.reduce((s, o) => s + (o.totalAmount || 0), 0)
-  const totalCollected = orders.reduce((s, o) => s + (o.amountPaid || 0), 0)
-  const averageOrderValue = totalOrders ? totalRevenue / totalOrders : 0
+  // Orders/payments restricted to the selected historical range for KPI
+  // cards, rankings, geography and customer figures. Forward-looking data
+  // (upcoming business, needs-attention, insights) always uses the full
+  // unfiltered order set below, since "outstanding balance right now" and
+  // "what's booked next month" are not meant to be scoped to a historical
+  // booking-date window.
+  const orders = rangeStart ? allOrders.filter((o) => new Date(o.createdAt) >= rangeStart) : allOrders
+  const orderIdsInRange = new Set(orders.map((o) => o.id))
+  const orderItems = rangeStart ? allOrderItems.filter((oi) => orderIdsInRange.has(oi.orderId)) : allOrderItems
+  const payments = rangeStart ? allPayments.filter((p) => orderIdsInRange.has(p.orderId)) : allPayments
 
-  // Item rankings: by units rented and by revenue
-  const itemStats = new Map<string, { units: number; revenue: number; orders: number }>()
-  for (const oi of orderItems) {
-    const name = oi.itemName || 'Unknown'
-    const cur = itemStats.get(name) || { units: 0, revenue: 0, orders: 0 }
-    cur.units += oi.quantity || 0
-    cur.revenue += oi.total || 0
-    cur.orders += 1
-    itemStats.set(name, cur)
-  }
-  const rankedByUnits = Array.from(itemStats.entries())
-    .map(([name, s]) => ({ name, ...s }))
-    .sort((a, b) => b.units - a.units)
-    .slice(0, 15)
-  const rankedByRevenue = Array.from(itemStats.entries())
-    .map(([name, s]) => ({ name, ...s }))
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 15)
+  const orderCounts = calculateOrderCounts(orders)
+  const grossBookedRevenue = calculateGrossBookedRevenue(orders)
+  const netBookedRevenue = calculateNetBookedRevenue(orders, payments)
+  const totalCollected = calculateCollectedRevenue(orders, payments)
+  const outstandingBalance = calculateOutstandingBalance(allOrders)
+  const legitimateOrderIds = new Set(filterLegitimateOrders(orders).map((o) => o.id))
+  const totalRefunds = calculateRefunds(payments, legitimateOrderIds)
+  const averageOrderValue = calculateAverageOrderValue(orders, payments)
+  const totalCustomers = calculateCustomerCount(orders, customers)
+  const customerSegments = calculateCustomerSegments(orders, customers)
+  const bookingLeadTime = calculateBookingLeadTime(orders)
 
-  // Revenue + order trend by month (last 12 months)
-  const monthMap = new Map<string, MonthBucket>()
-  for (let i = 0; i < 12; i++) {
-    const d = new Date(twelveMonthsAgo.getFullYear(), twelveMonthsAgo.getMonth() + i, 1)
-    monthMap.set(monthKey(d), { month: monthKey(d), revenue: 0, orders: 0 })
-  }
-  for (const o of orders) {
-    const k = monthKey(new Date(o.createdAt))
-    const bucket = monthMap.get(k)
-    if (bucket) {
-      bucket.revenue += o.totalAmount || 0
-      bucket.orders += 1
-    }
-  }
-  const revenueTrend = Array.from(monthMap.values())
+  const rankedByUnits = rankItemsByUnits(orders, orderItems)
+  const rankedByRevenue = rankItemsByRevenue(orders, orderItems)
+  const revenueTrend = calculateRevenueTrend(allOrders, 12, 'createdAt')
+  const cities = topCities(orders)
+  const states = topStates(orders)
+  const deliveryMix = calculateDeliveryMix(orders)
+  const topCustomersList = calculateTopCustomers(orders, payments, customers)
 
-  // Geography: where bookings come from (event city / state)
-  const cityStats = new Map<string, { orders: number; revenue: number }>()
-  const stateStats = new Map<string, { orders: number; revenue: number }>()
-  for (const o of orders) {
-    const city = (o.eventCity || 'Unknown').trim() + (o.eventState ? ', ' + o.eventState.trim() : '')
-    const st = (o.eventState || 'Unknown').trim() || 'Unknown'
-    const c = cityStats.get(city) || { orders: 0, revenue: 0 }
-    c.orders += 1
-    c.revenue += o.totalAmount || 0
-    cityStats.set(city, c)
-    const s = stateStats.get(st) || { orders: 0, revenue: 0 }
-    s.orders += 1
-    s.revenue += o.totalAmount || 0
-    stateStats.set(st, s)
-  }
-  const topCities = Array.from(cityStats.entries())
-    .map(([name, s]) => ({ name, ...s }))
-    .sort((a, b) => b.orders - a.orders)
-    .slice(0, 12)
-  const topStates = Array.from(stateStats.entries())
-    .map(([name, s]) => ({ name, ...s }))
-    .sort((a, b) => b.orders - a.orders)
-    .slice(0, 8)
+  const upcomingBusiness = calculateUpcomingBusiness(allOrders, allPayments, 30, now)
+  const needsAttention = calculateNeedsAttention(allOrders, 7, now)
+  const insights = calculateBusinessInsights(allOrders, allOrderItems, 30, now)
 
-  // Delivery mix
-  const deliveryMap = new Map<string, number>()
-  for (const o of orders) {
-    const k = o.deliveryType || 'unknown'
-    deliveryMap.set(k, (deliveryMap.get(k) || 0) + 1)
-  }
-  const deliveryMix = Array.from(deliveryMap.entries()).map(([type, count]) => ({ type, count }))
-
-  // Top customers by revenue
-  const custMap = new Map<string, { orders: number; revenue: number }>()
-  for (const o of orders) {
-    if (!o.customerId) continue
-    const c = custMap.get(o.customerId) || { orders: 0, revenue: 0 }
-    c.orders += 1
-    c.revenue += o.totalAmount || 0
-    custMap.set(o.customerId, c)
-  }
-  const topCustomerIds = Array.from(custMap.entries())
-    .sort((a, b) => b[1].revenue - a[1].revenue)
-    .slice(0, 10)
-  const customerRecords = await prisma.customer.findMany({
-    where: { id: { in: topCustomerIds.map(([id]) => id) } },
-    select: { id: true, firstName: true, lastName: true },
-  })
-  const custName = new Map(customerRecords.map((c) => [c.id, (c.firstName || '') + ' ' + (c.lastName || '')]))
-  const topCustomers = topCustomerIds.map(([id, s]) => ({
-    name: (custName.get(id) || 'Customer').trim() || 'Customer',
-    orders: s.orders,
-    revenue: s.revenue,
-  }))
+  const orderMeta = new Map(allOrders.map((o) => [o.id, { status: o.status, eventDate: o.eventDate, eventEndDate: o.eventEndDate }]))
+  const itemReservations = allOrderItems.map((oi) => ({ itemId: oi.itemId, orderId: oi.orderId, quantity: oi.quantity }))
+  const inventoryUtilization = calculateInventoryUtilization(items, itemReservations, orderMeta, 14, now)
 
   // Google connection status. These become "connected" once the corresponding
   // server-side credentials are added to the environment. Until then the UI
@@ -159,21 +145,33 @@ export async function GET() {
 
   return NextResponse.json({
     generatedAt: now.toISOString(),
+    rangeDays,
     totals: {
-      totalRevenue,
+      totalRevenue: netBookedRevenue,
+      grossBookedRevenue,
       totalCollected,
-      totalOrders,
+      outstandingBalance,
+      totalRefunds,
+      totalOrders: orderCounts.legitimate,
+      orderCounts,
       totalCustomers,
-      totalItems,
+      totalItems: activeItemsCount,
+      totalCatalogRecords: totalItemsCount,
       averageOrderValue,
     },
     rankedByUnits,
     rankedByRevenue,
     revenueTrend,
-    topCities,
-    topStates,
+    topCities: cities,
+    topStates: states,
     deliveryMix,
-    topCustomers,
+    topCustomers: topCustomersList,
+    upcomingBusiness,
+    needsAttention,
+    insights,
+    bookingLeadTime,
+    customerSegments,
+    inventoryUtilization,
     google,
   })
 }

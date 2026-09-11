@@ -73,18 +73,18 @@ export default function MobileHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white border-b border-gray-200 h-[64px] flex items-center px-2">
-        <button aria-label="Open menu" onClick={() => setMenuOpen(true)} className="p-3 -ml-1">
-          <Menu size={24} />
+      <header className="sticky top-0 z-40 bg-white border-b border-gray-200 h-[96px] flex items-center px-2">
+        <button aria-label="Open menu" onClick={() => setMenuOpen(true)} className="p-3 -ml-1 flex flex-col items-center justify-center text-gray-900">
+          <Menu size={26} strokeWidth={2.3} /><span className="text-[10px] font-semibold mt-0.5 leading-none">Menu</span>
         </button>
-        <Link href="/" className="flex-1 flex justify-center">
-          <Image src={LOGO_URL} alt="Friendly Party Rental" width={150} height={40} className="h-9 w-auto object-contain" />
+        <Link href="/" prefetch={false} className="flex-1 flex justify-center">
+          <Image src={LOGO_URL} alt="Friendly Party Rental" width={280} height={76} className="h-[76px] w-auto object-contain" />
         </Link>
         <div className="flex items-center">
           <button aria-label="Search" onClick={() => setSearchOpen(true)} className="p-3">
             <Search size={22} />
           </button>
-          <Link aria-label="Cart" href="/checkout" className="p-3 relative">
+          <Link aria-label="Cart" href="/checkout" prefetch={false} className="p-3 relative">
             <ShoppingCart size={22} />
             {itemCount > 0 && (
               <span className="absolute top-1 right-1 bg-accent text-white text-[10px] font-bold rounded-full min-w-[16px] h-[16px] px-1 flex items-center justify-center">
@@ -110,6 +110,7 @@ export default function MobileHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  prefetch={false}
                   onClick={() => setMenuOpen(false)}
                   className="block px-4 py-3 text-base font-medium text-dark border-b border-gray-100"
                 >
@@ -118,7 +119,7 @@ export default function MobileHeader() {
               ))}
             </nav>
             <div className="p-4 space-y-2 text-sm text-body">
-              <a href={`tel:${BUSINESS.phone}`} className="block font-bold text-dark">{BUSINESS.phone}</a>
+              <a href={`tel:${BUSINESS.phone}`} className="block font-bold text-dark">{BUSINESS.phone}</a><p className="text-xs text-gray-500 mt-1">Mon–Sat: 9am–6pm</p>
               <a href={`mailto:${BUSINESS.email}`} className="block break-all">{BUSINESS.email}</a>
             </div>
           </div>
@@ -157,6 +158,7 @@ export default function MobileHeader() {
               <Link
                 key={item.id}
                 href={item.slug ? `/items/${item.slug}` : '#'}
+                prefetch={false}
                 onClick={() => setSearchOpen(false)}
                 className="flex items-center justify-between px-4 py-3 border-b border-gray-100"
               >

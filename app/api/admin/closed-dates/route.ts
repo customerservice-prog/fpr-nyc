@@ -17,6 +17,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as { role?: string }).role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   const { date, reason } = await request.json()
   const closedDate = await prisma.closedDate.create({
@@ -29,6 +32,9 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as { role?: string }).role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   const { date } = await request.json()
   const dayStart = new Date(date)

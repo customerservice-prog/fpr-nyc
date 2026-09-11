@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     lastMinuteFeeAmount: o.lastMinuteFeeAmount,
     totalAmount: o.totalAmount,
     amountPaid: o.amountPaid,
-    balanceDue: o.balanceDue,
+    balanceDue: Math.max((o.totalAmount || 0) - (o.amountPaid || 0), 0),
     contractSignedAt: o.contractSignedAt,
     contractSignatureName: o.contractSignatureName,
     driverName: o.driver?.name || null,

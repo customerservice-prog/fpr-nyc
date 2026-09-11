@@ -8,6 +8,7 @@ import toast from 'react-hot-toast'
 import { useCart } from './CartContext'
 import { formatCurrency } from '@/lib/utils'
 import { IMAGE_CACHE_BUST } from '@/lib/imageVersion'
+import { ImageOff } from 'lucide-react'
 
 interface ItemCardProps {
   id: string
@@ -24,11 +25,12 @@ interface ItemCardProps {
   bookableAfterMessage?: string | null
   description?: string | null
   colorOptions?: string[]
+  priority?: boolean
 }
 
 const QUICK_QUANTITIES = [1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 25, 50, 75, 100, 150, 200]
 
-export default function ItemCard({ id, slug, name, cost, picture, updatedAt, available, pricingProfile, hideAvailability, isPackage, bookableAfter, bookableAfterMessage, description, colorOptions = [] }: ItemCardProps) {
+export default function ItemCard({ priority = false, id, slug, name, cost, picture, updatedAt, available, pricingProfile, hideAvailability, isPackage, bookableAfter, bookableAfterMessage, description, colorOptions = [] }: ItemCardProps) {
   const { addItem, items, eventDate } = useCart()
   const [quantity, setQuantity] = useState(1)
   const [isCustom, setIsCustom] = useState(false)
@@ -129,10 +131,11 @@ const onAddClick = () => {
   const thumb = (
     <div className="aspect-square bg-gray-100 relative overflow-hidden">
       {(slug || picture) && !thumbError ? (
-      <Image src={slug ? `/api/item-image/${slug}?v=${updatedAt || IMAGE_CACHE_BUST}` : picture!} alt={name} fill loading="lazy" className="object-contain" sizes="(max-width: 768px) 50vw, 250px" onError={() => setThumbError(true)} />
+      <Image src={slug ? `/api/item-image/${slug}?v=${updatedAt || IMAGE_CACHE_BUST}` : picture!} alt={name} fill {...(priority ? { priority: true } : { loading: 'lazy' as const })} className="object-contain" sizes="(max-width: 768px) 50vw, 250px" onError={() => setThumbError(true)} />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-          <span className="text-3xl">📦</span>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 flex flex-col items-center justify-center gap-1 text-gray-400">
+          <ImageOff className="w-7 h-7" />
+          <span className="text-[10px] font-medium">Photo coming soon</span>
         </div>
       )}
     <div className="absolute bottom-1 right-1 px-1.5 py-0.5 bg-black/40 text-white text-[10px] leading-none rounded pointer-events-none select-none">Friendly Party Rental</div>
@@ -143,13 +146,13 @@ const onAddClick = () => {
         <>
         <div className="category-card bg-white">
       {detailHref ? (
-        <Link href={detailHref} className="block cursor-pointer">
+        <Link href={detailHref} prefetch={false} className="block cursor-pointer">
           {thumb}
         </Link>
       ) : thumb}
       <div className="p-4">
         {detailHref ? (
-          <Link href={detailHref} className="block">
+          <Link href={detailHref} prefetch={false} className="block">
             <h3 className="font-medium text-dark text-sm mb-1 hover:underline">
               {name}
             </h3>
@@ -195,7 +198,7 @@ const onAddClick = () => {
     </div>
   </div>
 )}
-          {showRestroomWarning && (
+      {showRestroomWarning && (
           <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setShowRestroomWarning(false)}>
             <div className="bg-white rounded-lg max-w-md w-full p-6 relative shadow-xl" onClick={(e) => e.stopPropagation()}>
               <button onClick={() => setShowRestroomWarning(false)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>

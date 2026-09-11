@@ -76,7 +76,7 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
         'separator' in item ? (
           <hr key={idx} className="my-1 border-gray-200" />
         ) : (
-          <Link key={idx} href={item.href} className="block px-4 py-2 text-sm text-dark hover:bg-gray-100">
+          <Link key={idx} href={item.href} className="block px-4 py-2 text-sm text-dark hover:bg-gray-100" prefetch={false}>
             {item.name}
           </Link>
         )
@@ -100,6 +100,7 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
             ) : (
               <Link
                 href={link.href}
+                prefetch={false}
                 className={"px-2 lg:px-3 py-2 font-medium text-sm block whitespace-nowrap hover:opacity-80 " + textCls}
               >
                 {link.name}
@@ -113,7 +114,7 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
   }
 
   const logo = (
-    <Link href="/">
+    <Link href="/" prefetch={false}>
       <Image
         src={LOGO_URL}
         alt="Friendly Party Rental"
@@ -130,7 +131,7 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
     return (
       <header className="w-full bg-gradient-to-r from-secondary via-primary to-secondary">
         <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col items-center gap-3">
-          <Link href="/">
+          <Link href="/" prefetch={false}>
             <Image src={LOGO_URL} alt="Friendly Party Rental" width={220} height={147} />
           </Link>
           {renderNav(fgClass, 'justify-center')}
@@ -143,7 +144,7 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
   if (cfg.mode === 'inline') {
     const textCls = cfg.textColor === 'black' ? 'text-dark' : 'text-white'
     const logoEl = (
-      <Link href="/">
+      <Link href="/" prefetch={false}>
         <Image src={LOGO_URL} alt="Friendly Party Rental" width={160} height={107} />
       </Link>
     )
@@ -195,7 +196,7 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
                   {BUSINESS.email}
                 </a>
               </p>
-              <p>{BUSINESS.address}</p>
+              <p>{BUSINESS.address}</p><p className="text-xs text-gray-600 mt-0.5">Mon–Sat: 9am–6pm</p>
               <p>Serving {BUSINESS.serviceArea}</p>
             </div>
 
@@ -215,7 +216,7 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
               Y
             </a>
               </div>
-              <Link href="/order-by-date" className="btn-primary text-sm py-2 px-5 whitespace-nowrap">
+              <Link href="/order-by-date" className="btn-primary text-sm py-2 px-5 whitespace-nowrap" prefetch={false}>
                 Book Now &#9658;
               </Link>
             </div>

@@ -4,7 +4,7 @@ import { use, useEffect, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
-import { formatCurrency, formatDate } from '@/lib/utils'
+import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils'
 import { findPoleTentSurfaceIssue, findFrameTentSurfaceIssue } from '@/lib/tentSurfaceRules'
 
 interface OrderDetail {
@@ -43,6 +43,10 @@ interface OrderDetail {
   amountPaid: number
   balanceDue: number
   notes?: string
+  restrictionMatchedIds?: string[]
+  restrictionOverrideAt?: string | null
+  restrictionOverrideByName?: string | null
+  restrictionOverrideReason?: string | null
   internalNotes?: string
   followUpsPaused?: boolean
   scheduleApprovedUnpaid?: boolean
@@ -77,7 +81,7 @@ interface OrderDetail {
     recordedByName?: string | null
     createdAt: string
   }>
-  contacts?: Array<{
+  stripeCustomerId?: string | null; savedPaymentMethodId?: string | null; contacts?: Array<{
       id: string
       name: string
       role: string
@@ -103,8 +107,8 @@ interface EditItem {
 
 const DROPOFF_SLOT_LABELS = [
   'Morning (8am - 12pm)',
-  'Afternoon (12pm - 7pm)',
-  'Evening Drop-off (4pm - 8pm)',
+  'Afternoon (12pm - 4pm)',
+  'Evening (4pm - 7pm)',
   'Overnight Rental (picked up the next day)',
 ]
 
@@ -178,7 +182,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const [referenceSource, setReferenceSource] = useState('')
   const [setupSurfaceOptions, setSetupSurfaceOptions] = useState<{ id: string; name: string }[]>([])
   const [referenceOptions, setReferenceOptions] = useState<{ id: string; name: string }[]>([])
-  const [paymentAmount, setPaymentAmount] = useState(''); const [paymentNotes, setPaymentNotes] = useState(''); const [paymentSkipEmail, setPaymentSkipEmail] = useState(true) // default to NOT emailing the customer on manual payment/refund entries; staff can opt in by unchecking
+  const [paymentAmount, setPaymentAmount] = useState(''); const [paymentNotes, setPaymentNotes] = useState(''); const [paymentSkipEmail, setPaymentSkipEmail] = useState(false) // default to NOT emailing the customer on manual payment/refund entries; staff can opt in by unchecking
   const [sendingQuote, setSendingQuote] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [cancelling, setCancelling] = useState(false)
@@ -222,7 +226,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const [scheduleEditing, setScheduleEditing] = useState(false)
   const [addressEditing, setAddressEditing] = useState(false)
   const [itemsEditing, setItemsEditing] = useState(false)
-  const [addPaymentOpen, setAddPaymentOpen] = useState(false)
+  const [addPaymentOpen, setAddPaymentOpen] = useState(false); const [chargeCardOpen, setChargeCardOpen] = useState(false); const [chargeCardAmount, setChargeCardAmount] = useState(''); const [chargeCardReason, setChargeCardReason] = useState(''); const [chargingCard, setChargingCard] = useState(false)
   const [paymentMenuOpenId, setPaymentMenuOpenId] = useState<string | null>(null)
   const [internalNotesEditing, setInternalNotesEditing] = useState(false)
   const [customerNotesEditing, setCustomerNotesEditing] = useState(false)
@@ -251,7 +255,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const [contactNote, setContactNote] = useState('')
   const [savingContact, setSavingContact] = useState(false)
   const [receiptRecipientsOpen, setReceiptRecipientsOpen] = useState(false)
-  const [receiptRecipients, setReceiptRecipients] = useState<{ label: string; email: string; checked: boolean }[]>([])
+  const [receiptRecipients, setReceiptRecipients] = useState<{ label: string; email: string; checked: boolean }[]>([]); const [contactScope, setContactScope] = useState<'order' | 'profile'>('order')
 
   const loadOrder = () => {
     fetch('/api/admin/orders/' + id)
@@ -447,7 +451,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     } else toast.error('Failed')
   }
 
-  const removePayment = async (paymentId: string) => {
+  const chargeSavedCard = async () => { const amt = parseFloat(chargeCardAmount); if (isNaN(amt) || amt <= 0) { toast.error('Enter a valid amount'); return }; if (!chargeCardReason.trim()) { toast.error('Enter a reason (e.g. damage, item not returned)'); return }; if (!window.confirm('Charge the card on file $' + amt.toFixed(2) + ' for: ' + chargeCardReason.trim() + '?')) return; setChargingCard(true); try { const res = await fetch('/api/admin/orders/' + id + '/charge-saved-card', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amt, reason: chargeCardReason.trim() }) }); const data = await res.json(); if (res.ok) { toast.success('Card charged successfully'); setChargeCardAmount(''); setChargeCardReason(''); setChargeCardOpen(false); const d = await fetch('/api/admin/orders/' + id).then((r) => r.json()); setOrder(d.order) } else { toast.error(data.error || 'Failed to charge card') } } catch { toast.error('Failed to charge card') } finally { setChargingCard(false) } }; const removePayment = async (paymentId: string) => {
     if (!window.confirm('Remove this payment record? This will update the balance due and cannot be undone.')) return
     const res = await fetch('/api/admin/payments/' + paymentId, { method: 'DELETE' })
     if (res.ok) {
@@ -668,7 +672,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     const taxOverrideVal = overrideTaxAmount === '' ? null : parseFloat(overrideTaxAmount)
     const taxAmount = taxOverrideVal != null && !isNaN(taxOverrideVal) ? taxOverrideVal : Math.round(taxableBase * (taxRate / 100) * 100) / 100
     const totalAmount = Math.round((discountedSubtotal + deliveryFee + damageWaiverFee + specialRequestFee + taxAmount + lastMinuteFeeAmount + miscFeesVal) * 100) / 100
-    const balanceDue = Math.max(Math.round((totalAmount - (order?.amountPaid || 0) - raincheckAppliedVal) * 100) / 100, 0)
+    const balanceDue = Math.round((totalAmount - (order?.amountPaid || 0) - raincheckAppliedVal) * 100) / 100
     return { subtotal: editItemsSubtotal, taxAmount, totalAmount, balanceDue, deliveryFee, damageWaiverFee }
   }
 
@@ -802,7 +806,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
       setContactRole('Day-Of')
       setContactPhone('')
       setContactEmail('')
-      setContactNote('')
+      setContactNote(''); setContactScope('order')
   }
 
   const startEditContact = (c: any) => {
@@ -817,7 +821,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
   const saveContact = async () => {
       if (!order) return
-      if (!contactName.trim()) { toast.error('Contact name is required'); return }
+      if (contactScope === 'profile' && !contactEditingId) { if (!contactPhone.trim() && !contactEmail.trim()) { toast.error('Enter a phone number or email for the customer profile'); return }; if (!order.customerId) return; setSavingContact(true); try { const res = await fetch('/api/admin/customers/' + order.customerId, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ firstName: order.customer.firstName, lastName: order.customer.lastName, email: order.customer.email, phone: order.customer.phone, secondaryPhone: contactPhone.trim(), secondaryEmail: contactEmail.trim() }) }); if (!res.ok) throw new Error('Failed'); toast.success('Customer profile updated'); resetContactForm(); setContactFormOpen(false); loadOrder() } catch { toast.error('Failed to save contact') } finally { setSavingContact(false) }; return } if (!contactName.trim()) { toast.error('Contact name is required'); return }
       if (!contactPhone.trim() && !contactEmail.trim()) { toast.error('Enter a phone number or email for this contact'); return }
       setSavingContact(true)
       try {
@@ -875,7 +879,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             })
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || 'Failed to send')
-            toast.success('Receipt sent to ' + emails.length + ' recipient' + (emails.length === 1 ? '' : 's'))
+            toast.success((order && order.amountPaid > 0 ? 'Receipt' : 'Quote') + ' sent to ' + emails.length + ' recipient' + (emails.length === 1 ? '' : 's'))
             setReceiptRecipientsOpen(false)
       } catch (err) {
             toast.error(err instanceof Error ? err.message : 'Failed to send receipt')
@@ -941,6 +945,16 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           {order.customer.firstName} {order.customer.lastName} · {formatDate(order.eventDate)}{order.eventEndDate ? (' – ' + formatDate(order.eventEndDate)) : ''} · {deliveryTypeLabel}
         </p>
 
+        {order.restrictionMatchedIds && order.restrictionMatchedIds.length > 0 && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm no-print">
+            <p className="font-semibold text-red-800">Rental Restriction Match</p>
+            <p className="text-red-700">This order matches an active rental restriction.</p>
+            {order.restrictionOverrideAt && (
+              <p className="text-red-700 mt-1">Approved by {order.restrictionOverrideByName || 'an admin'} on {formatDate(order.restrictionOverrideAt)}. Reason: {order.restrictionOverrideReason}</p>
+            )}
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center gap-2">
           {liveTotals.balanceDue > 0 ? (
             <Link href={'/admin/orders/' + id + '/checkout'} className="btn-admin inline-flex items-center">Take Payment</Link>
@@ -961,7 +975,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                 <div className="absolute z-30 mt-1 left-0 w-72 bg-white border border-gray-200 rounded-lg shadow-lg py-1 text-sm">
                   <a href={'/pay/' + id} target="_blank" rel="noopener noreferrer" onClick={() => setMoreOpen(false)} className="block px-3 py-2 hover:bg-gray-50 text-dark">Open Payment Page</a>
                   <button onClick={() => { setMoreOpen(false); copyPaymentLink() }} type="button" className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-dark">Copy Payment Link</button>
-                  <button onClick={() => { setMoreOpen(false); (order.amountPaid > 0 ? openReceiptRecipients() : sendQuoteEmail()) }} disabled={sendingQuote} type="button" className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-dark disabled:opacity-50">
+                  <button onClick={() => { setMoreOpen(false); openReceiptRecipients() }} disabled={sendingQuote} type="button" className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-dark disabled:opacity-50">
                     {sendingQuote ? 'Sending...' : order.amountPaid > 0 ? 'Send Updated Receipt' : 'Email Quote to Customer'}
                   </button>
                   <button onClick={() => { setMoreOpen(false); copyContractLink() }} type="button" className="block w-full text-left px-3 py-2 hover:bg-gray-50 text-dark">Copy Contract Link</button>
@@ -1240,7 +1254,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             )}
           </Section>
 
-          <Section title="Payment History" accent="border-accent" action={<button onClick={() => setAddPaymentOpen((v) => !v)} type="button" className="text-secondary text-sm font-medium hover:underline no-print">{addPaymentOpen ? 'Cancel' : 'Add Manual Payment'}</button>}>
+          <Section title="Payment History" accent="border-accent" action={<button onClick={() => setAddPaymentOpen((v) => !v)} type="button" className="text-secondary text-sm font-medium hover:underline no-print">{addPaymentOpen ? 'Cancel' : 'Add Manual Payment'}</button>}>{order.stripeCustomerId && order.savedPaymentMethodId && (<div className="mb-3 no-print"><button onClick={() => setChargeCardOpen((v) => !v)} type="button" className="text-secondary text-sm font-medium hover:underline">{chargeCardOpen ? 'Cancel' : 'Charge Saved Card (damage / unreturned item)'}</button>{chargeCardOpen && (<div className="mt-3 border border-gray-200 rounded p-4 bg-gray-50/50"><p className="text-xs text-body mb-2">Charges the customer's card on file. The card number is never shown or entered - only Stripe's saved token is used.</p><div className="flex flex-wrap gap-2"><input type="number" placeholder="Amount" value={chargeCardAmount} onChange={(e) => setChargeCardAmount(e.target.value)} className="border border-gray-300 rounded px-3 py-2 text-sm w-32" /><input type="text" placeholder="Reason (e.g. damage, item not returned)" value={chargeCardReason} onChange={(e) => setChargeCardReason(e.target.value)} className="border border-gray-300 rounded px-3 py-2 text-sm flex-1 min-w-[220px]" /><button onClick={chargeSavedCard} disabled={chargingCard} type="button" className="btn-admin text-sm">{chargingCard ? 'Charging...' : 'Charge Card'}</button></div></div>)}</div>)}
             {order.payments.length === 0 && <p className="text-sm text-body">No payments recorded yet.</p>}
             <div className="divide-y divide-gray-100">
               {order.payments.map((p) => {
@@ -1254,7 +1268,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                 return (
                   <div key={p.id} className="flex justify-between items-center text-sm py-3">
                     <div>
-                      <p className="font-medium text-dark">{formatDate(p.createdAt)} · {paymentLabel}</p>
+                      <p className="font-medium text-dark">{formatDateTime(p.createdAt)} · {paymentLabel}</p>
 <p className="text-xs text-body mt-0.5">
 {p.notes && <span className="italic mr-2" title="Internal note">{p.notes}</span>}
 <span className={sourceInfo.cls} title={sourceInfo.title}>{sourceInfo.text}</span>
@@ -1627,7 +1641,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               </div>
             </div>
             <div className={'mt-3 text-center text-xs font-semibold rounded py-1.5 ' + (liveTotals.balanceDue > 0 ? 'bg-amber-50 text-amber-700' : 'bg-green-50 text-green-700')}>
-              {liveTotals.balanceDue > 0 ? formatCurrency(liveTotals.balanceDue) + ' Due' : 'PAID IN FULL'}
+              {liveTotals.balanceDue > 0 ? formatCurrency(liveTotals.balanceDue) + ' Due' : liveTotals.balanceDue < 0 ? 'Overpaid by ' + formatCurrency(Math.abs(liveTotals.balanceDue)) : 'PAID IN FULL'}
             </div>
           </Section>
 
@@ -1692,7 +1706,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 <button onClick={() => { resetContactForm(); setContactFormOpen(true) }} type="button" className="btn-outline text-sm w-full">+ Add Contact</button>
 ) : (
 <div className="border border-gray-200 rounded-lg p-3 space-y-3">
-<p className="text-sm font-medium">{contactEditingId ? 'Edit Contact' : 'Add Contact'} (this order only)</p>
+<p className="text-sm font-medium">{contactEditingId ? 'Edit Contact (this order only)' : 'Add Contact'}</p>{!contactEditingId && (<div><label className="block text-xs text-body mb-1">Applies To</label><select value={contactScope} onChange={(e) => setContactScope(e.target.value as 'order' | 'profile')} className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm"><option value="order">This Order Only</option><option value="profile">Customer Profile (all future orders)</option></select>{contactScope === 'profile' && (<p className="text-xs text-body mt-1">Only Phone and Email are saved to the customer profile for future orders. Name, Role, and Note only apply to order-only contacts and are ignored here.</p>)}</div>)}
 <div>
 <label className="block text-xs text-body mb-1">Name</label>
 <input type="text" value={contactName} onChange={(e) => setContactName(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" />
@@ -1735,8 +1749,8 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 <div className="fixed inset-0 bg-black/40 z-40 no-print" onClick={() => setReceiptRecipientsOpen(false)} />
 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 no-print">
 <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-5">
-<h2 className="text-lg font-semibold text-dark mb-3">Send Updated Receipt</h2>
-<p className="text-xs text-body mb-3">Choose who should receive this receipt.</p>
+<h2 className="text-lg font-semibold text-dark mb-3">{order && order.amountPaid > 0 ? 'Send Updated Receipt' : 'Send Quote'}</h2>
+<p className="text-xs text-body mb-3">Choose who should receive this {order && order.amountPaid > 0 ? 'receipt' : 'quote'}.</p>
 <div className="space-y-2 mb-4">
 {receiptRecipients.map((r, idx) => (
 <label key={idx} className="flex items-center gap-2 text-sm">
@@ -1746,7 +1760,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 ))}
 </div>
 <div className="flex gap-2">
-<button onClick={sendReceiptToSelectedRecipients} disabled={sendingQuote} type="button" className="btn-admin text-sm">{sendingQuote ? 'Sending...' : 'Send Receipt'}</button>
+<button onClick={sendReceiptToSelectedRecipients} disabled={sendingQuote} type="button" className="btn-admin text-sm">{sendingQuote ? 'Sending...' : (order && order.amountPaid > 0 ? 'Send Receipt' : 'Send Quote')}</button>
 <button onClick={() => setReceiptRecipientsOpen(false)} type="button" className="btn-outline text-sm">Cancel</button>
 </div>
 </div>

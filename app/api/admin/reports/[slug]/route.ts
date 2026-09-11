@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { slugify, IMPLEMENTED_SLUGS } from '@/lib/reportsConfig'
 
@@ -31,10 +33,94 @@ function customerName(c: any): string {
 }
 
 export async function GET(request: NextRequest, context: { params: Promise<{ slug: string }> }) {
+  const session = await getServerSession(authOptions)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as any).role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const slug = (await context.params).slug
 
   if (!IMPLEMENTED_SLUGS.has(slug)) {
     return NextResponse.json({ notImplemented: true })
+  }
+
+  if (slug === slugify('Sales References')) {
+    const orders = await prisma.order.findMany({
+      where: { status: { not: 'canceled' } },
+      select: { referenceSource: true, totalAmount: true },
+    })
+    const byRef: any = {}
+    for (const o of orders) {
+      const key = o.referenceSource || 'Unknown'
+      if (!byRef[key]) byRef[key] = { orders: 0, revenue: 0 }
+      byRef[key].orders++
+      byRef[key].revenue += o.totalAmount
+    }
+    const rows = Object.keys(byRef).map((ref) => ({ reference: ref, orders: byRef[ref].orders, revenue: money(byRef[ref].revenue) })).sort((a, b) => b.revenue - a.revenue)
+    return NextResponse.json({
+      title: 'Sales References',
+      columns: [
+        { key: 'reference', label: 'Reference Source' },
+        { key: 'orders', label: 'Orders' },
+        { key: 'revenue', label: 'Revenue' },
+      ],
+      rows,
+      summary: [{ label: 'Total Orders', value: orders.length }],
+    })
+  }
+
+  if (slug === slugify('Sales References By Created Date')) {
+    const year = new Date().getFullYear()
+    const orders = await prisma.order.findMany({
+      where: { createdAt: { gte: new Date(year, 0, 1), lt: new Date(year + 1, 0, 1) }, status: { not: 'canceled' } },
+      select: { referenceSource: true, totalAmount: true },
+    })
+    const byRef: any = {}
+    for (const o of orders) {
+      const key = o.referenceSource || 'Unknown'
+      if (!byRef[key]) byRef[key] = { orders: 0, revenue: 0 }
+      byRef[key].orders++
+      byRef[key].revenue += o.totalAmount
+    }
+    const rows = Object.keys(byRef).map((ref) => ({ reference: ref, orders: byRef[ref].orders, revenue: money(byRef[ref].revenue) })).sort((a, b) => b.revenue - a.revenue)
+    return NextResponse.json({
+      title: 'Sales References By Created Date',
+      columns: [
+        { key: 'reference', label: 'Reference Source' },
+        { key: 'orders', label: 'Orders' },
+        { key: 'revenue', label: 'Revenue' },
+      ],
+      rows,
+      summary: [{ label: 'Total Orders (This Year, By Created Date)', value: orders.length }],
+    })
+  }
+
+  if (slug === slugify('Bad Customer Status Report')) {
+    const customers = await prisma.customer.findMany({
+      where: { OR: [{ doNotRent: true }, { creditStatus: { not: 'good' } }] },
+      select: { firstName: true, lastName: true, email: true, phone: true, creditStatus: true, doNotRent: true, doNotRentNote: true },
+      orderBy: { lastName: 'asc' },
+    })
+    const rows = customers.map((c) => ({
+      name: `${c.firstName} ${c.lastName}`,
+      email: c.email,
+      phone: c.phone || '',
+      creditStatus: c.creditStatus,
+      doNotRent: c.doNotRent ? 'Yes' : 'No',
+      note: c.doNotRentNote || '',
+    }))
+    return NextResponse.json({
+      title: 'Bad Customer Status Report',
+      columns: [
+        { key: 'name', label: 'Customer' },
+        { key: 'email', label: 'Email' },
+        { key: 'phone', label: 'Phone' },
+        { key: 'creditStatus', label: 'Credit Status' },
+        { key: 'doNotRent', label: 'Do Not Rent' },
+        { key: 'note', label: 'Note' },
+      ],
+      rows,
+      summary: [{ label: 'Flagged Customers', value: rows.length }],
+    })
   }
 
   if (slug === slugify('Sales Overview')) {
@@ -46,11 +132,11 @@ export async function GET(request: NextRequest, context: { params: Promise<{ slu
     const byMonth: any = {}
     for (const o of orders) {
       const key = monthLabel(o.eventDate)
-      if (!byMonth[key]) byMonth[key] = { orders: 0, revenue: 0 }
+      if (!byMonth[key]) byMonth[key] = { orders: 0, revenue: 0, sortKey: o.eventDate.getFullYear() * 12 + o.eventDate.getMonth() }
       byMonth[key].orders++
       byMonth[key].revenue += o.totalAmount
     }
-    const rows = Object.keys(byMonth).map((month) => ({ month, orders: byMonth[month].orders, revenue: money(byMonth[month].revenue) }))
+    const rows = Object.keys(byMonth).map((month) => ({ month, orders: byMonth[month].orders, revenue: money(byMonth[month].revenue), sortKey: byMonth[month].sortKey })).sort((a, b) => a.sortKey - b.sortKey).map(({ sortKey, ...r }) => r)
     return NextResponse.json({
       title: 'Sales Overview',
       columns: [
@@ -845,7 +931,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ slu
 
   if (slug === slugify('Sales By Category')) {
     const orderItems = await prisma.orderItem.findMany({
-      include: { item: { include: { category: true } }, order: true },
+      select: { quantity: true, total: true, order: { select: { status: true } }, item: { select: { category: { select: { name: true } } } } },
     })
     const byCategory: any = {}
     for (const oi of orderItems) {
@@ -895,7 +981,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ slu
 
   if (slug === slugify('All Items')) {
     const items = await prisma.item.findMany({
-      include: { category: true },
+      select: { name: true, cost: true, quantity: true, displayToCustomer: true, category: { select: { name: true } } },
       orderBy: { name: 'asc' },
     })
     const rows = items.map((i) => ({
@@ -921,7 +1007,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ slu
 
   if (slug === slugify('Product Status Report')) {
     const items = await prisma.item.findMany({
-      include: { category: true },
+      select: { name: true, quantity: true, displayToCustomer: true, category: { select: { name: true } } },
       orderBy: { quantity: 'asc' },
     })
     const rows = items.map((i) => ({
@@ -947,7 +1033,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ slu
 
         if (slug === slugify('Product Attention List')) {
               const items = await prisma.item.findMany({
-                      include: { category: true },
+                select: { name: true, status: true, attentionNotes: true, lastInspectedAt: true, category: { select: { name: true } } },
                       orderBy: { updatedAt: 'desc' },
               })
               const flagged = items.filter((i: any) => (i.status && i.status !== 'Available') || (i.attentionNotes && i.attentionNotes.trim().length > 0))
@@ -1723,7 +1809,7 @@ summary: [],
 
 if (slug === slugify('Sales Items Inventory')) {
 const items = await prisma.item.findMany({
-include: { category: true, orderItems: { include: { order: true } } },
+    select: { name: true, quantity: true, category: { select: { name: true } }, orderItems: { select: { quantity: true, order: { select: { status: true } } } } },
 orderBy: { name: 'asc' },
 })
 const rows = items.map((i: any) => {
@@ -1750,7 +1836,7 @@ summary: [{ label: 'Total Items', value: items.length }],
 
 if (slug === slugify('Return on Investment (ROI)')) {
 const extras = await prisma.itemExtra.findMany()
-const items = await prisma.item.findMany({ include: { orderItems: { include: { order: true } } } })
+const items = await prisma.item.findMany({ select: { id: true, name: true, orderItems: { select: { quantity: true, total: true, order: { select: { status: true } } } } } })
 const extraByItem: any = {}
 for (const e of extras) extraByItem[e.itemId] = e
 const rows = items
@@ -1783,7 +1869,7 @@ summary: [{ label: 'Note', value: 'Only items with a Cost of Goods value set are
 if (slug === slugify('Return on Investment (ROI) by Date')) {
 const { start, end } = getRange(request)
 const extras = await prisma.itemExtra.findMany()
-const items = await prisma.item.findMany({ include: { orderItems: { include: { order: true } } } })
+const items = await prisma.item.findMany({ select: { id: true, name: true, orderItems: { select: { quantity: true, total: true, order: { select: { status: true, eventDate: true } } } } } })
 const extraByItem: any = {}
 for (const e of extras) extraByItem[e.itemId] = e
 const rows = items
@@ -1816,7 +1902,7 @@ summary: [{ label: 'Date Range', value: dayLabel(start) + ' - ' + dayLabel(end) 
 
 if (slug === slugify('ROI Breakdown')) {
 const extras = await prisma.itemExtra.findMany()
-const items = await prisma.item.findMany({ include: { category: true, orderItems: { include: { order: true } } } })
+const items = await prisma.item.findMany({ select: { id: true, name: true, category: { select: { name: true } }, orderItems: { select: { quantity: true, total: true, order: { select: { status: true } } } } } })
 const extraByItem: any = {}
 for (const e of extras) extraByItem[e.itemId] = e
 const rows: any[] = []

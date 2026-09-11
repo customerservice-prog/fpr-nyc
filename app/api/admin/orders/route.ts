@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getNextOrderNumber } from '@/lib/orderNumber'
+import { evaluateRentalRestrictions } from '@/lib/rentalRestrictions'
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -27,19 +28,18 @@ export async function GET(request: NextRequest) {
         })),
       } : {}),
     },
-    include: {
-      // Constrain only the customer relation so we do NOT read the
-      // `unsubscribed` column (may not exist in prod until prisma db push).
-      // Order scalar fields are still returned in full via include.
+select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+      eventDate: true,
+      totalAmount: true,
+      amountPaid: true,
+      balanceDue: true,
       customer: {
-        select: {
-          id: true, firstName: true, lastName: true, email: true, phone: true,
-          company: true, secondaryPhone: true, secondaryEmail: true,
-          customerType: true, address: true, city: true, state: true, zip: true,
-          notes: true, creditStatus: true, createdAt: true, updatedAt: true,
-        },
+              select: { id: true, firstName: true, lastName: true },
       },
-    },
+},
     orderBy: { createdAt: 'desc' },
   })
   return NextResponse.json({ orders })
@@ -60,12 +60,37 @@ export async function POST(request: NextRequest) {
         data: body.customer,
       })
 
+                                                                const restrictionCheck = await evaluateRentalRestrictions({
+                                                                        customerId: customer.id,
+                                                                        emails: [customer.email, customer.secondaryEmail],
+                                                                        phones: [customer.phone, customer.secondaryPhone],
+                                                                        address: { street1: body.eventAddress, city: body.eventCity, state: body.eventState, zip: body.eventZip },
+                                                                })
+
+      if (restrictionCheck.matched) {
+              const overrideReason = body.restrictionOverride?.reason
+              if (!overrideReason) {
+                        return NextResponse.json({
+                                    error: 'This booking matches an active rental restriction and requires manager review before it can be created.',
+                                    restrictionMatch: restrictionCheck,
+                        }, { status: 409 })
+              }
+              const role = (session.user as { role?: string } | undefined)?.role
+              if (role !== 'admin') {
+                        return NextResponse.json({ error: 'Only an admin can override a rental restriction match.' }, { status: 403 })
+              }
+      }
+
   const order = await prisma.order.create({
     data: {
       orderNumber: body.orderNumber || await getNextOrderNumber(),
       customerId: customer.id,
       status: body.status || 'quote',
       source: 'admin',
+      restrictionMatchedIds: restrictionCheck.matched ? restrictionCheck.restrictionIds : [],
+      restrictionOverrideAt: restrictionCheck.matched ? new Date() : null,
+      restrictionOverrideByName: restrictionCheck.matched ? ((session.user as { name?: string } | undefined)?.name || 'Admin') : null,
+      restrictionOverrideReason: restrictionCheck.matched ? body.restrictionOverride.reason : null,
       eventDate: new Date(body.eventDate),
       eventEndDate: body.eventEndDate ? new Date(body.eventEndDate) : null,
       eventTimeSlot: body.eventTimeSlot || null,

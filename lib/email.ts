@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer'
-import { BUSINESS } from '@/lib/utils'
+import { BUSINESS, formatDateTime } from '@/lib/utils'
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || 'smtp.gmail.com',
@@ -11,18 +11,20 @@ const transporter = nodemailer.createTransport({
   },
 })
 
-const LOGO_URL = 'https://www.friendlypartyrentalsc.com/images/logo.png'
+const LOGO_URL = 'https://www.friendlypartyrental.com/images/logo.png'
 
 export async function sendEmail({
   to,
   subject,
   html,
   text,
+  replyTo,
 }: {
   to: string
   subject: string
   html: string
   text?: string
+  replyTo?: string
 }) {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     console.log('Email not configured. Would send:', { to, subject })
@@ -31,8 +33,9 @@ export async function sendEmail({
 
   try {
     await transporter.sendMail({
-      from: process.env.EMAIL_FROM || 'Friendly Party Rental <customerservice@friendlypartyrentalsc.com>',
+      from: process.env.EMAIL_FROM || 'Friendly Party Rental <customerservice@friendlypartyrental.com>',
       to,
+      replyTo: replyTo || process.env.EMAIL_REPLY_TO || BUSINESS.email,
       subject,
       html,
       text: text || html.replace(/<[^>]*>/g, ''),
@@ -177,7 +180,7 @@ function paymentHistoryHtml(payments: Array<{ amount: number; method?: string | 
     .map((p) => {
       const who = p.recordedByName ? p.recordedByName + ' - ' : ''
       const methodLabel = p.method === 'card' ? 'Credit Card' : (p.method || 'Payment')
-      return '<tr><td style="padding:6px 10px; font-size:13px; color:#555; text-align:left; border-top:1px solid #eee;">' + who + p.createdAt + ' - ' + methodLabel + '</td><td style="padding:6px 10px; font-size:13px; color:#555; text-align:right; border-top:1px solid #eee;">$' + p.amount.toFixed(2) + '</td></tr>'
+      return '<tr><td style="padding:6px 10px; font-size:13px; color:#555; text-align:left; border-top:1px solid #eee;">' + who + formatDateTime(p.createdAt) + ' - ' + methodLabel + '</td><td style="padding:6px 10px; font-size:13px; color:#555; text-align:right; border-top:1px solid #eee;">$' + p.amount.toFixed(2) + '</td></tr>'
     })
     .join('')
   return (
@@ -215,9 +218,9 @@ export function orderConfirmationEmail(order: {
   depositAmount: number
   balanceDue: number
   items: OrderEmailItem[]
-}) {
+}, setting?: { subject?: string }) {
   return {
-    subject: `Order Confirmation #${order.orderNumber} - Friendly Party Rental`,
+    subject: setting?.subject || `Order Confirmation #${order.orderNumber} - Friendly Party Rental`,
     html: `
       <div style="font-family: Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
         ${emailHeader()}
@@ -230,7 +233,7 @@ export function orderConfirmationEmail(order: {
         <p style="margin-top:16px;"><strong>Total:</strong> $${order.totalAmount.toFixed(2)}</p>
         <p><strong>Deposit Paid:</strong> $${order.depositAmount.toFixed(2)}</p>
         <p><strong>Balance Due:</strong> $${order.balanceDue.toFixed(2)}</p>
-        <p style="margin-top:20px;"><a href="https://www.friendlypartyrentalsc.com/contract/${order.id}" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>
+        <p style="margin-top:20px;"><a href="https://www.friendlypartyrental.com/contract/${order.id}" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>
         ${policyFooterHtml()}
         ${emailFooter()}
       </div>
@@ -366,7 +369,7 @@ export function paymentReceiptEmail(payment: {
         <p><strong>Order Total:</strong> $${payment.totalAmount.toFixed(2)}</p>
         <p><strong>Remaining Balance:</strong> $${payment.balanceDue.toFixed(2)}</p>
         ${payment.payments && payment.payments.length ? paymentHistoryHtml(payment.payments) : ''}
-        ${payment.id ? '<p style="margin-top:20px;"><a href="https://www.friendlypartyrentalsc.com/contract/' + payment.id + '" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>' : ''}
+        ${payment.id ? '<p style="margin-top:20px;"><a href="https://www.friendlypartyrental.com/contract/' + payment.id + '" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>' : ''}
         ${policyFooterHtml()}
         ${emailFooter()}
       </div>
@@ -489,7 +492,7 @@ export function selfServiceQuoteEmail(data: {
           <tr><td style="padding:8px; font-weight:bold;">Subtotal</td><td style="padding:8px; text-align:right; font-weight:bold;">$${data.subtotal.toFixed(2)}</td></tr>
         </table>
         <p style="margin-top:16px; font-size:13px; color:#666;">Delivery fees and sales tax are calculated at checkout based on your address. This quote does not reserve your date - complete checkout to confirm your booking.</p>
-        <p style="margin-top:24px;"><a href="https://www.friendlypartyrentalsc.com/checkout">Return to checkout to complete your booking</a></p>
+        <p style="margin-top:24px;"><a href="https://www.friendlypartyrental.com/checkout">Return to checkout to complete your booking</a></p>
         ${emailFooter()}
       </div>
     `,
@@ -519,53 +522,52 @@ export function cancellationMessageEmail(data: {
   }
 }
 
-const PRE_PAYMENT_REMINDER_ENABLED = false
+export function prePaymentReminderEmail(
+    setting: { subject: string; content: string },
+    order: { orderNumber: string; payLink: string }
+  ) {
+    const paymentButtonHtml = `<p style="margin: 24px 0;"><a href="${order.payLink}" style="background:#1A6FD4;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;">Review Order &amp; Pay Balance</a></p>`
 
-export function prePaymentReminderEmail(order: {
-  orderNumber: string
-  customerName: string
-  eventDate: string
-  eventAddress?: string | null
-  eventCity?: string | null
-  eventState?: string | null
-  eventZip?: string | null
-  contractLink: string
-  deliveryType?: string | null
-  eventTimeSlot?: string | null
-  pickupTimeSlot?: string | null
-  balanceDue: number
-  payLink: string
-}) {
-  return {
-    subject: `Pre-Payment Option from ${BUSINESS.name}`,
-    html: `
-      <div style="font-family: Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
-        ${emailHeader()}
-        <p>Hello,</p>
-        <p>Re: ${order.orderNumber}</p>
-        <p>Your event is coming up in just <strong>3 days</strong>, and the <strong>${BUSINESS.name}</strong> team is excited to be working with you.</p>
-        ${eventDetailsHtml(order)}
-        <p>This is a friendly reminder that any remaining balance is due prior to delivery or pickup. To help keep everything running smoothly on event day, please use the link below to review your order and submit payment. If your balance has already been paid in full, no action is needed.</p>
-        <p><strong>Balance Due:</strong> $${order.balanceDue.toFixed(2)}</p>
-        <p><strong>Important setup reminder:</strong><br/>
-                Setup for tents and bounce houses is included. Tables and chairs are delivered and placed, but full setup for tables and chairs is not included unless requested.</p>
-        <p>If you've just realized you'd like table and chair setup added, it can still be included for $1 per table and $1 per chair. Simply reply to this email or contact our office and we'll be happy to add it for you.</p>
-        <p style="margin: 24px 0;">
-          <a href="${order.payLink}" style="background:#1A6FD4;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;">Review Order &amp; Pay Balance</a>
-        </p>
-        <p>Please also make sure to review and sign your rental contract before your event, if you haven't already:</p>
-        <p style="margin: 24px 0;">
-        <a href="${order.contractLink}" style="background:#28a745;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;">Sign Your Contract</a>
-        </p>
-        <p>Thank you, and we look forward to your upcoming event.</p>
-        ${emailFooter()}
-      </div>
-    `,
-  }
+    const subject = setting.subject.replace(/\[Order ID\]/g, order.orderNumber)
+    const bodyHtml = setting.content
+      .replace(/\[Order ID\]/g, order.orderNumber)
+      .replace(/\[Payment Link\]/g, paymentButtonHtml)
+      .replace(/\n/g, '<br/>')
+
+    return {
+          subject,
+          html: `
+                <div style="font-family: Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
+                        ${emailHeader()}
+                                ${bodyHtml}
+                                        ${emailFooter()}
+                                              </div>
+                                                  `,
+    }
 }
 
-export function isPrePaymentReminderEnabled() {
-  return PRE_PAYMENT_REMINDER_ENABLED
+export function incompleteOrderRecaptureEmail(
+  setting: { subject: string; content: string },
+  order: { firstName: string; orderId: string; resumeLink: string }
+  ) {
+  const name = order.firstName || 'there'
+    const subject = setting.subject
+      .replace(/\[Order ID\]/g, order.orderId)
+      .replace(/\{customer\.firstname\}/gi, name)
+      const bodyHtml = setting.content
+        .replace(/\[Order ID\]/g, order.orderId)
+        .replace(/\{customer\.firstname\}/gi, name)
+        .replace(/\n/g, '<br/>') + '<p><a href="' + order.resumeLink + '">' + order.resumeLink + '</a></p>'
+        return {
+          subject,
+          html: `
+          <div style="font-family: Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
+          ${emailHeader()}
+          ${bodyHtml}
+          ${emailFooter()}
+          </div>
+          `,
+        }
 }
 
 export function balanceReminderEmail(order: {
@@ -622,9 +624,9 @@ export function preRentalReminderEmail(setting: { subject: string; content: stri
 export function thankYouEmail(order: {
   orderNumber: string
   customerName: string
-}) {
+}, setting?: { subject?: string }) {
   return {
-    subject: `Thank you for renting with Friendly Party Rental!`,
+    subject: setting?.subject || `Thank you for renting with Friendly Party Rental!`,
     html: `
       <div style="font-family: Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
         ${emailHeader()}

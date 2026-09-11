@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ disabled: true, message: 'This automated email is temporarily disabled.' })
 
   const authHeader = request.headers.get('authorization')
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     where: {
       eventDate: { gte: startOfWindow, lte: endOfWindow },
       status: { not: 'canceled' },
-      balanceDue: { gt: 0 },
+      
       balanceReminderSentAt: null,
     },
     include: { customer: true },
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
   const results: any[] = []
 
-  for (const order of orders) {
+  for (const order of orders.filter((o) => Math.max((o.totalAmount || 0) - (o.amountPaid || 0), 0) > 0)) {
     const email = order.customer?.email || ''
     if (!email || email.includes('@imported.friendlypartyrental.local') || email.startsWith('no-email-')) {
       results.push({ orderId: order.id, orderNumber: order.orderNumber, skipped: true, reason: 'invalid or placeholder email' })
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       eventCity: order.eventCity,
       eventState: order.eventState,
       eventZip: order.eventZip,
-      balanceDue: order.balanceDue,
+      balanceDue: Math.max((order.totalAmount || 0) - (order.amountPaid || 0), 0),
       payLink,
     })
 

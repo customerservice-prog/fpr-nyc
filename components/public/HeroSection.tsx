@@ -19,7 +19,7 @@ export default function HeroSection() {
       height={220}
       className="w-[160px] md:w-[220px] h-[160px] md:h-[220px] rounded-full border-[5px] border-white object-cover"
       />
-    <Link href="/order-by-date">
+    <Link href="/order-by-date" prefetch={false}>
     <Image
       src={HERO_BADGES.book}
       alt="Greenville's #1 Party Rental"

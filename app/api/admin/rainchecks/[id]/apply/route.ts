@@ -11,6 +11,7 @@ export async function POST(
   ) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as any).role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { orderId } = await request.json()
   if (!orderId) return NextResponse.json({ error: 'orderId is required' }, { status: 400 })
@@ -28,7 +29,7 @@ export async function POST(
     return NextResponse.json({ error: "This raincheck does not belong to this order's customer" }, { status: 400 })
     }
 
-  const currentBalanceDue = order.balanceDue ?? Math.max(order.totalAmount - order.amountPaid, 0)
+  const currentBalanceDue = Math.max(order.totalAmount - order.amountPaid, 0)
   if (currentBalanceDue <= 0) {
     return NextResponse.json({ error: 'This order has no remaining balance to apply a credit to' }, { status: 400 })
     }

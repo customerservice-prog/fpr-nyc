@@ -72,12 +72,12 @@ ${bodyHtml}
 </td></tr>
 <tr><td style="background-color:#0b3d91;padding:20px 24px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
 <div style="color:#ffffff;font-size:16px;font-weight:bold;padding-bottom:4px;">Free delivery, setup &amp; pickup included</div>
-<div style="color:#cfe0ff;font-size:13px;">Serving Syracuse & Central New York since day one</div>
+<div style="color:#cfe0ff;font-size:13px;">Serving Greenville & Upstate South Carolina since day one</div>
 <div style="padding-top:12px;"><a href="${origin}/quote" style="display:inline-block;background-color:#f5a623;color:#1a1a1a;font-size:15px;font-weight:bold;text-decoration:none;padding:12px 28px;border-radius:6px;">Request a Free Quote</a></div>
 </td></tr>
 <tr><td style="background-color:#ffffff;padding:24px 32px;font-family:Arial,Helvetica,sans-serif;text-align:center;border-top:1px solid #e5e7eb;">
 <div style="font-size:15px;font-weight:bold;color:#1a1a1a;">Friendly Party Rental</div>
-<div style="font-size:13px;color:#6b7280;padding-top:4px;">330 Costello Parkway, Minoa, NY 13116</div>
+<div style="font-size:13px;color:#6b7280;padding-top:4px;">Greenville, SC</div>
 <div style="font-size:13px;color:#6b7280;padding-top:2px;">315-884-1498 &nbsp;&bull;&nbsp; customerservice@friendlypartyrental.com</div>
 <div style="padding-top:8px;"><a href="${origin}" style="color:#0b3d91;font-size:13px;font-weight:bold;text-decoration:none;">www.friendlypartyrental.com</a></div>
 <div style="font-size:11px;color:#6b7280;line-height:1.6;padding-top:16px;border-top:1px solid #e5e7eb;margin-top:16px;">

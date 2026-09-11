@@ -13,7 +13,7 @@ import { BUSINESS } from '@/lib/utils'
 // Runs on a schedule (see .github/workflows/auto-charge-cron.yml).
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization')
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       savedPaymentMethodId: { not: null },
       stripeCustomerId: { not: null },
       eventDate: { gte: targetStart, lte: targetEnd },
-      balanceDue: { gt: 0 },
+      
       status: { notIn: ['canceled'] },
       autoChargeAttemptedAt: null,
     },
@@ -48,10 +48,10 @@ export async function GET(request: NextRequest) {
 
   const results: Array<{ orderId: string; orderNumber: string; status: string; amount?: number; error?: string }> = []
 
-  for (const order of orders) {
+  for (const order of orders.filter((o) => Math.max((o.totalAmount || 0) - (o.amountPaid || 0), 0) > 0)) {
     const chargeAmount = settings.chargeRemainingBalance
-      ? order.balanceDue
-      : Math.min(order.depositAmount || order.balanceDue, order.balanceDue)
+      ? Math.max((order.totalAmount || 0) - (order.amountPaid || 0), 0)
+      : Math.min(order.depositAmount || Math.max((order.totalAmount || 0) - (order.amountPaid || 0), 0), Math.max((order.totalAmount || 0) - (order.amountPaid || 0), 0))
 
     if (!chargeAmount || chargeAmount <= 0) continue
 

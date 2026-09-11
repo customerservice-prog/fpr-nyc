@@ -79,7 +79,7 @@ const QUICK_ACTIONS = ['Outstanding balances', "Today's deliveries", 'Low stock 
 
 function OrderCard({ card, onCancelled }: { card: AssistantOrderCard; onCancelled: (id: string) => void }) {
 const [cancelling, setCancelling] = useState(false)
-const isCanceled = card.status === 'canceled' || card.status === 'cancelled'
+const isCanceled = card.status === 'canceled' || card.status === 'cancelled'; const balanceDue = Math.round((card.totalAmount - card.amountPaid) * 100) / 100
 
 const cancelOrder = async () => {
 if (!window.confirm('Cancel order ' + card.orderNumber + ' for ' + card.customerName + '? This sets its status to canceled.')) return
@@ -131,7 +131,7 @@ return (
 <div className="text-right">
 <p className="text-xs">Total {formatCurrency(card.totalAmount)}</p>
 <p className="text-xs">Paid {formatCurrency(card.amountPaid)}</p>
-<p className={'text-xs font-bold ' + (card.balanceDue > 0 ? 'text-red-600' : 'text-green-700')}>Balance {formatCurrency(card.balanceDue)}</p>
+<p className={'text-xs font-bold ' + (balanceDue > 0 ? 'text-red-600' : 'text-green-700')}>{balanceDue > 0 ? 'Balance ' + formatCurrency(balanceDue) : balanceDue < 0 ? 'Overpaid by ' + formatCurrency(Math.abs(balanceDue)) : 'Paid in Full'}</p>
 </div>
 </div>
 

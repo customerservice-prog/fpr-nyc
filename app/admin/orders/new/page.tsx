@@ -50,8 +50,8 @@ const EXACT_TIME_OPTIONS = generateExactTimeOptions()
 
 const DROPOFF_SLOTS = [
   { value: 'morning', label: 'Morning (8am - 12pm)' },
-  { value: 'afternoon', label: 'Afternoon (12pm - 7pm)' },
-  { value: 'evening', label: 'Evening Drop-off (4pm - 8pm)' },
+  { value: 'afternoon', label: 'Afternoon (12pm - 4pm)' },
+  { value: 'evening', label: 'Evening (4pm - 7pm)' },
   { value: 'overnight', label: 'Overnight Rental (picked up the next day)' },
   ...EXACT_TIME_OPTIONS,
 ]
@@ -289,7 +289,7 @@ function NewOrderPageInner() {
     }
   }
 
-  const applyCoupon = async () => {
+  useEffect(() => { if (form.deliveryType !== 'delivery') return; if (!effectiveEventZip || effectiveEventZip.trim().length < 5) return; const travelFeeTimer = setTimeout(() => { calculateTravelFee() }, 500); return () => clearTimeout(travelFeeTimer) }, [effectiveEventZip, form.deliveryType]); const applyCoupon = async () => {
     if (!couponCode.trim()) return
     setApplyingCoupon(true)
     try {
@@ -656,9 +656,9 @@ function NewOrderPageInner() {
               <input type="tel" placeholder="Secondary Phone (optional)" value={form.secondaryPhone} onChange={(e) => setForm({ ...form, secondaryPhone: e.target.value })} className="border rounded px-3 py-2" />
             </div>
             <input placeholder="Company Name (optional)" value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} className="w-full border rounded px-3 py-2 mb-2" />
-            <input placeholder="Billing Address" value={form.billingAddress} onChange={(e) => setForm({ ...form, billingAddress: e.target.value })} className="w-full border rounded px-3 py-2 mb-2" />
+            <input placeholder="Billing Address" value={form.billingAddress} onChange={(e) => setForm({ ...form, billingAddress: e.target.value })} className="w-full border rounded px-3 py-2 mb-2" required={form.deliveryType === 'delivery' && sameAsBilling} />
             <div className="grid grid-cols-3 gap-4">
-              <select value={form.billingCity} onChange={(e) => setForm({ ...form, billingCity: e.target.value })} className="border rounded px-3 py-2">
+              <select value={form.billingCity} onChange={(e) => setForm({ ...form, billingCity: e.target.value })} className="border rounded px-3 py-2" required={form.deliveryType === 'delivery' && sameAsBilling}>
                 <option value="">-- City --</option>
                 {LOCAL_CITIES.map((c) => (<option key={c} value={c}>{c}</option>))}
                 <option value="Other">Other</option>
@@ -667,10 +667,10 @@ function NewOrderPageInner() {
                 <option value="NY">NY</option>
                 <option value="Other">Other</option>
               </select>
-              <input placeholder="Zip" value={form.billingZip} onChange={(e) => setForm({ ...form, billingZip: e.target.value })} className="border rounded px-3 py-2" />
+              <input placeholder="Zip" value={form.billingZip} onChange={(e) => setForm({ ...form, billingZip: e.target.value })} className="border rounded px-3 py-2" required={form.deliveryType === 'delivery' && sameAsBilling} />
             </div>
             {form.billingCity === 'Other' && (
-              <input placeholder="Enter City Name" value={form.billingCityOther} onChange={(e) => setForm({ ...form, billingCityOther: e.target.value })} className="w-full border rounded px-3 py-2 mt-2" />
+              <input placeholder="Enter City Name" value={form.billingCityOther} onChange={(e) => setForm({ ...form, billingCityOther: e.target.value })} className="w-full border rounded px-3 py-2 mt-2" required={form.deliveryType === 'delivery' && sameAsBilling} />
             )}
           </div>
 
@@ -682,9 +682,9 @@ function NewOrderPageInner() {
             </label>
             {!sameAsBilling && (
               <>
-                <input placeholder="Event Address" value={form.eventAddress} onChange={(e) => setForm({ ...form, eventAddress: e.target.value })} className="w-full border rounded px-3 py-2 mb-2" />
+                <input placeholder="Event Address" value={form.eventAddress} onChange={(e) => setForm({ ...form, eventAddress: e.target.value })} className="w-full border rounded px-3 py-2 mb-2" required={form.deliveryType === 'delivery' && !sameAsBilling} />
                 <div className="grid grid-cols-3 gap-4 mb-2">
-                  <select value={form.eventCity} onChange={(e) => setForm({ ...form, eventCity: e.target.value })} className="border rounded px-3 py-2">
+                  <select value={form.eventCity} onChange={(e) => setForm({ ...form, eventCity: e.target.value })} className="border rounded px-3 py-2" required={form.deliveryType === 'delivery' && !sameAsBilling}>
                     <option value="">-- City --</option>
                     {LOCAL_CITIES.map((c) => (<option key={c} value={c}>{c}</option>))}
                     <option value="Other">Other</option>
@@ -693,15 +693,15 @@ function NewOrderPageInner() {
                     <option value="NY">NY</option>
                     <option value="Other">Other</option>
                   </select>
-                  <input placeholder="Zip" value={form.eventZip} onChange={(e) => setForm({ ...form, eventZip: e.target.value })} className="border rounded px-3 py-2" />
+                  <input placeholder="Zip" value={form.eventZip} onChange={(e) => setForm({ ...form, eventZip: e.target.value })} className="border rounded px-3 py-2" required={form.deliveryType === 'delivery' && !sameAsBilling} />
                 </div>
                 {form.eventCity === 'Other' && (
-                  <input placeholder="Enter City Name" value={form.eventCityOther} onChange={(e) => setForm({ ...form, eventCityOther: e.target.value })} className="w-full border rounded px-3 py-2 mb-2" />
+                  <input placeholder="Enter City Name" value={form.eventCityOther} onChange={(e) => setForm({ ...form, eventCityOther: e.target.value })} className="w-full border rounded px-3 py-2 mb-2" required={form.deliveryType === 'delivery' && !sameAsBilling} />
                 )}
               </>
             )}
             <div className="grid grid-cols-2 gap-4 items-end mt-2">
-              <select value={form.deliveryType} onChange={(e) => setForm({ ...form, deliveryType: e.target.value })} className="w-full border rounded px-3 py-2">
+              <select value={form.deliveryType} onChange={(e) => setForm({ ...form, deliveryType: e.target.value, travelFee: e.target.value === 'pickup' ? '0' : form.travelFee })} className="w-full border rounded px-3 py-2">
                 <option value="delivery">Delivery</option>
                 <option value="pickup">Customer Pickup</option>
               </select>

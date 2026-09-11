@@ -19,6 +19,9 @@ export async function POST(
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  if ((session.user as any).role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   try {
     const { amount, method, notes, status, createdAt } = await request.json();

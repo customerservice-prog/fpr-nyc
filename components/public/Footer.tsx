@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'; import { BUSINESS } from '@/lib/utils'
+import { Facebook, Youtube } from 'lucide-react'
 
 const LOGO_URL = '/images/logo.png'
 
@@ -28,10 +29,22 @@ export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string 
     return (
       <footer className="bg-gray-100 text-gray-700 pt-8 pb-24 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center text-sm space-y-2">
+          <Image src={LOGO_URL} alt={BUSINESS.legalName} width={120} height={60} className="mx-auto mb-1" />
           <p className="font-bold text-base">{BUSINESS.legalName}</p>
           <p>{BUSINESS.address}</p>
           <p>{BUSINESS.phone} | {BUSINESS.email}</p>
-          <p>Serving {BUSINESS.serviceArea}</p><nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 pt-3"><Link href="/category/tent-rentals" className="underline">Tent Rentals</Link> <Link href="/category/table-chair-rentals" className="underline">Table & Chair Rentals</Link> <Link href="/weddings" className="underline">Wedding Rentals</Link> <Link href="/wedding-vendors" className="underline">Wedding Vendors</Link> <Link href="/graduation-rentals" className="underline">Graduation Party Rentals</Link> <Link href="/chiavari-chair-rentals" className="underline">Chiavari Chair Rentals</Link> <Link href="/category/dance-floor-stage-rentals" className="underline">Dance Floor Rentals</Link> <Link href="/category/bounce-house-rentals" className="underline">Bounce Houses & Waterslides</Link> <Link href="/category" className="underline">Browse All Rentals</Link></nav>
+          <p>Serving {BUSINESS.serviceArea}</p>
+          <div className="flex items-center justify-center gap-4 pt-1">
+            <a href={BUSINESS.facebook} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="Facebook">
+              <Facebook size={22} fill="currentColor" />
+            </a>
+            <a href={BUSINESS.youtube} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="YouTube">
+              <Youtube size={22} />
+            </a>
+            <a href={BUSINESS.yelp} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold" aria-label="Yelp" title="Yelp">
+              Y
+            </a>
+          </div><nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 pt-3 border-t border-gray-200 mt-4"><Link href="/category/tent-rentals" className="underline" prefetch={false}>Tent Rentals</Link> <Link href="/category/table-chair-rentals" className="underline" prefetch={false}>Table & Chair Rentals</Link> <Link href="/weddings" className="underline" prefetch={false}>Wedding Rentals</Link> <Link href="/wedding-vendors" className="underline" prefetch={false}>Wedding Vendors</Link> <Link href="/graduation-rentals" className="underline" prefetch={false}>Graduation Party Rentals</Link> <Link href="/chiavari-chair-rentals" className="underline" prefetch={false}>Chiavari Chair Rentals</Link> <Link href="/category/dance-floor-stage-rentals" className="underline" prefetch={false}>Dance Floor Rentals</Link> <Link href="/category/bounce-house-rentals" className="underline" prefetch={false}>Bounce Houses & Waterslides</Link> <Link href="/category" className="underline" prefetch={false}>Browse All Rentals</Link></nav>
           <p className="text-gray-500 text-sm pt-2">
             &copy; {new Date().getFullYear()} {BUSINESS.legalName} All rights reserved.
           </p>
@@ -47,6 +60,17 @@ export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string 
         <p>{BUSINESS.address}</p>
         <p>{BUSINESS.phone} | {BUSINESS.email}</p>
         <p>Serving {BUSINESS.serviceArea}</p>
+        <div className="flex items-center justify-center gap-4 pt-1">
+          <a href={BUSINESS.facebook} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="Facebook">
+            <Facebook size={22} fill="currentColor" />
+          </a>
+          <a href={BUSINESS.youtube} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="YouTube">
+            <Youtube size={22} />
+          </a>
+          <a href={BUSINESS.yelp} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold" aria-label="Yelp" title="Yelp">
+            Y
+          </a>
+        </div>
         <p className="text-gray-400 pt-2">
           &copy; {new Date().getFullYear()} {BUSINESS.legalName} All rights reserved.
         </p>

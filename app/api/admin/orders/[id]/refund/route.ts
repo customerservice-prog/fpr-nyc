@@ -12,6 +12,7 @@ export async function POST(
 ) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as any).role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   try {
     const { paymentId, amount } = await request.json()
@@ -53,9 +54,8 @@ export async function POST(
     })
 
     const newAmountPaid = Math.max(order.amountPaid - refundAmount, 0)
-    const newBalanceDue = Math.max(order.totalAmount - newAmountPaid, 0)
-
-    const updated = await prisma.order.update({
+    const newBalanceDue = Math.round((order.totalAmount - newAmountPaid) * 100) / 100
+        const updated = await prisma.order.update({
       where: { id: order.id },
       data: {
         amountPaid: newAmountPaid,

@@ -9,18 +9,21 @@ export async function GET(
 ) {
   const order = await prisma.order.findUnique({
     where: { id: (await params).id },
-    include: { customer: true, items: true },
+    include: { customer: true, items: true, payments: true },
   })
 
   if (!order) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
+const refundedAmount = (order.payments || []).filter((p) => p.amount < 0).reduce((sum, p) => sum + Math.abs(p.amount), 0)
+  
   return NextResponse.json({
     order: {
       id: order.id,
       orderNumber: order.orderNumber,
       status: order.status,
+      refundedAmount, payments: (order.payments || []).slice().sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()).map((p) => ({ amount: p.amount, createdAt: p.createdAt })),
       eventDate: order.eventDate,
       eventAddress: order.eventAddress,
       eventCity: order.eventCity,
@@ -29,7 +32,7 @@ export async function GET(
       subtotal: order.subtotal,
       totalAmount: order.totalAmount,
       amountPaid: order.amountPaid,
-      balanceDue: order.balanceDue,
+      balanceDue: Math.max((order.totalAmount || 0) - (order.amountPaid || 0), 0),
       damageWaiver: order.damageWaiver,
       damageWaiverFee: order.damageWaiverFee,
       deliveryFee: order.deliveryFee,

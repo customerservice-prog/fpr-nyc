@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, prePaymentReminderEmail } from '@/lib/email'
-import { formatDate } from '@/lib/utils'
 
 // Automatic 3-day-before-event Pre-Payment Reminder email.
 // Runs on a schedule (see .github/workflows/pre-payment-reminders-cron.yml).
@@ -11,7 +10,7 @@ import { formatDate } from '@/lib/utils'
 // and skips any order that has the per-order prePayReminderDisabled override set.
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization')
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -34,8 +33,7 @@ export async function GET(request: NextRequest) {
   const orders = await prisma.order.findMany({
     where: {
       eventDate: { gte: startOfWindow, lte: endOfWindow },
-      status: { not: 'canceled' },
-      balanceDue: { gt: 0 },
+      status: { notIn: ['canceled', 'quote'] },
       prePayReminderSentAt: null,
       prePayReminderDisabled: false,
     },
@@ -44,7 +42,7 @@ export async function GET(request: NextRequest) {
 
   const results: any[] = []
 
-  for (const order of orders) {
+  for (const order of orders.filter((o) => Math.max((o.totalAmount || 0) - (o.amountPaid || 0), 0) > 0)) {
     const email = order.customer?.email || ''
     if (!email || email.includes('@imported.friendlypartyrental.local') || email.startsWith('no-email-')) {
       results.push({ orderId: order.id, orderNumber: order.orderNumber, skipped: true, reason: 'invalid or placeholder email' })
@@ -52,25 +50,11 @@ export async function GET(request: NextRequest) {
     }
 
     const payLink = `${origin}/pay/${order.id}`
-    const contractLink = origin + '/contract/' + order.id
-    const customerName = `${order.customer.firstName} ${order.customer.lastName}`
-    const eventDate = formatDate(order.eventDate)
 
-    const emailContent = prePaymentReminderEmail({
-      orderNumber: order.orderNumber,
-      customerName,
-      eventDate,
-      eventAddress: order.eventAddress,
-      eventCity: order.eventCity,
-      eventState: order.eventState,
-      eventZip: order.eventZip,
-      deliveryType: order.deliveryType,
-      eventTimeSlot: order.eventTimeSlot,
-      pickupTimeSlot: order.pickupTimeSlot,
-      balanceDue: order.balanceDue,
-      payLink,
-      contractLink,
-    })
+        const emailContent = prePaymentReminderEmail(
+          { subject: setting.subject, content: setting.content },
+          { orderNumber: order.orderNumber, payLink }
+              )
 
     await sendEmail({ to: email, subject: emailContent.subject, html: emailContent.html })
 

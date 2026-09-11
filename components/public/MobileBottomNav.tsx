@@ -28,6 +28,7 @@ export default function MobileBottomNav() {
           <Link
             key={tab.href}
             href={tab.href}
+            prefetch={false}
             className="flex-1 flex flex-col items-center justify-center gap-0.5"
           >
             <Icon size={22} className={active ? 'text-secondary' : 'text-gray-500'} />
@@ -42,7 +43,7 @@ export default function MobileBottomNav() {
         <Search size={22} className="text-gray-500" />
         <span className="text-[11px] text-gray-500">Search</span>
       </button>
-      <Link href="/checkout" className="flex-1 flex flex-col items-center justify-center gap-0.5 relative">
+      <Link href="/checkout" prefetch={false} className="flex-1 flex flex-col items-center justify-center gap-0.5 relative">
         <span className="relative">
           <ShoppingCart size={22} className={isActive('/checkout') ? 'text-secondary' : 'text-gray-500'} />
           {itemCount > 0 && (

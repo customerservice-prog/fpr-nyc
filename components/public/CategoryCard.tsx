@@ -2,7 +2,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 
-
 interface CategoryCardProps {
   name: string
   href: string
@@ -10,11 +9,10 @@ interface CategoryCardProps {
   displayStyle?: string
 }
 
-
 export default function CategoryCard({ name, href, image, displayStyle = 'boxed' }: CategoryCardProps) {
   if (displayStyle === 'image-only') {
     return (
-      <Link href={href} className="relative block w-full overflow-hidden" style={{ paddingTop: '75%' }}>
+      <Link href={href} prefetch={false} className="relative block w-full overflow-hidden" style={{ paddingTop: '75%' }}>
         {image ? (
           <Image src={image} alt={name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-contain bg-gray-50" />
         ) : (
@@ -26,7 +24,7 @@ export default function CategoryCard({ name, href, image, displayStyle = 'boxed'
 
   if (displayStyle === 'image-title') {
     return (
-      <Link href={href} className="block">
+      <Link href={href} prefetch={false} className="block">
         <div className="relative w-full overflow-hidden rounded" style={{ paddingTop: '75%' }}>
           {image ? (
             <Image src={image} alt={name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-contain bg-gray-50" />
@@ -41,7 +39,7 @@ export default function CategoryCard({ name, href, image, displayStyle = 'boxed'
 
   if (displayStyle === 'circled') {
     return (
-      <Link href={href} className="flex flex-col items-center">
+      <Link href={href} prefetch={false} className="flex flex-col items-center">
         <div className="relative w-32 h-32 rounded-full overflow-hidden border border-gray-200">
           {image ? (
             <Image src={image} alt={name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover" />
@@ -56,7 +54,7 @@ export default function CategoryCard({ name, href, image, displayStyle = 'boxed'
 
   if (displayStyle === 'minimal' || displayStyle === 'minimal-no-gutter') {
     return (
-      <Link href={href} className="block">
+      <Link href={href} prefetch={false} className="block">
         <div className="relative w-full overflow-hidden" style={{ paddingTop: '75%' }}>
           {image ? (
             <Image src={image} alt={name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-contain bg-gray-50" />
@@ -72,6 +70,7 @@ export default function CategoryCard({ name, href, image, displayStyle = 'boxed'
   return (
     <Link
       href={href}
+      prefetch={false}
       className="relative block w-full overflow-hidden rounded-lg shadow hover:shadow-lg transition-shadow"
       style={{ paddingTop: '75%' }}
     >

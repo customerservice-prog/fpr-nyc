@@ -18,7 +18,7 @@ interface CategoryRow {
 
 export default function CategoriesAdminPage() {
   const [categories, setCategories] = useState<CategoryRow[]>([])
-
+const [newCategoryName, setNewCategoryName] = useState('')
   useEffect(() => {
     fetch('/api/admin/categories')
       .then((r) => r.json())
@@ -74,7 +74,23 @@ export default function CategoriesAdminPage() {
     if (res.ok) toast.success('Category description updated')
     else toast.error('Failed to update category description')
   }
-
+const addCategory = async () => {
+  if (!newCategoryName.trim()) return
+  const res = await fetch('/api/admin/categories', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: newCategoryName.trim() }),
+  })
+  if (res.ok) {
+    const data = await res.json()
+    setCategories((prev) => [...prev, { ...data.category, items: [] }])
+    setNewCategoryName('')
+    toast.success('Category created')
+  } else {
+    toast.error('Failed to create category')
+  }
+}
+  
   const handlePictureFile = async (id: string, file: File | undefined) => {
     if (!file) return
     if (file.size > 5 * 1024 * 1024) {
@@ -110,7 +126,22 @@ export default function CategoriesAdminPage() {
         enables Overnight, Flexible Delivery, and Exact Time special request fees at checkout. Upload an
         image below to control the photo shown for that category on the public site.
       </p>
-      <div className="bg-white rounded shadow overflow-hidden">
+<div className="mb-4 flex items-center gap-2">
+<input
+  type="text"
+  value={newCategoryName}
+  onChange={(e) => setNewCategoryName(e.target.value)}
+  placeholder="New category name"
+  className="border rounded px-2 py-1 text-sm w-64"
+  />
+<button
+  onClick={addCategory}
+  className="bg-admin-green text-white text-sm font-medium rounded px-3 py-1.5 hover:opacity-90"
+  >
+Add New Category
+</button>
+  </div>
+    <div className="bg-white rounded shadow overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-admin-green text-white">
             <tr>

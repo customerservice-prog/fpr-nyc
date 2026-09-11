@@ -12,7 +12,7 @@ export async function GET() {
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const items = await prisma.item.findMany({
-      include: { category: true },
+      select: { id: true, name: true, cost: true, category: { select: { name: true } } },
       orderBy: { name: 'asc' },
       })
     const extras = await prisma.itemExtra.findMany()
@@ -37,6 +37,7 @@ export async function GET() {
 export async function PATCH(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as any).role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await request.json()
   if (!body.itemId) return NextResponse.json({ error: 'itemId required' }, { status: 400 })

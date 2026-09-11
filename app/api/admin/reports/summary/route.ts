@@ -37,10 +37,10 @@ prisma.payment.findMany({
         where: { createdAt: { gte: monthStart, lte: monthEnd } },
         select: { amount: true, notes: true },
 }),
-  prisma.order.aggregate({
-    _sum: { balanceDue: true },
-    _count: true,
-    where: { balanceDue: { gt: 0 }, status: { notIn: ['canceled', 'quote'] } },
+  prisma.order.findMany({ select: { totalAmount: true, amountPaid: true },
+    
+    
+    where: { status: { notIn: ['canceled', 'quote'] } },
   }),
   prisma.order.count(),
   prisma.order.count({ where: { createdAt: { gte: monthStart, lte: monthEnd } } }),
@@ -50,8 +50,7 @@ prisma.payment.findMany({
   prisma.customer.count({
     where: {
       createdAt: { gte: monthStart, lte: monthEnd },
-      orders: { some: { orderNumber: { not: { startsWith: 'ERS-' } } } },
-    },
+      orders: { some: { orderNumber: { not: { startsWith: 'ERS-' } } } }, },
   }),
   prisma.order.count({
     where: { eventDate: { gte: now, lte: in7Days }, status: { not: 'canceled' } },
@@ -60,7 +59,7 @@ prisma.payment.findMany({
     where: { eventDate: { gte: now, lte: in30Days }, status: { not: 'canceled' } },
   }),
   prisma.order.findMany({
-    where: { balanceDue: { gt: 0 }, status: { notIn: ['canceled', 'quote'] } },
+    where: { status: { notIn: ['canceled', 'quote'] } },
     orderBy: { eventDate: 'asc' },
     take: 25,
     include: { customer: true },
@@ -74,8 +73,8 @@ prisma.payment.findMany({
 
 const totalRevenue = totalRevenueAgg._sum.amountPaid || 0
   const revenueThisMonth = revenueThisMonthAgg.reduce((sum, p) => sum + p.amount, 0)
-  const outstandingBalance = outstandingAgg._sum.balanceDue || 0
-  const outstandingOrderCount = outstandingAgg._count || 0
+  const outstandingOrdersComputed = outstandingAgg.map((o) => Math.max((o.totalAmount || 0) - (o.amountPaid || 0), 0)).filter((b) => b > 0); const outstandingBalance = outstandingOrdersComputed.reduce((sum, b) => sum + b, 0)
+  const outstandingOrderCount = outstandingOrdersComputed.length
   const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
   const pendingPaymentsCount = pendingPaymentsAgg._count || 0
   const pendingPaymentsAmount = pendingPaymentsAgg._sum.pendingAmount || 0
@@ -86,17 +85,17 @@ const ordersByStatus = ordersByStatusRaw.map((s) => ({ status: s.status, count: 
     count: d._count,
   }))
 
-const balanceDueOrders = ordersWithBalance.map((o) => ({
+const balanceDueOrdersRaw = ordersWithBalance.map((o) => ({
   id: o.id,
   orderNumber: o.orderNumber,
   customerName: o.customer.firstName + ' ' + o.customer.lastName,
   eventDate: o.eventDate,
   totalAmount: o.totalAmount,
   amountPaid: o.amountPaid,
-  balanceDue: o.balanceDue,
+  balanceDue: Math.max((o.totalAmount || 0) - (o.amountPaid || 0), 0),
 }))
 
-return NextResponse.json({
+const balanceDueOrders = balanceDueOrdersRaw.filter((o) => o.balanceDue > 0).slice(0, 25); return NextResponse.json({
   totalRevenue,
   revenueThisMonth,
   outstandingBalance,

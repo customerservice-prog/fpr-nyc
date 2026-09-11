@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     for (const item of missing) {
       const categoryName = item.category?.name || 'party rental'
-      const description = `Rent the ${item.name} in Syracuse, NY from Friendly Party Rental. This ${categoryName.toLowerCase()} item is perfect for weddings, birthdays, graduations, and other special events. Starting at $${item.cost.toFixed(2)}/day. Serving Syracuse and the surrounding Central New York area — reserve yours online today!`
+      const description = `Rent the ${item.name} in Greenville, SC from Friendly Party Rental. This ${categoryName.toLowerCase()} item is perfect for weddings, birthdays, graduations, and other special events. Starting at $${item.cost.toFixed(2)}/day. Serving Greenville and the surrounding Upstate South Carolina area — reserve yours online today!`
       await prisma.item.update({
         where: { id: item.id },
         data: { description },

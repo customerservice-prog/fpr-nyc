@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getItemsWithAvailability, PUBLIC_ITEM_SELECT } from '@/lib/availability'
+import { getItemsWithAvailability, PUBLIC_ITEM_SELECT, withCategoryImage } from '@/lib/availability'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
@@ -20,7 +20,7 @@ if (!date) {
     select: PUBLIC_ITEM_SELECT,
     orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
   })
-      return NextResponse.json({ items }, { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=3600' } })
+      return NextResponse.json({ items: items.map(withCategoryImage) }, { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=3600' } })
 }
 
 const items = await getItemsWithAvailability(

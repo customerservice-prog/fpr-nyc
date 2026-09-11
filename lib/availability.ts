@@ -43,6 +43,18 @@ export const PUBLIC_ITEM_SELECT = {
   },
 } satisfies Prisma.ItemSelect
 
+// Attaches a lightweight, on-demand category image URL (served by the existing
+// /api/category-image/[slug] proxy route) without pulling the category's heavy
+// base64 picture data into this payload. This is what lets category tiles in the
+// order-builder show real photos again without reintroducing the payload-size
+// regression PUBLIC_ITEM_SELECT was trimmed down to fix.
+export function withCategoryImage<T extends { category: { slug: string } | null }>(item: T) {
+  return {
+    ...item,
+    category: item.category ? { ...item.category, picture: `/api/category-image/${item.category.slug}` } : null,
+  }
+}
+
 export async function getItemAvailability(itemId: string, date: Date): Promise<number> {
   const item = await prisma.item.findUnique({ where: { id: itemId } })
   if (!item) return 0
@@ -101,7 +113,7 @@ const [items, closedDate] = await Promise.all([
 
 // If the whole day is closed, nothing is available.
 if (closedDate) {
-  return items.map((item) => ({ ...item, available: 0 }))
+  return items.map((item) => withCategoryImage({ ...item, available: 0 }))
 }
 
 // Batch: pull ALL relevant order lines for this day in ONE query instead of
@@ -131,10 +143,10 @@ const bookedMap = new Map<string, number>()
 
 return items.map((item) => {
   if (item.bookableAfter && date < item.bookableAfter) {
-    return { ...item, available: 0 }
+    return withCategoryImage({ ...item, available: 0 })
   }
   const booked = bookedMap.get(item.id) || 0
-  return { ...item, available: Math.max(0, item.quantity - booked) }
+  return withCategoryImage({ ...item, available: Math.max(0, item.quantity - booked) })
 })
 }
 

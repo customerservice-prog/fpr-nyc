@@ -10,31 +10,40 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const items = await prisma.emailTemplateMarketing.findMany({ orderBy: { createdAt: 'desc' } })
   return NextResponse.json({ items })
-  }
+}
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as { role?: string }).role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
   const data = await request.json()
   const item = await prisma.emailTemplateMarketing.create({ data })
   return NextResponse.json({ item })
-  }
+}
 
 export async function PATCH(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as { role?: string }).role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
   const data = await request.json()
   const { id, ...rest } = data
   const item = await prisma.emailTemplateMarketing.update({ where: { id }, data: rest })
   return NextResponse.json({ item })
-  }
+}
 
 export async function DELETE(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as { role?: string }).role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
   await prisma.emailTemplateMarketing.delete({ where: { id } })
   return NextResponse.json({ success: true })
-  }
+}

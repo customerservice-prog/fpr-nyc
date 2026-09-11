@@ -251,7 +251,7 @@ export default function AdminDashboard() {
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {dayOrders.map((o) => {
-                    const isPaidInFull = (o.balanceDue || 0) <= 0.01
+                    const trueBalanceDue = Math.round(((o.totalAmount || 0) - (o.amountPaid || 0)) * 100) / 100; const isPaidInFull = trueBalanceDue <= 0.01
                     const headerColor = isPaidInFull ? 'bg-green-600' : (o.amountPaid || 0) > 0 ? 'bg-blue-600' : 'bg-gray-500'
                     const relation = dayRelation(o)
                     const relationLabel = relation === 'dropoff' ? '🚚 Drop-off Today' : relation === 'pickup' ? '📦 Pickup Today' : relation === 'single' ? '🚚📦 Drop-off & Pickup Today' : '⏳ Ongoing Rental (already delivered)'
@@ -308,10 +308,12 @@ export default function AdminDashboard() {
                             <div className="text-xs text-green-700 mb-1">Coupon{o.couponCode ? ` (${o.couponCode})` : ''}: -{money(o.couponDiscount)}</div>
                           )}
 
-                          {(o.balanceDue || 0) > 0.01 && (
-                            <p className="text-red-600 text-sm font-semibold mb-2">Due: {money(o.balanceDue)}</p>
+                          {trueBalanceDue > 0.01 && (
+                            <p className="text-red-600 text-sm font-semibold mb-2">Due: {money(trueBalanceDue)}</p>
                           )}
-
+                          {trueBalanceDue < -0.01 && (
+                            <p className="text-green-600 text-sm font-semibold mb-2">Overpaid by {money(Math.abs(trueBalanceDue))}</p>
+                          )}                          
                           <div className="text-xs text-gray-500 mb-2">
                             {o.eventAddress && <div>{o.eventAddress}</div>}
                             {(o.eventCity || o.eventZip) && <div>{o.eventCity}, {o.eventState} {o.eventZip}</div>}

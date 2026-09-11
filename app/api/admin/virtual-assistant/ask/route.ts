@@ -74,7 +74,7 @@ pickupTimeSlot: order.pickupTimeSlot || null,
 items: order.items.map((i: any) => ({ itemName: i.itemName, quantity: i.quantity, unitPrice: i.unitPrice })),
 totalAmount: order.totalAmount,
 amountPaid: order.amountPaid,
-balanceDue: order.balanceDue,
+balanceDue: Math.max((order.totalAmount || 0) - (order.amountPaid || 0), 0),
 notes: order.notes || null,
 internalNotes: order.internalNotes || null,
 driverName: order.driver ? order.driver.name : null,
@@ -157,6 +157,7 @@ answer:
 export async function POST(request: NextRequest) {
 const session = await getServerSession(authOptions)
 if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+if ((session.user as any).role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
 const body = await request.json()
 const q: string = (body.question || '').toString().trim()
@@ -246,11 +247,11 @@ return NextResponse.json({ answer: 'There are ' + todaysOrders.length + ' order(
 }
 
 if (qLower.includes('balance') && (qLower.includes('outstanding') || qLower.includes('total'))) {
-const agg = await prisma.order.aggregate({
-_sum: { balanceDue: true },
+const balanceOrders = await prisma.order.findMany({ select: { totalAmount: true, amountPaid: true },
+
 where: { status: { notIn: ['canceled', 'quote'] } },
 })
-return NextResponse.json({ answer: 'Total outstanding balance across active orders is ' + formatCurrency(agg._sum.balanceDue || 0) + '.' })
+const outstandingTotal = balanceOrders.reduce((sum, o) => sum + Math.max((o.totalAmount || 0) - (o.amountPaid || 0), 0), 0); return NextResponse.json({ answer: 'Total outstanding balance across active orders is ' + formatCurrency(outstandingTotal) + '.' })
 }
 
 // 5. Item / inventory stock lookup
@@ -324,7 +325,7 @@ pickupTimeSlot: order.pickupTimeSlot || null,
 items: (order.items || []).map((i: any) => ({ itemName: i.itemName, quantity: i.quantity, unitPrice: i.unitPrice })),
 totalAmount: order.totalAmount,
 amountPaid: order.amountPaid,
-balanceDue: order.balanceDue,
+balanceDue: Math.max((order.totalAmount || 0) - (order.amountPaid || 0), 0),
 notes: order.notes || null,
 internalNotes: order.internalNotes || null,
 driverName: order.driver ? order.driver.name : null,

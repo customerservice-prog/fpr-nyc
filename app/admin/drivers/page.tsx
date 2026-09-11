@@ -85,7 +85,7 @@ from the Delivery page, and routes can be sequenced per truck for the day.
 
 <div className="admin-card border-l-4 border-secondary flex flex-col sm:flex-row items-center gap-4">
 <img
-src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Fwww.friendlypartyrentalsc.com%2Fdriver"
+src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Fwww.friendlypartyrental.com%2Fdriver"
 alt="Driver App QR Code"
 width={160}
 height={160}
@@ -95,7 +95,7 @@ height={160}
 <p className="text-sm text-body mb-2">
 Have drivers scan this QR code with their phone camera to open the driver app. Once open, they can use their browser&apos;s &quot;Add to Home Screen&quot; option to install it for quick access like a regular app.
 </p>
-<a href="https://www.friendlypartyrentalsc.com/driver" target="_blank" rel="noopener noreferrer" className="text-secondary text-sm hover:underline">
+<a href="https://www.friendlypartyrental.com/driver" target="_blank" rel="noopener noreferrer" className="text-secondary text-sm hover:underline">
 Open Driver App &rarr;
 </a>
 </div>

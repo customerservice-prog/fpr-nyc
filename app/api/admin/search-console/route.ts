@@ -27,6 +27,7 @@ export async function GET() {
       rangeDays: 0,
       totals: { clicks: 0, impressions: 0, ctr: 0, position: 0 },
       topQueries: [],
+      trend: [],
     })
   }
 }

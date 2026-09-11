@@ -27,14 +27,24 @@ export async function POST(
                 return NextResponse.json({ error: 'This order is canceled. Automatic quote/receipt emails are blocked for canceled orders. Use the manual cancellation message option instead if you need to notify this customer.' }, { status: 400 })
     }
 
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.friendlypartyrentalsc.com'
+	let recipients: string[] = []
+	try {
+			const body = await request.json()
+			if (Array.isArray(body?.recipients)) {
+						recipients = body.recipients.filter((r: unknown) => typeof r === 'string' && r.trim()).map((r: string) => r.trim())
+			}
+	} catch {}
+	const toAddress = recipients.length > 0 ? recipients.join(', ') : order.customer.email
+	
+
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.friendlypartyrental.com'
         const payLink = `${origin}/pay/${order.id}`
 
     const amountDue = order.amountPaid > 0
-            ? order.balanceDue
+            ? Math.max(order.totalAmount - order.amountPaid, 0)
             : order.depositAmount > 0
             ? order.depositAmount
-                : order.balanceDue
+                : Math.max(order.totalAmount - order.amountPaid, 0)
 
     const catalogItems = await prisma.item.findMany({ select: { name: true, picture: true } })
 
@@ -91,7 +101,7 @@ export async function POST(
                 })
 
     const result = await sendEmail({
-                to: order.customer.email,
+                to: toAddress,
                 subject: emailContent.subject,
                 html: emailContent.html,
     })

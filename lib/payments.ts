@@ -20,7 +20,7 @@ export async function finalizePayment(input: {
 
   if (stripePaymentId) {
     const existing = await prisma.payment.findFirst({ where: { stripePaymentId } })
-    if (existing) {
+    if (existing) { console.warn(`[finalizePayment] Duplicate call for stripePaymentId=${stripePaymentId} on order ${orderId} - a Payment record already exists, skipping re-processing (receipt email, if any, was already sent by the original call).`)
       return prisma.order.findUnique({ where: { id: orderId }, include: { items: true, customer: true } })
     }
   }
@@ -33,7 +33,7 @@ export async function finalizePayment(input: {
   const tip = Number(tipAmount) || 0
   const newTotalAmount = order.totalAmount + tip
   const newAmountPaid = order.amountPaid + paidAmount
-  const newBalanceDue = Math.max(newTotalAmount - newAmountPaid, 0)
+  const newBalanceDue = Math.round((newTotalAmount - newAmountPaid) * 100) / 100
 
   let updated
     try {
@@ -62,7 +62,7 @@ export async function finalizePayment(input: {
     include: { items: { include: { item: true } }, customer: true, payments: true },
   })
     } catch (err: any) {
-          if (err?.code === 'P2002' && stripePaymentId) {
+          if (err?.code === 'P2002' && stripePaymentId) { console.warn(`[finalizePayment] Race condition: order.update hit P2002 (duplicate) for stripePaymentId=${stripePaymentId} on order ${orderId} - skipping this call's receipt email since another concurrent call already recorded the payment.`)
                   return prisma.order.findUnique({ where: { id: orderId }, include: { items: true, customer: true } })
           }
           throw err
@@ -98,7 +98,8 @@ export async function finalizePayment(input: {
     const email = updated.customer?.email || ''
     const isPlaceholderEmail = email.includes('@imported.friendlypartyrental.local') || email.startsWith('no-email-')
     const isCanceled = updated.status === 'canceled'
-    if (!skipEmail && email && !isPlaceholderEmail) {
+    if (!skipEmail) {
+      const canEmailCustomer = !!email && !isPlaceholderEmail
       const customerName = updated.customer.firstName + ' ' + updated.customer.lastName
       const sharedDetails = {
         eventAddress: updated.eventAddress,
@@ -112,6 +113,8 @@ export async function finalizePayment(input: {
         customerEmail: updated.customer.email,
       }
       if (isFirstPayment) {
+        const orderConfirmationSetting = await prisma.automaticMessage.findFirst({ where: { id: 'automsg_order_confirmation' } })
+        const orderConfirmationEnabled = orderConfirmationSetting?.enabled !== false
         const emailContent = orderConfirmationEmail({
           id: updated.id,
           orderNumber: updated.orderNumber,
@@ -122,11 +125,8 @@ export async function finalizePayment(input: {
           balanceDue: updated.balanceDue,
           items: updated.items.map((i) => ({ name: i.itemName, quantity: i.quantity, unitPrice: i.unitPrice, total: i.total, image: i.item?.picture || null })),
           ...sharedDetails,
-        })
-        if (!isCanceled && sendReceipt !== false) {
-          await sendEmail({ to: email, subject: emailContent.subject, html: emailContent.html })
-        }
-        await sendEmail({ to: BUSINESS.email, subject: '[Copy] ' + emailContent.subject, html: emailContent.html })
+        }, orderConfirmationSetting ?? undefined)
+if (orderConfirmationEnabled && canEmailCustomer && !isCanceled && sendReceipt !== false) { try { await sendEmail({ to: email, subject: emailContent.subject, html: emailContent.html }) } catch (err) { console.error('Customer email send failed:', err) } } try { await sendEmail({ to: BUSINESS.email, subject: '[Copy] ' + emailContent.subject, html: emailContent.html }) } catch (err) { console.error('Business copy email send failed:', err) }
       } else {
         const receiptContent = paymentReceiptEmail({
           id: updated.id,
@@ -148,14 +148,11 @@ export async function finalizePayment(input: {
           payments: (updated.payments || []).map((p) => ({ amount: p.amount, method: p.method, createdAt: formatDate(p.createdAt), recordedByName: p.recordedByName })),
           ...sharedDetails,
         })
-        if (!isCanceled && sendReceipt !== false) {
-          await sendEmail({ to: email, subject: receiptContent.subject, html: receiptContent.html })
-        }
-        await sendEmail({ to: BUSINESS.email, subject: '[Copy] ' + receiptContent.subject, html: receiptContent.html })
+if (canEmailCustomer && !isCanceled && sendReceipt !== false) { try { await sendEmail({ to: email, subject: receiptContent.subject, html: receiptContent.html }) } catch (err) { console.error('Customer email send failed:', err) } } try { await sendEmail({ to: BUSINESS.email, subject: '[Copy] ' + receiptContent.subject, html: receiptContent.html }) } catch (err) { console.error('Business copy email send failed:', err) }
       }
     }
   } catch (err) {
-    console.error('Payment confirmation email error:', err)
+    console.error(`[finalizePayment] Payment confirmation email error for order ${orderId}:`, err)
   }
 
   return updated
@@ -172,7 +169,7 @@ export async function removePayment(paymentId: string) {
 
   const remainingPayments = order.payments.filter((p) => p.id !== paymentId)
   const newAmountPaid = remainingPayments.reduce((sum, p) => sum + p.amount, 0)
-  const newBalanceDue = Math.max(order.totalAmount - newAmountPaid, 0)
+    const newBalanceDue = Math.round((order.totalAmount - newAmountPaid) * 100) / 100
 
   const updated = await prisma.order.update({
     where: { id: order.id },

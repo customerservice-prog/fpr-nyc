@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { stripe } from "@/lib/stripe"
 import { finalizePayment } from "@/lib/payments"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 // Reconciles this order's payment records against Stripe directly.
 // This exists because relying only on the client-side confirm-payment
@@ -17,6 +19,10 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if ((session.user as any).role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
     if (!stripe) {
       return NextResponse.json({ error: "Stripe is not configured" }, { status: 400 })
     }

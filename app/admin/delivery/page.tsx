@@ -52,7 +52,7 @@ eventAddress?: string
 eventCity?: string
 eventState?: string
 eventZip?: string
-balanceDue: number
+balanceDue: number; amountPaid: number
 totalAmount: number
 driverId: string | null
 driverName: string | null
@@ -67,7 +67,7 @@ notes: string | null
 contractSignedAt: string | null
 setupSurface: string | null
 isPublicPark: boolean
-customer: { firstName: string; lastName: string; phone?: string }
+customer: { firstName: string; lastName: string; phone?: string }; dayOfContact?: { name: string; phone?: string | null; note?: string | null } | null
 items: Array<{ itemName: string; quantity: number }>
 }
 
@@ -494,14 +494,14 @@ return (
 {o.notes && (<p className="text-xs bg-yellow-100 text-yellow-900 rounded px-1 py-0.5 mt-1 inline-block">{o.notes}</p>)}
 {o.setupSurface && (<p className="text-xs text-body">Surface: {o.setupSurface}</p>)}
 {o.isPublicPark && (<p className="text-xs text-red-600 font-semibold">Public Park - generator required</p>)}
-{o.customer.phone && <p className="text-sm text-body">{o.customer.phone}</p>}
+{o.customer.phone && <p className="text-sm text-body">{o.customer.phone}</p>}{o.dayOfContact && (<p className="text-xs text-amber-700 font-medium mt-0.5">Day-Of: {o.dayOfContact.name}{o.dayOfContact.phone ? ' - ' + o.dayOfContact.phone : ''}</p>)}
 {o.items.length > 0 && (
 <p className="text-xs text-body mt-1">{o.items.map((i) => i.itemName + ' x' + i.quantity).join(', ')}</p>
 )}
 </div>
 <div className="text-right">
-<p className={'text-sm font-semibold ' + (o.balanceDue > 0 ? 'text-red-600' : 'text-green-700')}>
-{o.balanceDue > 0 ? ('Balance: ' + formatCurrency(o.balanceDue)) : 'Paid in Full'}
+<p className={'text-sm font-semibold ' + ((o.totalAmount - (o.amountPaid || 0)) > 0.01 ? 'text-red-600' : (o.totalAmount - (o.amountPaid || 0)) < -0.01 ? 'text-green-700' : 'text-green-700')}>
+{(o.totalAmount - (o.amountPaid || 0)) > 0.01 ? ('Balance: ' + formatCurrency(o.totalAmount - (o.amountPaid || 0))) : (o.totalAmount - (o.amountPaid || 0)) < -0.01 ? ('Overpaid by ' + formatCurrency(Math.abs(o.totalAmount - (o.amountPaid || 0)))) : 'Paid in Full'}
 </p>
 <Link href={'/admin/orders/' + o.id} className="btn-outline text-xs mt-1 inline-block">View</Link>
 </div>
@@ -547,7 +547,7 @@ return (
     </div>
     <p className="text-sm text-body mt-1">{o.eventAddress}{o.eventCity ? (', ' + o.eventCity) : ''} {o.eventState} {o.eventZip}</p>
     <p className="text-xs text-body mt-1">Pickup time: {formatTimeSlot(o.pickupTimeSlot) || 'Not specified'}</p>
-      {o.customer.phone && <p className="text-sm text-body">{o.customer.phone}</p>}
+      {o.customer.phone && <p className="text-sm text-body">{o.customer.phone}</p>}{o.dayOfContact && (<p className="text-xs text-amber-700 font-medium mt-0.5">Day-Of: {o.dayOfContact.name}{o.dayOfContact.phone ? ' - ' + o.dayOfContact.phone : ''}</p>)}
       {o.items.length > 0 && (
       <p className="text-xs text-body mt-1">{o.items.map((i) => i.itemName + ' x' + i.quantity).join(', ')}</p>
     )}

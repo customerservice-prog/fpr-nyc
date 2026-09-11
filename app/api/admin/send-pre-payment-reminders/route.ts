@@ -5,7 +5,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, prePaymentReminderEmail } from '@/lib/email'
-import { formatDate } from '@/lib/utils'
 
 // One-time, manually-triggered batch sender for the 3-day pre-payment reminder.
 // Only processes the exact orderIds passed in the request body. Never runs on a schedule.
@@ -27,6 +26,11 @@ export async function POST(request: NextRequest) {
   const origin = process.env.NEXTAUTH_URL || request.nextUrl.origin
     const results: any[] = []
 
+        const setting = await prisma.automaticMessage.findFirst({ where: { id: 'automsg_prepay_letter' } })
+        if (!setting) {
+                  return NextResponse.json({ error: 'Pre-Pay Letter automatic message is not configured' }, { status: 500 })
+        }
+
         for (const id of orderIds) {
               const order = await prisma.order.findUnique({
                       where: { id },
@@ -43,7 +47,7 @@ export async function POST(request: NextRequest) {
               continue
       }
 
-      if (!order.balanceDue || order.balanceDue <= 0) {
+      if (Math.max((order.totalAmount || 0) - (order.amountPaid || 0), 0) <= 0) {
               results.push({ orderId: id, orderNumber: order.orderNumber, skipped: true, reason: 'no balance due' })
               continue
       }
@@ -54,40 +58,27 @@ export async function POST(request: NextRequest) {
                       continue
               }
 
-      const payLink = `${origin}/pay/${order.id}`
-            const contractLink = origin + '/contract/' + order.id
-              const customerName = `${order.customer.firstName} ${order.customer.lastName}`
-              const eventDate = formatDate(order.eventDate)
+const payLink = `${origin}/pay/${order.id}`
+                  const customerName = `${order.customer.firstName} ${order.customer.lastName}`
 
-      const emailContent = prePaymentReminderEmail({
-              orderNumber: order.orderNumber,
-              customerName,
-              eventDate,
-              eventAddress: order.eventAddress,
-              eventCity: order.eventCity,
-              eventState: order.eventState,
-              eventZip: order.eventZip,
-              deliveryType: order.deliveryType,
-              eventTimeSlot: order.eventTimeSlot,
-              pickupTimeSlot: order.pickupTimeSlot,
-              balanceDue: order.balanceDue,
-              payLink,
-          contractLink,
-      })
+                  const emailContent = prePaymentReminderEmail(
+                      { subject: setting.subject, content: setting.content },
+                      { orderNumber: order.orderNumber, payLink }
+                            )
 
-      if (dryRun) {
-              results.push({
-                        orderId: id,
-                        orderNumber: order.orderNumber,
-              customerName,
-                        to: email,
-                        subject: emailContent.subject,
-                        balanceDue: order.balanceDue,
-                        payLink,
-                        dryRun: true,
-              })
-              continue
-      }
+                  if (dryRun) {
+                              results.push({
+                                            orderId: id,
+                                            orderNumber: order.orderNumber,
+                                            customerName,
+                                            to: email,
+                                            subject: emailContent.subject,
+                                            balanceDue: Math.max((order.totalAmount || 0) - (order.amountPaid || 0), 0),
+                                            payLink,
+                                            dryRun: true,
+                              })
+                              continue
+                  }
 
       const sendResult = await sendEmail({
               to: email,
@@ -100,7 +91,7 @@ export async function POST(request: NextRequest) {
               orderNumber: order.orderNumber,
               customerName,
               to: email,
-              balanceDue: order.balanceDue,
+              balanceDue: Math.max((order.totalAmount || 0) - (order.amountPaid || 0), 0),
               sent: sendResult.success,
               simulated: (sendResult as any).simulated || false,
       })

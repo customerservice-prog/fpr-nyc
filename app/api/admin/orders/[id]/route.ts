@@ -41,7 +41,7 @@ export async function GET(
       },
       items: true,
       payments: { orderBy: { createdAt: 'desc' } },
-contacts: { orderBy: { createdAt: 'asc' } },
+      contacts: { orderBy: { createdAt: 'asc' } },
     },
   })
 
@@ -55,6 +55,7 @@ export async function PUT(
 ) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const isAdmin = (session.user as any)?.role === 'admin'
 
   const body = await request.json()
 
@@ -71,7 +72,10 @@ export async function PUT(
   const order = await prisma.order.update({
     where: { id: (await params).id },
     data: {
-      orderNumber: body.orderNumber,
+      // Financial totals, pricing overrides, order numbering and line items are
+      // admin-only. Non-admin (e.g. staff/VA) sessions may still update core
+      // logistics fields below but cannot alter money-affecting data.
+      orderNumber: isAdmin ? body.orderNumber : undefined,
       status: body.status,
       internalNotes: body.internalNotes, followUpsPaused: typeof body.followUpsPaused === 'boolean' ? body.followUpsPaused : undefined,
       eventDate: body.eventDate ? new Date(body.eventDate) : undefined,
@@ -80,32 +84,32 @@ export async function PUT(
       eventCity: body.eventCity,
       eventState: body.eventState,
       eventZip: body.eventZip,
-   notes: body.notes, deliveryType: body.deliveryType,
+      notes: body.notes, deliveryType: body.deliveryType,
       eventTimeSlot: body.eventTimeSlot,
       pickupTimeSlot: body.pickupTimeSlot,
       setupSurface: body.setupSurface,
       isPublicPark: body.isPublicPark,
       referenceSource: body.referenceSource,
-      specialRequestFee: body.specialRequestFee,
+      specialRequestFee: isAdmin ? body.specialRequestFee : undefined,
       specialRequestNames: body.specialRequestNames,
-      balanceDue: safeBalanceDue,
-      amountPaid: body.amountPaid,
-      
-      subtotal: safeSubtotal,
-      taxRate: body.taxRate,
-      taxAmount: safeTaxAmount,
-      deliveryFee: body.deliveryFee,
-      totalAmount: safeTotalAmount,
-      depositAmount: body.depositAmount,
-      prePayReminderDisabled: body.prePayReminderDisabled,
-      scheduleApprovedUnpaid: body.scheduleApprovedUnpaid,
+      balanceDue: isAdmin ? safeBalanceDue : undefined,
+      amountPaid: isAdmin ? body.amountPaid : undefined,
+
+      subtotal: isAdmin ? safeSubtotal : undefined,
+      taxRate: isAdmin ? body.taxRate : undefined,
+      taxAmount: isAdmin ? safeTaxAmount : undefined,
+      deliveryFee: isAdmin ? body.deliveryFee : undefined,
+      totalAmount: isAdmin ? safeTotalAmount : undefined,
+      depositAmount: isAdmin ? body.depositAmount : undefined,
+      prePayReminderDisabled: isAdmin ? body.prePayReminderDisabled : undefined,
+      scheduleApprovedUnpaid: isAdmin ? body.scheduleApprovedUnpaid : undefined,
       locationName: body.locationName,
-      generalDiscount: body.generalDiscount,
-      overrideTravelFee: body.overrideTravelFee,
-      overrideDepositAmount: body.overrideDepositAmount,
-      overrideTaxAmount: body.overrideTaxAmount, overrideDamageWaiverFee: body.overrideDamageWaiverFee, damageWaiverFee: body.damageWaiverFee,
-      miscellaneousFees: body.miscellaneousFees,
-      items: body.items ? {
+      generalDiscount: isAdmin ? body.generalDiscount : undefined,
+      overrideTravelFee: isAdmin ? body.overrideTravelFee : undefined,
+      overrideDepositAmount: isAdmin ? body.overrideDepositAmount : undefined,
+      overrideTaxAmount: isAdmin ? body.overrideTaxAmount : undefined, overrideDamageWaiverFee: isAdmin ? body.overrideDamageWaiverFee : undefined, damageWaiverFee: isAdmin ? body.damageWaiverFee : undefined,
+      miscellaneousFees: isAdmin ? body.miscellaneousFees : undefined,
+      items: (isAdmin && body.items) ? {
         deleteMany: {},
         create: body.items.map((i: any) => ({
           itemId: i.itemId || undefined,
@@ -156,6 +160,7 @@ export async function DELETE(
 ) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as any)?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   await prisma.order.delete({ where: { id: (await params).id } })
   return NextResponse.json({ success: true })

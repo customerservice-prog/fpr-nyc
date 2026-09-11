@@ -9,6 +9,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const session = await getServerSession(authOptions)
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    const role = (session.user as any).role
+    if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
     const body = await request.json()
     const pkg = await prisma.weddingPackage.update({
         where: { id: (await params).id },
@@ -31,6 +34,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const session = await getServerSession(authOptions)
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const role = (session.user as any).role
+    if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
     await prisma.weddingPackage.delete({ where: { id: (await params).id } })
     return NextResponse.json({ ok: true })

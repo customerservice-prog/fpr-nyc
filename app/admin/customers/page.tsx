@@ -10,6 +10,8 @@ firstName: string
 lastName: string
 email: string
 phone?: string
+doNotRent?: boolean
+  restrictionStatus?: 'RESTRICTED' | 'ADDRESS_RESTRICTED' | null
 orderCount: number
 totalSpent: number
 balanceDue: number
@@ -97,6 +99,8 @@ className="border border-gray-300 rounded px-3 py-2 text-sm w-full max-w-md"
 <Link href={'/admin/customers/' + c.id} className="text-secondary hover:underline font-medium">
 {c.firstName} {c.lastName}
 </Link>
+  {c.restrictionStatus === 'RESTRICTED' && <span className="ml-2 inline-block px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700">Do Not Rent</span>}
+  {c.restrictionStatus === 'ADDRESS_RESTRICTED' && <span className="ml-2 inline-block px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-700">Restricted Address</span>}
 </td>
 <td className="px-4 py-3">{c.email && c.email.includes('@imported.friendlypartyrental.local') ? <span className="text-amber-600 italic text-xs" title="Placeholder email imported from ERS — needs a real email on file">⚠ Missing email</span> : c.email}</td>
 <td className="px-4 py-3">{c.phone || '-'}</td>

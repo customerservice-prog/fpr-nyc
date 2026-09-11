@@ -10,46 +10,53 @@ export async function GET() {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-const categories = await prisma.category.findMany({
-  include: { items: { select: { id: true } } },
-  orderBy: { sortOrder: 'asc' },
-})
+  const categories = await prisma.category.findMany({
+    include: { items: { select: { id: true } } },
+    orderBy: { sortOrder: 'asc' },
+  })
 
-return NextResponse.json({ categories })
+  const lightCategories = categories.map((c) => ({ ...c, picture: c.picture ? `/api/category-image/${c.slug}` : null }))
+    return NextResponse.json({ categories: lightCategories })
 }
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as any)?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
-const body = await request.json()
+  const body = await request.json()
   const { slugify } = await import('@/lib/utils')
 
-const category = await prisma.category.create({
-  data: {
-    name: body.name,
-    slug: body.slug || slugify(body.name),
-    description: body.description,
-    picture: body.picture,
-    displayToCustomer: body.displayToCustomer ?? true,
-    scheduleProfile: body.scheduleProfile,
-    pricingProfile: body.pricingProfile || 'standard',
-    sortOrder: body.sortOrder || 0,
-  },
-})
+  const category = await prisma.category.create({
+    data: {
+      name: body.name,
+      slug: body.slug || slugify(body.name),
+      description: body.description,
+      picture: body.picture,
+      displayToCustomer: body.displayToCustomer ?? true,
+      scheduleProfile: body.scheduleProfile,
+      pricingProfile: body.pricingProfile || 'standard',
+      sortOrder: body.sortOrder || 0,
+    },
+  })
 
-revalidatePath('/')
-return NextResponse.json({ category })
+  revalidatePath('/')
+  return NextResponse.json({ category })
 }
 
 export async function PATCH(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as any)?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
-const body = await request.json()
+  const body = await request.json()
   if (!body.id) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
-const data: Record<string, unknown> = {}
+  const data: Record<string, unknown> = {}
   if ('name' in body) {
     data.name = body.name
   }
@@ -72,9 +79,9 @@ const data: Record<string, unknown> = {}
     data.pricingProfile = body.pricingProfile
   }
 
-if ('sortOrder' in body) {
-  data.sortOrder = parseInt(body.sortOrder)
-}
+  if ('sortOrder' in body) {
+    data.sortOrder = parseInt(body.sortOrder)
+  }
   if ('picture' in body) {
     data.picture = body.picture
   }
@@ -86,10 +93,10 @@ if ('sortOrder' in body) {
     data,
   })
 
-revalidatePath('/')
+  revalidatePath('/')
   revalidatePath(`/category/${category.slug}`)
-if ('picture' in data) {
-  revalidatePath(`/api/category-image/${category.slug}`)
-}
-return NextResponse.json({ category })
+  if ('picture' in data) {
+    revalidatePath(`/api/category-image/${category.slug}`)
+  }
+  return NextResponse.json({ category })
 }

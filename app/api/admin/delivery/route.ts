@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
   const orders = await prisma.order.findMany({
     where,
     include: {
-      customer: true,
+      customer: true, contacts: true,
       items: { select: { itemName: true, quantity: true } },
       driver: true,
       pickupDriver: true,
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     eventState: o.eventState,
     eventZip: o.eventZip,
     balanceDue: o.balanceDue,
-    totalAmount: o.totalAmount,
+    totalAmount: o.totalAmount, amountPaid: o.amountPaid,
     driverId: o.driverId,
     driverName: o.driver?.name || null,
     pickupDriverId: o.pickupDriverId,
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
     contractSignedAt: o.contractSignedAt,
     setupSurface: o.setupSurface,
     isPublicPark: o.isPublicPark,
-    customer: {
+    dayOfContact: (() => { const d = (o.contacts || []).find((c: any) => c.role === 'Day-Of'); return d ? { name: d.name, phone: d.phone, note: d.note } : null })(), customer: {
       firstName: o.customer.firstName,
       lastName: o.customer.lastName,
       phone: o.customer.phone,
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
   const pickupOrdersRaw = await prisma.order.findMany({
     where: pickupWhere,
     include: {
-      customer: true,
+      customer: true, contacts: true,
       items: { select: { itemName: true, quantity: true } },
       driver: true,
       pickupDriver: true,
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
     eventState: o.eventState,
     eventZip: o.eventZip,
     balanceDue: o.balanceDue,
-    totalAmount: o.totalAmount,
+    totalAmount: o.totalAmount, amountPaid: o.amountPaid,
     driverId: o.driverId,
     driverName: o.driver?.name || null,
     pickupDriverId: o.pickupDriverId,
@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
     contractSignedAt: o.contractSignedAt,
     setupSurface: o.setupSurface,
     isPublicPark: o.isPublicPark,
-    customer: {
+    dayOfContact: (() => { const d = (o.contacts || []).find((c: any) => c.role === 'Day-Of'); return d ? { name: d.name, phone: d.phone, note: d.note } : null })(), customer: {
       firstName: o.customer.firstName,
       lastName: o.customer.lastName,
       phone: o.customer.phone,

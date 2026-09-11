@@ -37,7 +37,7 @@ interface Stop {
   lng: number | null
 }
 
-const GREENVILLE_CENTER: [number, number] = [34.8526, -82.3940]
+const GREENVILLE_CENTER: [number, number] = [34.8472, -82.406]
 const ROUTE_COLORS = ['#1e3a8a', '#7c3aed', '#0d9488', '#b45309', '#be185d', '#4338ca', '#0369a1', '#65a30d']
 
 function groupStopsByDriver(stops: Stop[]) {
@@ -77,8 +77,8 @@ function formatActualTime(iso: string | null | undefined): string | null {
 
 const SLOT_LABELS: Record<string, string> = {
   morning: 'Morning (8am - 12pm)',
-  afternoon: 'Afternoon (12pm - 7pm)',
-  evening: 'Evening Drop-off (4pm - 8pm)',
+  afternoon: 'Afternoon (12pm - 4pm)',
+  evening: 'Evening (4pm - 7pm)',
   overnight: 'Overnight Rental',
   same_evening: 'Same Day Evening Pickup',
   next_morning: 'Next Day Morning Pickup',

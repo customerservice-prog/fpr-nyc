@@ -1,6 +1,7 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
   url = env("DATABASE_URL")
@@ -85,6 +86,10 @@ model Customer {
   zip String?
   notes String?
   creditStatus String @default("good")
+  doNotRent Boolean @default(false)
+  doNotRentNote String?
+  unsubscribedFromMarketing Boolean @default(false)
+  unsubscribedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   orders Order[]
@@ -198,6 +203,30 @@ model Order {
   // before it appears on the admin schedule/calendar. Existing orders were
   // backfilled to true; new orders default to false until paid or approved.
   scheduleApprovedUnpaid Boolean @default(false)
+
+  // --- Rental Restriction ("Do Not Rent") safety fields ---
+  // These record a one-time manager override of an active rental restriction
+  // for THIS order only. The underlying RentalRestriction record is never
+  // modified or deactivated by an override - it remains active for all
+  // future bookings unless a staff member explicitly deactivates it.
+  restrictionOverrideAt DateTime?
+  restrictionOverrideByName String?
+  restrictionOverrideReason String?
+  restrictionMatchedIds String[] @default([])
+
+  // --- Delivery / Pickup scheduling redesign (event time vs delivery window vs exact-time premium service) ---
+  eventStartTime String?
+  eventEndTime String?
+  deliveryWindowStart String?
+  deliveryWindowEnd String?
+  exactDeliveryRequested Boolean @default(false)
+  exactDeliveryTime String?
+  exactDeliveryFee Float @default(0)
+  pickupType String @default("flexible") // flexible | requiredBy | exact
+  pickupRequiredByTime String?
+  exactPickupTime String?
+  exactPickupFee Float @default(0)
+  latePickupApprovalRequired Boolean @default(false)
 }
 
 model OrderItem {
@@ -225,6 +254,19 @@ model Payment {
   pendingAmount Float?
   recordedByName String?
   createdAt DateTime @default(now())
+}
+
+model OrderContact {
+  id String @id @default(cuid())
+  orderId String
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  name String
+  role String @default("Other")
+  phone String?
+  email String?
+  note String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ClosedDate {
@@ -765,7 +807,6 @@ model DriverLocation {
   recordedAt DateTime @default(now())
 }
 
-
 model DriverTimeEntry {
   id String @id @default(cuid())
   driverId String
@@ -774,7 +815,6 @@ model DriverTimeEntry {
   clockOut DateTime?
   createdAt DateTime @default(now())
 }
-
 
 model ThemeSettings {
   id String @id @default(cuid())
@@ -793,7 +833,6 @@ model ThemeSettings {
   updatedAt DateTime @updatedAt
 }
 
-
 model PageCustomCode {
   id String @id @default(cuid())
   slug String @unique
@@ -801,16 +840,193 @@ model PageCustomCode {
   updatedAt DateTime @updatedAt
 }
 
+// --- Rental Restriction ("Do Not Rent") system ---
+// A RentalRestriction is a single staff-created "case" (e.g. one incident)
+// that can carry multiple matching identifiers (customer, email, phone,
+// address). Matching ANY active identifier blocks a new online booking.
+// See lib/rentalRestrictions.ts for normalization + matching logic.
+model RentalRestriction {
+  id String @id @default(cuid())
+  status String @default("ACTIVE") // ACTIVE | INACTIVE
+  reasonCategory String
+  internalNotes String?
 
-model OrderContact {
-  id        String   @id @default(cuid())
-  orderId   String
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  name      String
-  role      String   @default("Other")
-  phone     String?
-  email     String?
-  note      String?
+  // Snapshot references only (plain strings, not relations) so this record
+  // remains meaningful even if the source order/customer is later deleted.
+  sourceOrderId String?
+  sourceOrderNumber String?
+  sourceCustomerId String?
+
+  createdByName String?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime?
+
+  deactivatedAt DateTime?
+  deactivatedByName String?
+  deactivationReason String?
+
+  identifiers RentalRestrictionIdentifier[]
+
+  @@index([status])
+}
+
+model RentalRestrictionIdentifier {
+  id String @id @default(cuid())
+  restrictionId String
+  restriction RentalRestriction @relation(fields: [restrictionId], references: [id], onDelete: Cascade)
+
+  type String // CUSTOMER_ID | EMAIL | PHONE | ADDRESS
+  normalizedValue String
+  displayValue String
+
+  // CUSTOMER_ID identifiers store the Customer.id here (plain string, no FK
+  // relation - if the customer is deleted the identifier simply stops
+  // matching anything, which is the desired safe behavior).
+  customerIdRef String?
+
+  // ADDRESS identifiers only:
+  addressScope String? // EXACT_UNIT | ENTIRE_PROPERTY
+  addressStreet String?
+  addressUnit String?
+  addressCity String?
+  addressState String?
+  addressZip String?
+
+  createdAt DateTime @default(now())
+
+  @@index([type, normalizedValue])
+  @@index([restrictionId])
+}
+
+// A logged attempt where an online booking matched an active restriction and
+// was NOT allowed to complete. No Order, Customer, or inventory reservation
+// is ever created for a blocked attempt - this is purely a record so staff
+// can help the customer if they call in.
+model RestrictedCheckoutAttempt {
+  id String @id @default(cuid())
+  attemptedAt DateTime @default(now())
+  firstName String?
+  lastName String?
+  email String?
+  phone String?
+  eventAddress String?
+  eventCity String?
+  eventState String?
+  eventZip String?
+  eventDate DateTime?
+  cartSummary String?
+  matchedRestrictionIds String[] @default([])
+  matchTypes String[] @default([])
+  status String @default("UNRESOLVED") // UNRESOLVED | CONTACTED | RESOLVED
+  attemptCount Int @default(1)
+
+  @@index([status])
+}
+
+model HomeHeroDraft {
+  id                   String   @id @default(cuid())
+  mobileImageUrl       String
+  desktopImageUrl      String?
+  focalX               Float    @default(0.5)
+  focalY               Float    @default(0.5)
+  primaryActionType    String   @default("NAVIGATE_PAGE")
+  primaryActionValue   String
+  primaryPosLeft       Float
+  primaryPosTop        Float
+  primaryPosWidth      Float
+  primaryPosHeight     Float
+  secondaryActionType  String   @default("NAVIGATE_PAGE")
+  secondaryActionValue String
+  secondaryPosLeft     Float
+  secondaryPosTop      Float
+  secondaryPosWidth    Float
+  secondaryPosHeight   Float
+  baseRevisionNumber   Int      @default(0)
+  updatedAt            DateTime @updatedAt
+}
+
+model HomeHeroRevision {
+  id                   String   @id @default(cuid())
+  revisionNumber       Int      @unique
+  isCurrent            Boolean  @default(false)
+  mobileImageUrl       String
+  desktopImageUrl      String?
+  focalX               Float    @default(0.5)
+  focalY               Float    @default(0.5)
+  primaryActionType    String   @default("NAVIGATE_PAGE")
+  primaryActionValue   String
+  primaryPosLeft       Float
+  primaryPosTop        Float
+  primaryPosWidth      Float
+  primaryPosHeight     Float
+  secondaryActionType  String   @default("NAVIGATE_PAGE")
+  secondaryActionValue String
+  secondaryPosLeft     Float
+  secondaryPosTop      Float
+  secondaryPosWidth    Float
+  secondaryPosHeight   Float
+  changeSummary        String?
+  createdAt            DateTime @default(now())
+}
+
+model HomeContentDraft {
+  id                 String   @id @default(cuid())
+  content            Json
+  baseRevisionNumber Int      @default(0)
+  updatedAt          DateTime @updatedAt
+}
+
+model HomeContentRevision {
+  id             String   @id @default(cuid())
+  revisionNumber Int      @unique
+  isCurrent      Boolean  @default(false)
+  content        Json
+  createdAt      DateTime @default(now())
+}
+
+model HomeDraft {
+  id                 String   @id @default(cuid())
+  hero               Json
+  content            Json
+  baseRevisionNumber Int      @default(0)
+  updatedAt          DateTime @updatedAt
+}
+
+model HomeRevision {
+  id             String   @id @default(cuid())
+  revisionNumber Int      @unique
+  isCurrent      Boolean  @default(false)
+  hero           Json
+  content        Json
+  changeSummary  String?
+  createdAt      DateTime @default(now())
+}
+
+
+model ExactTimeSlot {
+  id String @id @default(cuid())
+  date DateTime
+  time String
+  type String // delivery | pickup
+  capacity Int @default(1)
+  bookedCount Int @default(0)
+  isBlocked Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([date, time, type])
+}
+
+model ExactTimeSettings {
+  id String @id @default(cuid())
+  enabled Boolean @default(true)
+  startHour Int @default(9)
+  endHour Int @default(20)
+  defaultCapacityPerSlot Int @default(1)
+  exactDeliveryFee Float @default(50)
+  eveningFee1 Float @default(50)
+  eveningFee2 Float @default(75)
+  lateNightFee Float @default(125)
   updatedAt DateTime @updatedAt
 }

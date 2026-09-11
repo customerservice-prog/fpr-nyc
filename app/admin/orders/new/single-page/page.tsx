@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { findPoleTentSurfaceIssue } from '@/lib/tentSurfaceRules'
+import { findPoleTentSurfaceIssue, findFrameTentSurfaceIssue } from '@/lib/tentSurfaceRules'
 
 interface CatalogItem {
   id: string
@@ -50,8 +50,8 @@ const EXACT_TIME_OPTIONS = generateExactTimeOptions()
 
 const DROPOFF_SLOTS = [
   { value: 'morning', label: 'Morning (8am - 12pm)' },
-  { value: 'afternoon', label: 'Afternoon (12pm - 7pm)' },
-  { value: 'evening', label: 'Evening Drop-off (4pm - 8pm)' },
+  { value: 'afternoon', label: 'Afternoon (12pm - 4pm)' },
+  { value: 'evening', label: 'Evening (4pm - 7pm)' },
   { value: 'overnight', label: 'Overnight Rental (picked up the next day)' },
   ...EXACT_TIME_OPTIONS,
 ]
@@ -280,7 +280,7 @@ function NewOrderPageInner() {
     }
   }
 
-  const applyCoupon = async () => {
+  useEffect(() => { if (form.deliveryType !== 'delivery') return; if (!effectiveEventZip || effectiveEventZip.trim().length < 5) return; const travelFeeTimer = setTimeout(() => { calculateTravelFee() }, 500); return () => clearTimeout(travelFeeTimer) }, [effectiveEventZip, form.deliveryType]); const applyCoupon = async () => {
     if (!couponCode.trim()) return
     setApplyingCoupon(true)
     try {
@@ -336,7 +336,7 @@ function NewOrderPageInner() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, overrideReason?: string) => {
     e.preventDefault()
     if (items.length === 0) {
       toast.error('Add at least one item to the order')
@@ -350,7 +350,7 @@ function NewOrderPageInner() {
       toast.error('The electrical requirement for inflatable equipment must be acknowledged')
       return
     }
-    const poleIssue = findPoleTentSurfaceIssue(items, form.setupSurface)
+    const poleIssue = findPoleTentSurfaceIssue(items, form.setupSurface); const frameIssue = findFrameTentSurfaceIssue(items, form.setupSurface); if (frameIssue && !window.confirm(frameIssue + ' Create order anyway?')) { return }
     if (poleIssue && !window.confirm(poleIssue + '\n\nCreate order anyway?')) {
       return
     }
@@ -405,6 +405,7 @@ function NewOrderPageInner() {
             })),
             ...(exactTimeFeeAmount > 0 ? [{ itemName: (exactTimeFee ? exactTimeFee.name : "Exact Time") + " Fee", quantity: 1, unitPrice: exactTimeFeeAmount }] : []),
           ],
+          restrictionOverride: overrideReason ? { reason: overrideReason } : undefined,
         }),
       })
       if (res.ok) {
@@ -412,13 +413,29 @@ function NewOrderPageInner() {
         toast.success('Quote created — continue to Payment Options')
         router.push(`/admin/orders/${d.order.id}/checkout`)
       } else {
-        toast.error('Failed to create order')
+                const errData = await res.json().catch(() => ({} as any))
+                if (res.status === 409 && errData.restrictionMatch) {
+                            const matchSummary = (errData.restrictionMatch.matches || []).map((m: any) => m.identifierType + ': ' + m.matchedValue).join('\n')
+                            const proceed = window.confirm('This booking matches an active rental restriction:\n\n' + matchSummary + '\n\nOnly an admin can override this. Continue and provide an override reason?')
+                            if (proceed) {
+                                          const reason = window.prompt('Enter a reason for overriding this rental restriction:')
+                                          if (reason) {
+                                                          await handleSubmit(e, reason)
+                                                          return
+                                          }
+                            }
+                            toast.error('Order not created - rental restriction match requires manager review')
+                } else if (res.status === 403) {
+                            toast.error(errData.error || 'Only an admin can override a rental restriction match.')
+                } else {
+                            toast.error(errData.error || 'Failed to create order')
+                }
       }
-    } finally {
+          } finally {
       setSubmitting(false)
     }
   }
-
+  
     return (
     <div className="p-4 max-w-3xl">
       <h1 className="text-xl font-bold text-dark mb-1">Create New Order / Quote</h1>
@@ -589,11 +606,11 @@ function NewOrderPageInner() {
             </div>
             <input type="email" placeholder="Email" value={form.email} onChange={(e) => updateForm('email', e.target.value)} className="w-full border rounded px-3 py-2 mb-2" required />
             <input type="tel" placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full border rounded px-3 py-2 mb-2" />
-            <input placeholder="Billing Address" value={form.billingAddress} onChange={(e) => setForm({ ...form, billingAddress: e.target.value })} className="w-full border rounded px-3 py-2 mb-2" />
+            <input placeholder="Billing Address" value={form.billingAddress} onChange={(e) => setForm({ ...form, billingAddress: e.target.value })} className="w-full border rounded px-3 py-2 mb-2" required={form.deliveryType === 'delivery' && sameAsBilling} />
             <div className="grid grid-cols-3 gap-4">
-              <input placeholder="City" value={form.billingCity} onChange={(e) => setForm({ ...form, billingCity: e.target.value })} className="border rounded px-3 py-2" />
+              <input placeholder="City" value={form.billingCity} onChange={(e) => setForm({ ...form, billingCity: e.target.value })} className="border rounded px-3 py-2" required={form.deliveryType === 'delivery' && sameAsBilling} />
               <input placeholder="State" value={form.billingState} onChange={(e) => setForm({ ...form, billingState: e.target.value })} className="border rounded px-3 py-2" />
-              <input placeholder="Zip" value={form.billingZip} onChange={(e) => setForm({ ...form, billingZip: e.target.value })} className="border rounded px-3 py-2" />
+              <input placeholder="Zip" value={form.billingZip} onChange={(e) => setForm({ ...form, billingZip: e.target.value })} className="border rounded px-3 py-2" required={form.deliveryType === 'delivery' && sameAsBilling} />
             </div>
           </div>
 
@@ -605,16 +622,16 @@ function NewOrderPageInner() {
             </label>
             {!sameAsBilling && (
               <>
-                <input placeholder="Event Address" value={form.eventAddress} onChange={(e) => setForm({ ...form, eventAddress: e.target.value })} className="w-full border rounded px-3 py-2 mb-2" />
+                <input placeholder="Event Address" value={form.eventAddress} onChange={(e) => setForm({ ...form, eventAddress: e.target.value })} className="w-full border rounded px-3 py-2 mb-2" required={form.deliveryType === 'delivery' && !sameAsBilling} />
                 <div className="grid grid-cols-3 gap-4 mb-2">
-                  <input placeholder="City" value={form.eventCity} onChange={(e) => setForm({ ...form, eventCity: e.target.value })} className="border rounded px-3 py-2" />
+                  <input placeholder="City" value={form.eventCity} onChange={(e) => setForm({ ...form, eventCity: e.target.value })} className="border rounded px-3 py-2" required={form.deliveryType === 'delivery' && !sameAsBilling} />
                   <input placeholder="State" value={form.eventState} onChange={(e) => setForm({ ...form, eventState: e.target.value })} className="border rounded px-3 py-2" />
-                  <input placeholder="Zip" value={form.eventZip} onChange={(e) => setForm({ ...form, eventZip: e.target.value })} className="border rounded px-3 py-2" />
+                  <input placeholder="Zip" value={form.eventZip} onChange={(e) => setForm({ ...form, eventZip: e.target.value })} className="border rounded px-3 py-2" required={form.deliveryType === 'delivery' && !sameAsBilling} />
                 </div>
               </>
             )}
             <div className="grid grid-cols-2 gap-4 items-end mt-2">
-              <select value={form.deliveryType} onChange={(e) => setForm({ ...form, deliveryType: e.target.value })} className="w-full border rounded px-3 py-2">
+              <select value={form.deliveryType} onChange={(e) => setForm({ ...form, deliveryType: e.target.value, travelFee: e.target.value === 'pickup' ? '0' : form.travelFee })} className="w-full border rounded px-3 py-2">
                 <option value="delivery">Delivery</option>
                 <option value="pickup">Customer Pickup</option>
               </select>

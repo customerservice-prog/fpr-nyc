@@ -22,6 +22,12 @@ export interface GscQueryRow {
   position: number
 }
 
+export interface GscTrendRow {
+  date: string
+  clicks: number
+  impressions: number
+}
+
 export interface GscSummary {
   connected: boolean
   reason?: string
@@ -33,6 +39,7 @@ export interface GscSummary {
     position: number
   }
   topQueries: GscQueryRow[]
+  trend: GscTrendRow[]
 }
 
 function n(v: unknown): number {
@@ -53,6 +60,7 @@ function notConnected(reason: string): GscSummary {
     rangeDays: 0,
     totals: { clicks: 0, impressions: 0, ctr: 0, position: 0 },
     topQueries: [],
+    trend: [],
   }
 }
 
@@ -97,13 +105,18 @@ export async function getSearchConsoleSummary(rangeDays = 28): Promise<GscSummar
   const startDate = isoDaysAgo(rangeDays)
   const endDate = isoDaysAgo(1)
 
-  const [totalsRes, queriesRes] = await Promise.all([
+  const [totalsRes, queriesRes, trendRes] = await Promise.all([
     query(siteUrl, token, { startDate, endDate, dimensions: [] }),
     query(siteUrl, token, {
       startDate,
       endDate,
       dimensions: ['query'],
       rowLimit: 15,
+    }),
+    query(siteUrl, token, {
+      startDate,
+      endDate,
+      dimensions: ['date'],
     }),
   ])
 
@@ -116,6 +129,14 @@ export async function getSearchConsoleSummary(rangeDays = 28): Promise<GscSummar
     position: n(r.position),
   }))
 
+  const trend: GscTrendRow[] = (trendRes.rows ?? [])
+    .map((r) => ({
+      date: r.keys?.[0] ?? '',
+      clicks: n(r.clicks),
+      impressions: n(r.impressions),
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date))
+
   return {
     connected: true,
     rangeDays,
@@ -126,5 +147,6 @@ export async function getSearchConsoleSummary(rangeDays = 28): Promise<GscSummar
       position: n(t?.position),
     },
     topQueries,
+    trend,
   }
 }

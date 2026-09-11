@@ -8,11 +8,9 @@ import { sendEmail, thankYouEmail } from '@/lib/email'
 // Runs on a schedule (see .github/workflows/thank-you-cron.yml).
 // Only sends if the "Thank You Email" automatic message is enabled in admin settings.
 export async function GET(request: NextRequest) {
-  // EMERGENCY KILL SWITCH - automatic sending paused by owner request, do not remove without explicit approval
-  return NextResponse.json({ disabled: true, message: 'This automated email is temporarily disabled.' })
 
   const authHeader = request.headers.get('authorization')
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

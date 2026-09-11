@@ -46,7 +46,7 @@ export default function SuggestedAddons({ addons }: { addons: SuggestedAddon[] }
             key={addon.id}
             className="group flex flex-col rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:border-amber-200"
           >
-            <Link href={`/items/${addon.slug}`} className="block aspect-[4/3] w-full overflow-hidden rounded-t-2xl bg-amber-50">
+            <Link href={`/items/${addon.slug}`} prefetch={false} className="block aspect-[4/3] w-full overflow-hidden rounded-t-2xl bg-amber-50">
               {addon.picture ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -61,7 +61,7 @@ export default function SuggestedAddons({ addons }: { addons: SuggestedAddon[] }
               )}
             </Link>
             <div className="flex flex-1 flex-col p-4">
-              <Link href={`/items/${addon.slug}`} className="font-semibold text-gray-900 hover:text-amber-600">
+              <Link href={`/items/${addon.slug}`} prefetch={false} className="font-semibold text-gray-900 hover:text-amber-600">
                 {addon.name}
               </Link>
               {addon.description && (

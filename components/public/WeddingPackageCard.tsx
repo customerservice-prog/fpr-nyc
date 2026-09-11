@@ -72,6 +72,7 @@ export default function WeddingPackageCard({
         </ul>
         <Link
           href={`/wedding-packages?package=${id}`}
+          prefetch={false}
           className="btn-primary block text-center uppercase text-sm tracking-wide"
         >
           View Details

@@ -11,13 +11,16 @@ export async function GET() {
 
   const companyTypes = await prisma.companyType.findMany({
     orderBy: { sortOrder: 'asc' },
-    })
+  })
   return NextResponse.json({ companyTypes })
-  }
+}
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as { role?: string }).role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   const body = await request.json()
 
@@ -26,14 +29,17 @@ export async function POST(request: NextRequest) {
       name: body.name,
       sortOrder: body.sortOrder ? parseInt(body.sortOrder) : 0,
       isActive: body.isActive ?? true,
-      },
-    })
+    },
+  })
   return NextResponse.json({ companyType })
-  }
+}
 
 export async function PATCH(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as { role?: string }).role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   const body = await request.json()
   const { id, ...data } = body
@@ -42,13 +48,16 @@ export async function PATCH(request: NextRequest) {
   const companyType = await prisma.companyType.update({
     where: { id },
     data,
-    })
+  })
   return NextResponse.json({ companyType })
-  }
+}
 
 export async function DELETE(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as { role?: string }).role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
@@ -56,4 +65,4 @@ export async function DELETE(request: NextRequest) {
 
   await prisma.companyType.delete({ where: { id } })
   return NextResponse.json({ success: true })
-  }
+}

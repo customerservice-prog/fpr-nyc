@@ -101,7 +101,7 @@ className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
 </td>
 <td className="px-4 py-3 text-right">{formatCurrency(order.totalAmount)}</td>
 <td className="px-4 py-3 text-right">{formatCurrency(order.amountPaid)}</td>
-<td className={'px-4 py-3 text-right ' + (order.balanceDue > 0 ? 'text-red-600 font-medium' : '')}>{formatCurrency(order.balanceDue)}</td>
+<td className={'px-4 py-3 text-right ' + (order.balanceDue > 0.01 ? 'text-red-600 font-medium' : '')}>{formatCurrency(order.balanceDue)}</td>
 <td className="px-4 py-3">
 <Link href={'/admin/orders/' + order.id} className="btn-outline text-xs px-3 py-1">View</Link>
 </td>

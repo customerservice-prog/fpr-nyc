@@ -15,6 +15,7 @@ export default function StickyBar() {
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-4 relative">
         <Link
           href="/order-by-date"
+          prefetch={false}
           className="bg-secondary text-white px-6 py-2 rounded font-medium hover:bg-blue-700 transition-colors flex-1 max-w-xs text-center"
         >
           Book Now

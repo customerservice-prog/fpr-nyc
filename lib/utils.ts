@@ -367,3 +367,16 @@ export const WEDDING_PACKAGES = [
 ]
 
 export const REVIEWS: Array<{ id: string; author: string; rating: number; date: string; text: string; source: string }> = []
+
+export function calculateReturnDateInfo(eventDateStr: string, minDays: number, maxDays: number | null): string {
+  const base = new Date(eventDateStr)
+    if (isNaN(base.getTime())) return ''
+      if (minDays <= 1 && (maxDays ?? 1) <= 1) return ''
+        if (maxDays === null) return `${minDays}+ days - exact return date will be confirmed with you`
+          const minReturn = new Date(base)
+            minReturn.setDate(minReturn.getDate() + (minDays - 1))
+              if (minDays === maxDays) return `Return: ${formatDate(minReturn)}`
+                const maxReturn = new Date(base)
+                  maxReturn.setDate(maxReturn.getDate() + (maxDays - 1))
+                    return `Return: approximately ${formatDate(minReturn)} - ${formatDate(maxReturn)}`
+}

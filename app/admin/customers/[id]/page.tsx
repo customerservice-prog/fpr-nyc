@@ -31,6 +31,8 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           customerType?: string
           notes?: string
           creditStatus?: string
+          doNotRent?: boolean
+          doNotRentNote?: string
 
     orders: Array<{
       id: string
@@ -52,16 +54,17 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     const [editing, setEditing] = useState(false)
     const [form, setForm] = useState<any>({})
     const [saving, setSaving] = useState(false)
-  const loadCustomer = () => {
+const loadCustomer = () => {
     fetch(`/api/admin/customers/${id}`)
       .then((r) => r.json())
-      .then((d) => { setCustomer(d.customer); setForm(d.customer || {}) })
+      .then((d) => { setCustomer(d.customer); setForm(d.customer || {}); setRestrictionMatch(d.restrictionMatch || null) })
   }
 
   useEffect(() => {
     loadCustomer()
   }, [id])
 
+    const [restrictionMatch, setRestrictionMatch] = useState<any>(null)
   if (!customer) return <div className="p-4">Loading...</div>
 
   const issueRaincheck = async () => {
@@ -169,10 +172,16 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           }
     }
 
+
   return (
     <div className="p-4 max-w-4xl">
       <Link href="/admin/customers" className="text-secondary hover:underline text-sm">&larr; Back to Customers</Link>
       <h1 className="text-2xl font-bold mt-2 mb-1">{customer.firstName} {customer.lastName}</h1>
+      {restrictionMatch && restrictionMatch.matched && (
+        <p className="text-xs font-medium text-red-700 mb-1">
+          {restrictionMatch.matches.some((m: any) => m.identifierType === 'CUSTOMER_ID' || m.identifierType === 'EMAIL' || m.identifierType === 'PHONE') ? '⚠ Active Rental Restriction' : '⚠ Restricted Address on File'}
+        </p>
+      )}
         {customer.orders.length === 0 && (
           <button
             onClick={deleteCustomer}
@@ -279,8 +288,8 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           </div>
         </div>
       )}      
-
-      <h2 className="text-lg font-semibold mt-6 mb-4">Orders</h2>
+      <div className="border border-gray-200 rounded-lg bg-white px-4 py-4 mt-4 mb-4">
+      <div className="flex items-center justify-between flex-wrap gap-2"><span className="text-sm font-semibold">Do Not Rent</span><Link href={'/admin/do-not-rent?customerId=' + id + '&name=' + encodeURIComponent(customer.firstName + ' ' + customer.lastName)} className="text-secondary hover:underline text-sm">+ Add to Do Not Rent</Link></div>{restrictionMatch && restrictionMatch.matched ? <p className="mt-2 text-sm text-red-700">Active rental restriction on file.</p> : <p className="mt-2 text-sm text-body">No active rental restriction on file.</p>}</div><h2 className="text-lg font-semibold mt-6 mb-4">Orders</h2>
       <div className="bg-white rounded shadow">
         {customer.orders.map((o) =>  {
           const statusBadgeClass = o.status === 'active' ? 'badge badge-active' : o.status === 'quote' ? 'badge badge-quote' : o.status === 'canceled' ? 'badge badge-canceled' : o.status === 'completed' ? 'badge badge-completed' : 'badge badge-incomplete'

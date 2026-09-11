@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { sendEmail } from '@/lib/email'
+import { sendEmail, incompleteOrderRecaptureEmail } from '@/lib/email'
 import { BUSINESS } from '@/lib/utils'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.friendlypartyrental.com'
@@ -39,7 +39,7 @@ async function hasAlreadyConverted(email: string, excludeOrderId: string) {
 export async function GET(request: NextRequest) {
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
-    if (cronSecret && authHeader !== 'Bearer ' + cronSecret) {
+    if (!cronSecret || authHeader !== 'Bearer ' + cronSecret) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     })
     for (const order of (stage0Enabled ? stage0Orders : [])) {
         if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
-        const email = buildEmail(0, order.customer?.firstName || '', order.id)
+        const email = incompleteOrderRecaptureEmail({ subject: stage0Setting!.subject, content: stage0Setting!.content }, { firstName: order.customer?.firstName || '', orderId: order.id, resumeLink: resumeLink(order.id) })
         if (order.customer?.email) {
             await sendEmail({ to: order.customer.email, subject: email.subject, html: email.html })
         }
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
     })
         for (const order of (stage3Enabled ? stage3Orders : [])) {
             if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
-        const email = buildEmail(3, order.customer?.firstName || '', order.id)
+        const email = incompleteOrderRecaptureEmail({ subject: stage3Setting!.subject, content: stage3Setting!.content }, { firstName: order.customer?.firstName || '', orderId: order.id, resumeLink: resumeLink(order.id) })
         if (order.customer?.email) {
             await sendEmail({ to: order.customer.email, subject: email.subject, html: email.html })
         }
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
     })
     for (const order of (stage7Enabled ? stage7Orders : [])) {
         if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
-        const email = buildEmail(7, order.customer?.firstName || '', order.id)
+        const email = incompleteOrderRecaptureEmail({ subject: stage7Setting!.subject, content: stage7Setting!.content }, { firstName: order.customer?.firstName || '', orderId: order.id, resumeLink: resumeLink(order.id) })
         if (order.customer?.email) {
             await sendEmail({ to: order.customer.email, subject: email.subject, html: email.html })
         }

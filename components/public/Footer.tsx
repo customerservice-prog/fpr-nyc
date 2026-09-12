@@ -71,6 +71,7 @@ export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string 
             Y
           </a>
         </div>
+<nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 pt-3 border-t border-gray-700 mt-4"><Link href="/category/tent-rentals" className="underline text-gray-300 hover:text-white" prefetch={false}>Tent Rentals</Link> <Link href="/category/table-chair-rentals" className="underline text-gray-300 hover:text-white" prefetch={false}>Table & Chair Rentals</Link> <Link href="/weddings" className="underline text-gray-300 hover:text-white" prefetch={false}>Wedding Rentals</Link> <Link href="/wedding-vendors" className="underline text-gray-300 hover:text-white" prefetch={false}>Wedding Vendors</Link> <Link href="/graduation-rentals" className="underline text-gray-300 hover:text-white" prefetch={false}>Graduation Party Rentals</Link> <Link href="/chiavari-chair-rentals" className="underline text-gray-300 hover:text-white" prefetch={false}>Chiavari Chair Rentals</Link> <Link href="/category/dance-floor-stage-rentals" className="underline text-gray-300 hover:text-white" prefetch={false}>Dance Floor Rentals</Link> <Link href="/category/bounce-house-rentals" className="underline text-gray-300 hover:text-white" prefetch={false}>Bounce Houses & Waterslides</Link> <Link href="/category" className="underline text-gray-300 hover:text-white" prefetch={false}>Browse All Rentals</Link></nav>
         <p className="text-gray-400 pt-2">
           &copy; {new Date().getFullYear()} {BUSINESS.legalName} All rights reserved.
         </p>

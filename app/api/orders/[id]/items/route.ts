@@ -28,14 +28,14 @@ export async function POST(
 
   if (order.status !== 'quote') {
     return NextResponse.json(
-      { error: 'This order is already booked. Please call 315-884-1498 to make changes.' },
+      { error: 'This order is already booked. Please call 864-610-5324 to make changes.' },
       { status: 403 }
     )
   }
 
   if (order.items.some((i) => !i.itemId)) {
     return NextResponse.json(
-      { error: 'This quote cannot be edited online. Please call 315-884-1498 to make changes.' },
+      { error: 'This quote cannot be edited online. Please call 864-610-5324 to make changes.' },
       { status: 403 }
     )
   }
@@ -67,14 +67,14 @@ export async function POST(
     const catalogItem = catalogMap.get(itemId)
     if (!catalogItem || !catalogItem.displayToCustomer || catalogItem.status !== 'Available') {
       return NextResponse.json(
-        { error: 'One of the requested items is no longer available. Please call 315-884-1498.' },
+        { error: 'One of the requested items is no longer available. Please call 864-610-5324.' },
         { status: 400 }
       )
     }
     const restricted = order.rentalDays > 1 && RESTRICTED_PRICING_PROFILES.includes(catalogItem.category?.pricingProfile || '')
     if (restricted && !existingCatalogIds.has(itemId)) {
       return NextResponse.json(
-        { error: `${catalogItem.name} requires staff review for multi-day rentals. Please call 315-884-1498 to add it to your quote.` },
+        { error: `${catalogItem.name} requires staff review for multi-day rentals. Please call 864-610-5324 to add it to your quote.` },
         { status: 400 }
       )
     }

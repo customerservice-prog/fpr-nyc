@@ -52,6 +52,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
     // item pricing. Purely additive -- does not change booking/cart behavior,
     // which still lives entirely in CategoryClient above.
     const priceValues = items
+            .filter(function (item) { return item.type === 'Regular' })
             .map(function (item) { return Number(item.cost) })
             .filter(function (n) { return Number.isFinite(n) })
         const minPrice = priceValues.length ? Math.min.apply(null, priceValues) : null

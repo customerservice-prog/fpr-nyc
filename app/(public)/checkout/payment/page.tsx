@@ -25,7 +25,7 @@ interface SpecialRequestFee {
 
 export default function PaymentPage() {
   const router = useRouter()
-  const { items, subtotal, eventDate, eventTimeSlot, pickupTimeSlot, clearCart, loaded } = useCart()
+  const { items, subtotal, eventDate, eventTimeSlot, pickupTimeSlot, schedulingDetails, clearCart, loaded } = useCart()
   const [loading, setLoading] = useState(false)
   const [depositPct, setDepositPct] = useState(25)
   const [depositIsFixed, setDepositIsFixed] = useState(false)
@@ -93,7 +93,7 @@ export default function PaymentPage() {
       .catch(() => {})
 
     if (checkoutData.eventZip && checkoutData.deliveryType !== 'pickup') {
-      fetch(`/api/delivery-fee?zip=${encodeURIComponent(checkoutData.eventZip)}`)
+      fetch('/api/delivery-fee?zip=' + encodeURIComponent(checkoutData.eventZip))
         .then((r) => r.json())
         .then((data) => {
           if (data.error) {
@@ -140,9 +140,12 @@ export default function PaymentPage() {
   const isLastMinuteBooking = hoursUntilEvent >= 24 && hoursUntilEvent < 72
   const lastMinuteFee = isLastMinuteBooking ? 49.99 : 0
   const damageWaiverFee = damageWaiver ? Math.round(adjustedSubtotal * 0.10 * 100) / 100 : 0
-  const taxableBase = Math.max(adjustedSubtotal - couponDiscount, 0) + deliveryFee + damageWaiverFee + specialRequestTotal + lastMinuteFee
+  const exactDeliveryFee = schedulingDetails?.exactDeliveryFee || 0
+  const exactPickupFee = schedulingDetails?.exactPickupFee || 0
+  const schedulingFeeTotal = exactDeliveryFee + exactPickupFee
+  const taxableBase = Math.max(adjustedSubtotal - couponDiscount, 0) + deliveryFee + damageWaiverFee + specialRequestTotal + lastMinuteFee + schedulingFeeTotal
   const taxAmount = Math.round(taxableBase * (taxRatePct / 100) * 100) / 100
-  const grandTotal = Math.max(adjustedSubtotal - couponDiscount, 0) + deliveryFee + damageWaiverFee + specialRequestTotal + taxAmount + lastMinuteFee
+  const grandTotal = Math.max(adjustedSubtotal - couponDiscount, 0) + deliveryFee + damageWaiverFee + specialRequestTotal + taxAmount + lastMinuteFee + schedulingFeeTotal
   const depositAmount = depositIsFixed ? Math.min(depositPct, grandTotal) : Math.round(grandTotal * (depositPct / 100) * 100) / 100
   const minimumOrder = deliveryTypeState === 'pickup' ? 50 : 100
   const belowMinimum = subtotal > 0 && subtotal < minimumOrder
@@ -172,7 +175,7 @@ export default function PaymentPage() {
   }
 
   const confirmPayment = async (finalOrderNumber: string, finalOrderId: string, stripePaymentId?: string) => {
-    await fetch(`/api/orders/${finalOrderId}/confirm-payment`, {
+    await fetch('/api/orders/' + finalOrderId + '/confirm-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount: amountDueToday, stripePaymentId, saveCard }),
@@ -182,9 +185,9 @@ export default function PaymentPage() {
 
   const handleContinue = async () => {
     if (isHardBlocked) { toast.error('Orders cannot be placed within 24 hours of the event date. Please call our office for last-minute availability.'); return }
-    if (belowMinimum) { toast.error(`Minimum order is $${minimumOrder} for ${deliveryTypeState === 'pickup' ? 'pickup' : 'delivery'} orders`); return }
+    if (belowMinimum) { toast.error('Minimum order is $' + minimumOrder + ' for ' + (deliveryTypeState === 'pickup' ? 'pickup' : 'delivery') + ' orders'); return }
     if (isLastMinuteBooking && !lastMinuteFeeAccepted) { toast.error('Please accept the last-minute booking fee to continue'); return }
-    if (paymentChoice === 'custom' && parsedCustomPayAmount < depositAmount) { toast.error(`Custom payment amount must be at least the deposit of ${formatCurrency(depositAmount)}`); return }
+    if (paymentChoice === 'custom' && parsedCustomPayAmount < depositAmount) { toast.error('Custom payment amount must be at least the deposit of ' + formatCurrency(depositAmount)); return }
     const checkoutData = JSON.parse(sessionStorage.getItem('checkout_data') || '{}')
     setLoading(true)
 
@@ -221,10 +224,15 @@ export default function PaymentPage() {
           pickupTimeSlot,
           tipAmount,
           lastMinuteFeeAmount: lastMinuteFee,
+          schedulingDetails: schedulingDetails && schedulingDetails.eventStartTime ? schedulingDetails : null,
         }),
       })
 
       const orderData = await orderRes.json()
+      if (orderData.requiresAssistance) {
+        router.push('/checkout/assistance')
+        return
+      }
       if (!orderRes.ok) throw new Error(orderData.error || 'Order failed')
       setOrderNumber(orderData.order.orderNumber)
       setOrderId(orderData.order.id)
@@ -265,7 +273,7 @@ export default function PaymentPage() {
         </div>
         {durationFee > 0 && (
           <div className="flex justify-between text-body text-sm">
-            <span>Multi-Day Rental Fee{durationTier ? ` (${durationTier.label})` : ''}</span>
+            <span>Multi-Day Rental Fee{durationTier ? ' (' + durationTier.label + ')' : ''}</span>
             <span>{formatCurrency(durationFee)}</span>
           </div>
         )}
@@ -275,6 +283,18 @@ export default function PaymentPage() {
             <span>{formatCurrency(fee.amount)}</span>
           </div>
         ))}
+        {exactDeliveryFee > 0 && (
+          <div className="flex justify-between text-body text-sm">
+            <span>Exact-Time Delivery Fee</span>
+            <span>{formatCurrency(exactDeliveryFee)}</span>
+          </div>
+        )}
+        {exactPickupFee > 0 && (
+          <div className="flex justify-between text-body text-sm">
+            <span>Exact-Time Pickup Fee</span>
+            <span>{formatCurrency(exactPickupFee)}</span>
+          </div>
+        )}
         {lastMinuteFee > 0 && (
           <div><span>Last-Minute Booking Fee</span><span>{formatCurrency(lastMinuteFee)}</span></div>
         )}
@@ -295,7 +315,7 @@ export default function PaymentPage() {
         )}
         {deliveryTypeState !== 'pickup' && (
           <div className="flex justify-between text-body text-sm">
-            <span>Delivery Fee{deliveryDistance != null ? ` (${deliveryDistance} mi)` : ''}</span>
+            <span>Delivery Fee{deliveryDistance != null ? ' (' + deliveryDistance + ' mi)' : ''}</span>
             <span>{formatCurrency(deliveryFee)}</span>
           </div>
         )}

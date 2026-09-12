@@ -9,7 +9,7 @@ interface FaqEntry {
 }
 
 const FAQ_DATA: FaqEntry[] = [
-  { q: 'How do I book a rental?', a: 'Browse our catalog, select items, choose your event date, and complete checkout online. You can also call 315-884-1498 for help.' },
+  { q: 'How do I book a rental?', a: 'Browse our catalog, select items, choose your event date, and complete checkout online. You can also call 864-610-5324 for help.' },
   { q: 'What can I rent from you?', a: 'We carry tents, tables and chairs, linens, lighting, bounce houses and waterslides, concessions and beverage service, dance floors, generators, photo booths, yard games, heating and cooling, wedding packages, and party accessories.' },
   { q: 'What payment methods do you accept?', a: 'We accept all major credit and debit cards through our secure online checkout.' },
   { q: 'When is the remaining balance due?', a: 'The remaining balance is due 3 days before your event. Your contract must be read and signed at final payment, or delivery will not occur.' },
@@ -39,7 +39,7 @@ const FAQ_DATA: FaqEntry[] = [
   { q: 'Can you set up at parks?', a: 'Yes. Permits may be required for park setups, and the customer is responsible for obtaining them.' },
   { q: 'What surfaces can you set up on?', a: 'Frame tents, tables, and equipment can be set up on grass, pavement, turf, gravel, or concrete. Pole tents must be staked into the ground with a gas-powered hammer about 42 inches deep, so they cannot go on concrete or pavement.' },
   { q: 'Do I need a permit for a backyard tent?', a: 'Usually not for residential setups. Large tents at commercial venues may require permits.' },
-  { q: 'Can you do a free yard assessment?', a: 'Yes! Call 315-884-1498 to schedule one.' },
+  { q: 'Can you do a free yard assessment?', a: 'Yes! Call 864-610-5324 to schedule one.' },
   { q: 'Is your equipment clean and safe?', a: 'Yes - every piece is cleaned, sanitized, and inspected before and after every rental. Our commercial-grade equipment is safe for children with adult supervision recommended.' },
   { q: 'What if something breaks?', a: 'Normal wear is covered by the damage waiver. Damage from misuse may have additional associated costs.' },
   { q: 'Do you carry insurance?', a: 'Yes, we are fully insured.' },
@@ -263,7 +263,7 @@ export async function POST(request: NextRequest) {
 
   const queryTokens = new Set(tokenize(trimmed))
   if (queryTokens.size === 0) {
-    return NextResponse.json({ answer: 'I am not sure I understood that. Could you rephrase your question, or call us at 315-884-1498?' })
+    return NextResponse.json({ answer: 'I am not sure I understood that. Could you rephrase your question, or call us at 864-610-5324?' })
   }
 
   const wantsInventoryInfo = ['have', 'rent', 'available', 'availability', 'cost', 'price', 'much'].some((w) => trimmed.toLowerCase().includes(w))
@@ -301,7 +301,7 @@ export async function POST(request: NextRequest) {
   if (wantsInventoryInfo && bestItem && bestItemScore >= 2) {
     const price = '$' + bestItem.cost.toFixed(2).replace(/\.00$/, '')
     return NextResponse.json({
-      answer: 'Yes! We carry ' + bestItem.name + ' (' + bestItem.categoryName + ') starting at ' + price + '. Check availability for your date by selecting it on our booking calendar, or call 315-884-1498.',
+      answer: 'Yes! We carry ' + bestItem.name + ' (' + bestItem.categoryName + ') starting at ' + price + '. Check availability for your date by selecting it on our booking calendar, or call 864-610-5324.',
     })
   }
 
@@ -332,6 +332,6 @@ export async function POST(request: NextRequest) {
     : ''
 
   return NextResponse.json({
-    answer: "I don't have an exact answer for that yet." + suggestionText + " Call or text 315-884-1498, or visit our Contact Us page and we'll get right back to you.",
+    answer: "I don't have an exact answer for that yet." + suggestionText + " Call or text 864-610-5324, or visit our Contact Us page and we'll get right back to you.",
   })
 }

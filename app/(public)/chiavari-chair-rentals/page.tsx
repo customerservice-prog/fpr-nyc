@@ -83,7 +83,7 @@ export default function ChiavariChairRentalsPage() {
           </div>
           <div>
             <p className="font-bold text-dark text-sm">Do you deliver chiavari chairs to my town?</p>
-            <p className="text-body text-sm">We regularly deliver to Greenville, Greer, Simpsonville, Mauldin, Taylors, Easley, Travelers Rest, Fountain Inn, and Piedmont, SC. Call (315) 884-1498 if your town isn&#39;t listed — we may still be able to help.</p>
+            <p className="text-body text-sm">We regularly deliver to Greenville, Greer, Simpsonville, Mauldin, Taylors, Easley, Travelers Rest, Fountain Inn, and Piedmont, SC. Call (864) 610-5324 if your town isn&#39;t listed — we may still be able to help.</p>
           </div>
           <div>
             <p className="font-bold text-dark text-sm">Can I order chiavari chairs along with tables, linens, and a tent for my wedding?</p>

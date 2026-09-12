@@ -25,7 +25,7 @@ const faqSections = [
     title: 'DELIVERY, SETUP & PICKUP',
     items: [
       { question: 'Does the price include delivery and setup?', answer: 'Tent delivery and setup is included for most Greenville County locations. Table and chair setup is available for an additional fee.' },
-      { question: 'What areas do you serve?', answer: 'Greenville, Taylors, Greer, Simpsonville, Mauldin, Travelers Rest, Fountain Inn, Piedmont, Berea, and surrounding Upstate South Carolina.' },
+      { question: 'What areas do you serve?', answer: 'Greenville, Minoa, Cicero, Liverpool, Manlius, DeWitt, Camillus, Fayetteville, Baldwinsville, Skaneateles, and surrounding CNY.' },
       { question: 'When do you set up?', answer: 'Setup is coordinated in advance based on your event schedule.' },
       { question: 'Does setup time count toward my rental period?', answer: 'No.' },
       { question: 'What if my event starts early in the morning?', answer: 'Early setups are available.' },
@@ -62,7 +62,7 @@ const faqSections = [
       { question: 'What surfaces can you set up on?', answer: 'Grass, pavement, turf, gravel, concrete.' },
       { question: 'Do I need a permit for a backyard tent?', answer: 'Usually no for residential. Large tents at commercial venues may need permits.' },
       { question: 'Can you do a free yard assessment?', answer: 'Yes. Call 315-884-1498.' },
-      { question: 'Do you serve all of Upstate South Carolina?', answer: 'Yes, Greenville County and surrounding areas.' },
+      { question: 'Do you serve all of CNY?', answer: 'Yes, Greenville County and surrounding areas.' },
     ],
   },
 ]

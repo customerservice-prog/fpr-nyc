@@ -203,7 +203,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <h1 className="text-2xl font-bold text-dark mb-4">Quote Not Found</h1>
-        <p className="text-body">This payment link is invalid or has expired. Please contact us at 315-884-1498.</p>
+        <p className="text-body">This payment link is invalid or has expired. Please contact us at 864-610-5324.</p>
       </div>
     )
   }
@@ -227,7 +227,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
             ))}
           </div>
         )}
-        <p className="text-body mt-4">If you have any questions, please contact us at 315-884-1498.</p></div>
+        <p className="text-body mt-4">If you have any questions, please contact us at 864-610-5324.</p></div>
     )
   }
 
@@ -270,7 +270,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
           ))}
           {!canSelfEdit && (
             <p className="text-sm text-body mt-3">
-              Need to add or change items? Please call us at 315-884-1498.
+              Need to add or change items? Please call us at 864-610-5324.
             </p>
           )}
           {canSelfEdit && (
@@ -320,7 +320,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
                 {savingItems ? 'Saving...' : 'Save Changes'}
               </button>
               <p className="text-xs text-body mt-2">
-                Changes save immediately and update your total below. Once your order is booked, please call 315-884-1498 for further changes.
+                Changes save immediately and update your total below. Once your order is booked, please call 864-610-5324 for further changes.
               </p>
             </div>
           )}

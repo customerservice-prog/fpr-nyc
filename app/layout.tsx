@@ -24,7 +24,7 @@ const LOCAL_BUSINESS_JSONLD = {
   '@type': 'LocalBusiness',
   name: 'Friendly Party Rental',
   image: `${SITE_URL}/images/logo.png`,
-  telephone: '+1-315-884-1498',
+  telephone: '+1-864-610-5324',
   url: SITE_URL,
   address: {
     '@type': 'PostalAddress',

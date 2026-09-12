@@ -239,7 +239,7 @@ async function main() {
     await prisma.companySettings.create({
       data: {
         businessName: 'Friendly Party Rental',
-        phone: '315-884-1498',
+        phone: '864-610-5324',
         email: 'customerservice@friendlypartyrental.com',
         address: '',
         city: 'Greenville',

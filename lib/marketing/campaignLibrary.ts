@@ -1340,7 +1340,7 @@ const TAG_EYEBROW: Record<CampaignTag, string> = {
   upsell: 'ADD TO YOUR ORDER',
 }
 
-const ORIGIN = 'https://www.friendlypartyrental.com'
+const ORIGIN = 'https://www.friendlypartyrentalsc.com'
 
 function uid() {
   return Math.random().toString(36).slice(2, 10)

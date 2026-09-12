@@ -25,7 +25,7 @@ const faqSections = [
     title: 'DELIVERY, SETUP & PICKUP',
     items: [
       { question: 'Does the price include delivery and setup?', answer: 'Tent delivery and setup is included for most Greenville County locations. Table and chair setup is available for an additional fee.' },
-      { question: 'What areas do you serve?', answer: 'Greenville, Minoa, Cicero, Liverpool, Manlius, DeWitt, Camillus, Fayetteville, Baldwinsville, Skaneateles, and surrounding CNY.' },
+      { question: 'What areas do you serve?', answer: 'Greenville, Greer, Simpsonville, Mauldin, Taylors, Easley, Travelers Rest, Fountain Inn, Piedmont, and surrounding Upstate South Carolina },
       { question: 'When do you set up?', answer: 'Setup is coordinated in advance based on your event schedule.' },
       { question: 'Does setup time count toward my rental period?', answer: 'No.' },
       { question: 'What if my event starts early in the morning?', answer: 'Early setups are available.' },

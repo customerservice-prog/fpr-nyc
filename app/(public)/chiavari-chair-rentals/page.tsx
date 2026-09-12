@@ -28,7 +28,7 @@ export default function ChiavariChairRentalsPage() {
       <div className="max-w-5xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold text-dark mb-2">Chiavari Chair Rentals in Greenville, SC</h1>
         <p className="text-body mb-8">
-          Planning a wedding or upscale event in Upstate South Carolina? Friendly Party Rental supplies chiavari chairs in gold, white, and mahogany finishes throughout Greenville, Minoa, Cicero, Manlius, Camillus, Baldwinsville, Clay, Cazenovia, and Liverpool, NY. Choose the finish that fits your event below, or call us to coordinate a large wedding order alongside tables, linens, and a tent.
+          Planning a wedding or upscale event in Upstate South Carolina? Friendly Party Rental supplies chiavari chairs in gold, white, and mahogany finishes throughout Greenville, Greer, Simpsonville, Mauldin, Taylors, Easley, Travelers Rest, Fountain Inn, and Piedmont, SC. Choose the finish that fits your event below, or call us to coordinate a large wedding order alongside tables, linens, and a tent.
         </p>
 
         <h2 className="font-bold text-dark mb-4 text-xl">Chiavari Chair Options</h2>
@@ -83,7 +83,7 @@ export default function ChiavariChairRentalsPage() {
           </div>
           <div>
             <p className="font-bold text-dark text-sm">Do you deliver chiavari chairs to my town?</p>
-            <p className="text-body text-sm">We regularly deliver to Greenville, Minoa, Cicero, Manlius, Camillus, Baldwinsville, Clay, Cazenovia, and Liverpool, NY. Call (315) 884-1498 if your town isn&#39;t listed — we may still be able to help.</p>
+            <p className="text-body text-sm">We regularly deliver to Greenville, Greer, Simpsonville, Mauldin, Taylors, Easley, Travelers Rest, Fountain Inn, and Piedmont, SC. Call (315) 884-1498 if your town isn&#39;t listed — we may still be able to help.</p>
           </div>
           <div>
             <p className="font-bold text-dark text-sm">Can I order chiavari chairs along with tables, linens, and a tent for my wedding?</p>
@@ -93,7 +93,7 @@ export default function ChiavariChairRentalsPage() {
 
         <h2 className="font-bold text-dark mb-4 text-xl">Why Greenville Couples Choose Friendly Party Rental</h2>
         <p className="text-body text-sm mb-2">
-          Family-owned and operated, based in Minoa, NY, with 10+ years serving Upstate South Carolina. Fully insured, with clean, inspected equipment and dependable delivery and pickup.
+          Family-owned and operated, based in Greenville, SC, with 10+ years serving Upstate South Carolina. Fully insured, with clean, inspected equipment and dependable delivery and pickup.
         </p>
       </div>
     </>

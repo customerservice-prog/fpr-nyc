@@ -210,7 +210,7 @@ function starterBlocks(): Block[] {
         { image: ORIGIN + '/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
       ],
     },
-    { id: uid(), type: 'text', text: "Questions? Call 315-884-1498 \u2014 we're happy to help you plan the perfect event.", align: 'center' },
+    { id: uid(), type: 'text', text: "Questions? Call 864-610-5324 \u2014 we're happy to help you plan the perfect event.", align: 'center' },
   ]
 }
 

@@ -67,7 +67,7 @@ export default function WeddingVendorsPage() {
       <div className="text-center">
         <p className="text-body mb-4">
           Prefer to have our team plan and coordinate everything for you instead? Ask us
-          about full-service event planning when you call or text 315-884-1498.
+          about full-service event planning when you call or text 864-610-5324.
         </p>
         <Link href="/event-planning" className="btn-accent">Learn About Event Planning</Link>
       </div>

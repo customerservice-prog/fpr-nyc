@@ -5,27 +5,18 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-const IMPORT_SECRET = 'frp-ers-migration-2026-temp'
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, PATCH, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, x-import-secret',
-}
-
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: CORS_HEADERS })
-}
-
-async function isAuthorized(request: NextRequest) {
-  const secret = request.headers.get('x-import-secret')
-  if (secret && secret === IMPORT_SECRET) return true
+async function requireAdmin() {
   const session = await getServerSession(authOptions)
-  return !!session
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as any)?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+  return null
 }
 
 export async function POST(request: NextRequest) {
-  const authorized = await isAuthorized(request)
-  if (!authorized) return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: CORS_HEADERS })
+  const denied = await requireAdmin()
+  if (denied) return denied
 
   const body = await request.json()
   const orders = body.orders || []
@@ -122,35 +113,35 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ created, customersCreated, customersReused, errors }, { headers: CORS_HEADERS })
+  return NextResponse.json({ created, customersCreated, customersReused, errors })
 }
 
 export async function PATCH(request: NextRequest) {
-    const authorized = await isAuthorized(request)
-    if (!authorized) return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: CORS_HEADERS })
+  const denied = await requireAdmin()
+  if (denied) return denied
 
   const body = await request.json()
-    const updates = body.updates || []
-        let updated = 0
-    const errors: any[] = []
+  const updates = body.updates || []
+  let updated = 0
+  const errors: any[] = []
 
-        for (const u of updates) {
-              try {
-                      const match = await prisma.customer.findFirst({
-                                where: {
-                                            firstName: { equals: u.firstName, mode: 'insensitive' },
-                                            lastName: { equals: u.lastName, mode: 'insensitive' },
-                                            email: { contains: '@imported.friendlypartyrental.local' },
-                                },
-                      })
-                      if (match) {
-                                await prisma.customer.update({ where: { id: match.id }, data: { email: u.email } })
-                                updated++
-                      }
-              } catch (e: any) {
-                      errors.push({ name: u.firstName + ' ' + u.lastName, error: e.message })
-              }
-        }
+  for (const u of updates) {
+    try {
+      const match = await prisma.customer.findFirst({
+        where: {
+          firstName: { equals: u.firstName, mode: 'insensitive' },
+          lastName: { equals: u.lastName, mode: 'insensitive' },
+          email: { contains: '@imported.friendlypartyrental.local' },
+        },
+      })
+      if (match) {
+        await prisma.customer.update({ where: { id: match.id }, data: { email: u.email } })
+        updated++
+      }
+    } catch (e: any) {
+      errors.push({ name: u.firstName + ' ' + u.lastName, error: e.message })
+    }
+  }
 
-  return NextResponse.json({ updated, errors }, { headers: CORS_HEADERS })
+  return NextResponse.json({ updated, errors })
 }

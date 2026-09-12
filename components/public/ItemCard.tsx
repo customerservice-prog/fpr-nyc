@@ -203,7 +203,7 @@ const onAddClick = () => {
             <div className="bg-white rounded-lg max-w-md w-full p-6 relative shadow-xl" onClick={(e) => e.stopPropagation()}>
               <button onClick={() => setShowRestroomWarning(false)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             <h2 className="text-xl font-bold text-dark mb-1">Please Call Before Booking</h2>
-            <p className="text-sm text-gray-700 mb-3">Our restroom rentals book up quickly and are available in limited quantity. Please call us at 315-884-1498 to confirm availability before booking to avoid disappointment.</p>
+            <p className="text-sm text-gray-700 mb-3">Our restroom rentals book up quickly and are available in limited quantity. Please call us at 864-610-5324 to confirm availability before booking to avoid disappointment.</p>
             <div className="flex gap-3">
             <button onClick={() => setShowRestroomWarning(false)} className="flex-1 border border-gray-300 rounded-lg py-2 text-sm font-medium hover:bg-gray-50">Cancel</button>
             <button onClick={() => { setShowRestroomWarning(false); handleAdd() }} className="flex-1 btn-primary py-2 text-sm">I Understand, Add to Cart</button>

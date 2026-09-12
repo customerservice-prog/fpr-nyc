@@ -167,7 +167,7 @@ export function blockHtml(b: Block, theme: VisualThemeTokens): string {
       return '<div style="text-align:left;font-family:' + theme.headingFont + ';font-style:italic;font-size:15px;color:' + theme.textColor + ';margin:6px 0 4px;">' + esc(b.text || '') + '</div>'
     case 'footerBrand': {
       const variant = b.variant || 'standard'
-      const contact = '315-884-1498 &nbsp;•&nbsp; friendlypartyrental.com'
+      const contact = '315-884-1498 &nbsp;•&nbsp; friendlypartyrentalsc.com'
       if (variant === 'minimal') {
         return '<div style="text-align:center;border-top:1px solid ' + theme.borderColor + ';padding-top:14px;margin-top:18px;font-family:' + theme.bodyFont + ';font-size:12px;color:' + theme.mutedColor + ';">' +
           'Friendly Party Rental &nbsp;•&nbsp; ' + contact + '<br/><a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Manage email preferences</a></div>'

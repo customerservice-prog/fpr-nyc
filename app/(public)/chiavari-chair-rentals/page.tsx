@@ -35,7 +35,7 @@ export default function ChiavariChairRentalsPage() {
         <div className="grid md:grid-cols-3 gap-6 mb-10">
           <div className="bg-white rounded-lg shadow-lg border-2 border-primary overflow-hidden p-4">
             <h3 className="text-xl font-bold text-dark mb-1">Gold Chiavari Chair</h3>
-            <p className="text-3xl font-bold text-secondary mb-2">$11.99/day</p>
+            <p className="text-3xl font-bold text-secondary mb-2">$8.00/day</p>
             <p className="text-body text-sm mb-4">
               A classic gold finish that pairs well with most wedding and gala color schemes.
             </p>
@@ -45,7 +45,7 @@ export default function ChiavariChairRentalsPage() {
           </div>
           <div className="bg-white rounded-lg shadow-lg border-2 border-primary overflow-hidden p-4">
             <h3 className="text-xl font-bold text-dark mb-1">White Chiavari Chair</h3>
-            <p className="text-3xl font-bold text-secondary mb-2">$11.99/day</p>
+            <p className="text-3xl font-bold text-secondary mb-2">$7.50/day</p>
             <p className="text-body text-sm mb-4">
               A bright white finish for garden weddings, all-white receptions, and daytime events.
             </p>

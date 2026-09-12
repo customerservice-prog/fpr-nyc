@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'About Us',
-  description: 'Learn about Friendly Party Rental, a family-owned party rental company based in Minoa, NY serving Greenville and Upstate South Carolina for over 10 years with clean, reliable rental equipment.',
+  description: 'Learn about Friendly Party Rental, a family-owned party rental company based in Greenville, SC serving Greenville and Upstate South Carolina for over 10 years with clean, reliable rental equipment.',
   alternates: { canonical: 'https://www.friendlypartyrentalsc.com/about_us' },
 }
 
@@ -17,7 +17,7 @@ export default function AboutPage() {
 
       <div className="space-y-6 text-body mb-12">
         <p>
-          Friendly Party Rental is a family-owned party rental company based in Minoa, NY, proudly serving Greenville and Upstate South Carolina communities. For over 10 years, we have been helping families, schools, businesses, and organizations create memorable events with reliable rental equipment and friendly local service.
+          Friendly Party Rental is a family-owned party rental company based in Greenville, SC, proudly serving Greenville and Upstate South Carolina communities. For over 10 years, we have been helping families, schools, businesses, and organizations create memorable events with reliable rental equipment and friendly local service.
         </p>
         <p>
           Our inventory includes tents, tables, chairs, linens, dance floors, generators, event lighting, popcorn machines, cotton candy machines, and much more. Every piece of equipment is professionally cleaned, inspected, and prepared before every rental so your event looks great and runs smoothly.

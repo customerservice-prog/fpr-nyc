@@ -71,7 +71,7 @@ export default function ConfirmationPage() {
       )}
 
       <p className="text-body text-sm mb-8">
-        Questions? Call us at <a href="tel:315-884-1498" className="text-secondary">315-884-1498</a>
+        Questions? Call us at <a href="tel:864-610-5324" className="text-secondary">864-610-5324</a>
         or email <a href="mailto:customerservice@friendlypartyrentalsc.com" className="text-secondary">customerservice@friendlypartyrentalsc.com</a>
       </p>
 

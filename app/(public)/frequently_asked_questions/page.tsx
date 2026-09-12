@@ -12,7 +12,7 @@ const faqSections = [
   {
     title: 'BOOKING & PAYMENTS',
     items: [
-      { question: 'How do I book a rental?', answer: 'Browse our catalog, select items, choose your event date, and complete checkout. You can also call 315-884-1498 for help.' },
+      { question: 'How do I book a rental?', answer: 'Browse our catalog, select items, choose your event date, and complete checkout. You can also call 864-610-5324 for help.' },
       { question: 'Do I need to pay a deposit?', answer: 'Yes. A deposit is required at booking. The balance is due before delivery.' },
       { question: 'What payment methods do you accept?', answer: 'We accept all major credit and debit cards through our secure checkout.' },
       { question: 'When is the remaining balance due?', answer: 'The balance is due before delivery. Automatic reminders are sent.' },
@@ -61,7 +61,7 @@ const faqSections = [
       { question: 'Do parks have electricity for bounce houses?', answer: 'Many do not. Generator rental from $125.' },
       { question: 'What surfaces can you set up on?', answer: 'Grass, pavement, turf, gravel, concrete.' },
       { question: 'Do I need a permit for a backyard tent?', answer: 'Usually no for residential. Large tents at commercial venues may need permits.' },
-      { question: 'Can you do a free yard assessment?', answer: 'Yes. Call 315-884-1498.' },
+      { question: 'Can you do a free yard assessment?', answer: 'Yes. Call 864-610-5324.' },
       { question: 'Do you serve all of Upstate SC?', answer: 'Yes, Greenville County and surrounding areas.' },
     ],
   },

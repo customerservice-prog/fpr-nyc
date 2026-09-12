@@ -851,7 +851,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
         </p>
         <p>
           We regularly deliver to Greenville, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, and
-          Piedmont, SC. Don&apos;t see your town listed? Give us a call at (315) 884-1498 &mdash; we may still be able
+          Piedmont, SC. Don&apos;t see your town listed? Give us a call at (864) 610-5324 &mdash; we may still be able
           to deliver to you.
         </p>
       </section>

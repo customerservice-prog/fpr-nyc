@@ -23,10 +23,12 @@ function cleanSlug(raw: string) {
 async function findItem(slugParts: string[]) {
   const rawSlug = (slugParts || []).join('/')
   const lastSegment = rawSlug.split('/').pop() || ''
+  // Strip null bytes/control characters so malformed input can't reach Postgres
+  const safeSegment = lastSegment.replace(/[\u0000-\u001F\u007F]/g, '')
 
   try {
     const exact = await prisma.item.findFirst({
-      where: { slug: lastSegment },
+      where: { slug: safeSegment },
       include: { category: true },
     })
     if (exact) return exact
@@ -156,7 +158,7 @@ const suggestedAddons = item.suggestedAddonIds && item.suggestedAddonIds.length 
               <h2 className="text-sm font-semibold text-gray-700 mb-2">You Might Also Like</h2>
               <div className="grid grid-cols-2 gap-2">
                 {relatedItems.map((ri) => (
-                  <Link key={ri.id} href={`/items/${ri.slug}`} className="block border rounded-lg p-2 text-sm hover:shadow-md transition">
+                  <Link key={ri.id} href={`/items/${ri.slug}`} prefetch={false} className="block border rounded-lg p-2 text-sm hover:shadow-md transition">
                     <span className="block font-medium text-gray-900">{ri.name}</span>
                     <span className="block text-xs text-gray-500">From ${Number(ri.cost).toFixed(2)}/day</span>
                   </Link>

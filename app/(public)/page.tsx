@@ -208,7 +208,7 @@ style={{ background: 'linear-gradient(135deg, #EEC400, #E07B00, #EEC400)' }}
         <div>
           <h2 className="text-xl font-bold text-dark mb-3">Wedding Rentals in Greenville</h2>
           <p className="text-body text-sm">Planning a wedding in Greenville or elsewhere in Upstate South Carolina? Friendly Party Rental offers everything from intimate backyard ceremonies to large, all-inclusive receptions, including Chiavari chairs, farmhouse cross-back chairs, floor-length linens, arches and arbors, candelabras, charger plates, sweetheart tables, backdrops, greenery walls, uplighting, and welcome signs.</p>
-          <p className="text-body text-sm">Our wedding tents range from 20x40 for smaller ceremonies up to 40x80 for receptions of 300 or more guests, with sidewall, climate control, and lighting options available. Call 315-884-1498 or browse our wedding packages below to start planning delivery and setup for your big day.</p>
+          <p className="text-body text-sm">Our wedding tents range from 20x40 for smaller ceremonies up to 40x80 for receptions of 300 or more guests, with sidewall, climate control, and lighting options available. Call 864-610-5324 or browse our wedding packages below to start planning delivery and setup for your big day.</p>
         </div>
       </section>
 

@@ -28,7 +28,7 @@ export default function GraduationRentalsPage() {
       <div className="max-w-5xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold text-dark mb-2">Graduation Party Rentals in Greenville, SC</h1>
         <p className="text-body mb-8">
-          Celebrating a Greenville-area graduate? Friendly Party Rental supplies tents, tables, chairs, bounce houses, and concessions for graduation open houses and backyard celebrations throughout Greenville, Taylors, Greer, Simpsonville, Mauldin, Travelers Rest, Easley, Williamston, and Fountain Inn, SC. Choose one of our ready-to-book graduation packages below, or build your own from our full rental inventory. Delivery, setup, and pickup are included.
+          Celebrating a Greenville-area graduate? Friendly Party Rental supplies tents, tables, chairs, bounce houses, and concessions for graduation open houses and backyard celebrations throughout Greenville, Minoa, Cicero, Manlius, Camillus, Baldwinsville, Clay, Cazenovia, and Liverpool, NY. Choose one of our ready-to-book graduation packages below, or build your own from our full rental inventory. Delivery, setup, and pickup are included.
         </p>
 
         <h2 className="font-bold text-dark mb-4 text-xl">Graduation Party Packages</h2>
@@ -74,7 +74,7 @@ export default function GraduationRentalsPage() {
 
         <h2 className="font-bold text-dark mb-4 text-xl">Why Greenville Families Choose Friendly Party Rental</h2>
         <p className="text-body text-sm mb-2">
-          Family-owned and operated, bringing more than a decade of party rental experience to Greenville and the rest of Upstate South Carolina. Fully insured, with clean, inspected equipment and dependable delivery and pickup.
+          Family-owned and operated, based in Minoa, NY, with 10+ years serving Upstate South Carolina. Fully insured, with clean, inspected equipment and dependable delivery and pickup.
         </p>
       </div>
     </>

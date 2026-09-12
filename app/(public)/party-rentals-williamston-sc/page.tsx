@@ -34,7 +34,7 @@ export default function PartyRentalsWilliamstonPage() {
                 </p>
           
                 <div className="text-center">
-                        <p className="text-body mb-4">Not sure what you need? Call or text us at 315-884-1498 and we will help you plan your Williamston event.</p>
+                        <p className="text-body mb-4">Not sure what you need? Call or text us at 864-610-5324 and we will help you plan your Williamston event.</p>
                         <Link href="/order-by-date" className="btn-accent">Book Your Williamston Party Rentals</Link>
                 </div>
           </div>

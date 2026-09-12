@@ -109,30 +109,30 @@ function newBlock(type: BlockType): Block {
     case 'image':
       return { id, type, image: '', url: '', align: 'center' }
     case 'button':
-      return { id, type, text: 'Shop Now', url: 'https://www.friendlypartyrental.com/rentals', align: 'center' }
+      return { id, type, text: 'Shop Now', url: 'https://www.friendlypartyrentalsc.com/rentals', align: 'center' }
     case 'divider':
       return { id, type }
     case 'spacer':
       return { id, type }
     case 'hero':
-      return { id, type, image: 'https://www.friendlypartyrental.com/images/wedding-backyard-elopement.jpg', url: 'https://www.friendlypartyrental.com/rentals' }
+      return { id, type, image: 'https://www.friendlypartyrentalsc.com/images/wedding-backyard-elopement.jpg', url: 'https://www.friendlypartyrentalsc.com/rentals' }
     case 'offer':
-      return { id, type, eyebrow: 'Limited-Time Offer', title: 'Save 15% on your next order', subtitle: 'Book by June 30th — mention code SUMMER15 on your quote.', code: 'SUMMER15', buttonText: 'Browse Rentals', url: 'https://www.friendlypartyrental.com/rentals' }
+      return { id, type, eyebrow: 'Limited-Time Offer', title: 'Save 15% on your next order', subtitle: 'Book by June 30th — mention code SUMMER15 on your quote.', code: 'SUMMER15', buttonText: 'Browse Rentals', url: 'https://www.friendlypartyrentalsc.com/rentals' }
     case 'grid':
       return {
         id, type, title: 'Popular Rentals', subtitle: 'Tap any category to explore', columns: 2,
         cards: [
-          { image: 'https://www.friendlypartyrental.com/api/category-image/tent-rentals', caption: 'Tents & Canopies', url: 'https://www.friendlypartyrental.com/rentals' },
-          { image: 'https://www.friendlypartyrental.com/api/category-image/table-chair-rentals', caption: 'Tables & Chairs', url: 'https://www.friendlypartyrental.com/rentals' },
+          { image: 'https://www.friendlypartyrentalsc.com/api/category-image/tent-rentals', caption: 'Tents & Canopies', url: 'https://www.friendlypartyrentalsc.com/rentals' },
+          { image: 'https://www.friendlypartyrentalsc.com/api/category-image/table-chair-rentals', caption: 'Tables & Chairs', url: 'https://www.friendlypartyrentalsc.com/rentals' },
         ],
       }
     case 'badges':
       return {
         id, type, title: 'Why Friendly Party Rental?',
         cards: [
-          { image: 'https://www.friendlypartyrental.com/images/badge-syracuse-number1-party-rental.png', caption: '', url: '' },
-          { image: 'https://www.friendlypartyrental.com/images/badge-all-day-8-hour-rental.png', caption: '', url: '' },
-          { image: 'https://www.friendlypartyrental.com/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
+          { image: 'https://www.friendlypartyrentalsc.com/images/badge-syracuse-number1-party-rental.png', caption: '', url: '' },
+          { image: 'https://www.friendlypartyrentalsc.com/images/badge-all-day-8-hour-rental.png', caption: '', url: '' },
+          { image: 'https://www.friendlypartyrentalsc.com/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
         ],
       }
     case 'masthead':
@@ -140,7 +140,7 @@ function newBlock(type: BlockType): Block {
     case 'eyebrow':
       return { id, type, text: 'SEASONAL COLLECTION' }
     case 'splitrow':
-      return { id, type, image: 'https://www.friendlypartyrental.com/api/category-image/tent-rentals', title: 'What You May Need', text: 'A short description of this section.', url: 'https://www.friendlypartyrental.com/rentals', align: 'left' }
+      return { id, type, image: 'https://www.friendlypartyrentalsc.com/api/category-image/tent-rentals', title: 'What You May Need', text: 'A short description of this section.', url: 'https://www.friendlypartyrentalsc.com/rentals', align: 'left' }
     case 'featureRow':
       return { id, type, title: 'Highlights', items: [{ title: 'Delivered & Set Up', text: '' }, { title: 'Local Support', text: '' }, { title: 'Flexible Scheduling', text: '' }] }
     case 'trust':
@@ -273,7 +273,7 @@ function blockHtml(b: Block, theme: VisualThemeTokens): string {
       return '<div style="text-align:left;font-family:' + theme.headingFont + ';font-style:italic;font-size:15px;color:' + theme.textColor + ';margin:6px 0 4px;">' + esc(b.text || '') + '</div>'
     case 'footerBrand': {
       const variant = b.variant || 'standard'
-      const contact = '315-884-1498 &nbsp;•&nbsp; friendlypartyrental.com'
+      const contact = '315-884-1498 &nbsp;•&nbsp; friendlypartyrentalsc.com'
       if (variant === 'minimal') {
         return '<div style="text-align:center;border-top:1px solid ' + theme.borderColor + ';padding-top:14px;margin-top:18px;font-family:' + theme.bodyFont + ';font-size:12px;color:' + theme.mutedColor + ';">' +
           'Friendly Party Rental &nbsp;•&nbsp; ' + contact + '<br/><a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Manage email preferences</a></div>'
@@ -319,7 +319,7 @@ function campaignReadiness(blocks: Block[], subject: string, preheader: string):
   ]
 }
 
-const ORIGIN = 'https://www.friendlypartyrental.com'
+const ORIGIN = 'https://www.friendlypartyrentalsc.com'
 
 function starterBlocks(): Block[] {
   return [

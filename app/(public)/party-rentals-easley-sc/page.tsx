@@ -34,7 +34,7 @@ export default function PartyRentalsEasleyPage() {
       </p>
 
       <div className="text-center">
-        <p className="text-body mb-4">Ready to book? Call or text 315-884-1498 or reserve online.</p>
+        <p className="text-body mb-4">Ready to book? Call or text 864-610-5324 or reserve online.</p>
         <Link href="/order-by-date" className="btn-accent">Book Your Easley Party Rentals</Link>
       </div>
     </div>

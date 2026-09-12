@@ -17,7 +17,7 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: 'Wedding Rental Packages in Greenville, SC',
-  description: 'Wedding rental packages in Greenville, SC starting at $345, from backyard elopements to 200-guest estate receptions. Tents, chairs, linens, arches, lighting, and dance floors -- delivery, setup, and pickup included. Call 315-884-1498.',
+  description: 'Wedding rental packages in Greenville, SC starting at $345, from backyard elopements to 200-guest estate receptions. Tents, chairs, linens, arches, lighting, and dance floors -- delivery, setup, and pickup included. Call 864-610-5324.',
   alternates: { canonical: 'https://www.friendlypartyrentalsc.com/weddings' },
 }
 export const dynamic = 'force-dynamic'
@@ -28,7 +28,7 @@ const faqItems = [
   },
   {
     question: 'Can I customize a wedding package?',
-    answer: 'Yes! We can customize any package to fit your specific needs. Call us at 315-884-1498 to discuss your vision and we will create a custom quote.',
+    answer: 'Yes! We can customize any package to fit your specific needs. Call us at 864-610-5324 to discuss your vision and we will create a custom quote.',
   },
   {
     question: 'How far in advance should I book wedding rentals?',

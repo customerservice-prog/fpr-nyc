@@ -202,7 +202,7 @@ export default function AdminDashboard() {
           </div>
 
           <div className="bg-white rounded shadow p-4">
-            <h3 className="font-bold text-dark text-sm mb-2">Weather — Minoa, NY</h3>
+            <h3 className="font-bold text-dark text-sm mb-2">Weather — Greenville, SC</h3>
             <WeatherWidget />
 
           </div>

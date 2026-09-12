@@ -23,8 +23,8 @@ export default function NotFound() {
       <p className="text-body mb-6">
         Or <Link href="/items" className="font-semibold underline">browse our full rental catalog</Link>.
       </p>
-      <a href="tel:+13158841498" className="btn-primary inline-block">
-        Call (315) 884-1498
+      <a href="tel:+18646105324" className="btn-primary inline-block">
+        Call (864) 610-5324
       </a>
     </div>
   )

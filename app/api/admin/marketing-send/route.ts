@@ -83,7 +83,7 @@ ${bodyHtml}
 <div style="font-size:11px;color:#6b7280;line-height:1.6;padding-top:16px;border-top:1px solid #e5e7eb;margin-top:16px;">
 You are receiving this email because you are a customer of Friendly Party Rental.<br />
 <a href="${unsubUrl}" style="color:#6b7280;text-decoration:underline;">Unsubscribe from marketing emails</a><br />
-&copy; ${year} Friendly Party Rental, Minoa, NY. All rights reserved.
+&copy; ${year} Friendly Party Rental, Greenville, SC. All rights reserved.
 </div>
 </td></tr>
 </table>

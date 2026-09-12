@@ -34,7 +34,7 @@ export default function PartyRentalsMauldinPage() {
       </p>
 
       <div className="text-center">
-        <p className="text-body mb-4">Have questions about delivery to Mauldin? Call or text 315-884-1498.</p>
+        <p className="text-body mb-4">Have questions about delivery to Mauldin? Call or text 864-610-5324.</p>
         <Link href="/order-by-date" className="btn-accent">Book Your Mauldin Rentals</Link>
       </div>
     </div>

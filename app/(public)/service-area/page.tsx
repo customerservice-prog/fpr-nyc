@@ -92,7 +92,7 @@ export default function ServiceAreaPage() {
       </div>
 
       <div className="text-center mb-8">
-        <p className="text-body mb-6">Not sure if we deliver to your area? Give us a call at 315-884-1498 or text us and we'll let you know right away. Delivery fees may vary by distance.</p>
+        <p className="text-body mb-6">Not sure if we deliver to your area? Give us a call at 864-610-5324 or text us and we'll let you know right away. Delivery fees may vary by distance.</p>
         <h2 className="text-2xl font-bold text-dark mb-2">Ready to Book Your Party?</h2>
         <p className="text-body mb-4">Browse our full inventory of bounce houses, tents, tables, chairs, linens &amp; more — delivered right to your door across Upstate South Carolina.</p>
       </div>

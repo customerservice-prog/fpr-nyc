@@ -17,6 +17,9 @@ export async function POST() {
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+  if ((session.user as any).role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   const order7833 = await prisma.order.findFirst({ where: { orderNumber: 'ERS-7833' } })
   if (!order7833) return NextResponse.json({ error: 'ERS-7833 not found' }, { status: 404 })

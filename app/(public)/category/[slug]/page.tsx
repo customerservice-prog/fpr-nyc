@@ -71,8 +71,8 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
         {
                         q: 'How much does it cost to rent ' + categoryLower + ' in Greenville, SC?',
                         a: minPrice
-                            ? 'Pricing starts at $' + minPrice.toFixed(2) + '/day and depends on the specific item, quantity, and rental duration. Call 315-884-1498 for an exact quote.'
-                                            : 'Pricing depends on the specific item, quantity, and rental duration. Call 315-884-1498 for an exact quote.',
+                            ? 'Pricing starts at $' + minPrice.toFixed(2) + '/day and depends on the specific item, quantity, and rental duration. Call 864-610-5324 for an exact quote.'
+                                            : 'Pricing depends on the specific item, quantity, and rental duration. Call 864-610-5324 for an exact quote.',
         },
         {
                         q: 'Do you deliver ' + categoryLower + ' near me?',
@@ -80,11 +80,11 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
         },
         {
                         q: 'How far in advance should I book ' + categoryLower + '?',
-                        a: 'We recommend booking as early as possible, especially for weekends between May and September when dates fill up quickly. Call 315-884-1498 to check availability.',
+                        a: 'We recommend booking as early as possible, especially for weekends between May and September when dates fill up quickly. Call 864-610-5324 to check availability.',
         },
             {
                         q: 'Do I need to pay a deposit for  ' + categoryLower + '?',
-                        a: 'Yes, a 33% deposit is required at booking to reserve your date. Deposits are non-refundable, but rainchecks are valid for one year. Call 315-884-1498 with any questions.',
+                        a: 'Yes, a 33% deposit is required at booking to reserve your date. Deposits are non-refundable, but rainchecks are valid for one year. Call 864-610-5324 with any questions.',
         },
             ]
 

@@ -12,6 +12,7 @@ const LOGO_URL = '/images/logo.png'
 const defaultNavLinks = [
   { name: 'Home', href: '/' },
   { name: 'Weddings', href: '/weddings' },
+  { name: 'Event Planning', href: '/event-planning' },
   { name: 'Rentals', href: '/category', hasDropdown: true },
   { name: 'FAQs', href: '/frequently_asked_questions' },
   { name: 'About Us', href: '/about_us' },

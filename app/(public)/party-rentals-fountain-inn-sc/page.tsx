@@ -30,7 +30,7 @@ export default function PartyRentalsFountainInnPage() {
         We have proudly served the greater Greenville area, including Fountain Inn, for more than a decade. We are fully insured, our delivery team is background-checked, and we bring the same care to a small backyard gathering as we do to a large wedding reception.
       </p>
       <div className="text-center">
-        <p className="text-body mb-4">Not sure what you need? Call or text us at 315-884-1498 and we will help you plan your Fountain Inn event.</p>
+        <p className="text-body mb-4">Not sure what you need? Call or text us at 864-610-5324 and we will help you plan your Fountain Inn event.</p>
         <Link href="/order-by-date" className="btn-accent">Book Your Fountain Inn Party Rentals</Link>
       </div>
     </div>

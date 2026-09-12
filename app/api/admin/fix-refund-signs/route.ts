@@ -17,6 +17,9 @@ export async function POST() {
     if (!session) {
           return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    if ((session.user as any).role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
   const payments = await prisma.payment.findMany({
         where: { amount: { gt: 0 }, notes: { contains: 'Refund', mode: 'insensitive' } },

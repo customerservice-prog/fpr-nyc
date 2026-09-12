@@ -34,7 +34,7 @@ export default function PartyRentalsSimpsonvillePage() {
       </p>
 
       <div className="text-center">
-        <p className="text-body mb-4">Call or text 315-884-1498 to check availability for your Simpsonville event.</p>
+        <p className="text-body mb-4">Call or text 864-610-5324 to check availability for your Simpsonville event.</p>
         <Link href="/order-by-date" className="btn-accent">Check Simpsonville Availability</Link>
       </div>
     </div>

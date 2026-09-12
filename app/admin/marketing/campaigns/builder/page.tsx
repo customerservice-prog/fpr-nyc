@@ -226,7 +226,7 @@ function blockHtml(b: Block, theme: VisualThemeTokens): string {
       }
       return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="padding:16px 0;border-bottom:3px solid ' + theme.accent + ';">' +
         '<div style="font-family:' + theme.headingFont + ';font-size:19px;font-weight:bold;color:' + theme.headingColor + ';letter-spacing:1.5px;">FRIENDLY PARTY RENTAL</div>' +
-        '<div style="font-size:11px;color:' + theme.mutedColor + ';letter-spacing:1px;margin-top:2px;font-family:' + theme.bodyFont + ';">SYRACUSE &amp; CENTRAL NEW YORK EVENT RENTALS</div>' +
+        '<div style="font-size:11px;color:' + theme.mutedColor + ';letter-spacing:1px;margin-top:2px;font-family:' + theme.bodyFont + ';">GREENVILLE &amp; UPSTATE SOUTH CAROLINA EVENT RENTALS</div>' +
         '</td></tr></table>'
     }
     case 'eyebrow':

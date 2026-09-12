@@ -2,10 +2,13 @@
 
 import { use, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatCurrency, formatDateTime } from '@/lib/utils'
 
 interface ContractOrder {
   id: string
+  status: string
+  refundedAmount: number
+    payments: Array<{ amount: number; createdAt: string }>
   orderNumber: string
   eventDate: string
   eventAddress?: string
@@ -100,6 +103,20 @@ export default function ContractPage({ params }: { params: Promise<{ id: string 
         <p className="text-body">Greenville, SC and surrounding Upstate South Carolina areas</p>
       </div>
 
+      {order.status === 'canceled' && (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-center">
+      <p className="font-bold text-red-700">This order has been canceled.</p>
+              {order.payments && order.payments.length > 0 && (
+                <div className="text-red-700 text-sm mt-1 space-y-1">
+                  {order.payments.filter((p) => p.amount > 0).map((p, idx) => (
+                    <p key={`paid-${idx}`}>Paid {formatCurrency(p.amount)} on {formatDateTime(p.createdAt)}</p>
+                  ))}
+                  {order.payments.filter((p) => p.amount < 0).map((p, idx) => (
+                    <p key={`refund-${idx}`}>Refunded {formatCurrency(Math.abs(p.amount))} on {formatDateTime(p.createdAt)}</p>
+                  ))}
+                </div>
+              )}</div>
+            )}
       <div className="bg-gray-50 p-6 rounded-lg mb-8 space-y-1">
         <h2 className="font-bold text-dark mb-2">Event Contract</h2>
         <p className="text-sm">Order #{order.orderNumber}</p>

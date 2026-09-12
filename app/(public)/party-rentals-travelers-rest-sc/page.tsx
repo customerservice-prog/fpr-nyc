@@ -30,7 +30,7 @@ export default function PartyRentalsTravelersRestPage() {
         We have proudly served the greater Greenville area, including Travelers Rest, for more than a decade. We are fully insured, our delivery team is background-checked, and we bring the same attention to detail to a small backyard party as we do to a 200-guest wedding.
       </p>
       <div className="text-center">
-        <p className="text-body mb-4">Not sure what you need? Call or text us at 315-884-1498 and we will help you plan your Travelers Rest event.</p>
+        <p className="text-body mb-4">Not sure what you need? Call or text us at 864-610-5324 and we will help you plan your Travelers Rest event.</p>
         <Link href="/order-by-date" className="btn-accent">Book Your Travelers Rest Party Rentals</Link>
       </div>
     </div>

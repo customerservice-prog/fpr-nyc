@@ -72,8 +72,8 @@ export function parseAmount(value: string | number): number {
 export const BUSINESS = {
   name: 'Friendly Party Rental',
   legalName: 'Friendly Party Rental L.L.C.',
-  phone: '315-884-1498',
-  text: '315-884-1498',
+  phone: '864-610-5324',
+  text: '864-610-5324',
   email: 'customerservice@friendlypartyrentalsc.com',
   address: 'Greenville, SC',
   serviceArea: 'Greenville & Nearby Upstate SC Cities',

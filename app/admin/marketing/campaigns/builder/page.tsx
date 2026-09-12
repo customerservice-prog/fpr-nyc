@@ -273,7 +273,7 @@ function blockHtml(b: Block, theme: VisualThemeTokens): string {
       return '<div style="text-align:left;font-family:' + theme.headingFont + ';font-style:italic;font-size:15px;color:' + theme.textColor + ';margin:6px 0 4px;">' + esc(b.text || '') + '</div>'
     case 'footerBrand': {
       const variant = b.variant || 'standard'
-      const contact = '315-884-1498 &nbsp;•&nbsp; friendlypartyrentalsc.com'
+      const contact = '864-610-5324 &nbsp;•&nbsp; friendlypartyrentalsc.com'
       if (variant === 'minimal') {
         return '<div style="text-align:center;border-top:1px solid ' + theme.borderColor + ';padding-top:14px;margin-top:18px;font-family:' + theme.bodyFont + ';font-size:12px;color:' + theme.mutedColor + ';">' +
           'Friendly Party Rental &nbsp;•&nbsp; ' + contact + '<br/><a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Manage email preferences</a></div>'
@@ -347,7 +347,7 @@ function starterBlocks(): Block[] {
         { image: ORIGIN + '/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
       ],
     },
-    { id: uid(), type: 'text', text: "Questions? Call 315-884-1498 — we're happy to help you plan the perfect event.", align: 'center' },
+    { id: uid(), type: 'text', text: "Questions? Call 864-610-5324 — we're happy to help you plan the perfect event.", align: 'center' },
   ]
 }
 function MarketingHubPage() {

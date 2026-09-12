@@ -62,7 +62,7 @@ const faqSections = [
       { question: 'What surfaces can you set up on?', answer: 'Grass, pavement, turf, gravel, concrete.' },
       { question: 'Do I need a permit for a backyard tent?', answer: 'Usually no for residential. Large tents at commercial venues may need permits.' },
       { question: 'Can you do a free yard assessment?', answer: 'Yes. Call 315-884-1498.' },
-      { question: 'Do you serve all of CNY?', answer: 'Yes, Greenville County and surrounding areas.' },
+      { question: 'Do you serve all of Upstate SC?', answer: 'Yes, Greenville County and surrounding areas.' },
     ],
   },
 ]

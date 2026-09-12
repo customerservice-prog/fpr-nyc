@@ -57,7 +57,7 @@ export default function GraduationRentalsPage() {
 
         <p className="text-body text-sm mb-10">
           Need a different guest count? Call us at{' '}
-          <a href="tel:315-884-1498" className="text-secondary underline">315-884-1498</a>{' '}
+          <a href="tel:864-610-5324" className="text-secondary underline">864-610-5324</a>{' '}
           and we&#39;ll help you size a tent and table/chair count for your graduation party. You can also browse{' '}
           <Link href="/category/party-rental-packages" className="text-secondary underline">all package deals</Link>.
         </p>

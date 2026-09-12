@@ -22,7 +22,7 @@ const faqItems = [
   },
   {
     question: 'Can I add event planning to an existing rental order?',
-    answer: 'Yes. Call us at 315-884-1498 or request a consultation below and we will help you add planning services to your rental order.',
+    answer: 'Yes. Call us at 864-610-5324 or request a consultation below and we will help you add planning services to your rental order.',
   },
   {
     question: 'How many meetings and calls are included?',

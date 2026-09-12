@@ -35,8 +35,8 @@ export default function NotFound() {
             <Link href="/" className="btn-primary inline-block px-6 py-3">
               Back to Home
             </Link>
-            <a href="tel:+13158841498" className="btn-outline inline-block px-6 py-3">
-              Call (315) 884-1498
+            <a href="tel:+18646105324" className="btn-outline inline-block px-6 py-3">
+              Call (864) 610-5324
             </a>
           </div>
         </div>

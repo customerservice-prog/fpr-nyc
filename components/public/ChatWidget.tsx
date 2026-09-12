@@ -14,7 +14,7 @@ interface ChatMessage {
 }
 
 const FAQ_DATA: FaqEntry[] = [
-  { q: 'How do I book a rental?', a: 'Browse our catalog, select items, choose your event date, and complete checkout online. You can also call 315-884-1498 for help.' },
+  { q: 'How do I book a rental?', a: 'Browse our catalog, select items, choose your event date, and complete checkout online. You can also call 864-610-5324 for help.' },
   { q: 'What can I rent from you?', a: 'We carry tents, tables and chairs, linens, lighting, bounce houses and waterslides, concessions and beverage service, dance floors, generators, photo booths, yard games, heating and cooling, and full wedding and party packages.' },
   { q: 'Do I need to pay a deposit?', a: 'Yes, a 33% deposit is required at booking to reserve your date. The remaining balance is due before delivery.' },
   { q: 'What payment methods do you accept?', a: 'We accept all major credit and debit cards through our secure online checkout.' },
@@ -42,7 +42,7 @@ const FAQ_DATA: FaqEntry[] = [
   { q: 'Can you set up at parks?', a: 'Yes. Permits may be required for park setups, and the customer is responsible for obtaining them.' },
   { q: 'What surfaces can you set up on?', a: 'We can set up on grass, pavement, turf, gravel, or concrete.' },
   { q: 'Do I need a permit for a backyard tent?', a: 'Usually not for residential setups. Large tents at commercial venues may require permits.' },
-  { q: 'Can you do a free yard assessment?', a: 'Yes! Call 315-884-1498 to schedule one.' },
+  { q: 'Can you do a free yard assessment?', a: 'Yes! Call 864-610-5324 to schedule one.' },
   ]
 
 const QUICK_QUESTIONS = [
@@ -87,7 +87,7 @@ async function findItemAnswer(userText: string, userTokens: Set<string>): Promis
     if (!item || typeof item.cost !== 'number') return null
     const price = '$' + item.cost.toFixed(2).replace(/\.00$/, '')
     const categoryPart = item.category?.name ? ` (${item.category.name})` : ''
-    return `Yes! We carry ${item.name}${categoryPart} starting at ${price}. Check availability for your date on our booking calendar, or call 315-884-1498.`
+    return `Yes! We carry ${item.name}${categoryPart} starting at ${price}. Check availability for your date on our booking calendar, or call 864-610-5324.`
   } catch {
     return null
   }
@@ -96,7 +96,7 @@ async function findItemAnswer(userText: string, userTokens: Set<string>): Promis
 async function findBestAnswer(userText: string): Promise<string> {
   const userTokens = new Set(tokenize(userText))
   if (userTokens.size === 0) {
-    return "I'm not sure I understood that. Could you rephrase your question, or call us at 315-884-1498?"
+    return "I'm not sure I understood that. Could you rephrase your question, or call us at 864-610-5324?"
   }
 
   const itemAnswer = await findItemAnswer(userText, userTokens)
@@ -127,7 +127,7 @@ async function findBestAnswer(userText: string): Promise<string> {
     return bestEntry.a
   }
 
-  return "I don't have an exact answer for that, but our team can help! Call or text 315-884-1498, or visit our Contact Us page and we'll get right back to you."
+  return "I don't have an exact answer for that, but our team can help! Call or text 864-610-5324, or visit our Contact Us page and we'll get right back to you."
 }
 
 export default function ChatWidget() {

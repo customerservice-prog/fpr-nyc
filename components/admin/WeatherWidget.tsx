@@ -37,7 +37,7 @@ export default function WeatherWidget() {
   const [weather, setWeather] = useState<any>(null)
 
   useEffect(() => {
-    fetch('https://api.open-meteo.com/v1/forecast?latitude=43.0642&longitude=-75.9938&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FNew_York&forecast_days=5')
+          fetch('https://api.open-meteo.com/v1/forecast?latitude=34.8526&longitude=-82.3940&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FNew_York&forecast_days=5')
       .then((r) => r.json())
       .then((d) => setWeather(d))
       .catch(() => {})
@@ -70,7 +70,7 @@ if (!weather || !weather.current || !weather.daily) {
       <div className="mt-3 rounded overflow-hidden border" style={{ height: 260 }}>
         <iframe
           title="Weather Radar Map"
-          src="https://embed.windy.com/embed2.html?lat=43.064&lon=-75.994&zoom=8&level=surface&overlay=radar&menu=&message=true&marker=true&calendar=now&type=map&location=coordinates&metricWind=default&metricTemp=default&radarRange=-1"
+                  src="https://embed.windy.com/embed2.html?lat=34.853&lon=-82.394&zoom=8&level=surface&overlay=radar&menu=&message=true&marker=true&calendar=now&type=map&location=coordinates&metricWind=default&metricTemp=default&radarRange=-1"
           width="100%"
           height="100%"
           style={{ border: 0 }}

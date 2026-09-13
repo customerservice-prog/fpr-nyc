@@ -430,14 +430,7 @@ export default function CheckoutPage() {
               >
                 Delivery to My Event
               </button>
-              <button
-                type="button"
-                onClick={() => setEditMethod('pickup')}
-                className={`flex-1 rounded px-3 py-2 text-sm font-medium border ${'$'}{editMethod === 'pickup' ? 'border-primary bg-primary/10 text-dark' : 'border-gray-200 text-body'}`}
-              >
-                I'll Pick Up
-              </button>
-            </div>
+                          </div>
 
             {editMethod === 'delivery' ? (
               <>

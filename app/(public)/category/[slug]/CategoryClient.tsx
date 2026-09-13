@@ -429,14 +429,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
                   <Truck size={18} />
                   Delivery to My Event
                 </button>
-                <button
-                  onClick={() => handleSelectMethod('pickup')}
-                  className="w-full border border-primary text-primary rounded px-4 py-2 flex items-center justify-center gap-2 font-medium"
-                >
-                  <MapPin size={18} />
-                  I'll Pick Up (By Appointment)
-                </button>
-              </div>
+                              </div>
               <div className="text-center mt-4">
                 <button
                   onClick={() => { setBrowseWithoutDate(true); if (typeof window !== 'undefined') localStorage.setItem('fpr_browseWithoutDate', 'true') }}

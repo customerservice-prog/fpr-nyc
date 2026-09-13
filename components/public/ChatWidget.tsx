@@ -16,7 +16,7 @@ interface ChatMessage {
 const FAQ_DATA: FaqEntry[] = [
   { q: 'How do I book a rental?', a: 'Browse our catalog, select items, choose your event date, and complete checkout online. You can also call 864-610-5324 for help.' },
   { q: 'What can I rent from you?', a: 'We carry tents, tables and chairs, linens, lighting, bounce houses and waterslides, concessions and beverage service, dance floors, generators, photo booths, yard games, heating and cooling, and full wedding and party packages.' },
-  { q: 'Do I need to pay a deposit?', a: 'Yes, a 33% deposit is required at booking to reserve your date. The remaining balance is due before delivery.' },
+  { q: 'Do I need to pay a deposit?', a: 'Yes, a 25% deposit is required at booking to reserve your date. The remaining balance is due before delivery.' },
   { q: 'What payment methods do you accept?', a: 'We accept all major credit and debit cards through our secure online checkout.' },
   { q: 'When is the remaining balance due?', a: 'The balance is due before delivery. Automatic reminders are sent by email as your event approaches.' },
   { q: 'Is there sales tax on my order?', a: 'Yes, New York State sales tax applies to taxable rental items and is calculated automatically at checkout.' },

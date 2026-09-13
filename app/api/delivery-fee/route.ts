@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (zip === WAREHOUSE_ZIP) {
-    return NextResponse.json({ fee: 0, distance: 0 })
+    return NextResponse.json({ fee: calculateFeeForDistance(0).fee, distance: 0 })
   }
 
   const customerCoords = await getZipCoords(zip)

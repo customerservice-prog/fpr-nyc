@@ -84,7 +84,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
         },
             {
                         q: 'Do I need to pay a deposit for  ' + categoryLower + '?',
-                        a: 'Yes, a 33% deposit is required at booking to reserve your date. Deposits are non-refundable, but rainchecks are valid for one year. Call 864-610-5324 with any questions.',
+                        a: 'Yes, a 25% deposit is required at booking to reserve your date. Deposits are non-refundable, but rainchecks are valid for one year. Call 864-610-5324 with any questions.',
         },
             ]
 

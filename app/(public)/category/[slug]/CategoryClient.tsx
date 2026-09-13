@@ -131,7 +131,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
   }>>(initialItems)
   const [cartOpen, setCartOpen] = useState(false)
   const [closedDates, setClosedDates] = useState<string[]>([])
-  const { setEventDate, setEventTimeSlot, eventTimeSlot, setDeliveryType, setPickupTimeSlot, setExactTimeRequested, setSchedulingDetails, itemCount, durationTierId, setDurationTierId } = useCart()
+  const { setEventDate, eventDate: cartEventDate, loaded: cartLoaded, setEventTimeSlot, eventTimeSlot, setDeliveryType, setPickupTimeSlot, setExactTimeRequested, setSchedulingDetails, itemCount, durationTierId, setDurationTierId } = useCart()
 
   const [browseWithoutDate, setBrowseWithoutDate] = useState(false)
   const [bookingMethod, setBookingMethod] = useState<'' | 'delivery' | 'pickup'>('')
@@ -146,6 +146,12 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
       setBrowseWithoutDate(true)
     }
   }, [])
+  useEffect(() => {
+    if (!dateParam && !selectedDate && cartLoaded && cartEventDate) {
+      setSelectedDate(new Date(cartEventDate))
+    }
+  }, [dateParam, selectedDate, cartLoaded, cartEventDate])
+  
   const [timeConfirmed, setTimeConfirmed] = useState(false)
   const [eventStartTime, setEventStartTimeLocal] = useState('')
   const [eventEndTime, setEventEndTimeLocal] = useState('')

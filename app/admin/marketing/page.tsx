@@ -83,30 +83,29 @@ function newBlock(type: BlockType): Block {
     case 'image':
       return { id, type, image: '', url: '', align: 'center' }
     case 'button':
-      return { id, type, text: 'Shop Now', url: 'https://www.friendlypartyrental.com/rentals', align: 'center' }
+      return { id, type, text: 'Shop Now', url: 'https://www.friendlypartyrentalsc.com/rentals', align: 'center' }
     case 'divider':
       return { id, type }
     case 'spacer':
       return { id, type }
     case 'hero':
-      return { id, type, image: 'https://www.friendlypartyrental.com/images/wedding-backyard-elopement.jpg', url: 'https://www.friendlypartyrental.com/rentals' }
+      return { id, type, image: 'https://www.friendlypartyrentalsc.com/images/wedding-backyard-elopement.jpg', url: 'https://www.friendlypartyrentalsc.com/rentals' }
     case 'offer':
-      return { id, type, eyebrow: 'Limited-Time Offer', title: 'Save 15% on your next order', subtitle: 'Book by June 30th \u2014 mention code SUMMER15 on your quote.', code: 'SUMMER15', buttonText: 'Browse Rentals', url: 'https://www.friendlypartyrental.com/rentals' }
+      return { id, type, eyebrow: 'Limited-Time Offer', title: 'Save 15% on your next order', subtitle: 'Book by June 30th \u2014 mention code SUMMER15 on your quote.', code: 'SUMMER15', buttonText: 'Browse Rentals', url: 'https://www.friendlypartyrentalsc.com/rentals' }
     case 'grid':
       return {
         id, type, title: 'Popular Rentals', subtitle: 'Tap any category to explore', columns: 2,
         cards: [
-          { image: 'https://www.friendlypartyrental.com/api/category-image/tent-rentals', caption: 'Tents & Canopies', url: 'https://www.friendlypartyrental.com/rentals' },
-          { image: 'https://www.friendlypartyrental.com/api/category-image/table-chair-rentals', caption: 'Tables & Chairs', url: 'https://www.friendlypartyrental.com/rentals' },
+          { image: 'https://www.friendlypartyrentalsc.com/api/category-image/tent-rentals', caption: 'Tents & Canopies', url: 'https://www.friendlypartyrentalsc.com/rentals' },
+          { image: 'https://www.friendlypartyrentalsc.com/api/category-image/table-chair-rentals', caption: 'Tables & Chairs', url: 'https://www.friendlypartyrentalsc.com/rentals' },
         ],
       }
     case 'badges':
       return {
         id, type, title: 'Why Friendly Party Rental?',
         cards: [
-          { image: 'https://www.friendlypartyrental.com/images/badge-syracuse-number1-party-rental.png', caption: '', url: '' },
-          { image: 'https://www.friendlypartyrental.com/images/badge-all-day-8-hour-rental.png', caption: '', url: '' },
-          { image: 'https://www.friendlypartyrental.com/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
+          { image: 'https://www.friendlypartyrentalsc.com/images/badge-all-day-8-hour-rental.png', caption: '', url: '' },
+          { image: 'https://www.friendlypartyrentalsc.com/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
         ],
       }
     default:
@@ -182,7 +181,7 @@ function blocksToHtml(blocks: Block[]): string {
   return blocks.map(blockHtml).join('\n')
 }
 
-const ORIGIN = 'https://www.friendlypartyrental.com'
+const ORIGIN = 'https://www.friendlypartyrentalsc.com'
 
 function starterBlocks(): Block[] {
   return [
@@ -205,7 +204,6 @@ function starterBlocks(): Block[] {
     {
       id: uid(), type: 'badges', title: 'Why Friendly Party Rental?',
       cards: [
-        { image: ORIGIN + '/images/badge-syracuse-number1-party-rental.png', caption: '', url: '' },
         { image: ORIGIN + '/images/badge-all-day-8-hour-rental.png', caption: '', url: '' },
         { image: ORIGIN + '/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
       ],

@@ -50,7 +50,7 @@ export default function ApiInfoPage() {
         This key can be used to authenticate requests to this system's own API from external tools you control.
       </p>
       <label className="block text-xs text-gray-500 mb-1">API Base URL</label>
-      <input className="border rounded px-3 py-2 text-sm w-full mb-4 bg-gray-100" readOnly value="https://www.friendlypartyrental.com/api" />
+      <input className="border rounded px-3 py-2 text-sm w-full mb-4 bg-gray-100" readOnly value="https://www.friendlypartyrentalsc.com/api" />
       <label className="block text-xs text-gray-500 mb-1">API Key</label>
       <input className="border rounded px-3 py-2 text-sm w-full mb-4 bg-gray-100" readOnly value={apiKey} />
       <button className="bg-admin-dark text-white px-4 py-2 rounded text-sm" onClick={regenerate}>

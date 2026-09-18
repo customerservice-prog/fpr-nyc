@@ -130,7 +130,6 @@ function newBlock(type: BlockType): Block {
       return {
         id, type, title: 'Why Friendly Party Rental?',
         cards: [
-          { image: 'https://www.friendlypartyrentalsc.com/images/badge-syracuse-number1-party-rental.png', caption: '', url: '' },
           { image: 'https://www.friendlypartyrentalsc.com/images/badge-all-day-8-hour-rental.png', caption: '', url: '' },
           { image: 'https://www.friendlypartyrentalsc.com/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
         ],
@@ -342,7 +341,6 @@ function starterBlocks(): Block[] {
     {
       id: uid(), type: 'badges', title: 'Why Friendly Party Rental?',
       cards: [
-        { image: ORIGIN + '/images/badge-syracuse-number1-party-rental.png', caption: '', url: '' },
         { image: ORIGIN + '/images/badge-all-day-8-hour-rental.png', caption: '', url: '' },
         { image: ORIGIN + '/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
       ],

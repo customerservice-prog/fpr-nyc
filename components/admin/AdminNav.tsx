@@ -54,7 +54,7 @@ export default function AdminNav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 h-20" style={{ backgroundColor: '#2d6a2d', borderBottom: '3px solid #4CAF50' }}>
       <div className="flex items-center gap-4">
-        <Link href="https://www.friendlypartyrental.com" target="_blank" rel="noopener noreferrer">
+        <Link href="https://www.friendlypartyrentalsc.com" target="_blank" rel="noopener noreferrer">
           <Image
             src="/images/logo.png"
             alt="Friendly Party Rental"

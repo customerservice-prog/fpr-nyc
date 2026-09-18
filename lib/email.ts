@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
   },
 })
 
-const LOGO_URL = 'https://www.friendlypartyrental.com/images/logo.png'
+const LOGO_URL = 'https://www.friendlypartyrentalsc.com/images/logo.png'
 
 export async function sendEmail({
   to,
@@ -233,7 +233,7 @@ export function orderConfirmationEmail(order: {
         <p style="margin-top:16px;"><strong>Total:</strong> $${order.totalAmount.toFixed(2)}</p>
         <p><strong>Deposit Paid:</strong> $${order.depositAmount.toFixed(2)}</p>
         <p><strong>Balance Due:</strong> $${order.balanceDue.toFixed(2)}</p>
-        <p style="margin-top:20px;"><a href="https://www.friendlypartyrental.com/contract/${order.id}" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>
+        <p style="margin-top:20px;"><a href="https://www.friendlypartyrentalsc.com/contract/${order.id}" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>
         ${policyFooterHtml()}
         ${emailFooter()}
       </div>
@@ -369,7 +369,7 @@ export function paymentReceiptEmail(payment: {
         <p><strong>Order Total:</strong> $${payment.totalAmount.toFixed(2)}</p>
         <p><strong>Remaining Balance:</strong> $${payment.balanceDue.toFixed(2)}</p>
         ${payment.payments && payment.payments.length ? paymentHistoryHtml(payment.payments) : ''}
-        ${payment.id ? '<p style="margin-top:20px;"><a href="https://www.friendlypartyrental.com/contract/' + payment.id + '" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>' : ''}
+        ${payment.id ? '<p style="margin-top:20px;"><a href="https://www.friendlypartyrentalsc.com/contract/' + payment.id + '" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>' : ''}
         ${policyFooterHtml()}
         ${emailFooter()}
       </div>
@@ -492,7 +492,7 @@ export function selfServiceQuoteEmail(data: {
           <tr><td style="padding:8px; font-weight:bold;">Subtotal</td><td style="padding:8px; text-align:right; font-weight:bold;">$${data.subtotal.toFixed(2)}</td></tr>
         </table>
         <p style="margin-top:16px; font-size:13px; color:#666;">Delivery fees and sales tax are calculated at checkout based on your address. This quote does not reserve your date - complete checkout to confirm your booking.</p>
-        <p style="margin-top:24px;"><a href="https://www.friendlypartyrental.com/checkout">Return to checkout to complete your booking</a></p>
+        <p style="margin-top:24px;"><a href="https://www.friendlypartyrentalsc.com/checkout">Return to checkout to complete your booking</a></p>
         ${emailFooter()}
       </div>
     `,

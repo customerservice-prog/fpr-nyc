@@ -1,11 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // The @zoom/meetingsdk embedded UMD bundle require()s '@zoom/download-manager',
-  // an unpublished Zoom-internal module (404 on npm) that is only reached by the
-  // full Client View download path, never by the embedded Component View we use.
-  // Turbopack's resolveAlias can't map to false, so point it at an empty stub
-  // module instead of failing the build with "Module not found".
   turbopack: {
     resolveAlias: {
       '@zoom/download-manager': './lib/stubs/zoom-download-manager.ts',
@@ -13,15 +8,14 @@ const nextConfig = {
   },
   images: {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 480, 576],
-    domains: [
-      'www.friendlypartyrentalsc.com',
-      'friendlypartyrentalsc.com',
-      'images.unsplash.com',
-      'files.sysers.com',
-      '315.ourers.com',
+    remotePatterns: [
+      { protocol: 'https', hostname: 'www.friendlypartyrentalsc.com' },
+      { protocol: 'https', hostname: 'friendlypartyrentalsc.com' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'files.sysers.com' },
+      { protocol: 'https', hostname: '315.ourers.com' },
     ],
-    localPatterns: [
-      { pathname: '/**' },      ],
+    localPatterns: [{ pathname: '/**' }],
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60,
   },
@@ -53,5 +47,4 @@ const nextConfig = {
     ]
   },
 }
-
 module.exports = nextConfig

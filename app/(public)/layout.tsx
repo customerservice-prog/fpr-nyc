@@ -1,5 +1,4 @@
 import Header from '@/components/public/Header'
-import AnnouncementBanner from '@/components/public/AnnouncementBanner'
 import Footer from '@/components/public/Footer'
 import StickyBar from '@/components/public/StickyBar'; import MobileHeader from '@/components/public/MobileHeader'; import MobileBottomNav from '@/components/public/MobileBottomNav'
 import ChatWidget from '@/components/public/ChatWidget'
@@ -19,7 +18,6 @@ export default async function PublicLayout({ children }: { children: React.React
     <style dangerouslySetInnerHTML={{__html:`:root { --theme-btn-primary: ${btnPrimaryColor}; --theme-btn-primary-bg: ${btnPrimaryColorBg}; } .btn-primary { background-color: var(--theme-btn-primary-bg) !important; color: ${btnPrimaryColor===btnPrimaryColorBg?'#fff':btnPrimaryColor} !important; }`}}/>
     <ConfettiIntro />
     <div className="hidden md:block"><Header navItems={navItems} headerStyle={theme?.headerStyle??1}/></div><div className="md:hidden"><MobileHeader/></div>
-    <AnnouncementBanner />
     <main className="min-h-screen pb-20">{children}</main>
     <Footer footerStyle={theme?.footerStyle??'dark'}/>
     <div className="hidden md:block"><StickyBar/></div><div className="md:hidden"><MobileBottomNav/><div style={{height:'calc(60px + env(safe-area-inset-bottom))'}}/></div>

@@ -10,7 +10,7 @@ import path from 'path'
 // Required env vars:
 //   STORAGE_DIR        absolute path of the mounted volume, e.g. /data/uploads
 //   PUBLIC_BASE_URL    site origin used to build absolute URLs for emails,
-//                      e.g. https://www.friendlypartyrental.com (no trailing slash)
+//                      e.g. https://www.friendlypartyrentalsc.com (no trailing slash)
 
 const { STORAGE_DIR, PUBLIC_BASE_URL } = process.env
 
@@ -30,7 +30,8 @@ function extForType(contentType: string): string {
   return map[contentType] || 'bin'
 }
 
-// Writes a buffer to the volume and returns an absolute public https URL.
+// Writes a buffer to the Railway-mounted volume and returns an absolute public URL.
+// STORAGE_DIR is intentionally a runtime path outside the application source tree.
 export async function uploadImage(
   body: Buffer,
   contentType: string,
@@ -45,7 +46,7 @@ export async function uploadImage(
   const filename = randomUUID() + '.' + ext
 
   await fs.mkdir(dir, { recursive: true })
-  await fs.writeFile(path.join(dir, filename), body)
+  await fs.writeFile(path.join(/*turbopackIgnore: true*/ dir, filename), body)
 
   return base + '/api/uploads/' + filename
 }
@@ -56,5 +57,5 @@ export function resolveStoredFile(segment: string): string | null {
   if (!STORAGE_DIR) return null
   const safe = path.basename(segment)
   if (!safe || safe !== segment) return null
-  return path.join(STORAGE_DIR, safe)
+  return path.join(/*turbopackIgnore: true*/ STORAGE_DIR, safe)
 }

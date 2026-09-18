@@ -2,6 +2,7 @@ export const revalidate = 60
 
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { categoryDescriptionForSc, itemDescriptionForSc } from '@/lib/scPublicCopy'
 
 export async function GET(
   _request: Request,
@@ -21,5 +22,14 @@ export async function GET(
     return NextResponse.json({ error: 'Category not found' }, { status: 404 })
   }
 
-  return NextResponse.json({ category })
+  return NextResponse.json({
+    category: {
+      ...category,
+      description: categoryDescriptionForSc(category.name, category.description),
+      items: category.items.map((item) => ({
+        ...item,
+        description: itemDescriptionForSc(item.name, item.description),
+      })),
+    },
+  })
 }

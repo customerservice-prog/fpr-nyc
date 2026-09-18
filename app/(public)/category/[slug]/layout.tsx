@@ -1,30 +1,29 @@
 import type { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
 import { safeJsonLd } from '@/lib/jsonLd'
+import { categoryDescriptionForSc } from '@/lib/scPublicCopy'
 
-const BASE_URL = 'https://friendlypartyrentalsc.com'
+const BASE_URL = 'https://www.friendlypartyrentalsc.com'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   try {
     const category = await prisma.category.findUnique({ where: { slug: (await params).slug } })
     if (!category) return {}
-const fallbackDescription = `Rent ${category.name} in Greenville, SC from Friendly Party Rental. Fast online booking, delivery, and setup throughout Upstate South Carolina.`
-        const description =
-                category.description && category.description.length >= 120
-            ? category.description
-                  : fallbackDescription
+    const localized = categoryDescriptionForSc(category.name, category.description)
+    const fallbackDescription = `Rent ${category.name} in Greenville, SC from Friendly Party Rental. Fast online booking, delivery, and setup throughout Upstate South Carolina.`
+    const description = localized.length >= 120 ? localized : fallbackDescription
     const canonical = `${BASE_URL}/category/${category.slug}`
     const isLowValueDuplicateIntent = category.slug === 'weddings'
     return {
-title:       `${category.name} | Greenville, SC`,
+      title: `${category.name} | Greenville, SC`,
       description,
       alternates: { canonical },
       robots: isLowValueDuplicateIntent ? { index: false, follow: true } : undefined,
       openGraph: {
-        title: `${category.name} | Friendly Party Rental`,
+        title: `${category.name} | Friendly Party Rental Greenville`,
         description,
         url: canonical,
-                  images: category.picture && !category.picture.startsWith('data:') ? [category.picture] : undefined,
+        images: category.picture && !category.picture.startsWith('data:') ? [category.picture] : undefined,
       },
     }
   } catch {
@@ -47,9 +46,7 @@ export default async function CategoryLayout({
         '@context': 'https://schema.org',
         '@type': 'CollectionPage',
         name: category.name,
-        description:
-          category.description ||
-          `Rent ${category.name} in Greenville, SC from Friendly Party Rental.`,
+        description: categoryDescriptionForSc(category.name, category.description),
         url: `${BASE_URL}/category/${category.slug}`,
       }
     }
@@ -57,10 +54,7 @@ export default async function CategoryLayout({
   return (
     <>
       {jsonLd && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       )}
       {children}
     </>

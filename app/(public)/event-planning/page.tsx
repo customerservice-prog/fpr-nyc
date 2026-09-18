@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Accordion from '@/components/public/Accordion'
+import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 import type { Metadata } from 'next'
 import { Playfair_Display } from 'next/font/google'
 
@@ -137,6 +138,14 @@ export default function EventPlanningPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 pt-12"><div className="grid grid-cols-1 sm:grid-cols-3 gap-6"><img src="/images/event-planning/outdoor-tent-setup/image.png" alt="Real outdoor party tent setup by Friendly Party Rental" className="w-full h-56 object-cover rounded-xl shadow-lg ring-1 ring-[#D4AF37]/30 hover:shadow-xl transition-shadow duration-300" /><img src="/images/event-planning/tent-patio-setup/image.png" alt="Real tent and patio party setup with string lights by Friendly Party Rental" className="w-full h-56 object-cover rounded-xl shadow-lg ring-1 ring-[#D4AF37]/30 hover:shadow-xl transition-shadow duration-300" /><img src="/images/event-planning/ceremony-deck/image.png" alt="Real outdoor wedding ceremony setup with rows of white chairs on a deck" className="w-full h-56 object-cover rounded-xl shadow-lg ring-1 ring-[#D4AF37]/30 hover:shadow-xl transition-shadow duration-300" /></div><p className="text-center text-body text-sm mt-4">Real events we have planned and set up across Upstate South Carolina</p></div><div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="mb-12 rounded-2xl border border-primary/20 bg-[#F6F4F2] p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-5 md:gap-8">
+          <div className="flex-1">
+            <p className="text-secondary uppercase tracking-[0.3em] text-xs font-bold mb-3">Have A Vision Already?</p>
+            <h2 className={`${playfair.className} text-2xl font-bold text-dark mb-2`}>Create a layout before your planning call.</h2>
+            <p className="text-body">Use RentSketch with our real tents, tables and chairs to create a visual starting point, then send it to our team so we can plan around the setup you have in mind.</p>
+          </div>
+          <DesignYourEventCTA source="event_planning_page" label="Create My Layout" variant="primary" className="shrink-0" />
+        </div>
         <div id="packages" className="text-center mb-4">
           <p className="text-secondary uppercase tracking-[0.3em] text-xs font-bold mb-3">Clear, Upfront Pricing</p>
           <h2 className={`${playfair.className} text-3xl md:text-4xl font-bold text-dark mb-3`}>Event Planning Packages</h2>

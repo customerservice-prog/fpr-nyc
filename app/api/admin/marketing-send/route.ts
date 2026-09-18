@@ -21,7 +21,7 @@ function wrapEmail(bodyHtml: string, recipient: string, origin: string, preheade
 <title>Friendly Party Rental</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f4f6fb;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:#f4f6fb;">${(preheaderText || 'Party & event rentals delivered and set up for you across Central New York.').replace(/[&<>]/g, (c) => (c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;'))}</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:#f4f6fb;">${(preheaderText || 'Party & event rentals delivered and set up for you across Greenville and Upstate South Carolina.').replace(/[&<>]/g, (c) => (c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;'))}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f6fb;"><tr><td align="center" style="padding:0;">
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;margin:0 auto;">
 <tr><td style="background-color:#0b3d91;padding:22px 24px;text-align:center;border-radius:0;">

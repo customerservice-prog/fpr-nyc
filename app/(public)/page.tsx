@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import CategoryCard from '@/components/public/CategoryCard'
 import HeroSection from '@/components/public/HeroSection'
+import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 import ComicBookBackground from '@/components/public/ComicBookBackground'
 import YouTubeFacade from '@/components/public/YouTubeFacade'
 import ReviewCarousel from '@/components/public/ReviewCarousel'
@@ -14,6 +15,27 @@ import { Playfair_Display } from 'next/font/google'
 import { CalendarCheck, MousePointerClick, Truck } from 'lucide-react'
 export const revalidate = 60
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['600','700'], style: ['italic','normal'], display: 'swap' })
+
+function EventDesignerHomeSection() {
+  return (
+    <section className="bg-[#0B1F3A] py-14">
+      <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <p className="text-[#EEC400] tracking-[0.3em] text-xs font-bold uppercase mb-3">RentSketch Event Designer</p>
+          <h2 className={`${playfair.className} text-3xl md:text-4xl font-bold text-white mb-4`}>Not Sure What Fits Your Event?</h2>
+          <p className="text-white/80 mb-6 max-w-md">Tell us your guest count and build a starting layout with tents, tables, chairs, dance floor pieces and more. Customize it, switch between 2D and 3D, then send the design to our Greenville team.</p>
+          <div className="flex flex-wrap items-center gap-4">
+            <DesignYourEventCTA source="home_designer_section" label="Design My Event" variant="primary" />
+            <Link href="/design-your-event" className="border-2 border-white text-white hover:bg-white/10 rounded-full px-6 py-3 font-bold inline-flex items-center justify-center">See How It Works</Link>
+          </div>
+        </div>
+        <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+          <img src="/images/design-your-event-3d-preview.png" alt="RentSketch 3D event preview with tent, tables, chairs and dance floor" className="w-full h-auto" />
+        </div>
+      </div>
+    </section>
+  )
+}
 export default async function HomePage() {
   let theme: { storeBackgroundImage: string | null; storeBackgroundTint: string; categoryDisplayStyle: string; categoryCarouselCount: number } | null = null
   try {
@@ -136,6 +158,8 @@ style={{ background: 'linear-gradient(135deg, #EEC400, #E07B00, #EEC400)' }}
 <Link href="/order-by-date" prefetch={false} className="btn-gold inline-block">Book Your Rentals Online</Link>
 </div>
 </ComicBookBackground>
+
+      <EventDesignerHomeSection />
 
       {/* Category Grid */}
       <section

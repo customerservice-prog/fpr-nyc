@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 import { useSearchParams, notFound } from 'next/navigation'
 import ItemCard from '@/components/public/ItemCard'
 import BookingCalendar from '@/components/public/BookingCalendar'
@@ -729,6 +730,16 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
 
           {showItems && (
             <>
+              {(slug === 'tent-rentals' || slug === 'table-chair-rentals') && (
+                <div className="mb-8 rounded-xl border border-primary/20 bg-[#F6F4F2] p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+                  <div className="flex-1">
+                    <p className="text-secondary uppercase tracking-[0.18em] text-[11px] font-bold mb-2">RentSketch Event Designer</p>
+                    <p className="font-bold text-dark mb-1">{slug === 'tent-rentals' ? 'Not sure which tent size you need?' : 'Not sure how many tables or chairs you need?'}</p>
+                    <p className="text-sm text-body">{slug === 'tent-rentals' ? 'Build a starting layout around your guest count, then add tables, chairs, dance floor pieces and more before you book.' : 'See how tables and chairs fit around your guest count and event layout before you reserve them.'}</p>
+                  </div>
+                  <DesignYourEventCTA source={slug === 'tent-rentals' ? 'tent_category_page' : 'table_chair_category_page'} label="Design My Layout" variant="primary" className="shrink-0" />
+                </div>
+              )}
               {(selectedDate || eventTimeSlot) && !browseWithoutDate && (
                 <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3 mb-6">
                   <div className="flex items-center gap-2 text-sm text-dark">

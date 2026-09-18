@@ -38,7 +38,10 @@ export async function GET(
       status: 200,
       headers: {
         'Content-Type': contentType,
-                'Cache-Control': 'public, max-age=0, must-revalidate',
+        // Uploaded filenames are UUIDs and therefore immutable. Let browsers/CDNs
+        // cache the bytes directly instead of repeatedly re-reading the Railway volume.
+        'Cache-Control': 'public, max-age=31536000, immutable',
+        'X-Content-Type-Options': 'nosniff',
       },
     })
   } catch {

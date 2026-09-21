@@ -1,3 +1,4 @@
+import {categorySearchName} from '@/lib/scSearchReadiness'
 import {cache} from 'react'
 import {prisma} from '@/lib/prisma'
 import {safeJsonLd} from '@/lib/jsonLd'
@@ -7,7 +8,7 @@ const getCategory=cache((slug:string)=>prisma.category.findUnique({where:{slug}}
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}){
  const category=await getCategory((await params).slug)
  if(!category||!category.displayToCustomer)return {title:'Rental category not found',robots:{index:false,follow:true}}
- const name=category.name.replace(/\s*[—–-]\s*Greenville,?\s*SC$/i,'')
+ const name=categorySearchName(category.slug,category.name)
  return scPageMetadata('/category/'+encodeURIComponent(category.slug),`${name} in Greenville, SC`,categoryDescriptionForSc(name,category.description),category.slug!=='weddings')
 }
 export default async function CategoryLayout({children,params}:{children:React.ReactNode;params:Promise<{slug:string}>}){

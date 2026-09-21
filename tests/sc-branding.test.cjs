@@ -14,3 +14,5 @@ test('email readiness is administrator-only and never exposes or requests passwo
 require('./sc-exact-media.test.cjs')
 
 require('./sc-search.test.cjs')
+
+require('./sc-search-readiness.test.cjs')

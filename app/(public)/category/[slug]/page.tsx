@@ -1,3 +1,4 @@
+import CategoryCatalogFallback from '@/components/public/CategoryCatalogFallback'
 import { createElement, Suspense, Fragment } from 'react'
 import LocalDeliveryLinks from '@/components/public/LocalDeliveryLinks'
 import { notFound } from 'next/navigation'
@@ -150,7 +151,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
     null,
     createElement(
       Suspense,
-      { fallback: createElement('p', { className: 'text-center py-12' }, 'Loading...') },
+      { fallback: createElement(CategoryCatalogFallback, {name: category.name, items: initialItems}) },
       createElement(CategoryClient, {
         slug,
         initialCategory,

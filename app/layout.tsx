@@ -25,6 +25,7 @@ const LOCAL_BUSINESS_JSONLD = {
   name: 'Friendly Party Rental',
   image: `${SITE_URL}/images/logo.png`,
   telephone: '+1-864-610-5324',
+  email: 'customerservice@friendlypartyrental.com',
   url: SITE_URL,
   address: {
     '@type': 'PostalAddress',
@@ -48,6 +49,18 @@ const LOCAL_BUSINESS_JSONLD = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  applicationName: 'Friendly Party Rental - South Carolina',
+  manifest: '/site.webmanifest',
+  icons: {
+    icon: [
+      { url: '/favicon.ico?v=sc-20260921', sizes: 'any', type: 'image/x-icon' },
+      { url: '/favicon-32x32.png?v=sc-20260921', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-48x48.png?v=sc-20260921', sizes: '48x48', type: 'image/png' },
+      { url: '/favicon-96x96.png?v=sc-20260921', sizes: '96x96', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico?v=sc-20260921',
+    apple: [{ url: '/apple-touch-icon.png?v=sc-20260921', sizes: '180x180', type: 'image/png' }],
+  },
   title: {
     default: 'Friendly Party Rental | Carolina Party Rentals in Greenville, SC',
     template: '%s | Friendly Party Rental',

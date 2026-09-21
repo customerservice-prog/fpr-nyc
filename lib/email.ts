@@ -5,7 +5,12 @@ import { BUSINESS, formatDateTime } from '@/lib/utils'
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || 'smtp.gmail.com',
   port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: false,
+  // Port 465 requires TLS immediately; submission ports upgrade with STARTTLS.
+  secure: Number(process.env.EMAIL_PORT || '587') === 465,
+  requireTLS: Number(process.env.EMAIL_PORT || '587') !== 465,
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 20000,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -33,7 +38,7 @@ export async function sendEmail({
   }
 
   try {
-    await transporter.sendMail({
+    const delivery = await transporter.sendMail({
       from: { name: 'Friendly Party Rental - South Carolina', address: (process.env.EMAIL_FROM || process.env.EMAIL_USER || SC_EMAIL_ADDRESS).replace(/^.*<([^>]+)>.*$/, '$1').trim() },
       to: to.toLowerCase() === 'customerservice@friendlypartyrentalsc.com' ? SC_EMAIL_ADDRESS : to,
       replyTo: replyTo || SC_EMAIL_ADDRESS,
@@ -42,6 +47,11 @@ export async function sendEmail({
       text: 'SOUTH CAROLINA - GREENVILLE | friendlypartyrentalsc.com\n\n' + (text || html.replace(/<[^>]*>/g, '')),
       headers: { 'X-FPR-Location': 'greenville-sc', 'X-FPR-Website': 'friendlypartyrentalsc.com' },
     })
+    // SMTP acceptance is not inbox delivery, but an empty/rejected envelope is
+    // definitely not a successful send. Never mark it as one.
+    if (!Array.isArray(delivery?.accepted) || delivery.accepted.length === 0 || (delivery.rejected?.length || 0) > 0) {
+      throw new Error('SMTP did not accept every intended recipient')
+    }
     return { success: true, simulated: false }
   } catch (error) {
     console.error('Greenville email delivery failed')

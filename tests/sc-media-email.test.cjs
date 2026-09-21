@@ -41,7 +41,7 @@ test('provider failure is propagated instead of returning a false success',async
  await assert.rejects(mail.sendEmail({to:business.email,subject:'QA',html:'<p>QA</p>'}),/could not be delivered/)
 })
 test('message headers, inbox, sender name and customer Reply-To identify SC',async()=>{
- let message;const mail=mailModule(async payload=>{message=payload},{EMAIL_USER:'sender@example.invalid',EMAIL_PASS:'mock-not-a-secret'})
+ let message;const mail=mailModule(async payload=>{message=payload;return {accepted:[payload.to],rejected:[],messageId:'qa-mock-only'}},{EMAIL_USER:'sender@example.invalid',EMAIL_PASS:'mock-not-a-secret'})
  const result=await mail.sendEmail({to:'customerservice@friendlypartyrentalsc.com',subject:'New contact inquiry',html:'<p>Test only</p>',replyTo:'customer@example.invalid'})
  assert.equal(result.success,true);assert.equal(result.simulated,false)
  assert.equal(message.to,business.email);assert.equal(message.replyTo,'customer@example.invalid');assert.equal(message.from.name,'Friendly Party Rental - South Carolina');assert.equal(message.from.address,'sender@example.invalid')
@@ -88,3 +88,18 @@ test('customer-facing contact links no longer advertise a separate unconfigured 
   const text=fs.readFileSync(file,'utf8');assert.ok(text.includes('BUSINESS.emailHref'),file);assert.ok(!text.includes('mailto:customerservice@friendlypartyrentalsc.com'),file)
  }
 })
+
+for (const result of [{accepted:[],rejected:[]},{accepted:[],rejected:['recipient@example.invalid']},{accepted:['one@example.invalid'],rejected:['two@example.invalid']},undefined]) {
+ test('empty or partially rejected SMTP response never counts as sent: '+JSON.stringify(result),async()=>{
+  const mail=mailModule(async()=>result,{EMAIL_USER:'sender@example.invalid',EMAIL_PASS:'mock-not-a-secret'})
+  await assert.rejects(mail.sendEmail({to:business.email,subject:'QA',html:'<p>QA</p>'}),/could not be delivered/)
+ })
+}
+for (const [port,secure] of [['465',true],['587',false],['2525',false]]) {
+ test('SMTP TLS mode matches submission port '+port,()=>{
+  let options
+  load('lib/email.ts',{'nodemailer':{createTransport(value){options=value;return {sendMail:async()=>({accepted:[],rejected:[]})}}},'@/lib/scEmail':location,'@/lib/utils':{BUSINESS:business,formatDateTime:()=>''}}, {EMAIL_PORT:port})
+  assert.equal(options.secure,secure);assert.equal(options.requireTLS,!secure)
+  assert.equal(options.connectionTimeout,10000);assert.equal(options.socketTimeout,20000)
+ })
+}

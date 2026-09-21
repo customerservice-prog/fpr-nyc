@@ -30,5 +30,8 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
+      - name: Test SC tracking destination isolation
+        run: node --test tests/sc-tracking-isolation.test.cjs
+
       - name: Build
         run: npm run build

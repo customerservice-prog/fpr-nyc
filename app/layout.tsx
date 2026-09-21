@@ -3,7 +3,7 @@ import { Roboto } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
 import Script from 'next/script'
 import { CartProvider } from '@/components/public/CartContext'
-import { GA_MEASUREMENT_ID, AW_CONVERSION_ID } from '@/lib/gtag'
+import { GOOGLE_TAG_ID, GOOGLE_TAG_BOOTSTRAP } from '@/lib/gtag'
 import GoogleAnalyticsListener from '@/components/GoogleAnalyticsListener'
 import VisitorTracker from '@/components/VisitorTracker'
 import './globals.css'
@@ -90,19 +90,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: safeJsonLd(LOCAL_BUSINESS_JSONLD) }}
         />
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-          strategy="afterInteractive"
-        />
-        <Script id="ga4-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}');
-            gtag('config', '${AW_CONVERSION_ID}');
-          `}
-        </Script>
+        {GOOGLE_TAG_ID && <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`}
+            strategy="afterInteractive"
+          />
+          <Script id="ga4-init" strategy="afterInteractive">
+            {GOOGLE_TAG_BOOTSTRAP}
+          </Script>
+        </>}
       </head>
       <body className={roboto.className}>
         <GoogleAnalyticsListener />

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/utils'
-import { trackEvent, AW_CONVERSION_ID } from '@/lib/gtag'
+import { trackEvent, AW_PURCHASE_DESTINATION } from '@/lib/gtag'
 
 export default function ConfirmationPage() {
   const [order, setOrder] = useState<{
@@ -25,8 +25,8 @@ export default function ConfirmationPage() {
         value: parsed.totalAmount,
         currency: 'USD',
       })
-      trackEvent('conversion', {      
-        send_to: `${AW_CONVERSION_ID}/ig-ZCL_Q1d0cEKWo2rlE`,
+      if (AW_PURCHASE_DESTINATION) trackEvent('conversion', {
+        send_to: AW_PURCHASE_DESTINATION,
         transaction_id: parsed.orderNumber,
         value: parsed.totalAmount,
         currency: 'USD',

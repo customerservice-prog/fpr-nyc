@@ -57,3 +57,27 @@ jobs:
           path: test-results/sc-delivery-live.json
           if-no-files-found: ignore
           retention-days: 7
+
+  delivery-browser:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Install isolated browser test tools
+        run: |
+          python3 -m venv /tmp/sc-browser-qa
+          /tmp/sc-browser-qa/bin/pip install playwright
+          /tmp/sc-browser-qa/bin/python -m playwright install --with-deps chromium
+      - name: Test desktop, mobile, failed quotes, and stale pickup sessions with all writes blocked
+        run: /tmp/sc-browser-qa/bin/python tests/sc-delivery-browser.py
+      - name: Save browser screenshots and results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: sc-delivery-browser-verification
+          path: test-results/sc-delivery-*
+          if-no-files-found: ignore
+          retention-days: 7

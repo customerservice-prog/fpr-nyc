@@ -16,7 +16,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       return new NextResponse(bytes, { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=0, must-revalidate', 'X-Image-Reference': 'shared-brand-inspiration', 'X-Content-Type-Options': 'nosniff' } })
     }
     if (!pkg.image) return new NextResponse('Not found', { status: 404 })
-    const match = pkg.image.match(/^data:(image\/(?:png|jpeg|webp|gif|avif));base64,(.*)$/s)
+    const match = pkg.image.match(/^data:(image\/(?:png|jpeg|webp|gif|avif));base64,([\s\S]*)$/)
     if (match) return new NextResponse(Buffer.from(match[2], 'base64'), { headers: { 'Content-Type': match[1], 'Cache-Control': 'public, max-age=0, must-revalidate', 'X-Content-Type-Options': 'nosniff' } })
     const upstream = await fetch(pkg.image, { signal: AbortSignal.timeout(10000) })
     if (!upstream.ok) return new NextResponse('Image unavailable', { status: 404 })

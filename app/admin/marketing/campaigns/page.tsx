@@ -12,7 +12,7 @@ import {
   type CampaignTag,
 } from '@/lib/marketing/campaignLibrary'
 
-const ORIGIN = 'https://www.friendlypartyrental.com'
+const ORIGIN = 'https://www.friendlypartyrentalsc.com'
 
 const TAG_ORDER: CampaignTag[] = [
   'wedding', 'graduation', 'summer-family', 'fall', 'holiday-corporate',

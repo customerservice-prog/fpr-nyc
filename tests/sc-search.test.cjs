@@ -30,9 +30,11 @@ test('private metadata does not noindex the individual item pages',()=>{
 test('rentals are not marked as universally in-stock purchases',()=>{
  const s=read('app/(public)/items/[...slug]/page.tsx');assert.ok(!s.includes("availability: 'https://schema.org/InStock'"));assert.ok(s.includes('goodrelations/v1#LeaseOut'));assert.ok(s.includes('displayToCustomer: true'))
 })
-test('canonical host redirects preserve authenticated, API and payment hosts',async()=>{
- const config=require('../next.config.js'),redirects=await config.redirects(),headers=await config.headers(),hostRules=redirects.filter(r=>r.has?.some(h=>h.type==='host'))
- assert.equal(hostRules.length,2);assert.ok(hostRules[1].source.includes('api|admin|driver|checkout|pay|contract|schedule|unsubscribe|_next'))
+test('canonical metadata consolidates search URLs without moving origin-scoped carts',async()=>{
+ const config=require('../next.config.js'),redirects=await config.redirects(),headers=await config.headers()
+ assert.equal(redirects.filter(r=>r.has?.some(h=>h.type==='host')).length,0)
+ assert.ok(redirects.every(r=>r.destination.startsWith('/')&&!r.destination.startsWith('//')))
+ for(const path of ['/','/category','/order-by-date'])assert.equal(seo.scPageMetadata(path,'Title','Description').alternates.canonical,seo.SC_SITE_URL+path)
  for(const p of ['/checkout/:path*','/admin/:path*','/driver/:path*','/items'])assert.ok(headers.some(h=>h.source===p&&h.headers[0].value.includes('noindex')))
  const s=read('app/robots.ts');for(const p of ['/api/item-image/','/api/category-image/','/api/wedding-package-image/','/api/shared-gallery/'])assert.ok(s.includes(p))
 })

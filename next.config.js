@@ -24,9 +24,10 @@ const nextConfig = {
     return privatePaths.map(source=>({source,headers:[{key:'X-Robots-Tag',value:'noindex, follow'}]}))
   },
   async redirects() {
+    // Both hosts have existing origin-scoped carts. Do not force a host change
+    // without migrating those sessions. Public metadata and the sitemap agree
+    // on www as Google's preferred URL; alias redirects stay within the origin.
     return [
-      {source:'/',has:[{type:'host',value:'friendlypartyrentalsc.com'}],destination:'https://www.friendlypartyrentalsc.com/',permanent:true},
-      {source:'/:path((?!api|admin|driver|checkout|pay|contract|schedule|unsubscribe|_next).+)',has:[{type:'host',value:'friendlypartyrentalsc.com'}],destination:'https://www.friendlypartyrentalsc.com/:path',permanent:true},
       { source: '/index.html', destination: '/', permanent: true },
       { source: '/home', destination: '/', permanent: true },
       { source: '/view_gallery', destination: '/gallery', permanent: true },

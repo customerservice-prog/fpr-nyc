@@ -1,4 +1,6 @@
-"""Run the requested read-only exact-media comparison; no workflow permissions change."""
+"""Read-only exact-media verification with separate original-byte and rendered-geometry checks.
+No workflow permissions or public storefront pixels are changed by this test.
+"""
 import py_compile
 import runpy
 import shutil

@@ -6,6 +6,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,5 +36,24 @@ jobs:
       - name: Test SC tracking destination isolation
         run: node --test tests/sc-tracking-isolation.test.cjs
 
+      - name: Test Greenville delivery-only policy and quote regressions
+        run: node --experimental-strip-types --test tests/sc-delivery.test.mjs
+
       - name: Build
         run: npm run build
+
+      - name: Verify live Greenville delivery endpoints without creating orders or payments
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        timeout-minutes: 6
+        env:
+          RUN_SC_DELIVERY_SMOKE: '1'
+        run: node --experimental-strip-types --test --test-name-pattern='live Greenville' tests/sc-delivery.test.mjs
+
+      - name: Save public delivery verification evidence
+        if: always() && github.event_name == 'push'
+        uses: actions/upload-artifact@v7
+        with:
+          name: sc-delivery-live-verification
+          path: test-results/sc-delivery-live.json
+          if-no-files-found: ignore
+          retention-days: 7

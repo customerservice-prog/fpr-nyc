@@ -70,7 +70,7 @@ test('public sender diagnostic contains no credentials and does not claim active
  const {route}=contact(async()=>{});const r=await route.GET();assert.equal(r.body.notificationsEnabled,false);assert.equal(r.body.email,business.email);assert.equal(Object.keys(r.body).length,3)
 })
 test('all new category and wedding assets exist, with five distinct wedding previews',()=>{
- const categories=load('lib/scCategoryImages.ts').SC_CATEGORY_IMAGES;assert.equal(Object.keys(categories).length,18)
+ const categories=load('lib/scCategoryImages.ts').SC_CATEGORY_IMAGES;assert.equal(Object.keys(categories).length,19);assert.ok(categories['order-by-date'])
  const weddings=load('lib/scWeddingImages.ts').SC_WEDDING_IMAGES;assert.equal(new Set(Object.values(weddings)).size,5)
  for(const file of [...Object.values(categories),...Object.values(weddings)])assert.ok(fs.existsSync(path.join('public',file)),file)
 })
@@ -79,8 +79,8 @@ test('audited item references are revision-locked and have real image files',()=
  for(const row of Object.values(media)){assert.ok(row.updatedAt);assert.equal(row.reference,true);assert.ok(fs.existsSync(path.join('public',row.path)))}
  const route=fs.readFileSync('app/api/item-image/[slug]/route.ts','utf8');assert.ok(route.includes('item.updatedAt.toISOString() === media.updatedAt'))
 })
-test('planning pictures are present before YouTube on mobile and desktop',()=>{
- const mobile=fs.readFileSync('components/public/MobileHome.tsx','utf8');assert.ok(mobile.indexOf('<PlanningShortcuts/>')<mobile.indexOf('<HomeYouTube/>'))
+test('desktop planning pictures and original mobile video/category order are preserved',()=>{
+ const mobile=fs.readFileSync('components/public/MobileHome.tsx','utf8');assert.ok(!mobile.includes('<PlanningShortcuts'));assert.ok(mobile.includes('<HomeYouTube/>'));assert.ok(mobile.includes('<HomeCategoryGrid'));assert.ok(mobile.indexOf('<HomeYouTube/>')<mobile.indexOf('<HomeCategoryGrid'))
  const desktop=fs.readFileSync('app/(public)/page.tsx','utf8');assert.ok(desktop.includes('<PlanningShortcuts />'))
 })
 test('customer-facing contact links no longer advertise a separate unconfigured SC mailbox',()=>{

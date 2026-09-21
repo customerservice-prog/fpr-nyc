@@ -10,6 +10,7 @@ interface YouTubeFacadeProps {
 
 export default function YouTubeFacade({ videoId, title, className = '' }: YouTubeFacadeProps) {
   const [loaded, setLoaded] = useState(false)
+  const [posterQuality, setPosterQuality] = useState('maxresdefault')
   const baseClass = ('w-full h-full ' + className).trim()
 
   if (loaded) {
@@ -32,7 +33,9 @@ export default function YouTubeFacade({ videoId, title, className = '' }: YouTub
       className={'relative block group cursor-pointer overflow-hidden ' + baseClass}
     >
       <img
-        src={'https://i.ytimg.com/vi/' + videoId + '/hqdefault.jpg'}
+        src={'https://i.ytimg.com/vi/' + videoId + '/' + posterQuality + '.jpg'}
+        onError={() => setPosterQuality('hqdefault')}
+        onLoad={e => { if (e.currentTarget.naturalWidth < 320 && posterQuality !== 'hqdefault') setPosterQuality('hqdefault') }}
         alt={title}
         className="absolute inset-0 w-full h-full object-cover"
         loading="lazy"

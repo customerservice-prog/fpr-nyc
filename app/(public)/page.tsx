@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PlanningShortcuts from '@/components/public/PlanningShortcuts'
 import CategoryCard from '@/components/public/CategoryCard'
 import HeroSection from '@/components/public/HeroSection'
 import StorefrontDesigner from '@/components/public/StorefrontDesigner'
@@ -68,7 +69,7 @@ const packagesRaw = await getSyncedWeddingPackages()
     <div>
       <div className="md:hidden"><MobileHome categories={mobileCategories} popularItems={popularItems.map((it: any) => ({ id: it.id, name: it.specialDisplayName || it.name, slug: it.slug, cost: it.cost, picture: it.slug ? `/api/item-image/${it.slug}?v=${IMAGE_CACHE_BUST}` : (it.picture || null), status: null, category: it.category }))} bounceItems={bounceItems.map((it: any) => ({ id: it.id, name: it.specialDisplayName || it.name, slug: it.slug, cost: it.cost, picture: it.slug ? `/api/item-image/${it.slug}?v=${IMAGE_CACHE_BUST}` : (it.picture || null), status: null, category: it.category }))} packages={packages.map((p: any) => ({ id: p.id, name: p.name, price: p.price, guests: p.guests, image: p.image, items: p.items, popular: p.popular, signature: p.signature }))} weddingImage={packages[0]?.image || null} seoSection={<section className="max-w-4xl mx-auto px-4 py-8 space-y-6 text-sm text-body"><p>Friendly Party Rental provides reliable and affordable party rentals in Greenville, SC and surrounding Upstate South Carolina communities.</p><p>Serving Greenville, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, Piedmont, and surrounding Upstate South Carolina areas.</p></section>}  content={homeContent} hero={heroForMobile}/></div><div className="hidden md:block"><HeroSection /></div>
 
-      {/* Intro Section */}<div className="hidden md:block">
+      {/* Intro Section */}<div className="hidden md:block"><PlanningShortcuts />
       <section className="max-w-4xl mx-auto px-4 py-12 text-center">
         <h1 className="text-3xl font-bold text-dark mb-6">Party Rentals in Greenville, SC &amp; Surrounding Areas</h1>
         <div className="space-y-4 text-body">

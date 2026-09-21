@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import { SC_EMAIL_ADDRESS, scEmailSubject, scEmailHtml } from '@/lib/scEmail'
 import { BUSINESS, formatDateTime } from '@/lib/utils'
 
 const transporter = nodemailer.createTransport({
@@ -27,23 +28,24 @@ export async function sendEmail({
   replyTo?: string
 }) {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.log('Email not configured. Would send:', { to, subject })
-    return { success: true, simulated: true }
+    // Never count an unsent notification as delivered.
+    throw new Error('Greenville outgoing email is not configured (EMAIL_USER / EMAIL_PASS).')
   }
 
   try {
     await transporter.sendMail({
-      from: process.env.EMAIL_FROM || 'Friendly Party Rental <customerservice@friendlypartyrental.com>',
-      to,
-      replyTo: replyTo || process.env.EMAIL_REPLY_TO || BUSINESS.email,
-      subject,
-      html,
-      text: text || html.replace(/<[^>]*>/g, ''),
+      from: { name: 'Friendly Party Rental - South Carolina', address: (process.env.EMAIL_FROM || process.env.EMAIL_USER || SC_EMAIL_ADDRESS).replace(/^.*<([^>]+)>.*$/, '$1').trim() },
+      to: to.toLowerCase() === 'customerservice@friendlypartyrentalsc.com' ? SC_EMAIL_ADDRESS : to,
+      replyTo: replyTo || SC_EMAIL_ADDRESS,
+      subject: scEmailSubject(subject),
+      html: scEmailHtml(html),
+      text: 'SOUTH CAROLINA - GREENVILLE | friendlypartyrentalsc.com\n\n' + (text || html.replace(/<[^>]*>/g, '')),
+      headers: { 'X-FPR-Location': 'greenville-sc', 'X-FPR-Website': 'friendlypartyrentalsc.com' },
     })
-    return { success: true }
+    return { success: true, simulated: false }
   } catch (error) {
-    console.error('Email send error:', error)
-    return { success: false, error }
+    console.error('Greenville email delivery failed')
+    throw new Error('Greenville email could not be delivered. Check the outgoing email configuration.')
   }
 }
 
@@ -59,7 +61,7 @@ function emailFooter() {
   return `
     <hr style="border:none; border-top:1px solid #e5e5e5; margin:28px 0 14px;" />
     <p style="font-size:13px; color:#555; margin:4px 0;">${BUSINESS.legalName}<br/>${BUSINESS.address}</p>
-    <p style="font-size:13px; color:#555; margin:4px 0;">Questions? Call or text us at <a href="tel:${BUSINESS.phone.replace(/[^0-9]/g, '')}">${BUSINESS.phone}</a> or email <a href="mailto:${BUSINESS.email}">${BUSINESS.email}</a></p>
+    <p style="font-size:13px; color:#555; margin:4px 0;">Questions? Call or text us at <a href="tel:${BUSINESS.phone.replace(/[^0-9]/g, '')}">${BUSINESS.phone}</a> or email <a href="${BUSINESS.emailHref}">${BUSINESS.email}</a></p>
     <p style="font-size:12px; color:#999; margin-top:14px; line-height:1.5;">Please note: payment in full is due 3 days prior to your event. Setup for tents and bounce houses is included; full setup for tables and chairs is available for $1 per table and $1 per chair upon request. Deposits are non-refundable. Please refer to your signed contract for complete rental terms and policies.</p>
     <p style="font-size:12px; color:#999; margin-top:8px;">Thank you for choosing ${BUSINESS.name}!</p>
   `

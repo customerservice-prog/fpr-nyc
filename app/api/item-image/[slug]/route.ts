@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import sharp from 'sharp'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
+import { SC_ITEM_MEDIA } from '@/lib/scItemMedia'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -48,13 +49,20 @@ export async function GET(
   const { slug } = await params
   const item = await prisma.item.findUnique({
     where: { slug },
-    select: { name: true, picture: true },
+    select: { name: true, picture: true, updatedAt: true },
   })
 
   if (!item) {
     return new NextResponse('Not found', { status: 404 })
   }
 
+  const media = SC_ITEM_MEDIA[slug]
+  if (media && item.updatedAt.toISOString() === media.updatedAt) {
+    return new NextResponse(await readFile(path.join(process.cwd(), 'public', media.path)), { headers: {
+      'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
+      'X-Image-Reference': 'Illustrative reference; see visible caption', 'X-Content-Type-Options': 'nosniff',
+    } })
+  }
   if (!item.picture) {
     return fallbackImage(item.name, 'missing')
   }

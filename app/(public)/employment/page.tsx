@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { BUSINESS } from '@/lib/utils'
@@ -18,6 +19,7 @@ interface EmploymentForm {
 const OPENINGS = ['Event Coordinator', 'Delivery Driver', 'Customer Service Representative', 'Event Setup Crew']
 
 export default function EmploymentPage() {
+    const [directEmail,setDirectEmail] = useState<string|null>(null)
     const { register, handleSubmit, reset, formState: { errors } } = useForm<EmploymentForm>()
 
   const onSubmit = async (data: EmploymentForm) => {
@@ -28,6 +30,9 @@ export default function EmploymentPage() {
                           body: JSON.stringify(data),
                 })
                 if (!res.ok) throw new Error('Failed')
+                const result = await res.json()
+                if (result.notificationSent === false) { setDirectEmail(result.emailHref || BUSINESS.emailHref); toast('Application saved. Email us directly to notify the Greenville team.'); return }
+                setDirectEmail(null)
                 toast.success('Application submitted! We will contact you soon.')
                 reset()
         } catch {
@@ -66,13 +71,13 @@ export default function EmploymentPage() {
           Questions? Contact us at{' '}
           <a href={`tel:${BUSINESS.phone}`} className="text-secondary">{BUSINESS.phone}</a>
 {' or '}
-        <a href={`mailto:${BUSINESS.email}`} className="text-secondary">{BUSINESS.email}</a>
+        <a href={BUSINESS.emailHref} className="text-secondary">{BUSINESS.email}</a>
       </p>
 
       <div className="bg-gray-50 p-6 rounded-lg">
         <h2 className="text-xl font-bold text-dark mb-2">Apply Now</h2>
         <p className="text-body text-sm mb-6">Fill out the form below and we&apos;ll be in touch shortly!</p>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div>{directEmail && <p role="status" className="mb-4 rounded-xl bg-amber-50 p-4 text-sm">Your application is saved, but its email notification was not delivered. <a href={directEmail} className="font-bold underline">Email the Greenville team</a>.</p>}</div><form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-dark mb-1">Full Name *</label>
             <input {...register('name', { required: true })} className="w-full border rounded px-3 py-2" />

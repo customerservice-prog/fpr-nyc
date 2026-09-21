@@ -1,3 +1,4 @@
+import { SC_WEDDING_IMAGES } from '@/lib/scWeddingImages'
 import { prisma } from '@/lib/prisma'
 import { IMAGE_CACHE_BUST } from '@/lib/imageVersion'
 import { WEDDING_PACKAGES } from '@/lib/utils'
@@ -26,7 +27,7 @@ export async function getSyncedWeddingPackages() {
     const fallback = fallbackById.get(p.id)
     const liveCost = costByName.get(`Wedding Package - ${p.name}`)
     const legacyArt = p.updatedAt.toISOString() === '2026-08-23T19:15:02.017Z'
-    const image = legacyArt ? '/images/sc-event-reception.jpg' : p.image
+    const image = legacyArt ? (SC_WEDDING_IMAGES[p.id] || '/images/sc-event-reception.jpg') : p.image
       ? `/api/wedding-package-image/${p.id}?v=${p.updatedAt ? new Date(p.updatedAt).toISOString() : IMAGE_CACHE_BUST}`
       : fallback?.image || null
     const description = localizeScPublicCopy(p.description) || fallback?.description || ''

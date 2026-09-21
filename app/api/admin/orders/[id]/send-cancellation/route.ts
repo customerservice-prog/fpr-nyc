@@ -1,3 +1,4 @@
+import { SC_EMAIL_ADDRESS } from '@/lib/scEmail'
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -52,7 +53,7 @@ export async function POST(
 
   try {
     const companySettings = await prisma.companySettings.findFirst()
-    const notifyEmail = companySettings ? companySettings.email : null
+    const notifyEmail = SC_EMAIL_ADDRESS
     if (notifyEmail) {
       await sendEmail({
         to: notifyEmail,

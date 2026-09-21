@@ -100,7 +100,7 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
     {cfg.topBar && <div className="max-w-7xl mx-auto px-4 py-3"><div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
       <div className="min-w-0 text-sm text-gray-700 leading-relaxed">
         <p><a href={`tel:${BUSINESS.phone}`} className="font-bold text-dark hover:underline">{BUSINESS.phone}</a>{' | '}<a href={`sms:${BUSINESS.text}`} className="font-bold text-dark hover:underline">Text Us</a></p>
-        <p className="break-all"><a href={`mailto:${BUSINESS.email}`} className="hover:underline">{BUSINESS.email}</a></p>
+        <p className="break-all"><a href={BUSINESS.emailHref} className="hover:underline">{BUSINESS.email}</a></p>
         <p>{BUSINESS.address}</p><p className="text-xs text-gray-600 mt-0.5">Mon–Sat: 9am–6pm</p><p>Serving {BUSINESS.serviceArea}</p>
       </div>
       <div className={'min-w-0 flex justify-center' + (cfg.grayscale ? ' grayscale' : '')}>{logo}</div>

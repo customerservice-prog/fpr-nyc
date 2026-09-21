@@ -50,7 +50,7 @@ export default function WeddingPackageCard({
             alt={`${name}: illustrative event setting; included equipment is listed below`}
             fill
             sizes="(max-width: 768px) 100vw, 400px"
-            className="object-contain bg-gray-50 group-hover:scale-105 transition-transform duration-300"
+            className="object-cover bg-gray-50 group-hover:scale-105 transition-transform duration-300"
           />
         </div>
       )}

@@ -1,0 +1,47 @@
+name: Greenville branding and icon verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tests/sc-branding*'
+      - 'app/layout.tsx'
+      - 'app/api/wedding-package*/**'
+      - 'components/public/YouTubeFacade.tsx'
+      - 'components/public/HomeYouTube.tsx'
+      - 'public/site.webmanifest'
+      - 'public/favicon*'
+      - '.github/workflows/sc-branding-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  branding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://user:pass@localhost:5432/db
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies without production credentials
+        run: npm ci --no-audit --no-fund
+      - name: Check icons, media and shared-inbox behavior without sending email
+        run: node --test tests/sc-brand-finishing.test.cjs tests/sc-media-email.test.cjs tests/sc-branding.test.cjs
+      - name: Install isolated browser verification tools
+        run: |
+          python3 -m venv /tmp/sc-branding
+          /tmp/sc-branding/bin/pip install playwright Pillow
+          /tmp/sc-branding/bin/python -m playwright install --with-deps chromium
+      - name: Verify deployed SC assets without submissions
+        run: /tmp/sc-branding/bin/python tests/sc-branding-live.py
+      - name: Retain actual screenshots and icon results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: sc-branding-verification
+          path: test-results/sc-branding/
+          if-no-files-found: warn
+          retention-days: 7

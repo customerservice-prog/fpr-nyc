@@ -7,6 +7,7 @@ import { BUSINESS } from '@/lib/utils'
 import { sendEmail, newOrderAdminNotificationEmail } from '@/lib/email'
 import { getItemAvailability } from '@/lib/availability'
 import { evaluateRentalRestrictions } from '@/lib/rentalRestrictions'
+import { DeliveryQuoteError, getDeliveryQuote, requireDeliveryMethod, requireMatchingDeliveryFee } from '@/lib/delivery'
 
 async function reserveExactTimeSlot(tx: any, date: Date, time: string, type: 'delivery' | 'pickup', defaultCapacity: number): Promise<{ ok: true } | { ok: false; reason: 'blocked' | 'full' }> {
   const dayDate = new Date(date)
@@ -27,6 +28,9 @@ async function reserveExactTimeSlot(tx: any, date: Date, time: string, type: 'de
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    // Enforce Greenville's public delivery-only policy before any database writes,
+    // inventory reservations, email notifications, or payment creation.
+    requireDeliveryMethod(body?.deliveryType)
     const {
       firstName,
       lastName,
@@ -41,7 +45,6 @@ export async function POST(request: NextRequest) {
       pickupTimeSlot,
       tipAmount,
       lastMinuteFeeAmount,
-      deliveryType,
       notes,
       items,
       subtotal,
@@ -51,7 +54,6 @@ export async function POST(request: NextRequest) {
       specialRequestFee,
       specialRequestNames,
       deliveryFee,
-      deliveryDistance,
       taxRate,
       taxAmount,
       couponCode,
@@ -66,6 +68,14 @@ export async function POST(request: NextRequest) {
     if (!firstName || !lastName || !email || !eventDate || !items?.length) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
+    if (typeof eventAddress !== 'string' || !eventAddress.trim() || typeof eventCity !== 'string' || !eventCity.trim()) {
+      return NextResponse.json({ error: 'Please provide your event delivery address and city. Warehouse pickup is not available.' }, { status: 400 })
+    }
+
+    // Recalculate from the ZIP on the server. Missing, stale, zero, and manipulated
+    // delivery fees cannot create an order. Never silently change an agreed total.
+    const deliveryQuote = await getDeliveryQuote(eventZip)
+    requireMatchingDeliveryFee(deliveryFee, deliveryQuote)
 
     const normalizedEmail = String(email).trim().toLowerCase()
     const normalizedPhone = phone ? String(phone).trim() : null
@@ -151,6 +161,7 @@ export async function POST(request: NextRequest) {
     // frontend-only availability for premium exact-time slots. Revalidates
     // and atomically reserves the slot at submission time so two customers
     // can never both be promised the same exact-time slot.
+    // Here pickup means OUR CREW collecting equipment from the event, not warehouse pickup.
     const wantsExactDelivery = !!schedulingDetails?.exactDeliveryRequested && !!schedulingDetails?.exactDeliveryTime
     const wantsExactPickup = schedulingDetails?.pickupType === 'exact' && !!schedulingDetails?.exactPickupTime
 
@@ -192,14 +203,14 @@ export async function POST(request: NextRequest) {
           phone: normalizedPhone,
           address: eventAddress || null,
           city: eventCity || null,
-          state: eventState || 'NY',
+          state: eventState || 'SC',
           zip: eventZip || null,
         },
       })
     }
 
     const orderNumber = await getNextOrderNumber()
-    const fee = deliveryFee || 0
+    const fee = deliveryQuote.fee
     const tax = taxAmount || 0
     const discount = couponDiscount || 0
     const waiverFee = damageWaiverFee || 0
@@ -222,13 +233,13 @@ export async function POST(request: NextRequest) {
         eventDate: new Date(eventDate),
         eventAddress: eventAddress || null,
         eventCity: eventCity || null,
-        eventState: eventState || 'NY',
+        eventState: eventState || 'SC',
         eventZip: eventZip || null,
         eventTimeSlot: eventTimeSlot || null,
         pickupTimeSlot: pickupTimeSlot || null,
-        deliveryType: deliveryType || 'delivery',
+        deliveryType: 'delivery',
         deliveryFee: fee,
-        deliveryDistance: deliveryDistance ?? null,
+        deliveryDistance: deliveryQuote.distance,
         subtotal,
         rentalDays: rentalDays || 1,
         durationLabel: durationLabel || null,
@@ -308,6 +319,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ order: { id: order.id, orderNumber: order.orderNumber } })
   } catch (error) {
+    if (error instanceof DeliveryQuoteError) {
+      return NextResponse.json({ error: error.message }, { status: error.status })
+    }
     console.error('Order creation error:', error)
     return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
   }

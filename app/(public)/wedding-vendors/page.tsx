@@ -1,14 +1,8 @@
+import { scPageMetadata } from '@/lib/scSeo'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Local Wedding Vendors We Recommend',
-  description: 'A short list of local Upstate South Carolina wedding vendors that Friendly Party Rental is happy to recommend.',
-  alternates: {
-    canonical: 'https://www.friendlypartyrentalsc.com/wedding-vendors',
-  },
-  robots: { index: true, follow: true },
-}
+export const metadata = scPageMetadata("/wedding-vendors","Upstate South Carolina Wedding Vendor Guide","Explore wedding vendor resources for Greenville and Upstate South Carolina while planning your rental equipment, celebration and event services.")
 
 export default function WeddingVendorsPage() {
   return (

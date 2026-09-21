@@ -1,8 +1,9 @@
+import { scPageMetadata } from '@/lib/scSeo'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { safeJsonLd } from '@/lib/jsonLd'
 const BASE_URL='https://www.friendlypartyrentalsc.com'
-export const metadata:Metadata={title:'Chiavari Chair Rentals in Greenville, SC',description:'Rent gold, white, and mahogany chiavari chairs in Greenville, SC and Upstate South Carolina. Ideal for weddings and upscale events. Online booking, delivery, and setup.',alternates:{canonical:`${BASE_URL}/chiavari-chair-rentals`}}
+export const metadata = scPageMetadata("/chiavari-chair-rentals","Chiavari Chair Rentals in Greenville, SC","Browse Chiavari chairs for weddings and events in Greenville and Upstate South Carolina. Check quantities, event-date availability and delivery.")
 export default function ChiavariChairRentalsPage(){
  const jsonLd={'@context':'https://schema.org','@type':'CollectionPage',name:'Chiavari Chair Rentals',description:'Chiavari chair rental options in Greenville, SC and Upstate South Carolina.',url:`${BASE_URL}/chiavari-chair-rentals`}
  return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(jsonLd)}}/><div className="max-w-5xl mx-auto px-4 py-12">

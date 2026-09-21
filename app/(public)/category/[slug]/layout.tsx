@@ -1,62 +1,19 @@
-import type { Metadata } from 'next'
-import { prisma } from '@/lib/prisma'
-import { safeJsonLd } from '@/lib/jsonLd'
-import { categoryDescriptionForSc } from '@/lib/scPublicCopy'
-
-const BASE_URL = 'https://www.friendlypartyrentalsc.com'
-
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  try {
-    const category = await prisma.category.findUnique({ where: { slug: (await params).slug } })
-    if (!category) return {}
-    const localized = categoryDescriptionForSc(category.name, category.description)
-    const fallbackDescription = `Rent ${category.name} in Greenville, SC from Friendly Party Rental. Fast online booking, delivery, and setup throughout Upstate South Carolina.`
-    const description = localized.length >= 120 ? localized : fallbackDescription
-    const canonical = `${BASE_URL}/category/${category.slug}`
-    const isLowValueDuplicateIntent = category.slug === 'weddings'
-    return {
-      title: `${category.name} | Greenville, SC`,
-      description,
-      alternates: { canonical },
-      robots: isLowValueDuplicateIntent ? { index: false, follow: true } : undefined,
-      openGraph: {
-        title: `${category.name} | Friendly Party Rental Greenville`,
-        description,
-        url: canonical,
-        images: category.picture && !category.picture.startsWith('data:') ? [category.picture] : undefined,
-      },
-    }
-  } catch {
-    return {}
-  }
+import {cache} from 'react'
+import {prisma} from '@/lib/prisma'
+import {safeJsonLd} from '@/lib/jsonLd'
+import {categoryDescriptionForSc} from '@/lib/scPublicCopy'
+import {scPageMetadata,scBreadcrumbs,scUrl} from '@/lib/scSeo'
+const getCategory=cache((slug:string)=>prisma.category.findUnique({where:{slug}}))
+export async function generateMetadata({params}:{params:Promise<{slug:string}>}){
+ const category=await getCategory((await params).slug)
+ if(!category||!category.displayToCustomer)return {title:'Rental category not found',robots:{index:false,follow:true}}
+ const name=category.name.replace(/\s*[—–-]\s*Greenville,?\s*SC$/i,'')
+ return scPageMetadata('/category/'+encodeURIComponent(category.slug),`${name} in Greenville, SC`,categoryDescriptionForSc(name,category.description),category.slug!=='weddings')
 }
-
-export default async function CategoryLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode
-  params: Promise<{ slug: string }>
-}) {
-  let jsonLd: Record<string, unknown> | null = null
-  try {
-    const category = await prisma.category.findUnique({ where: { slug: (await params).slug } })
-    if (category) {
-      jsonLd = {
-        '@context': 'https://schema.org',
-        '@type': 'CollectionPage',
-        name: category.name,
-        description: categoryDescriptionForSc(category.name, category.description),
-        url: `${BASE_URL}/category/${category.slug}`,
-      }
-    }
-  } catch {}
-  return (
-    <>
-      {jsonLd && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-      )}
-      {children}
-    </>
-  )
+export default async function CategoryLayout({children,params}:{children:React.ReactNode;params:Promise<{slug:string}>}){
+ const category=await getCategory((await params).slug)
+ if(!category||!category.displayToCustomer)return children
+ const path='/category/'+encodeURIComponent(category.slug)
+ const schema={'@context':'https://schema.org','@type':'CollectionPage',name:category.name,description:categoryDescriptionForSc(category.name,category.description),url:scUrl(path)}
+ return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(schema)}}/><script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(scBreadcrumbs([{name:'Home',path:'/'},{name:'Rental Categories',path:'/category'},{name:category.name,path}]))}}/>{children}</>
 }

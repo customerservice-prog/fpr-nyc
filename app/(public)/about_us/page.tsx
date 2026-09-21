@@ -1,10 +1,7 @@
+import { scPageMetadata } from '@/lib/scSeo'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-export const metadata: Metadata = {
-  title: 'About Us',
-  description: 'Meet Friendly Party Rental, a family-owned rental business bringing clean event equipment, delivery and setup services to Greenville and Upstate South Carolina.',
-  alternates: { canonical: 'https://www.friendlypartyrentalsc.com/about_us' },
-}
+export const metadata = scPageMetadata("/about_us","About Friendly Party Rental in Greenville, SC","Meet Friendly Party Rental serving Greenville and nearby Upstate South Carolina communities with party and event equipment rentals.")
 export default function AboutPage() {
   return <div className="max-w-4xl mx-auto px-4 py-12">
     <div className="text-center mb-12"><h1 className="text-3xl font-bold text-dark mb-3">About Friendly Party Rental</h1><p className="text-body text-lg">Local. Reliable. Clean, event-ready rentals for Greenville &amp; Upstate South Carolina.</p></div>

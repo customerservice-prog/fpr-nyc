@@ -1,3 +1,5 @@
+import {scPageMetadata} from '@/lib/scSeo'
+export const metadata=scPageMetadata('/','Party Rentals in Greenville, SC','Rent tents, tables, chairs, bounce houses, linens and wedding equipment in Greenville and nearby Upstate South Carolina communities. Check your event date online.')
 import HomeCategoryGrid from '@/components/public/HomeCategoryGrid'
 import HomeYouTube from '@/components/public/HomeYouTube'
 import Link from 'next/link'

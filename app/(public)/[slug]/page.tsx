@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
+import {scPageMetadata} from '@/lib/scSeo'
 
 export const dynamic = 'force-dynamic'
 
@@ -427,6 +428,15 @@ function RenderBlock({ block }: { block: Block }) {
     }default:
       return null
   }
+}
+
+export async function generateMetadata({params}:PageProps){
+ const {slug}=await params
+ const page=await prisma.websitePage.findUnique({where:{slug}})
+ if(!page||!page.isPublished)return {title:'Page not found',robots:{index:false,follow:true}}
+ const blocks=parseBlocks(page.content)
+ const text=blocks.flatMap(block=>[block.text,block.headingText,block.heroSubtitle,block.ctaText]).filter(Boolean).join(' ')
+ return scPageMetadata('/'+encodeURIComponent(slug),page.title,text||`${page.title} — Friendly Party Rental in Greenville and Upstate South Carolina.`,blocks.length>0)
 }
 
 export default async function CustomWebsitePage({ params }: PageProps) {

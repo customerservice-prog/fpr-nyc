@@ -3,6 +3,7 @@ import RegisterServiceWorker from './register-sw'
 import DriverNav from '@/components/driver/DriverNav'
 
 export const metadata: Metadata = {
+    robots:{index:false,follow:false},alternates:{canonical:null},
     title: 'FPR Drivers',
     manifest: '/driver-manifest.webmanifest',
     appleWebApp: {

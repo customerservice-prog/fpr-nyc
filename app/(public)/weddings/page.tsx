@@ -1,3 +1,4 @@
+import { scPageMetadata } from '@/lib/scSeo'
 import Link from 'next/link'
 import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 import WeddingPackageCard from '@/components/public/WeddingPackageCard'
@@ -16,11 +17,7 @@ const playfair = Playfair_Display({
   display: 'swap',
 })
 
-export const metadata: Metadata = {
-  title: 'Wedding Rental Packages in Greenville, SC',
-  description: 'Wedding rentals and packages in Greenville, SC for backyard ceremonies through 200-guest receptions. Tents, chairs, linens, arches, lighting and dance floors with professional setup available. Call 864-610-5324.',
-  alternates: { canonical: 'https://www.friendlypartyrentalsc.com/weddings' },
-}
+export const metadata = scPageMetadata("/weddings","Wedding Rentals in Greenville, SC","Compare Greenville wedding rental packages and listed inclusions for tents, tables, chairs, linens and lighting. Travel fees and tax are separate.")
 export const dynamic = 'force-dynamic'
 
 const faqItems = [

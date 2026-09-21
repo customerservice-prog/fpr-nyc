@@ -12,3 +12,5 @@ test('email readiness is administrator-only and never exposes or requests passwo
  assert.ok(read('app/admin/settings/page.tsx').includes("'Email Delivery':'/admin/settings/email-delivery'"))
 })
 require('./sc-exact-media.test.cjs')
+
+require('./sc-search.test.cjs')

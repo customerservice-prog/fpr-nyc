@@ -1,80 +1,22 @@
-import { MetadataRoute } from 'next'
-import { prisma } from '@/lib/prisma'
-
-export const dynamic = 'force-dynamic'
-
-const BASE_URL = 'https://www.friendlypartyrentalsc.com'
-
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const staticRoutes: MetadataRoute.Sitemap = [
-          '',
-        '/about_us',
-        '/weddings',
-        '/wedding-packages',
-        '/graduation-rentals',
-        '/contact_us',
-        '/employment',
-        '/frequently_asked_questions',
-        '/gallery',
-        '/order-by-date',
-        '/service-area',
-        '/chiavari-chair-rentals',
-        '/party-rentals-greer-sc',
-        '/party-rentals-simpsonville-sc',
-        '/party-rentals-mauldin-sc',
-        '/party-rentals-easley-sc',
-        '/party-rentals-travelers-rest-sc',
-        '/party-rentals-fountain-inn-sc',
-        '/party-rentals-taylors-sc',
-        '/party-rentals-piedmont-sc',
-        '/party-rentals-berea-sc',
-        '/party-rentals-anderson-sc',
-        '/party-rentals-spartanburg-sc',
-        '/party-rentals-duncan-sc',
-        '/party-rentals-powdersville-sc',
-        '/party-rentals-williamston-sc',
-        '/party-rentals-pelzer-sc',
-        '/party-rentals-pickens-sc',
-        '/party-rentals-liberty-sc',
-        '/party-rentals-clemson-sc',
-        '/party-rentals-seneca-sc',
-        '/party-rentals-laurens-sc',
-        '/party-rentals-woodruff-sc',
-        '/party-rentals-boiling-springs-sc',
-        '/party-rentals-inman-sc',
-        '/party-rentals-landrum-sc',
-        '/party-rentals-gray-court-sc',
-        '/party-rentals-central-sc',
-        '/party-rentals-six-mile-sc',
-        '/party-rentals-belton-sc',
-        '/party-rentals-honea-path-sc',
-        '/party-rentals-marietta-sc',
-        '/party-rentals-wade-hampton-sc',
-        '/party-rentals-judson-sc',
-        '/party-rentals-parker-sc',
-        '/party-rentals-gantt-sc',
-        ].map((route) => ({
-              url: `${BASE_URL}${route}`,
-              lastModified: new Date(),
-              changeFrequency: 'weekly',
-              priority: route === '' ? 1 : 0.7,
-        }))
-
-  let categoryRoutes: MetadataRoute.Sitemap = []
-      try {
-            const categories = await prisma.category.findMany({
-                    where: { displayToCustomer: true },
-                    select: { slug: true, updatedAt: true },
-            })
-            categoryRoutes = categories.map((c) => ({
-                    url: `${BASE_URL}/category/${c.slug}`,
-                    lastModified: c.updatedAt,
-                    changeFrequency: 'weekly',
-                    priority: 0.8,
-            }))
-      } catch {
-            categoryRoutes = []
-      }
-
-  let itemRoutes: MetadataRoute.Sitemap = []; try { const items = await prisma.item.findMany({ where: { displayToCustomer: true }, select: { slug: true, updatedAt: true } }); itemRoutes = items.map((it) => ({ url: `${BASE_URL}/items/${it.slug}`, lastModified: it.updatedAt, changeFrequency: 'weekly' as const, priority: 0.6 })) } catch { itemRoutes = [] } return [...staticRoutes, ...categoryRoutes, ...itemRoutes]
+import type { MetadataRoute } from 'next'
+import {prisma} from '@/lib/prisma'
+import {SC_SERVICE_AREAS} from '@/lib/scServiceAreas'
+import {SC_STATIC_SEARCH_PATHS,scUrl,isSearchableSlug,isCmsSearchPage} from '@/lib/scSeo'
+export const dynamic='force-dynamic'
+export default async function sitemap():Promise<MetadataRoute.Sitemap>{
+ // Do not silently publish a truncated sitemap when the database is unavailable.
+ const [categories,items,pages]=await Promise.all([
+  prisma.category.findMany({where:{displayToCustomer:true},select:{slug:true,updatedAt:true}}),
+  prisma.item.findMany({where:{displayToCustomer:true,category:{displayToCustomer:true}},select:{slug:true,updatedAt:true}}),
+  prisma.websitePage.findMany({where:{isPublished:true},select:{slug:true,content:true,updatedAt:true}}),
+ ])
+ const urls=new Map<string,MetadataRoute.Sitemap[number]>()
+ const add=(path:string,lastModified?:Date)=>{const url=scUrl(path);urls.set(url,lastModified?{url,lastModified}:{url})}
+ // Request time is not a content modification date. Static lastmod is omitted.
+ SC_STATIC_SEARCH_PATHS.forEach(path=>add(path))
+ SC_SERVICE_AREAS.filter(a=>a.href!=='/').forEach(a=>add(a.href))
+ categories.filter(c=>isSearchableSlug(c.slug)&&c.slug!=='weddings').forEach(c=>add('/category/'+encodeURIComponent(c.slug),c.updatedAt))
+ items.filter(i=>isSearchableSlug(i.slug)).forEach(i=>add('/items/'+encodeURIComponent(i.slug!),i.updatedAt))
+ pages.filter(isCmsSearchPage).forEach(page=>add('/'+encodeURIComponent(page.slug),page.updatedAt))
+ return [...urls.values()]
 }

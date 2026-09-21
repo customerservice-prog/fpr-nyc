@@ -1,3 +1,4 @@
+import { scPageMetadata } from '@/lib/scSeo'
 import StorefrontDesigner from '@/components/public/StorefrontDesigner'
 import type { Metadata } from 'next'
 import { Playfair_Display } from 'next/font/google'
@@ -7,11 +8,7 @@ import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 
 const playfair = Playfair_Display({ weight: ['600', '700'], subsets: ['latin'], display: 'swap' })
 
-export const metadata: Metadata = {
-  title: 'Design Your Event Online | Friendly Party Rental Greenville SC',
-  description: 'Explore 2D and 3D event layouts, see the RentSketch walkthrough, and arrange layout assistance with Friendly Party Rental Greenville. Explore event layouts and ask our Greenville team for planning help.',
-  alternates: { canonical: 'https://www.friendlypartyrentalsc.com/design-your-event' },
-}
+export const metadata = scPageMetadata("/design-your-event","Event Layout Help in Greenville, SC","Explore event layout ideas for tents, tables and chairs. Contact our Greenville team for planning help; online Greenville order access is not yet available.")
 
 const features = [
   ['01', 'Start with your event', 'Tell our Greenville team your guest count and what you are planning.'],

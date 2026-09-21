@@ -1,38 +1,13 @@
 import Link from 'next/link'
 import DeliveryFeeChecker from '@/components/public/DeliveryFeeChecker'
 import ServiceAreaDirectory from '@/components/public/ServiceAreaDirectory'
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Party Rental Delivery Area',
-  description: 'Friendly Party Rental delivers tents, bounce houses, tables, chairs, and linens throughout Greenville, Taylors, Greer, Simpsonville, Mauldin, Fountain Inn, and surrounding Upstate South Carolina communities.',
-  alternates: { canonical: 'https://friendlypartyrentalsc.com/service-area' },
-}
-
-
-export default function ServiceAreaPage() {
-  return (
-    <><DeliveryFeeChecker/><div className="max-w-4xl mx-auto px-4 py-10">
-      <h2 className="text-3xl font-bold text-dark mb-8 text-center">
-        Party Rental Delivery Area — Greenville, SC & Surrounding Cities
-      </h2>
-
-      <p className="text-body text-center mb-8 max-w-2xl mx-auto">
-        Friendly Party Rental proudly delivers bounce houses, tents, tables, chairs, linens, and more throughout Upstate South Carolina. We serve the greater Greenville area and all nearby communities. Don't see your city? Call us — we may still deliver to you!
-      </p>
-
-      <div className="mb-8"><h2 className="text-lg font-bold text-dark mb-2">Local Rental Guides</h2><ul className="flex flex-wrap gap-4 text-sm"><li><Link href="/party-rentals-taylors-sc" className="text-primary hover:underline">Taylors, SC</Link></li><li><Link href="/party-rentals-piedmont-sc" className="text-primary hover:underline">Piedmont, SC</Link></li><li><Link href="/party-rentals-berea-sc" className="text-primary hover:underline">Berea, SC</Link></li><li><Link href="/party-rentals-simpsonville-sc" className="text-primary hover:underline">Simpsonville, SC</Link></li><li><Link href="/party-rentals-anderson-sc" className="text-primary hover:underline">Anderson, SC</Link></li><li><Link href="/party-rentals-spartanburg-sc" className="text-primary hover:underline">Spartanburg, SC</Link></li><li><Link href="/party-rentals-travelers-rest-sc" className="text-primary hover:underline">Travelers Rest, SC</Link></li><li><Link href="/party-rentals-fountain-inn-sc" className="text-primary hover:underline">Fountain Inn, SC</Link></li><li><Link href="/party-rentals-mauldin-sc" className="text-primary hover:underline">Mauldin, SC</Link></li><li><Link href="/party-rentals-duncan-sc" className="text-primary hover:underline">Duncan, SC</Link></li><li><Link href="/party-rentals-powdersville-sc" className="text-primary hover:underline">Powdersville, SC</Link></li><li><Link href="/party-rentals-williamston-sc" className="text-primary hover:underline">Williamston, SC</Link></li><li><Link href="/party-rentals-pelzer-sc" className="text-primary hover:underline">Pelzer, SC</Link></li><li><Link href="/party-rentals-pickens-sc" className="text-primary hover:underline">Pickens, SC</Link></li><li><Link href="/party-rentals-liberty-sc" className="text-primary hover:underline">Liberty, SC</Link></li></ul></div><ServiceAreaDirectory/>
-
-      <div className="text-center mb-8">
-        <p className="text-body mb-6">Not sure if we deliver to your area? Give us a call at 864-610-5324 or text us and we'll let you know right away. Delivery fees may vary by distance.</p>
-        <h2 className="text-2xl font-bold text-dark mb-2">Ready to Book Your Party?</h2>
-        <p className="text-body mb-4">Browse our full inventory of bounce houses, tents, tables, chairs, linens &amp; more — delivered right to your door across Upstate South Carolina.</p>
-      </div>
-      <div className="flex flex-wrap justify-center gap-4">
-        <Link href="/category/bounce-house-rentals" className="btn-primary">Browse Bounce Houses</Link>
-        <Link href="/category/tent-rentals" className="btn-primary">Browse Tents</Link>
-        <Link href="/order-by-date" className="btn-accent">Book Now</Link>
-      </div>
-    </div></>
-  )
+import {scPageMetadata,scBreadcrumbs,SC_BUSINESS_ID,scUrl} from '@/lib/scSeo'
+import {SC_SERVICE_AREAS} from '@/lib/scServiceAreas'
+import {safeJsonLd} from '@/lib/jsonLd'
+export const metadata=scPageMetadata('/service-area','Party Rental Delivery Areas — Greenville & Upstate SC','Check party rental delivery for Greenville and 34 nearby Upstate South Carolina communities. Find your city, browse rentals and estimate your travel fee.')
+export default function ServiceAreaPage(){
+ const schema={'@context':'https://schema.org','@type':'Service','@id':scUrl('/service-area')+'#delivery',name:'Party rental delivery in Greenville and Upstate South Carolina',serviceType:'Party and event equipment rental delivery',provider:{'@id':SC_BUSINESS_ID},areaServed:SC_SERVICE_AREAS.map(a=>({'@type':'Place',name:a.name+', SC'})),url:scUrl('/service-area')}
+ return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(schema)}}/><script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(scBreadcrumbs([{name:'Home',path:'/'},{name:'South Carolina Delivery Areas',path:'/service-area'}]))}}/><DeliveryFeeChecker/>
+  <div className="mx-auto max-w-4xl px-4 py-10"><h2 className="mb-5 text-center text-3xl font-bold text-dark">Party Rental Delivery — Greenville, SC &amp; Nearby Communities</h2><p className="text-body leading-7">Find your community below to explore tents, tables, chairs, inflatables, linens and event equipment. We serve these communities from our Greenville operation; each town is a delivery area, not a separate warehouse or storefront.</p><p className="mt-4 text-body leading-7">Your final delivery arrangements depend on your event address, date, access and the equipment selected. Travel fees and tax are separate. Customer pickup at the warehouse is not available. Use the estimate tool or call <a href="tel:+18646105324" className="underline">864-610-5324</a> to confirm details.</p></div>
+  <ServiceAreaDirectory/><div className="mx-auto mb-10 flex max-w-4xl flex-wrap justify-center gap-4 px-4"><Link href="/category/tent-rentals" className="btn-primary">Browse Tents</Link><Link href="/category/table-chair-rentals" className="btn-primary">Tables &amp; Chairs</Link><Link href="/order-by-date" className="btn-accent">Check Your Event Date</Link></div></>
 }

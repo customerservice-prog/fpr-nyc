@@ -1,3 +1,4 @@
+import { scPageMetadata } from '@/lib/scSeo'
 import Link from 'next/link'
 import Accordion from '@/components/public/Accordion'
 import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
@@ -6,11 +7,7 @@ import { Playfair_Display } from 'next/font/google'
 
 const playfair = Playfair_Display({ weight: ['600', '700'], subsets: ['latin'], display: 'swap' })
 
-export const metadata: Metadata = {
-  title: 'Event Planning Services in Greenville, SC',
-  description: 'Full-service event planning from Friendly Party Rental. We plan and provide your rentals, so you do not need to hire a separate event planner. Serving Greenville and Upstate South Carolina.',
-  alternates: { canonical: 'https://www.friendlypartyrentalsc.com/event-planning' },
-}
+export const metadata = scPageMetadata("/event-planning","Event Planning Services in Greenville, SC","Review event planning and coordination services with rental equipment in Greenville and Upstate South Carolina. Compare listed packages or request a consultation.")
 
 const faqItems = [
   {

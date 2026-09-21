@@ -1,4 +1,5 @@
 import { createElement, Suspense, Fragment } from 'react'
+import LocalDeliveryLinks from '@/components/public/LocalDeliveryLinks'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { PUBLIC_ITEM_SELECT } from '@/lib/availability'
@@ -20,7 +21,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
   ])
   const category = results[0]
   const items = results[1]
-  if (!category) notFound()
+  if (!category || !category.displayToCustomer) notFound()
 
   const initialCategory = {
     name: category.name,
@@ -49,7 +50,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
     'Family-owned with more than 10 years of event-rental experience',
     'Fully insured with professional delivery and setup crews',
     'Clean, professionally maintained equipment',
-    'Greenville-area delivery, setup, and pickup options',
+    'Greenville-area delivery and event-site collection; no warehouse customer pickup',
   ]
 
   const faqs = [
@@ -69,7 +70,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
     },
     {
       q: 'Can your team help me choose the right rentals?',
-      a: 'Yes. Call 864-610-5324 if you want help choosing equipment. For tents and table/chair layouts, you can also use our RentSketch Event Designer to visualize a starting setup before you book.',
+      a: 'Yes. Call 864-610-5324 for help choosing equipment or planning a tent, table and chair layout with our Greenville team.',
     },
   ]
 
@@ -140,7 +141,8 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
     whyChooseUsEl,
     faqEl,
     faqSchemaEl,
-    relatedEl
+    relatedEl,
+    createElement(LocalDeliveryLinks)
   )
 
   return createElement(

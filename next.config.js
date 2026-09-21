@@ -19,8 +19,14 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60,
   },
+  async headers() {
+    const privatePaths=['/admin/:path*','/driver/:path*','/checkout/:path*','/pay/:path*','/pay-now','/contract/:path*','/schedule/:path*','/unsubscribe','/items']
+    return privatePaths.map(source=>({source,headers:[{key:'X-Robots-Tag',value:'noindex, follow'}]}))
+  },
   async redirects() {
     return [
+      {source:'/',has:[{type:'host',value:'friendlypartyrentalsc.com'}],destination:'https://www.friendlypartyrentalsc.com/',permanent:true},
+      {source:'/:path((?!api|admin|driver|checkout|pay|contract|schedule|unsubscribe|_next).+)',has:[{type:'host',value:'friendlypartyrentalsc.com'}],destination:'https://www.friendlypartyrentalsc.com/:path',permanent:true},
       { source: '/index.html', destination: '/', permanent: true },
       { source: '/home', destination: '/', permanent: true },
       { source: '/view_gallery', destination: '/gallery', permanent: true },

@@ -6,9 +6,9 @@ import { SC_SHARED_GALLERY } from '@/lib/scSharedGallery'
 
 interface GalleryImage { id: string; url: string; caption?: string | null }
 export default function GalleryPage() {
-  const [images, setImages] = useState<GalleryImage[]>([])
-  const [shared, setShared] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [images, setImages] = useState<GalleryImage[]>(SC_SHARED_GALLERY)
+  const [shared, setShared] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [index, setIndex] = useState(0)
   const [showThumbs, setShowThumbs] = useState(false)
   useEffect(() => {

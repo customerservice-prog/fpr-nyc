@@ -2,6 +2,8 @@ import { notFound, permanentRedirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import {scPageMetadata,scMetaText,scBreadcrumbs,SC_BUSINESS_ID,scUrl} from '@/lib/scSeo'
+import LocalDeliveryLinks from '@/components/public/LocalDeliveryLinks'
 import { safeJsonLd } from '@/lib/jsonLd'
 import ItemGallery from '@/components/public/ItemGallery'
 import SuggestedAddons from '@/components/public/SuggestedAddons'
@@ -27,7 +29,7 @@ async function findItem(slugParts: string[]) {
   const lastSegment = rawSlug.split('/').pop() || ''
   const safeSegment = lastSegment.replace(/[\u0000-\u001F\u007F]/g, '')
   try {
-    const exact = await prisma.item.findFirst({ where: { slug: safeSegment }, include: { category: true } })
+    const exact = await prisma.item.findFirst({ where: { slug: safeSegment, displayToCustomer: true, category: {displayToCustomer:true} }, include: { category: true } })
     if (exact) return exact
   } catch {}
   const cleaned = cleanSlug(rawSlug)
@@ -36,7 +38,7 @@ async function findItem(slugParts: string[]) {
     const words = cleaned.split(' ').filter((w) => w.length > 2)
     if (!words.length) return null
     return await prisma.item.findFirst({
-      where: { AND: words.slice(0, 4).map((w) => ({ name: { contains: w, mode: 'insensitive' as const } })) },
+      where: { displayToCustomer:true, category:{displayToCustomer:true}, AND: words.slice(0, 4).map((w) => ({ name: { contains: w, mode: 'insensitive' as const } })) },
       include: { category: true },
     })
   } catch { return null }
@@ -44,12 +46,12 @@ async function findItem(slugParts: string[]) {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
   const item = await findItem((await params).slug)
-  if (!item) return { title: 'Friendly Party Rental | Party Rentals in Greenville, SC' }
+  if (!item) return { title: 'Rental not found', robots:{index:false,follow:true} }
   const fullDescription = itemDescriptionForSc(item.name, item.description)
-  const desc = fullDescription.slice(0, 160)
+  const desc = scMetaText(`Rent ${item.name} in Greenville, SC. ${fullDescription}`)
   const canonical = `${BASE_URL}/items/${item.slug}`
   return {
-    title: `${item.name} Rental - Greenville, SC`,
+    ...scPageMetadata(`/items/${encodeURIComponent(item.slug!)}`, `${item.name} Rental - Greenville, SC`, desc),
     description: desc,
     alternates: { canonical },
     openGraph: {
@@ -66,7 +68,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
   const item = await findItem(slugParts)
   if (!item || !item.category) notFound()
   const lastRequested = (slugParts || []).join('/').split('/').pop() || ''
-  if (item.slug !== lastRequested) permanentRedirect(`/items/${item.slug}`)
+  if (item.slug !== (slugParts || []).join('/')) permanentRedirect(`/items/${encodeURIComponent(item.slug!)}`)
 
   const description = itemDescriptionForSc(item.name, item.description)
   const relatedItems = await prisma.item.findMany({ where: { categoryId: item.categoryId, id: { not: item.id }, displayToCustomer: true }, orderBy: { name: 'asc' }, take: 4 })
@@ -92,8 +94,9 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
       '@type': 'Offer',
       priceCurrency: 'USD',
       price: Number(item.cost).toFixed(2),
-      availability: 'https://schema.org/InStock',
-      url: `${BASE_URL}/category/${item.category.slug}`,
+      businessFunction: 'http://purl.org/goodrelations/v1#LeaseOut',
+      seller: {'@id':SC_BUSINESS_ID},
+      url: scUrl(`/items/${encodeURIComponent(item.slug!)}`),
       areaServed: 'Greenville, SC',
     },
   }
@@ -101,6 +104,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(scBreadcrumbs([{name:"Home",path:"/"},{name:item.category.name,path:`/category/${item.category.slug}`},{name:item.name,path:`/items/${encodeURIComponent(item.slug!)}`}]))}}/>
       <nav className="text-sm text-gray-500 mb-4"><Link href="/">Home</Link>{' / '}<Link href={`/category/${item.category.slug}`}>{item.category.name}</Link>{' / '}<span>{item.name}</span></nav>
       <div className="grid md:grid-cols-2 gap-8 items-start">
         <ItemGallery slug={item.slug} name={item.name} hasPicture={!!item.picture} additionalImages={item.additionalImages || []} />
@@ -121,6 +125,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
           <Link href={`/category/${item.category.slug}`} className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">Check Availability & Book</Link>
         </div>
       </div>
+      <LocalDeliveryLinks/>
     </div>
   )
 }

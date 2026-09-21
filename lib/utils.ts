@@ -1,3 +1,4 @@
+import { SC_CATEGORY_IMAGES } from '@/lib/scCategoryImages'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { format } from 'date-fns'
@@ -118,7 +119,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Order-by-Date',
         slug: 'order-by-date',
         href: '/order-by-date',
-        image: '/images/order-by-date.png',
+        image: SC_CATEGORY_IMAGES['order-by-date'],
         count: 0,
   },
   {
@@ -126,7 +127,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Bounce House Rentals — Greenville, SC',
         slug: 'bounce-house-rentals',
         href: '/category/bounce-house-rentals',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Mar-10--2026--04_18_04-PM.png',
+        image: SC_CATEGORY_IMAGES['bounce-house-rentals'],
         count: 15,
   },
   {
@@ -134,7 +135,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Tent Rentals — Greenville, SC',
         slug: 'tent-rentals',
         href: '/category/tent-rentals',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_38_16-AM.png',
+        image: SC_CATEGORY_IMAGES['tent-rentals'],
         count: 22,
   },
   {
@@ -142,7 +143,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Table & Chair Rentals — Greenville, SC',
         slug: 'table-chair-rentals',
         href: '/category/table-chair-rentals',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_38_40-AM.png',
+        image: SC_CATEGORY_IMAGES['table-chair-rentals'],
         count: 14,
   },
   {
@@ -150,7 +151,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Concession Machine Rentals — Greenville, SC',
         slug: 'concession-machine-rentals',
         href: '/category/concession-machine-rentals',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_42_03-AM.png',
+        image: SC_CATEGORY_IMAGES['concession-machine-rentals'],
         count: 17,
   },
   {
@@ -158,7 +159,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Generator Rentals — Greenville, SC',
         slug: 'generator-rentals',
         href: '/category/generator-rentals',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_40_58-AM.png',
+        image: SC_CATEGORY_IMAGES['generator-rentals'],
         count: 3,
   },
   {
@@ -166,7 +167,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Yard Game Rentals — Greenville, SC',
         slug: 'yard-game-rentals',
         href: '/category/yard-game-rentals',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_37_29-AM.png',
+        image: SC_CATEGORY_IMAGES['yard-game-rentals'],
         count: 9,
   },
   {
@@ -174,7 +175,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Photobooth Rentals — Greenville, SC',
         slug: 'photobooth-rentals',
         href: '/category/photobooth-rentals',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_39_03-AM.png',
+        image: SC_CATEGORY_IMAGES['photobooth-rentals'],
         count: 5,
   },
   {
@@ -182,7 +183,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Foam Party Machine Rentals — Greenville, SC',
         slug: 'foam-party-machine-rentals',
         href: '/category/foam-party-machine-rentals',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_48_33-AM.png',
+        image: SC_CATEGORY_IMAGES['foam-party-machine-rentals'],
         count: 1,
   },
   {
@@ -190,7 +191,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Event Lighting Rentals — Greenville, SC',
         slug: 'event-lighting-rentals',
         href: '/category/event-lighting-rentals',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_40_24-AM.png',
+        image: SC_CATEGORY_IMAGES['event-lighting-rentals'],
         count: 17,
   },
   {
@@ -198,7 +199,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Linen & Tablecloth Rentals — Greenville, SC',
         slug: 'linen-rentals',
         href: '/category/linen-rentals',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_40_05-AM.png',
+        image: SC_CATEGORY_IMAGES['linen-rentals'],
         count: 36,
   },
   {
@@ -206,7 +207,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Dance Floor & Stage Rentals — Greenville, SC',
         slug: 'dance-floor-stage-rentals',
         href: '/category/dance-floor-stage-rentals',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_41_14-AM.png',
+        image: SC_CATEGORY_IMAGES['dance-floor-stage-rentals'],
         count: 6,
   },
   {
@@ -214,7 +215,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Heater & Fan Rentals — Greenville, SC',
         slug: 'heater-fan-rentals',
         href: '/category/heater-fan-rentals',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_47_00-AM.png',
+        image: SC_CATEGORY_IMAGES['heater-fan-rentals'],
         count: 8,
   },
   {
@@ -222,7 +223,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Inflatable Movie Screen Rentals — Greenville, SC',
         slug: 'inflatable-movie-screen-rentals',
         href: '/category/inflatable-movie-screen-rentals',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_49_44-AM.png',
+        image: SC_CATEGORY_IMAGES['inflatable-movie-screen-rentals'],
         count: 2,
   },
   {
@@ -230,7 +231,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Beverage & Food Service Rentals — Greenville, SC',
         slug: 'beverage-food-service',
         href: '/category/beverage-food-service',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_44_30-AM.png',
+        image: SC_CATEGORY_IMAGES['beverage-food-service'],
         count: 46,
   },
   {
@@ -238,7 +239,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Party Rental Packages — Greenville, SC',
         slug: 'party-rental-packages',
         href: '/category/party-rental-packages',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Dec-19--2025--10_39_22-AM.png',
+        image: SC_CATEGORY_IMAGES['party-rental-packages'],
         count: 13,
   },
   {
@@ -246,7 +247,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Weddings',
         slug: 'weddings',
         href: '/category/weddings',
-        image: 'https://315.ourers.com/cp/upload/315/categories/victoria-grady_r-tagg-2546-2.jpg',
+        image: SC_CATEGORY_IMAGES['weddings'],
         count: 23,
   },
   {
@@ -254,7 +255,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Party Rental Accessories — Greenville, SC',
         slug: 'party-rental-accessories',
         href: '/category/party-rental-accessories',
-        image: 'https://315.ourers.com/cp/upload/315/categories/ChatGPT-Image-Jun-9--2026--05_10_38-AM.png',
+        image: SC_CATEGORY_IMAGES['party-rental-accessories'],
         count: 6,
   },
   {
@@ -262,7 +263,7 @@ export const PUBLIC_CATEGORIES = [
     name: 'Restroom Rentals — Greenville, SC',
     slug: 'restroom-rentals',
     href: '/category/restroom-rentals',
-    image: 'https://www.friendlypartyrental.com/api/uploads/1ffb3758-6dd6-421a-a5c3-5214648b5d4e.jpg',
+    image: SC_CATEGORY_IMAGES['restroom-rentals'],
     count: 2,
   },
   ]

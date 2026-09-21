@@ -1,3 +1,5 @@
+import HomeCategoryGrid from '@/components/public/HomeCategoryGrid'
+import HomeYouTube from '@/components/public/HomeYouTube'
 import Link from 'next/link'
 import PlanningShortcuts from '@/components/public/PlanningShortcuts'
 import CategoryCard from '@/components/public/CategoryCard'
@@ -96,73 +98,9 @@ const packagesRaw = await getSyncedWeddingPackages()
           ))}
         </div>
       </section>
-      {/* YouTube Section */}
-<ComicBookBackground className="py-14">
-<div className="max-w-4xl mx-auto px-4 text-center">
-<p className="text-[#EEC400] tracking-[0.3em] text-xs font-bold uppercase mb-2">As Seen In Action</p>
-<h2 className={playfair.className + " text-3xl md:text-4xl font-bold text-white mb-8 drop-shadow-md"}>Watch Us on YouTube</h2>
-<div className="relative max-w-3xl mx-auto mb-8">
-<div
-className="absolute -inset-6 rounded-[2rem] opacity-70 blur-2xl animate-pulse"
-style={{ background: 'linear-gradient(135deg, #EEC400, #E07B00, #EEC400)' }}
-aria-hidden="true"
-/>
-<div
-className="absolute -inset-1.5 rounded-[1.75rem]"
-style={{ background: 'linear-gradient(135deg, #EEC400, #FFF7DC, #E07B00, #FFF7DC, #EEC400)' }}
-aria-hidden="true"
-/>
-<div
-className="relative p-[6px] rounded-3xl shadow-2xl"
-style={{ background: 'linear-gradient(135deg, #EEC400, #E07B00, #EEC400)' }}
->
-<div className="bg-[#FFFDF7] p-2 rounded-[22px]">
-<div className="aspect-video bg-black rounded-2xl overflow-hidden ring-1 ring-black/10">
-<YouTubeFacade videoId="LWQvMclQea4" title="Friendly Party Rental YouTube" />
-</div>
-</div>
-<span className="absolute -top-3 -left-3 w-6 h-6 rotate-45 bg-white border-2 border-[#EEC400] shadow-lg flex items-center justify-center" aria-hidden="true">
-<span className="w-2 h-2 bg-[#E07B00]" />
-</span>
-<span className="absolute -top-3 -right-3 w-6 h-6 rotate-45 bg-white border-2 border-[#EEC400] shadow-lg flex items-center justify-center" aria-hidden="true">
-<span className="w-2 h-2 bg-[#E07B00]" />
-</span>
-<span className="absolute -bottom-3 -left-3 w-6 h-6 rotate-45 bg-white border-2 border-[#EEC400] shadow-lg flex items-center justify-center" aria-hidden="true">
-<span className="w-2 h-2 bg-[#E07B00]" />
-</span>
-<span className="absolute -bottom-3 -right-3 w-6 h-6 rotate-45 bg-white border-2 border-[#EEC400] shadow-lg flex items-center justify-center" aria-hidden="true">
-<span className="w-2 h-2 bg-[#E07B00]" />
-</span>
-</div>
-</div>
-<p className={playfair.className + " italic text-white/90 text-lg mb-6"}>See the Friendly Party Rental difference for yourself</p>
-<Link href="/order-by-date" prefetch={false} className="btn-gold inline-block">Book Your Rentals Online</Link>
-</div>
-</ComicBookBackground>
-
-
-      {/* Category Grid */}
-      <section
-        className="max-w-6xl mx-auto px-4 py-12"
-        style={
-          theme?.storeBackgroundImage
-            ? {
-                backgroundImage:
-                  (theme.storeBackgroundTint === 'dark' ? 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), ' : '') +
-                  `url(${theme.storeBackgroundImage})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }
-            : undefined
-        }
-      >
-        <h2 className="text-2xl font-bold text-dark mb-8 text-center">Browse Our Rentals</h2>
-        <div className={"grid grid-cols-2 md:grid-cols-3 " + (theme?.categoryDisplayStyle === 'minimal-no-gutter' ? 'gap-0' : 'gap-4')}>
-          {          displayCategories.map((cat) => (
-            <CategoryCard key={cat.slug} name={cat.name} href={cat.href} image={categoryPictures[cat.slug] || cat.image} displayStyle={theme?.categoryDisplayStyle} />
-          ))}
-        </div>
-      </section>
+      {/* Exact original NY image treatment; Greenville links and offers are retained. */}
+      <HomeYouTube desktop />
+      <HomeCategoryGrid categories={displayCategories.map(cat=>({...cat,image:categoryPictures[cat.slug]||cat.image}))} />
 
       <StorefrontDesigner />
       {/* How It Works */}

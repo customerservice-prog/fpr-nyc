@@ -1,21 +1,23 @@
-// Consistent previews assembled from this location's published product photos.
+// Exact original NY artwork, copied unchanged at the owner's request.
+// Audit origin and SHA-256 are recorded in nyMediaSnapshot.json.
 export const SC_CATEGORY_IMAGES: Record<string,string> = {
-  "tent-rentals": "/images/storefront/category-tent-rentals.jpg",
-  "table-chair-rentals": "/images/storefront/category-table-chair-rentals.jpg",
-  "bounce-house-rentals": "/images/storefront/category-bounce-house-rentals.jpg",
-  "linen-rentals": "/images/storefront/category-linen-rentals.jpg",
-  "photobooth-rentals": "/images/storefront/category-photobooth-rentals.jpg",
-  "dance-floor-stage-rentals": "/images/storefront/category-dance-floor-stage-rentals.jpg",
-  "concession-machine-rentals": "/images/storefront/category-concession-machine-rentals.jpg",
-  "yard-game-rentals": "/images/storefront/category-yard-game-rentals.jpg",
-  "event-lighting-rentals": "/images/storefront/category-event-lighting-rentals.jpg",
-  "generator-rentals": "/images/storefront/category-generator-rentals.jpg",
-  "heater-fan-rentals": "/images/storefront/category-heater-fan-rentals.jpg",
-  "party-rental-packages": "/images/storefront/category-party-rental-packages.jpg",
-  "beverage-food-service": "/images/storefront/category-beverage-food-service.jpg",
-  "foam-party-machine-rentals": "/images/storefront/category-foam-party-machine-rentals.jpg",
-  "inflatable-movie-screen-rentals": "/images/storefront/category-inflatable-movie-screen-rentals.jpg",
-  "party-rental-accessories": "/images/storefront/category-party-rental-accessories.jpg",
-  "restroom-rentals": "/images/storefront/category-restroom-rentals.jpg",
-  "weddings": "/images/storefront/category-weddings.jpg"
+  "order-by-date": "/images/order-by-date.png",
+  "bounce-house-rentals": "/images/ny-parity/category-bounce-house-rentals.png",
+  "tent-rentals": "/images/ny-parity/category-tent-rentals.png",
+  "table-chair-rentals": "/images/ny-parity/category-table-chair-rentals.png",
+  "concession-machine-rentals": "/images/ny-parity/category-concession-machine-rentals.png",
+  "generator-rentals": "/images/ny-parity/category-generator-rentals.png",
+  "yard-game-rentals": "/images/ny-parity/category-yard-game-rentals.png",
+  "photobooth-rentals": "/images/ny-parity/category-photobooth-rentals.png",
+  "foam-party-machine-rentals": "/images/ny-parity/category-foam-party-machine-rentals.png",
+  "event-lighting-rentals": "/images/ny-parity/category-event-lighting-rentals.png",
+  "linen-rentals": "/images/ny-parity/category-linen-rentals.png",
+  "dance-floor-stage-rentals": "/images/ny-parity/category-dance-floor-stage-rentals.png",
+  "heater-fan-rentals": "/images/ny-parity/category-heater-fan-rentals.png",
+  "inflatable-movie-screen-rentals": "/images/ny-parity/category-inflatable-movie-screen-rentals.png",
+  "beverage-food-service": "/images/ny-parity/category-beverage-food-service.png",
+  "party-rental-packages": "/images/ny-parity/category-party-rental-packages.png",
+  "weddings": "/images/ny-parity/category-weddings.png",
+  "party-rental-accessories": "/images/ny-parity/category-party-rental-accessories.png",
+  "restroom-rentals": "/images/ny-parity/category-restroom-rentals.jpg"
 }

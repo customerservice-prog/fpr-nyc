@@ -13,6 +13,6 @@ test('all published icon assets exist with valid signatures',()=>{
 test('storefront manifest is independent of the existing driver app',()=>{
  const manifest=JSON.parse(read('public/site.webmanifest'));assert.equal(manifest.short_name,'FPR SC');assert.equal(manifest.start_url,'/');assert.equal(manifest.display,'browser');assert.equal(manifest.icons.length,2)
 })
-test('home video has localized local cover rather than a NY or low-resolution generic poster',()=>{
- const code=read('components/public/YouTubeFacade.tsx');assert.ok(code.includes("const LOCAL_COVER = '/images/sc-event-reception.jpg'"));assert.ok(code.includes('South Carolina'));assert.ok(code.includes('data-sc-video-cover'));assert.ok(code.includes('setLoaded(true)'));assert.ok(!code.includes('Central NY'));assert.ok(code.includes("poster === 'local'"))
+test('home video uses the exact NY cover requested by the owner',()=>{
+ const code=read('components/public/YouTubeFacade.tsx');assert.ok(code.includes('/images/youtube-video-thumbnail.jpg'));assert.ok(code.includes('setLoaded(true)'));assert.ok(!code.includes('sc-event-reception.jpg'));assert.ok(!code.includes('i.ytimg.com'))
 })

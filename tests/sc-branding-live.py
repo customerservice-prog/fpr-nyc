@@ -1,5 +1,6 @@
-"""Read-only exact-media verification with separate original-byte and rendered-geometry checks.
-No workflow permissions or public storefront pixels are changed by this test.
+"""Verify exact asset bytes and responsive rendering; retain unaltered screenshots.
+Pixel-difference measurements are diagnostic, not a claim that regional text
+or subpixel rasterization is identical. Workflow permissions are unchanged.
 """
 import py_compile
 import runpy

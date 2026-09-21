@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
+import { SC_CATEGORY_IMAGES } from '@/lib/scCategoryImages'
 
 interface CategoryCardProps {
   name: string
@@ -10,6 +11,8 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({ name, href, image, displayStyle = 'boxed' }: CategoryCardProps) {
+  const slug=href.split('/').filter(Boolean).pop()||''
+  if (!image || image.startsWith('https://315.ourers.com/') || image.startsWith('https://www.friendlypartyrental.com/')) image=SC_CATEGORY_IMAGES[slug]||image
   if (displayStyle === 'image-only') {
     return (
       <Link href={href} prefetch={false} className="relative block w-full overflow-hidden" style={{ paddingTop: '75%' }}>
@@ -32,7 +35,7 @@ export default function CategoryCard({ name, href, image, displayStyle = 'boxed'
             <div className="absolute inset-0 bg-gray-200" />
           )}
         </div>
-        <p className="text-center font-medium mt-2">{name}</p>
+        <p className="text-center text-sm font-bold leading-5 mt-2">{name}</p>
       </Link>
     )
   }

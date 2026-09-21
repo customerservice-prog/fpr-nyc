@@ -134,15 +134,15 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
   const [closedDates, setClosedDates] = useState<string[]>([])
   const { setEventDate, eventDate: cartEventDate, loaded: cartLoaded, setEventTimeSlot, eventTimeSlot, setDeliveryType, setPickupTimeSlot, setExactTimeRequested, setSchedulingDetails, itemCount, durationTierId, setDurationTierId } = useCart()
 
-  const [browseWithoutDate, setBrowseWithoutDate] = useState(false)
-  const [bookingMethod, setBookingMethod] = useState<'' | 'delivery' | 'pickup'>('')
+  const [browseWithoutDate, setBrowseWithoutDate] = useState(!dateParam)
+  const [bookingMethod, setBookingMethod] = useState<'' | 'delivery' | 'pickup'>('delivery')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
     const savedMethod = localStorage.getItem('fpr_bookingMethod')
     const savedSkip = localStorage.getItem('fpr_browseWithoutDate')
     if (savedMethod === 'delivery' || savedMethod === 'pickup') {
-      setBookingMethod(savedMethod)
+      setBookingMethod('delivery')
     } else if (savedSkip === 'true') {
       setBrowseWithoutDate(true)
     }
@@ -150,6 +150,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
   useEffect(() => {
     if (!dateParam && !selectedDate && cartLoaded && cartEventDate) {
       setSelectedDate(new Date(cartEventDate))
+      setBrowseWithoutDate(false)
     }
   }, [dateParam, selectedDate, cartLoaded, cartEventDate])
   
@@ -274,7 +275,8 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
       localStorage.removeItem('fpr_bookingMethod')
       localStorage.removeItem('fpr_browseWithoutDate')
     }
-    setBookingMethod('')
+    setBookingMethod('delivery')
+    setBrowseWithoutDate(false)
     setSelectedDate(null)
     setTimeConfirmed(false)
     resetTimeSelections()

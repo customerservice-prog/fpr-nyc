@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Image from 'next/image'
+import { SC_SHARED_GALLERY } from '@/lib/scSharedGallery'
 
 interface GalleryImage {
   id: string
@@ -11,6 +12,7 @@ interface GalleryImage {
 
 export default function GalleryPage() {
   const [images, setImages] = useState<GalleryImage[]>([])
+  const [shared, setShared] = useState(false)
   const [loading, setLoading] = useState(true)
   const [index, setIndex] = useState(0)
   const [showThumbs, setShowThumbs] = useState(false)
@@ -19,10 +21,12 @@ export default function GalleryPage() {
     fetch('/api/gallery')
       .then((res) => res.json())
       .then((data) => {
-        setImages(data.images || [])
+        const local = data.images || []
+        setShared(local.length === 0)
+        setImages(local.length ? local : SC_SHARED_GALLERY)
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch(() => {setImages(SC_SHARED_GALLERY);setShared(true);setLoading(false)})
   }, [])
 
   const goNext = useCallback(() => {
@@ -65,10 +69,10 @@ export default function GalleryPage() {
       <h1 className="text-3xl font-bold text-center mb-1">Gallery</h1>
       <div className="mx-auto mb-3 h-1 w-24 rounded-full bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-300" />
       <p className="text-center text-body mb-2">
-        Real Events, Real Setups, Real Smiles
+        {shared ? "Shared Brand Gallery & Event Inspiration" : "Real Events, Real Setups, Real Smiles"}
       </p>
       <p className="text-center text-body mb-6">
-        Browse photos from birthdays, weddings, graduations, and events across Upstate South Carolina.
+        {shared ? "From Friendly Party Rental’s New York website. These are shared photos and design inspiration, not Greenville event photos. Equipment and availability may differ by location." : "Browse photos from birthdays, weddings, graduations and events shared by our Greenville team."}
       </p>
 
       <div className="relative rounded-3xl bg-gradient-to-br from-amber-600 via-yellow-500 to-amber-800 p-[6px] shadow-2xl shadow-amber-900/40">

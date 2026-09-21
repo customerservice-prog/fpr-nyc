@@ -34,7 +34,7 @@ export default async function WeddingPackagesPage({
 
       <div className="bg-white rounded-lg shadow-lg border-2 border-primary overflow-hidden">
         {pkg.image && (
-          <img src={pkg.image} alt={`${pkg.name} wedding rental package`} className="w-full h-auto max-h-[520px] object-cover bg-gray-50" />
+          <img src={pkg.image} alt={`${pkg.name}: illustrative event setting; refer to the inclusions list`} className="w-full h-auto max-h-[520px] object-cover bg-gray-50" />
         )}
         <div className="p-6 sm:p-8">
           <div className="flex flex-wrap gap-2 mb-4">
@@ -53,7 +53,7 @@ export default async function WeddingPackagesPage({
             <p className="text-body leading-7 mb-7 whitespace-pre-line">{pkg.description}</p>
           )}
 
-          <h2 className="font-bold text-dark mb-4">Package Includes:</h2>
+          <h2 className="font-bold text-dark mb-4">Greenville Package Includes:</h2>
           <ul className="space-y-3 mb-8">
             {pkg.items.map((item: string) => (
               <li key={item} className="flex items-start gap-2 text-body">

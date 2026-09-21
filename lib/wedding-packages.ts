@@ -25,7 +25,8 @@ export async function getSyncedWeddingPackages() {
   return packages.map((p) => {
     const fallback = fallbackById.get(p.id)
     const liveCost = costByName.get(`Wedding Package - ${p.name}`)
-    const image = p.image
+    const legacyArt = p.updatedAt.toISOString() === '2026-08-23T19:15:02.017Z'
+    const image = legacyArt ? '/images/sc-event-reception.jpg' : p.image
       ? `/api/wedding-package-image/${p.id}?v=${p.updatedAt ? new Date(p.updatedAt).toISOString() : IMAGE_CACHE_BUST}`
       : fallback?.image || null
     const description = localizeScPublicCopy(p.description) || fallback?.description || ''

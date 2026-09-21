@@ -1,3 +1,4 @@
+import StorefrontDesigner from '@/components/public/StorefrontDesigner'
 import type { Metadata } from 'next'
 import { Playfair_Display } from 'next/font/google'
 import Link from 'next/link'
@@ -8,15 +9,15 @@ const playfair = Playfair_Display({ weight: ['600', '700'], subsets: ['latin'], 
 
 export const metadata: Metadata = {
   title: 'Design Your Event Online | Friendly Party Rental Greenville SC',
-  description: 'Build your Greenville event layout in 2D and 3D using tents, tables, chairs and event equipment from Friendly Party Rental. See your setup before you book.',
+  description: 'Explore 2D and 3D event layouts, see the RentSketch walkthrough, and arrange layout assistance with Friendly Party Rental Greenville. Explore event layouts and ask our Greenville team for planning help.',
   alternates: { canonical: 'https://www.friendlypartyrentalsc.com/design-your-event' },
 }
 
 const features = [
-  ['01', 'Start with your event', 'Tell the designer your guest count and what you are planning.'],
+  ['01', 'Start with your event', 'Tell our Greenville team your guest count and what you are planning.'],
   ['02', 'Build the layout', 'Arrange tents, tables, chairs, dance floors and other event equipment.'],
   ['03', 'See it in 3D', 'Switch from floor-plan view to a visual preview of the event you created.'],
-  ['04', 'Send us your design', 'Share the layout with our Greenville team so we can confirm availability and final pricing.'],
+  ['04', 'Send us your design', 'Contact our Greenville team with your layout ideas to confirm availability and final pricing.'],
 ]
 
 const equipment = [
@@ -34,7 +35,7 @@ export default function DesignYourEventPage() {
         <div>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[.18em] text-[#F4C542]">RentSketch Event Designer</div>
           <h1 className={`${playfair.className} max-w-xl text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl`}>Build Your Event. See It Before Setup Day.</h1>
-          <p className="mt-5 max-w-xl text-base leading-7 text-white/75 sm:text-lg">Plan your tent, tables, chairs and event layout visually using our rental equipment. Build in 2D, preview in 3D, then send the design to Friendly Party Rental Greenville.</p>
+          <p className="mt-5 max-w-xl text-base leading-7 text-white/75 sm:text-lg">See how a 2D floor plan becomes a 3D event layout. Our Greenville team can help you choose equipment and plan your space; ask us about layout assistance with your order.</p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
             <DesignYourEventCTA source="design_your_event_page" label="Start Designing My Event" variant="primary" />
             <Link href="/category" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/35 px-6 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-[#0B1F3A]">Browse Rentals</Link>
@@ -51,6 +52,7 @@ export default function DesignYourEventPage() {
       </div>
     </section>
 
+    <StorefrontDesigner />
     <section className="border-b border-gray-100 bg-[#FAFAF8]">
       <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-gray-200 px-4 py-5 text-center md:grid-cols-4">
         {['Use real rental equipment','Plan around your guest count','Switch between 2D + 3D','Send your layout to our team'].map((item)=><div key={item} className="px-3 py-2 text-xs font-extrabold sm:text-sm">{item}</div>)}
@@ -81,7 +83,7 @@ export default function DesignYourEventPage() {
 
     <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 md:pb-20 lg:px-8">
       <div className="overflow-hidden rounded-[2rem] bg-[#0B1F3A] px-6 py-10 text-white md:px-10 lg:grid lg:grid-cols-[1fr_auto] lg:items-center lg:gap-10">
-        <div><p className="text-xs font-extrabold uppercase tracking-[.2em] text-[#F4C542]">When your layout is ready</p><h2 className={`${playfair.className} mt-2 text-3xl font-bold`}>Send it to Friendly Party Rental.</h2><p className="mt-3 max-w-2xl leading-7 text-white/70">Your design helps our Greenville team understand the setup you are trying to create. We will confirm equipment, availability, site details and final pricing before the order is finalized.</p></div>
+        <div><p className="text-xs font-extrabold uppercase tracking-[.2em] text-[#F4C542]">When your layout is ready</p><h2 className={`${playfair.className} mt-2 text-3xl font-bold`}>Send it to Friendly Party Rental.</h2><p className="mt-3 max-w-2xl leading-7 text-white/70">Your layout ideas help our Greenville team understand the setup you are trying to create. We will confirm equipment, availability, site details and final pricing before the order is finalized.</p></div>
         <div className="mt-7 lg:mt-0"><DesignYourEventCTA source="design_your_event_footer" label="Start Designing" variant="primary" /></div>
       </div>
       <p className="mx-auto mt-5 max-w-3xl text-center text-xs leading-5 text-gray-500">The Event Designer is a planning and visualization tool. Designs and estimates are not reservations. Final equipment availability, site requirements and pricing are confirmed by Friendly Party Rental.</p>

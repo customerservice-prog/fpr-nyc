@@ -1,5 +1,8 @@
 'use client'
 
+import Link from 'next/link'
+import { SC_RENTSKETCH_TENANT } from '@/lib/scRentSketch'
+
 export type DesignYourEventSource = string
 
 interface DesignYourEventCTAProps {
@@ -32,6 +35,10 @@ export default function DesignYourEventCTA({
     window.dispatchEvent(new CustomEvent('open-design-your-event', {
       detail: { source, ...(tent ? { tent } : {}), ...(tentSlug ? { tentSlug } : {}) },
     }))
+  }
+
+  if (!SC_RENTSKETCH_TENANT) {
+    return <Link href={source.startsWith('design_your_event') || source === 'home_designer_section' ? '/contact_us' : '/design-your-event'} className={`${base} ${variants[variant] || variants.primary} ${className}`}>Get Greenville Layout Help</Link>
   }
 
   if (source === 'mobile_home') {

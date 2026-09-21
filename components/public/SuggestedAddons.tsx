@@ -38,9 +38,9 @@ export default function SuggestedAddons({ addons }: { addons: SuggestedAddon[] }
         <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
           <span className="text-xl">✨</span> Frequently Added With This
         </h3>
-        <p className="mt-1 text-sm text-gray-500">Popular add-ons that pair perfectly with this rental</p>
+        <p className="mt-1 text-sm text-gray-500">Optional additions. Review the item and confirm availability for your event date.</p>
       </div>
-      <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(210px,1fr))]">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
         {addons.slice(0, 3).map((addon) => (
           <div
             key={addon.id}
@@ -71,10 +71,10 @@ export default function SuggestedAddons({ addons }: { addons: SuggestedAddon[] }
                 <span className="text-base font-bold text-amber-700">${addon.cost.toFixed(2)}</span>
                 <button
                   type="button"
-                  onClick={() => handleAdd(addon)}
+                  onClick={() => { window.location.assign('/items/' + encodeURIComponent(addon.slug)) }}
                   className="shrink-0 whitespace-nowrap rounded-full bg-amber-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-amber-600 hover:shadow-md"
                 >
-                  + Add
+                  View Add-on
                 </button>
               </div>
             </div>

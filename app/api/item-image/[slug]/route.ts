@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import sharp from 'sharp'
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -13,14 +16,15 @@ function escapeXml(value: string) {
   }[char] || char))
 }
 
-function fallbackImage(name: string, reason: string) {
+async function fallbackImage(name: string, reason: string) {
+  if (/12\s*x\s*12/i.test(name) && /dance floor/i.test(name)) return new NextResponse(await readFile(path.join(process.cwd(),'public/images/sc-12x12-dance-floor.jpg')),{headers:{'Content-Type':'image/jpeg','Cache-Control':'public, max-age=300'}})
   const safeName = escapeXml(name || 'Rental item')
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="${safeName}"><rect width="1200" height="900" fill="#f4f4f5"/><rect x="80" y="80" width="1040" height="740" rx="32" fill="#fff" stroke="#d4d4d8" stroke-width="4"/><text x="600" y="410" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="54" font-weight="700" fill="#18181b">${safeName}</text><text x="600" y="485" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="34" fill="#71717a">Photo coming soon</text></svg>`
 
-  return new NextResponse(svg, {
+  return new NextResponse(await sharp(Buffer.from(svg)).png().toBuffer(), {
     status: 200,
     headers: {
-      'Content-Type': 'image/svg+xml; charset=utf-8',
+      'Content-Type': 'image/png',
       'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
       'X-Content-Type-Options': 'nosniff',
       'X-Image-Fallback': reason,

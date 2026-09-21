@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import CategoryCard from '@/components/public/CategoryCard'
 import HeroSection from '@/components/public/HeroSection'
-import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
+import StorefrontDesigner from '@/components/public/StorefrontDesigner'
 import ComicBookBackground from '@/components/public/ComicBookBackground'
 import YouTubeFacade from '@/components/public/YouTubeFacade'
 import ReviewCarousel from '@/components/public/ReviewCarousel'
@@ -16,26 +16,6 @@ import { CalendarCheck, MousePointerClick, Truck } from 'lucide-react'
 export const revalidate = 60
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['600','700'], style: ['italic','normal'], display: 'swap' })
 
-function EventDesignerHomeSection() {
-  return (
-    <section className="bg-[#0B1F3A] py-14">
-      <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
-        <div>
-          <p className="text-[#EEC400] tracking-[0.3em] text-xs font-bold uppercase mb-3">RentSketch Event Designer</p>
-          <h2 className={`${playfair.className} text-3xl md:text-4xl font-bold text-white mb-4`}>Not Sure What Fits Your Event?</h2>
-          <p className="text-white/80 mb-6 max-w-md">Tell us your guest count and build a starting layout with tents, tables, chairs, dance floor pieces and more. Customize it, switch between 2D and 3D, then send the design to our Greenville team.</p>
-          <div className="flex flex-wrap items-center gap-4">
-            <DesignYourEventCTA source="home_designer_section" label="Design My Event" variant="primary" />
-            <Link href="/design-your-event" className="border-2 border-white text-white hover:bg-white/10 rounded-full px-6 py-3 font-bold inline-flex items-center justify-center">See How It Works</Link>
-          </div>
-        </div>
-        <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-          <img src="/images/design-your-event-3d-preview.png" alt="RentSketch 3D event preview with tent, tables, chairs and dance floor" className="w-full h-auto" />
-        </div>
-      </div>
-    </section>
-  )
-}
 export default async function HomePage() {
   let theme: { storeBackgroundImage: string | null; storeBackgroundTint: string; categoryDisplayStyle: string; categoryCarouselCount: number } | null = null
   try {
@@ -83,10 +63,10 @@ heroForMobile = null
 homeContent = DEFAULT_HOME_CONTENT
 }
 const packagesRaw = await getSyncedWeddingPackages()
-        const packages = packagesRaw.map((p) => ({ ...p, items: Array.isArray(p.items) ? (p.items as string[]) : [], image: p.image || undefined })); let popularItems: any[] = []; try { popularItems = await prisma.item.findMany({ where: { displayToCustomer: true, status: 'Available', category: { slug: { in: ['bounce-house-rentals','tent-rentals','weddings','photobooth-rentals','dance-floor-stage-rentals','foam-party-machine-rentals','inflatable-movie-screen-rentals','yard-game-rentals'] } } }, orderBy: { sortOrder: 'asc' }, take: 10, select: { id: true, name: true, specialDisplayName: true, slug: true, cost: true, picture: true, category: { select: { name: true } } } }) } catch { popularItems = [] }; let bounceItems: any[] = []; try { bounceItems = await prisma.item.findMany({ where: { displayToCustomer: true, status: 'Available', category: { slug: 'bounce-house-rentals' } }, orderBy: { sortOrder: 'asc' }, take: 12, select: { id: true, name: true, specialDisplayName: true, slug: true, cost: true, picture: true, category: { select: { name: true } } } }) } catch { bounceItems = [] }; const mobileCategorySlugs = ['order-by-date', 'tent-rentals','bounce-house-rentals','table-chair-rentals','weddings','linen-rentals','dance-floor-stage-rentals','photobooth-rentals','concession-machine-rentals','yard-game-rentals','event-lighting-rentals','generator-rentals','heater-fan-rentals','party-rental-packages','beverage-food-service','foam-party-machine-rentals','inflatable-movie-screen-rentals','party-rental-accessories','restroom-rentals']; const mobileCategories = mobileCategorySlugs.map((slug) => displayCategories.find((c) => c.slug === slug)).filter((c): c is (typeof PUBLIC_CATEGORIES)[number] => Boolean(c)).map((c) => ({ slug: c.slug, name: c.slug === 'bounce-house-rentals' ? 'Bounce Houses & Water Slides' : c.name.replace(' — Greenville, SC', ''), href: c.href, image: categoryPictures[c.slug] || c.image }))
+        const packages = packagesRaw.map((p) => ({ ...p, items: Array.isArray(p.items) ? (p.items as string[]) : [], image: p.image || undefined })); let popularItems: any[] = []; try { popularItems = await prisma.item.findMany({ where: { displayToCustomer: true, status: 'Available', category: { slug: { in: ['bounce-house-rentals','tent-rentals','weddings','photobooth-rentals','dance-floor-stage-rentals','foam-party-machine-rentals','inflatable-movie-screen-rentals','yard-game-rentals'] } } }, orderBy: { sortOrder: 'asc' }, take: 10, select: { id: true, name: true, specialDisplayName: true, slug: true, cost: true, picture: true, category: { select: { name: true } } } }) } catch { popularItems = [] }; let bounceItems: any[] = []; try { bounceItems = await prisma.item.findMany({ where: { displayToCustomer: true, status: 'Available', category: { slug: 'bounce-house-rentals' } }, orderBy: { sortOrder: 'asc' }, take: 12, select: { id: true, name: true, specialDisplayName: true, slug: true, cost: true, picture: true, category: { select: { name: true } } } }) } catch { bounceItems = [] }; const mobileCategorySlugs = ['order-by-date', 'tent-rentals','bounce-house-rentals','table-chair-rentals','weddings','linen-rentals','dance-floor-stage-rentals','photobooth-rentals','concession-machine-rentals','yard-game-rentals','event-lighting-rentals','generator-rentals','heater-fan-rentals','party-rental-packages','beverage-food-service','foam-party-machine-rentals','inflatable-movie-screen-rentals','party-rental-accessories','restroom-rentals']; const mobileCategories = displayCategories.map((c) => ({ slug: c.slug, name: c.slug === 'bounce-house-rentals' ? 'Bounce Houses & Water Slides' : c.name.replace(' — Greenville, SC', ''), href: c.href, image: categoryPictures[c.slug] || c.image }))
   return (
     <div>
-      <div className="md:hidden"><MobileHome categories={mobileCategories} popularItems={popularItems.map((it: any) => ({ id: it.id, name: it.specialDisplayName || it.name, slug: it.slug, cost: it.cost, picture: it.slug ? `/api/item-image/${it.slug}?v=${IMAGE_CACHE_BUST}` : (it.picture || null), status: null, category: it.category }))} bounceItems={bounceItems.map((it: any) => ({ id: it.id, name: it.specialDisplayName || it.name, slug: it.slug, cost: it.cost, picture: it.slug ? `/api/item-image/${it.slug}?v=${IMAGE_CACHE_BUST}` : (it.picture || null), status: null, category: it.category }))} packages={packages.map((p: any) => ({ id: p.id, name: p.name, price: p.price, guests: p.guests, image: p.image, popular: p.popular, signature: p.signature }))} weddingImage={packages[0]?.image || null} seoSection={<section className="max-w-4xl mx-auto px-4 py-8 space-y-6 text-sm text-body"><p>Friendly Party Rental provides reliable and affordable party rentals in Greenville, SC and surrounding Upstate South Carolina communities.</p><p>Serving Greenville, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, Piedmont, and surrounding Upstate South Carolina areas.</p></section>}  content={homeContent} hero={heroForMobile}/></div><div className="hidden md:block"><HeroSection /></div>
+      <div className="md:hidden"><MobileHome categories={mobileCategories} popularItems={popularItems.map((it: any) => ({ id: it.id, name: it.specialDisplayName || it.name, slug: it.slug, cost: it.cost, picture: it.slug ? `/api/item-image/${it.slug}?v=${IMAGE_CACHE_BUST}` : (it.picture || null), status: null, category: it.category }))} bounceItems={bounceItems.map((it: any) => ({ id: it.id, name: it.specialDisplayName || it.name, slug: it.slug, cost: it.cost, picture: it.slug ? `/api/item-image/${it.slug}?v=${IMAGE_CACHE_BUST}` : (it.picture || null), status: null, category: it.category }))} packages={packages.map((p: any) => ({ id: p.id, name: p.name, price: p.price, guests: p.guests, image: p.image, items: p.items, popular: p.popular, signature: p.signature }))} weddingImage={packages[0]?.image || null} seoSection={<section className="max-w-4xl mx-auto px-4 py-8 space-y-6 text-sm text-body"><p>Friendly Party Rental provides reliable and affordable party rentals in Greenville, SC and surrounding Upstate South Carolina communities.</p><p>Serving Greenville, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, Piedmont, and surrounding Upstate South Carolina areas.</p></section>}  content={homeContent} hero={heroForMobile}/></div><div className="hidden md:block"><HeroSection /></div>
 
       {/* Intro Section */}<div className="hidden md:block">
       <section className="max-w-4xl mx-auto px-4 py-12 text-center">
@@ -159,7 +139,6 @@ style={{ background: 'linear-gradient(135deg, #EEC400, #E07B00, #EEC400)' }}
 </div>
 </ComicBookBackground>
 
-      <EventDesignerHomeSection />
 
       {/* Category Grid */}
       <section
@@ -178,12 +157,13 @@ style={{ background: 'linear-gradient(135deg, #EEC400, #E07B00, #EEC400)' }}
       >
         <h2 className="text-2xl font-bold text-dark mb-8 text-center">Browse Our Rentals</h2>
         <div className={"grid grid-cols-2 md:grid-cols-3 " + (theme?.categoryDisplayStyle === 'minimal-no-gutter' ? 'gap-0' : 'gap-4')}>
-          {          [...PUBLIC_CATEGORIES.slice(0, theme?.categoryCarouselCount || PUBLIC_CATEGORIES.length), ...extraCategories].map((cat) => (
+          {          displayCategories.map((cat) => (
             <CategoryCard key={cat.slug} name={cat.name} href={cat.href} image={categoryPictures[cat.slug] || cat.image} displayStyle={theme?.categoryDisplayStyle} />
           ))}
         </div>
       </section>
 
+      <StorefrontDesigner />
       {/* How It Works */}
       <section className="bg-primary/20 py-12">
         <div className="max-w-4xl mx-auto px-4">
@@ -215,7 +195,7 @@ style={{ background: 'linear-gradient(135deg, #EEC400, #E07B00, #EEC400)' }}
         </div>
         <div>
           <h2 className="text-xl font-bold text-dark mb-3">Tent Rentals in Greenville, SC</h2>
-          <p className="text-body text-sm">We stock pole tents, frame tents, and high-peak tents in sizes ranging from compact 10x10 canopies for graduation parties up to expansive 40x80 tents that can seat 300 or more guests, a popular search for <Link href="/category/tent-rentals" prefetch={false} className="underline">tent rentals near me</Link> across Greenville and the surrounding towns. Every tent is cleaned, inspected, and installed by our experienced crew, and we can add sidewalls, lighting, or flooring based on your event's needs. Our team pulls permits when required and coordinates directly with your venue to keep setup simple.</p>
+          <p className="text-body text-sm">We stock pole tents, frame tents, and high-peak tents in sizes ranging from compact 10x10 canopies for graduation parties larger event tents; seating depends on the layout and the specific tent selected, a popular search for <Link href="/category/tent-rentals" prefetch={false} className="underline">tent rentals near me</Link> across Greenville and the surrounding towns. Every tent is cleaned, inspected, and installed by our experienced crew, and we can add sidewalls, lighting, or flooring based on your event's needs. Confirm venue access, anchoring, setup requirements and any permit responsibilities with our team before booking.</p>
         </div>
         <div>
           <h2 className="text-xl font-bold text-dark mb-3">Table and Chair Rentals</h2>
@@ -232,7 +212,7 @@ style={{ background: 'linear-gradient(135deg, #EEC400, #E07B00, #EEC400)' }}
         <div>
           <h2 className="text-xl font-bold text-dark mb-3">Wedding Rentals in Greenville</h2>
           <p className="text-body text-sm">Planning a wedding in Greenville or elsewhere in Upstate South Carolina? Friendly Party Rental offers everything from intimate backyard ceremonies to large, all-inclusive receptions, including Chiavari chairs, farmhouse cross-back chairs, floor-length linens, arches and arbors, candelabras, charger plates, sweetheart tables, backdrops, greenery walls, uplighting, and welcome signs.</p>
-          <p className="text-body text-sm">Our wedding tents range from 20x40 for smaller ceremonies up to 40x80 for receptions of 300 or more guests, with sidewall, climate control, and lighting options available. Call 864-610-5324 or browse our wedding packages below to start planning delivery and setup for your big day.</p>
+          <p className="text-body text-sm">Our wedding tents range from 20x40 for smaller ceremonies larger reception layouts, with guest capacity confirmed for your chosen tent and floor plan, with sidewall, heater/fan, and lighting options available. Call 864-610-5324 or browse our wedding packages below to start planning delivery and setup for your big day.</p>
         </div>
       </section>
 
@@ -240,7 +220,7 @@ style={{ background: 'linear-gradient(135deg, #EEC400, #E07B00, #EEC400)' }}
       <section className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-2xl font-bold text-dark mb-2 text-center">Wedding Rental Packages</h2>
-          <p className="text-body text-center mb-8">All packages include professional delivery, setup &amp; breakdown. No hidden fees.</p>
+          <p className="text-body text-center mb-8">Review each package’s equipment and included services. Travel fees and tax are separate.</p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {packages.map((pkg, idx) => (
               <WeddingPackageCard
@@ -268,7 +248,7 @@ style={{ background: 'linear-gradient(135deg, #EEC400, #E07B00, #EEC400)' }}
         <h2 className="text-2xl font-bold text-dark mb-6 text-center">Why Choose Friendly Party Rental</h2>
         <div className="space-y-4 text-body">
           <p>
-            Family-owned and serving Upstate South Carolina for over 10 years, we have built our reputation on dependable delivery, clean equipment, fair pricing, and professional setup. We are fully insured and our delivery and setup crews are background-checked, so you can book with confidence.
+            Friendly Party Rental brings its event-rental experience to Greenville and Upstate South Carolina. Our team can help coordinate equipment, delivery, setup and collection for your event.
           </p>
           <p className="font-bold text-dark">
             Serving Greenville, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, Piedmont, and surrounding Upstate South Carolina areas.

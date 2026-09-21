@@ -6,6 +6,8 @@ import { safeJsonLd } from '@/lib/jsonLd'
 import ItemGallery from '@/components/public/ItemGallery'
 import SuggestedAddons from '@/components/public/SuggestedAddons'
 import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
+import { matchesTentLighting } from '@/lib/scAddonMatching'
+import { SC_RENTSKETCH_TENANT } from '@/lib/scRentSketch'
 import { itemDescriptionForSc } from '@/lib/scPublicCopy'
 
 export const dynamic = 'force-dynamic'
@@ -69,7 +71,11 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
   const description = itemDescriptionForSc(item.name, item.description)
   const relatedItems = await prisma.item.findMany({ where: { categoryId: item.categoryId, id: { not: item.id }, displayToCustomer: true }, orderBy: { name: 'asc' }, take: 4 })
   const validRelatedItems = relatedItems.filter((ri) => { const slug = typeof ri.slug === 'string' ? ri.slug.trim() : ''; return slug.length > 0 && slug.toLowerCase() !== 'null' && slug.toLowerCase() !== 'undefined' })
-  const suggestedAddons = item.suggestedAddonIds && item.suggestedAddonIds.length > 0 ? await prisma.item.findMany({ where: { id: { in: item.suggestedAddonIds }, displayToCustomer: true }, select: { id: true, name: true, slug: true, description: true, cost: true, picture: true, quantity: true } }) : []
+  let suggestedAddons = item.suggestedAddonIds && item.suggestedAddonIds.length > 0 ? await prisma.item.findMany({ where: { id: { in: item.suggestedAddonIds }, displayToCustomer: true }, select: { id: true, name: true, slug: true, description: true, cost: true, picture: true, quantity: true } }) : []
+  if (!suggestedAddons.length && item.category.slug === 'tent-rentals') {
+    const lighting=await prisma.item.findMany({where:{displayToCustomer:true,status:'Available',quantity:{gt:0},name:{contains:'Tent Lighting',mode:'insensitive'}},select:{id:true,name:true,slug:true,description:true,cost:true,picture:true,quantity:true},take:100})
+    suggestedAddons=lighting.filter(addon=>matchesTentLighting(item.name,addon.name))
+  }
   const validSuggestedAddons = suggestedAddons.filter((addon) => { const slug = typeof addon.slug === 'string' ? addon.slug.trim() : ''; return slug.length > 0 && slug.toLowerCase() !== 'null' && slug.toLowerCase() !== 'undefined' })
 
   const isStandaloneTent = /\btent\b/i.test(item.name) && /\b\d+\s*(?:x|×)\s*\d+\b/i.test(item.name) && !/(?:side\s*wall|sidewall|package|accessor)/i.test(item.name)
@@ -101,7 +107,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
         <div>
           <h1 className="text-3xl font-bold mb-4 text-gray-900">{item.name}</h1>
           <p className="text-xl font-semibold mb-4 text-gray-900">Starting at ${Number(item.cost).toFixed(2)}<span className="text-sm font-normal text-gray-500">/day</span></p>
-          {isStandaloneTent && (
+          {isStandaloneTent && SC_RENTSKETCH_TENANT && (
             <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
               <p className="font-bold text-emerald-950 mb-1">See this exact tent in RentSketch 3D</p>
               <p className="mb-3 text-sm text-emerald-950/80">Preview the {item.name} by itself, then add tables, chairs, dance floor pieces and other equipment to build your event layout.</p>

@@ -69,6 +69,8 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
     ? navItems.map((item) => ({ name: item.label, href: item.url, hasDropdown: item.url === '/category' }))
     : defaultNavLinks
 
+  if (!navLinks.some(link => link.href === '/design-your-event')) navLinks.splice(Math.min(4,navLinks.length),0,{name:'Design Your Event',href:'/design-your-event',hasDropdown:false})
+
   const cfg = HEADER_CONFIG[headerStyle] || HEADER_CONFIG[1]
 
   const dropdown = (

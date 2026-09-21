@@ -12,7 +12,14 @@ test('email readiness is administrator-only and never exposes or requests passwo
  assert.ok(read('app/admin/settings/page.tsx').includes("'Email Delivery':'/admin/settings/email-delivery'"))
 })
 require('./sc-exact-media.test.cjs')
-
 require('./sc-search.test.cjs')
-
 require('./sc-search-readiness.test.cjs')
+test('indexable wedding hub links all published SC wedding items without duplicated offer promises',()=>{
+ const code=read('app/(public)/weddings/layout.tsx')
+ assert.ok(code.includes("where:{displayToCustomer:true,category:{slug:'weddings',displayToCustomer:true}}"))
+ assert.ok(code.includes('isSearchableSlug(item.slug)'))
+ assert.ok(code.includes('encodeURIComponent(item.slug!)'))
+ assert.ok(code.includes('data-wedding-catalog-links="sc-search-v2"'))
+ assert.ok(!code.includes('take:'));assert.ok(!code.includes('.slice('));assert.ok(!code.includes('dangerouslySetInnerHTML'))
+ assert.ok(!code.includes('cost:'));assert.ok(!code.includes('prisma.item.update'));assert.ok(!code.includes('noindex'))
+})

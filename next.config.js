@@ -20,8 +20,35 @@ const nextConfig = {
     minimumCacheTTL: 60,
   },
   async headers() {
+    const contentSecurityPolicy = [
+      "default-src 'self' https: data: blob:",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+      "style-src 'self' 'unsafe-inline' https:",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data: https:",
+      "connect-src 'self' https: wss:",
+      "frame-src 'self' https:",
+      "media-src 'self' blob: https:",
+      "worker-src 'self' blob:",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self' https://www.friendlypartyrentalsc.com https://friendlypartyrentalsc.com",
+      "frame-ancestors 'self'",
+      "upgrade-insecure-requests",
+    ].join('; ')
+    const globalHeaders = [
+      { key: 'Content-Security-Policy', value: contentSecurityPolicy },
+      { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+      { key: 'X-Content-Type-Options', value: 'nosniff' },
+      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+      { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+      { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
+    ]
     const privatePaths=['/admin/:path*','/driver/:path*','/checkout/:path*','/pay/:path*','/pay-now','/contract/:path*','/schedule/:path*','/unsubscribe','/items']
-    return privatePaths.map(source=>({source,headers:[{key:'X-Robots-Tag',value:'noindex, follow'}]}))
+    return [
+      { source: '/:path*', headers: globalHeaders },
+      ...privatePaths.map(source=>({source,headers:[{key:'X-Robots-Tag',value:'noindex, follow'}]})),
+    ]
   },
   async redirects() {
     // Both hosts have existing origin-scoped carts. Do not force a host change

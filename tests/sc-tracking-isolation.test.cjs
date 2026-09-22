@@ -277,3 +277,35 @@ test('SC public pay page renders the recorded state instead of a hardcoded NY st
   assert.match(pay,/order\.eventState \|\| 'SC'/)
   assert.doesNotMatch(pay,/\{order\.eventCity\} NY/)
 })
+
+
+test('SC Popular Rentals has one booking-history source of truth for live home and Website Builder', () => {
+  const engine = fs.readFileSync(path.join(root,'lib/homepageMerchandising.ts'),'utf8')
+  const page = fs.readFileSync(path.join(root,'app/(public)/page.tsx'),'utf8')
+  const admin = fs.readFileSync(path.join(root,'app/api/admin/website/home/data/route.ts'),'utf8')
+  const mobile = fs.readFileSync(path.join(root,'components/public/MobileHome.tsx'),'utf8')
+  assert.match(engine,/distinct qualifying SC bookings|Rank by distinct qualifying SC bookings/)
+  assert.match(engine,/status:\{notIn:\['canceled','cancelled','quote','draft','incomplete'\]\}/)
+  assert.match(engine,/count>=2/)
+  assert.match(engine,/type:'Regular'/)
+  assert.match(engine,/NON_FEATURED_NAME/)
+  assert.match(page,/getHomepagePopularItems\(8\)/)
+  assert.match(admin,/getHomepagePopularItems\(8\)/)
+  assert.doesNotMatch(page,/popularItems = await prisma\.item\.findMany/)
+  assert.doesNotMatch(admin,/popularItemsRaw = await prisma\.item\.findMany/)
+  assert.match(mobile,/data-home-section="popular"/)
+  assert.match(mobile,/data-home-section="bounce"/)
+  assert.match(mobile,/popularItems\.map\(product\)/)
+})
+
+test('SC Popular Rentals candidate filter rejects add-ons and non-products', () => {
+  const mod = load('lib/homepageMerchandising.ts', {
+    '@/lib/prisma': { prisma:{} },
+    '@/lib/imageVersion': { IMAGE_CACHE_BUST:'test' },
+  })
+  const valid={name:'20x20 Pole Tent',specialDisplayName:null,slug:'20x20-pole-tent'}
+  assert.equal(mod.isHomepageFeatureCandidate(valid),true)
+  for(const name of ['Photo Booth Print Upgrade','Extra Hour','Simple Centerpiece','55','Laptop Rental']){
+    assert.equal(mod.isHomepageFeatureCandidate({...valid,name,slug:name.toLowerCase().replace(/ /g,'-')}),false)
+  }
+})

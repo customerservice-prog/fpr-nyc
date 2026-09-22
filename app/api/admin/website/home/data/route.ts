@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma'
 import { PUBLIC_CATEGORIES } from '@/lib/utils'
 import { getSyncedWeddingPackages } from '@/lib/wedding-packages'
 import { IMAGE_CACHE_BUST } from '@/lib/imageVersion'
+import { getHomepagePopularItems } from '@/lib/homepageMerchandising'
 
 // GET: return the real, current business data needed to render the actual
 // Home page inside the editor canvas (categories, popular items, bounce
@@ -38,9 +39,7 @@ export async function GET() {
     .map((c) => ({ slug: c.slug, name: c.slug === 'bounce-house-rentals' ? 'Bounce Houses & Water Slides' : c.name.replace(' — Greenville, SC', ''), href: c.href, image: categoryPictures[c.slug] || c.image }))
 
   let popularItemsRaw: any[] = []
-  try {
-    popularItemsRaw = await prisma.item.findMany({ where: { displayToCustomer: true, status: 'Available', category: { slug: { in: ['bounce-house-rentals','tent-rentals','weddings','photobooth-rentals','dance-floor-stage-rentals','foam-party-machine-rentals','inflatable-movie-screen-rentals','yard-game-rentals'] } } }, orderBy: { sortOrder: 'asc' }, take: 10, select: { id: true, name: true, specialDisplayName: true, slug: true, cost: true, picture: true, category: { select: { name: true } } } })
-  } catch { popularItemsRaw = [] }
+  try { popularItemsRaw = await getHomepagePopularItems(8) } catch { popularItemsRaw = [] }
 
   let bounceItemsRaw: any[] = []
   try {

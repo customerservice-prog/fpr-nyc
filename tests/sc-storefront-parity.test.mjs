@@ -14,3 +14,17 @@ test('gallery and shared reviews retain geographic attribution',()=>{assert.matc
 test('SC price stays inventory-owned while canonical package artwork matches NY without cropping',()=>{const packages=text('lib/wedding-packages.ts'),card=text('components/public/WeddingPackageCard.tsx'),detail=text('app/(public)/wedding-packages/page.tsx');assert.match(packages,/price: liveCost !== undefined && liveCost !== null \? liveCost : p.price/);assert.match(packages,/SC_WEDDING_IMAGES\[p.id\]/);assert.match(card,/object-contain bg-gray-50/);assert.doesNotMatch(card,/illustrative event setting|included equipment and price below define this Greenville package/);assert.match(detail,/w-full h-auto object-contain bg-gray-50/);assert.doesNotMatch(detail,/max-h-\[520px\] object-cover/)})
 test('existing delivery/payment protections remain present',()=>{assert.match(text('app/api/orders/route.ts'),/requireMatchingDeliveryFee\(deliveryFee, deliveryQuote\)/);assert.match(text('app/(public)/checkout/payment/page.tsx'),/if \(!totalsReady\)/);assert.match(text('lib/delivery-session.ts'),/migrateDeliveryOnlySession/)})
 test('local category and video assets exist',()=>{assert.ok(existsSync('public/images/categories/restroom-rentals.jpg'));assert.ok(existsSync('public/images/sc-12x12-dance-floor.jpg'));assert.ok(existsSync('public/videos/event-design-walkthrough-v2.mp4'))})
+
+test('homepage uses one responsive shell with the newer dedicated desktop composition',()=>{
+ const page=text('app/(public)/page.tsx'),responsive=text('components/public/ResponsiveHome.tsx'),desktop=text('components/public/DesktopHome.tsx'),mobile=text('components/public/MobileHome.tsx')
+ assert.match(page,/ResponsiveHome/)
+ assert.doesNotMatch(page,/md:hidden|hidden md:block|PlanningShortcuts|WeddingPackageCard/)
+ assert.match(page,/initialHomeDevice/)
+ assert.match(responsive,/window\.matchMedia\('\(min-width: 768px\)'\)/)
+ assert.match(responsive,/DesktopHome/)
+ assert.match(desktop,/Greenville/)
+ assert.match(desktop,/HomeCategoryGrid/)
+ assert.match(desktop,/StorefrontDesigner/)
+ assert.match(desktop,/WeddingPackageCard/)
+ assert.match(mobile,/export interface MobileHomeProps/)
+})

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { SC_RENTSKETCH_TENANT } from '@/lib/scRentSketch'
 
 export type DesignYourEventSource = string
@@ -23,6 +24,16 @@ export default function DesignYourEventCTA({
   tent,
   tentSlug,
 }: DesignYourEventCTAProps) {
+  const [tentPhotoOpen, setTentPhotoOpen] = useState(false)
+  useEffect(() => {
+    if (!tentPhotoOpen) return
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setTentPhotoOpen(false) }
+    document.addEventListener('keydown', onKey)
+    const old = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = old }
+  }, [tentPhotoOpen])
+
   const base = 'inline-flex items-center justify-center rounded-full font-semibold px-6 py-3 transition-colors text-center'
   const variants: Record<string, string> = {
     primary: 'btn-primary',
@@ -35,6 +46,23 @@ export default function DesignYourEventCTA({
     window.dispatchEvent(new CustomEvent('open-design-your-event', {
       detail: { source, ...(tent ? { tent } : {}), ...(tentSlug ? { tentSlug } : {}) },
     }))
+  }
+
+  if (tent || tentSlug) {
+    const slug = tentSlug || ''
+    const image = slug ? '/api/item-image/' + encodeURIComponent(slug) : ''
+    return <>
+      <button type="button" onClick={() => setTentPhotoOpen(true)} className={`${base} ${variants[variant] || variants.primary} ${className}`}>
+        {label.replace(/3D|layout/gi, 'Tent').replace(/\s+/g, ' ').trim()}
+      </button>
+      {tentPhotoOpen && <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-label={(tent || 'Tent') + ' photo'} onClick={() => setTentPhotoOpen(false)}>
+        <div className="w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={event => event.stopPropagation()}>
+          <div className="flex items-center justify-between border-b px-5 py-4"><div><p className="text-xs font-bold uppercase tracking-[.16em] text-gray-500">Rental tent photo</p><h2 className="mt-1 text-xl font-bold text-gray-900">{tent || 'Tent preview'}</h2></div><button type="button" onClick={() => setTentPhotoOpen(false)} aria-label="Close tent photo" className="rounded-full px-3 py-2 text-2xl leading-none text-gray-500 hover:bg-gray-100">×</button></div>
+          <div className="bg-slate-50 p-4 sm:p-6">{image ? <img src={image} alt={(tent || 'Tent') + ' rental photo'} className="mx-auto max-h-[70vh] w-full object-contain" /> : <p className="py-12 text-center text-gray-600">Open the tent listing to view its rental photo.</p>}</div>
+          <div className="flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-gray-600">This shows the tent itself. Event layouts are available separately in Design Your Event.</p><button type="button" onClick={() => setTentPhotoOpen(false)} className="rounded-lg bg-[#0B1F3A] px-5 py-2.5 text-sm font-bold text-white">Done</button></div>
+        </div>
+      </div>}
+    </>
   }
 
   if (!SC_RENTSKETCH_TENANT) {

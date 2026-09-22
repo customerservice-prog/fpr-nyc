@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Call pre-rental reminder endpoint
-        run: curl -f -X GET https://friendlypartyrentalsc.com/api/cron/pre-rental-reminder
+        run: |\n          curl -f -X GET https://www.friendlypartyrentalsc.com/api/cron/pre-rental-reminder -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Call thank you endpoint
-        run: curl -f -X GET https://friendlypartyrentalsc.com/api/cron/thank-you
+        run: |\n          curl -f -X GET https://www.friendlypartyrentalsc.com/api/cron/thank-you -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

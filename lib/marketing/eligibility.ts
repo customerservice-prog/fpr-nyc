@@ -1,4 +1,6 @@
 import { prisma } from '@/lib/prisma'
+import { getDeliverySuppressedEmails } from '@/lib/marketing/suppression'
+import { normalizeAddress, normalizeEmail as normalizeRestrictionEmail, normalizePhone } from '@/lib/rentalRestrictions'
 
 // Central place that decides whether a contact is allowed to receive a
 // MARKETING (non-transactional) email. Transactional email (receipts,
@@ -13,7 +15,7 @@ import { prisma } from '@/lib/prisma'
 const TEST_RECORD_PATTERNS: RegExp[] = [/@example\.com$/i, /\bqa[\s._-]?/i, /\btest\b/i]
 
 export function normalizeEmail(email: string): string {
-    return (email || '').trim().toLowerCase()
+    return normalizeRestrictionEmail(email) || ''
 }
 
 export function isValidEmailFormat(email: string): boolean {
@@ -32,17 +34,17 @@ export function isTestRecord(
 
 /**
  * Normalized emails that must NEVER receive a marketing send right now:
- * explicit unsubscribe, an active RentalRestriction (matched by EMAIL or
- * CUSTOMER_ID identifier), or the legacy Customer.doNotRent flag.
+ * explicit unsubscribe, an unexpired active RentalRestriction (matched by
+ * customer, email, phone, or address), the legacy Customer.doNotRent flag, or a recorded
+ * bounce, complaint, uncertain delivery, or manual marketing hold.
  *
- * Does NOT apply per-campaign frequency caps or one-off exclusions - those
- * don't exist yet (see MARKETING_AUDIT.md Section T) and are the caller's
- * responsibility once built.
+ * Per-campaign frequency caps and one-off exclusions remain the caller's
+ * responsibility.
  */
-export async function getSuppressedEmails(): Promise<Set<string>> {
+export async function getSuppressedEmails(now = new Date()): Promise<Set<string>> {
     const suppressed = new Set<string>()
 
-  const [unsubscribed, doNotRentCustomers, activeRestrictions] = await Promise.all([
+  const [unsubscribed, doNotRentCustomers, activeRestrictions, deliverySuppressed] = await Promise.all([
         prisma.customer.findMany({
                 where: { unsubscribedFromMarketing: true },
                 select: { email: true },
@@ -52,34 +54,93 @@ export async function getSuppressedEmails(): Promise<Set<string>> {
                 select: { email: true },
         }),
         prisma.rentalRestriction.findMany({
-                where: { status: 'ACTIVE' },
+                where: { status: 'ACTIVE', OR: [{ expiresAt: null }, { expiresAt: { gt: now } }] },
                 include: { identifiers: true },
         }),
+        getDeliverySuppressedEmails(),
       ])
 
   unsubscribed.forEach((c) => suppressed.add(normalizeEmail(c.email)))
+    deliverySuppressed.forEach(email => suppressed.add(email))
     doNotRentCustomers.forEach((c) => suppressed.add(normalizeEmail(c.email)))
 
   const restrictedCustomerIds = new Set<string>()
+    const restrictedEmails = new Set<string>()
+    const restrictedPhones = new Set<string>()
+    const restrictedAddresses = new Set<string>()
     for (const restriction of activeRestrictions) {
           for (const identifier of restriction.identifiers) {
                   if (identifier.type === 'EMAIL') {
-                            suppressed.add(normalizeEmail(identifier.normalizedValue))
+                            const email = normalizeRestrictionEmail(identifier.normalizedValue)
+                            if (email) {
+                                  suppressed.add(email)
+                                  restrictedEmails.add(email)
+                            }
                   }
                   if (identifier.type === 'CUSTOMER_ID' && identifier.customerIdRef) {
                             restrictedCustomerIds.add(identifier.customerIdRef)
                   }
+                  if (identifier.type === 'PHONE') {
+                            const phone = normalizePhone(identifier.normalizedValue)
+                            if (phone) restrictedPhones.add(phone)
+                  }
+                  if (identifier.type === 'ADDRESS' && identifier.normalizedValue) {
+                            restrictedAddresses.add(identifier.normalizedValue)
+                  }
           }
     }
 
-  if (restrictedCustomerIds.size > 0) {
-        const restrictedCustomers = await prisma.customer.findMany({
-                where: { id: { in: Array.from(restrictedCustomerIds) } },
-                select: { email: true },
-        })
-        restrictedCustomers.forEach((c) => suppressed.add(normalizeEmail(c.email)))
+  const matchContactDetails = restrictedEmails.size > 0 || restrictedPhones.size > 0 || restrictedAddresses.size > 0
+  if (!matchContactDetails) {
+        if (restrictedCustomerIds.size > 0) {
+              const customers = await prisma.customer.findMany({
+                    where: { id: { in: Array.from(restrictedCustomerIds) } },
+                    select: { email: true },
+              })
+              customers.forEach(customer => suppressed.add(normalizeEmail(customer.email)))
+        }
+        return suppressed
   }
 
+    // Imported contact fields are not stored in canonical form. Read the
+    // required fields in a single batch, then use the same exact normalized
+    // matching as checkout. Per-customer restriction queries would turn a
+    // marketing audience check into thousands of database calls.
+    const customers = await prisma.customer.findMany({
+            select: {
+                  id: true, email: true, secondaryEmail: true,
+                  phone: true, secondaryPhone: true,
+                  address: true, city: true, state: true, zip: true,
+                  orders: {
+                        select: {
+                              eventAddress: true, eventCity: true, eventState: true, eventZip: true,
+                              contacts: { select: { email: true, phone: true } },
+                        },
+                  },
+            },
+    })
+    const matchesEmail = (email: string | null) => {
+          const normalized = normalizeRestrictionEmail(email)
+          return !!normalized && restrictedEmails.has(normalized)
+    }
+    const matchesPhone = (phone: string | null) => {
+          const normalized = normalizePhone(phone)
+          return !!normalized && restrictedPhones.has(normalized)
+    }
+    const matchesAddress = (street1: string | null, city: string | null, state: string | null, zip: string | null) => {
+          const address = normalizeAddress({ street1, city, state, zip })
+          return !!address && (restrictedAddresses.has(address.propertyKey) || restrictedAddresses.has(address.unitKey))
+    }
+    for (const customer of customers) {
+          const matched = restrictedCustomerIds.has(customer.id)
+                || matchesEmail(customer.email) || matchesEmail(customer.secondaryEmail)
+                || matchesPhone(customer.phone) || matchesPhone(customer.secondaryPhone)
+                || matchesAddress(customer.address, customer.city, customer.state, customer.zip)
+                || (customer.orders || []).some(order =>
+                      matchesAddress(order.eventAddress, order.eventCity, order.eventState, order.eventZip)
+                      || order.contacts.some(contact => matchesEmail(contact.email) || matchesPhone(contact.phone)))
+          if (matched) suppressed.add(normalizeEmail(customer.email))
+    }
   return suppressed
 }
 

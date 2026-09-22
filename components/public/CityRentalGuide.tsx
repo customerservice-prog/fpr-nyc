@@ -5,7 +5,7 @@ import {SC_LOCAL_PLANNING} from '@/lib/scLocalPlanningResources'
 import {scPageMetadata,scBreadcrumbs,scUrl,SC_BUSINESS_ID} from '@/lib/scSeo'
 import {safeJsonLd} from '@/lib/jsonLd'
 const rentals=[['Tent rentals','/category/tent-rentals'],['Tables and chairs','/category/table-chair-rentals'],['Bounce houses and inflatables','/category/bounce-house-rentals'],['Linens and tablecloths','/category/linen-rentals'],['Dance floors and stages','/category/dance-floor-stage-rentals'],['Wedding rentals','/weddings']]
-export function cityRentalMetadata(slug:string){const area=SC_SERVICE_AREAS.find(a=>a.slug===slug);if(!area)return {robots:{index:false,follow:true}};return scPageMetadata(area.href,`Party Rentals in ${area.name}, SC`,`Rent tents, tables, chairs and event equipment for ${area.name}, SC. Check event-date availability and delivery with Friendly Party Rental's Greenville team.`)}
+export function cityRentalMetadata(slug:string){const area=SC_SERVICE_AREAS.find(a=>a.slug===slug);if(!area)return {robots:{index:false,follow:true}};return scPageMetadata(area.href,`Party Rentals in ${area.name}, SC`,`Rent tents, tables, chairs and event equipment for ${area.name}, SC. Check event-date availability and delivery with the Friendly Party Rental SC Greenville team.`)}
 export default function CityRentalGuide({slug}:{slug:string}){
  const area=SC_SERVICE_AREAS.find(a=>a.slug===slug);if(!area)notFound();const resource=SC_LOCAL_PLANNING[slug]
  const schema={'@context':'https://schema.org','@type':'Service','@id':scUrl(area.href)+'#rentals',name:`Party rental delivery to ${area.name}, SC`,serviceType:'Party and event equipment rentals',url:scUrl(area.href),provider:{'@id':SC_BUSINESS_ID},areaServed:{'@type':'Place',name:area.name+', South Carolina'}}

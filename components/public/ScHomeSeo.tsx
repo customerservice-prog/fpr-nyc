@@ -20,7 +20,7 @@ export default function ScHomeSeo() {
     </div>
     <div>
       <h2 className="text-xl font-bold text-dark mb-3">Greenville &amp; Upstate South Carolina Delivery</h2>
-      <p className="text-body text-sm">Friendly Party Rental serves Greenville and nearby Upstate communities including Greer, Simpsonville, Mauldin, Taylors, Easley, Travelers Rest, Fountain Inn, Piedmont, Spartanburg, Anderson, and surrounding areas. Travel fees are separate from rental and package prices. <Link href="/service-area" prefetch={false} className="underline">Review the service area and delivery estimator</Link>, or call <a href="tel:8646105324" className="underline">864-610-5324</a> for help planning your order.</p>
+      <p className="text-body text-sm">Friendly Party Rental SC serves Greenville and nearby Upstate communities including Greer, Simpsonville, Mauldin, Taylors, Easley, Travelers Rest, Fountain Inn, Piedmont, Spartanburg, Anderson, and surrounding areas. Travel fees are separate from rental and package prices. <Link href="/service-area" prefetch={false} className="underline">Review the service area and delivery estimator</Link>, or call <a href="tel:8646105324" className="underline">864-610-5324</a> for help planning your order.</p>
     </div>
   </div>
 }

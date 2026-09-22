@@ -13,8 +13,8 @@ export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string 
     return (
       <footer className="bg-gray-100 text-gray-700 pt-8 pb-24 mt-12 text-center">
         <div className="max-w-7xl mx-auto px-4 space-y-2">
-          <Image src={LOGO_URL} alt={BUSINESS.legalName} width={140} height={70} className="mx-auto" />
-          <p className="font-bold text-base">{BUSINESS.legalName}</p>
+          <Image src={LOGO_URL} alt={BUSINESS.name} width={140} height={70} className="mx-auto" />
+          <p className="font-bold text-base">{BUSINESS.name}</p>
           <p>{BUSINESS.address}</p>
           <p className="break-words">{BUSINESS.phone} | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
           <p className="text-gray-500 text-sm pt-2">
@@ -29,8 +29,8 @@ export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string 
     return (
       <footer className="bg-gray-100 text-gray-700 pt-8 pb-24 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center text-sm space-y-2">
-          <Image src={LOGO_URL} alt={BUSINESS.legalName} width={120} height={60} className="mx-auto mb-1" />
-          <p className="font-bold text-base">{BUSINESS.legalName}</p>
+          <Image src={LOGO_URL} alt={BUSINESS.name} width={120} height={60} className="mx-auto mb-1" />
+          <p className="font-bold text-base">{BUSINESS.name}</p>
           <p>{BUSINESS.address}</p>
           <p className="break-words">{BUSINESS.phone} | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
           <p>Serving {BUSINESS.serviceArea}</p>
@@ -56,7 +56,7 @@ export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string 
   return (
     <footer className="bg-[#1a1a1a] text-white pt-8 pb-24 mt-12">
       <div className="max-w-7xl mx-auto px-4 text-center text-sm space-y-2">
-        <p className="font-bold text-base">{BUSINESS.legalName}</p>
+        <p className="font-bold text-base">{BUSINESS.name}</p>
         <p>{BUSINESS.address}</p>
         <p className="break-words">{BUSINESS.phone} | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
         <p>Serving {BUSINESS.serviceArea}</p>

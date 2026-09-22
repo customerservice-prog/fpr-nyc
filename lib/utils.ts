@@ -71,7 +71,7 @@ export function parseAmount(value: string | number): number {
 }
 
 export const BUSINESS = {
-  name: 'Friendly Party Rental',
+  name: 'Friendly Party Rental SC',
   legalName: 'Friendly Party Rental L.L.C.',
   phone: '864-610-5324',
   text: '864-610-5324',

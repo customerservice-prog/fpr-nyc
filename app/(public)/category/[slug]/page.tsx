@@ -84,7 +84,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
 
   const introText = categoryDescriptionForSc(
     categoryLabel,
-    category.description || `${categoryLabel} from Friendly Party Rental serve Greenville, SC and surrounding Upstate South Carolina communities. Browse the current inventory below, check your event date, and contact our team if you need help choosing the right setup.`
+    category.description || `${categoryLabel} from Friendly Party Rental SC serve Greenville, SC and surrounding Upstate South Carolina communities. Browse the current inventory below, check your event date, and contact our team if you need help choosing the right setup.`
   )
 
   const introEl = createElement('p', { className: 'text-gray-700 mb-10 leading-relaxed' }, introText)

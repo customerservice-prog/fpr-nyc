@@ -70,7 +70,7 @@ test('SC entity schema exposes the real service catalog without fabricating a st
 
 test('ranking wave strengthens existing authority URLs instead of adding doorway keyword routes',()=>{
   const seo=read('lib/scSeo.ts')
-  assert.ok(seo.includes("SC_SEARCH_REVISION = '2026-09-22-sc-search-v2'"))
+  assert.ok(seo.includes("SC_SEARCH_REVISION = '2026-09-22-sc-search-v3'"))
   for(const bad of [
     '/tent-rentals-greenville-sc',
     '/table-chair-rentals-greenville-sc',

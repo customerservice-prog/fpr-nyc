@@ -17,13 +17,14 @@ const roboto = Roboto({
 
 const SITE_URL = 'https://www.friendlypartyrentalsc.com'
 const SITE_DESCRIPTION =
-  'Friendly Party Rental is your local Carolina party rental company providing reliable and affordable party rentals in Greenville, SC and surrounding Upstate South Carolina communities. Tent, bounce house, table and chair rentals with fast online booking.'
+  'Friendly Party Rental SC provides party and event rentals in Greenville, SC and surrounding Upstate South Carolina communities, including tents, tables, chairs, inflatables, weddings and event equipment.'
 
 const LOCAL_BUSINESS_JSONLD = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
   '@id': 'https://www.friendlypartyrentalsc.com/#business',
-  name: 'Friendly Party Rental',
+  name: 'Friendly Party Rental SC',
+  legalName: 'Friendly Party Rental L.L.C.',
   description: SITE_DESCRIPTION,
   image: `${SITE_URL}/images/logo.png`,
   telephone: '+1-864-610-5324',
@@ -62,14 +63,14 @@ const WEBSITE_JSONLD = {
   '@type': 'WebSite',
   '@id': SITE_URL + '/#website',
   url: SITE_URL,
-  name: 'Friendly Party Rental - Greenville, SC',
+  name: 'Friendly Party Rental SC',
   description: SITE_DESCRIPTION,
   publisher: { '@id': SITE_URL + '/#business' },
 }
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  applicationName: 'Friendly Party Rental - South Carolina',
+  applicationName: 'Friendly Party Rental SC',
   manifest: '/site.webmanifest',
   icons: {
     icon: [
@@ -82,11 +83,12 @@ export const metadata: Metadata = {
     apple: [{ url: '/apple-touch-icon.png?v=sc-20260921', sizes: '180x180', type: 'image/png' }],
   },
   title: {
-    default: 'Friendly Party Rental | Carolina Party Rentals in Greenville, SC',
-    template: '%s | Friendly Party Rental',
+    default: 'Friendly Party Rental SC | Party Rentals in Greenville, SC',
+    template: '%s | Friendly Party Rental SC',
   },
   description: SITE_DESCRIPTION,
   keywords: [
+    'Friendly Party Rental SC',
     'party rentals Greenville SC',
     'Carolina party rental',
     'tent rentals Greenville',
@@ -95,12 +97,12 @@ export const metadata: Metadata = {
     'wedding rentals Greenville SC',
   ],
   openGraph: {
-    title: 'Friendly Party Rental | Carolina Party Rentals in Greenville, SC',
+    title: 'Friendly Party Rental SC | Party Rentals in Greenville, SC',
     description: SITE_DESCRIPTION,
-    siteName: 'Friendly Party Rental',
+    siteName: 'Friendly Party Rental SC',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: `${SITE_URL}/images/logo.png`, width: 1731, height: 909, alt: 'Friendly Party Rental' }],
+    images: [{ url: `${SITE_URL}/images/logo.png`, width: 1731, height: 909, alt: 'Friendly Party Rental SC' }],
   },
   robots: {
     index: true,

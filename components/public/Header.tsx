@@ -84,14 +84,14 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
       </li>)}
     </ul>
   }
-  const logo = <Link href="/" prefetch={false}><Image src={LOGO_URL} alt="Friendly Party Rental" width={cfg.logoLarge ? 340 : 280} height={cfg.logoLarge ? 227 : 187} className={cfg.grayscale ? 'grayscale' : ''}/></Link>
+  const logo = <Link href="/" prefetch={false}><Image src={LOGO_URL} alt={BUSINESS.name} width={cfg.logoLarge ? 340 : 280} height={cfg.logoLarge ? 227 : 187} className={cfg.grayscale ? 'grayscale' : ''}/></Link>
   if (cfg.mode === 'cover') {
     const fgClass = cfg.coverFg === 'black' ? 'text-dark' : 'text-white'
-    return <header className="w-full bg-gradient-to-r from-secondary via-primary to-secondary"><div className="max-w-7xl mx-auto px-4 py-6 flex flex-col items-center gap-3"><Link href="/" prefetch={false}><Image src={LOGO_URL} alt="Friendly Party Rental" width={220} height={147}/></Link>{renderNav(fgClass, 'justify-center')}</div></header>
+    return <header className="w-full bg-gradient-to-r from-secondary via-primary to-secondary"><div className="max-w-7xl mx-auto px-4 py-6 flex flex-col items-center gap-3"><Link href="/" prefetch={false}><Image src={LOGO_URL} alt={BUSINESS.name} width={220} height={147}/></Link>{renderNav(fgClass, 'justify-center')}</div></header>
   }
   if (cfg.mode === 'inline') {
     const textCls = cfg.textColor === 'black' ? 'text-dark' : 'text-white'
-    const logoEl = <Link href="/" prefetch={false}><Image src={LOGO_URL} alt="Friendly Party Rental" width={160} height={107}/></Link>
+    const logoEl = <Link href="/" prefetch={false}><Image src={LOGO_URL} alt={BUSINESS.name} width={160} height={107}/></Link>
     const navEl = renderNav(textCls, 'justify-start lg:justify-end')
     return <header className="w-full bg-gradient-to-r from-secondary to-primary"><div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-4">{cfg.logoSide === 'right' ? <>{navEl}{logoEl}</> : <>{logoEl}{navEl}</>}</div></header>
   }

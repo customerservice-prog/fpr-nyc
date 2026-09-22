@@ -12,7 +12,7 @@ export default function PlanningPage({ service }: { service?: Service }) {
   const title = service?.title || 'Event Planning & Coordination in Greenville, SC'
   const path = '/event-planning' + (service ? '/' + service.slug : '')
   const image = service?.image || '/images/event-planning/tent-patio-setup/image.png'
-  const schema = { '@context': 'https://schema.org', '@type': 'Service', name: title, serviceType: service?.label || 'Event planning and coordination', url: PLANNING_ORIGIN + path, areaServed: { '@type': 'City', name: 'Greenville' }, provider: { '@type': 'Organization', name: 'Friendly Party Rental', url: PLANNING_ORIGIN, telephone: '+1-864-610-5324' } }
+  const schema = { '@context': 'https://schema.org', '@type': 'Service', name: title, serviceType: service?.label || 'Event planning and coordination', url: PLANNING_ORIGIN + path, areaServed: { '@type': 'City', name: 'Greenville' }, provider: { '@type': 'Organization', name: 'Friendly Party Rental SC', url: PLANNING_ORIGIN, telephone: '+1-864-610-5324' } }
   return <div className="bg-slate-50 pb-20 md:pb-0" data-planning-page>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }}/>
     <section className="overflow-hidden bg-blue-950 text-white">

@@ -55,6 +55,12 @@ const nextConfig = {
     // without migrating those sessions. Public metadata and the sitemap agree
     // on www as Google's preferred URL; alias redirects stay within the origin.
     return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'friendly-party-rental-greenville-sc-production.up.railway.app' }],
+        destination: 'https://www.friendlypartyrentalsc.com/:path*',
+        permanent: true,
+      },
       { source: '/index.html', destination: '/', permanent: true },
       { source: '/home', destination: '/', permanent: true },
       { source: '/view_gallery', destination: '/gallery', permanent: true },

@@ -167,7 +167,7 @@ export default async function WeddingsPage() {
         <div className="max-w-4xl mx-auto space-y-14 mb-16">
           <div>
             <h2 className={`${playfair.className} text-2xl font-bold text-dark mb-4 text-center`}>Full Wedding Rental Services</h2>
-            <p className="text-body mb-4">Friendly Party Rental provides wedding rentals throughout Greenville and Upstate South Carolina. Mix individual pieces or start with one of our packages, then customize the tent, seating, linens, lighting, ceremony décor and reception equipment around your venue and guest count. We also offer <Link href="/event-planning" className="text-secondary underline font-semibold">full-service event planning</Link> when you want help coordinating the full setup.</p>
+            <p className="text-body mb-4">Friendly Party Rental SC provides wedding rentals throughout Greenville and Upstate South Carolina. Mix individual pieces or start with one of our packages, then customize the tent, seating, linens, lighting, ceremony décor and reception equipment around your venue and guest count. We also offer <Link href="/event-planning" className="text-secondary underline font-semibold">full-service event planning</Link> when you want help coordinating the full setup.</p>
           </div>
 
           <div>

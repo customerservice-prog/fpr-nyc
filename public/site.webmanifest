@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Friendly Party Rental - South Carolina",
+  "name": "Friendly Party Rental SC",
   "short_name": "FPR SC",
-  "description": "Party rentals in Greenville and Upstate South Carolina.",
+  "description": "Party and event rentals in Greenville and Upstate South Carolina.",
   "start_url": "/",
   "scope": "/",
   "display": "browser",

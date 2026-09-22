@@ -858,7 +858,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
           {category?.name || slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} Delivered Throughout Greenville, SC
         </h2>
         <p className="mb-3">
-          Friendly Party Rental proudly supplies {(category?.name || 'rentals').toLowerCase()} for birthdays, graduations,
+          Friendly Party Rental SC proudly supplies {(category?.name || 'rentals').toLowerCase()} for birthdays, graduations,
           weddings, corporate events, and backyard parties across Greenville, SC and the surrounding Upstate South Carolina
           communities. Whether you are planning a small backyard gathering or a large wedding reception, our team
           delivers, sets up, and picks up your rental so you can focus on your event.

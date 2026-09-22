@@ -3,7 +3,7 @@ import Accordion from '@/components/public/Accordion'
 import type { Metadata } from 'next'
 import { safeJsonLd } from '@/lib/jsonLd'
 
-export const metadata = scPageMetadata("/frequently_asked_questions","Party Rental Questions \u2014 Greenville, SC","Find answers about Greenville party rentals, booking, delivery, setup and event preparation. Contact Friendly Party Rental for help with your order.")
+export const metadata = scPageMetadata("/frequently_asked_questions","Party Rental Questions \u2014 Greenville, SC","Find answers about Greenville party rentals, booking, delivery, setup and event preparation. Contact Friendly Party Rental SC for help with your order.")
 
 const faqSections = [
   {

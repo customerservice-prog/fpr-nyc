@@ -10,4 +10,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Call one year reminder endpoint
-        run: |\n          curl -f -X GET https://www.friendlypartyrentalsc.com/api/cron/one-year-reminder -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+        run: |
+          curl -f -X GET https://www.friendlypartyrentalsc.com/api/cron/one-year-reminder -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

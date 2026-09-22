@@ -7,9 +7,7 @@ import LocalDeliveryLinks from '@/components/public/LocalDeliveryLinks'
 import { safeJsonLd } from '@/lib/jsonLd'
 import ItemGallery from '@/components/public/ItemGallery'
 import SuggestedAddons from '@/components/public/SuggestedAddons'
-import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 import { matchesTentLighting } from '@/lib/scAddonMatching'
-import { SC_RENTSKETCH_TENANT } from '@/lib/scRentSketch'
 import { itemDescriptionForSc } from '@/lib/scPublicCopy'
 
 export const dynamic = 'force-dynamic'
@@ -111,12 +109,23 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
         <div>
           <h1 className="text-3xl font-bold mb-4 text-gray-900">{item.name}</h1>
           <p className="text-xl font-semibold mb-4 text-gray-900">Starting at ${Number(item.cost).toFixed(2)}<span className="text-sm font-normal text-gray-500">/day</span></p>
-          {isStandaloneTent && SC_RENTSKETCH_TENANT && (
-            <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-              <p className="font-bold text-emerald-950 mb-1">See this exact tent in RentSketch 3D</p>
-              <p className="mb-3 text-sm text-emerald-950/80">Preview the {item.name} by itself, then add tables, chairs, dance floor pieces and other equipment to build your event layout.</p>
-              <DesignYourEventCTA source="tent_product_page" label="See This Tent in a Layout" variant="primary" tent={item.name} tentSlug={item.slug} className="w-full sm:w-auto" />
-            </div>
+          {isStandaloneTent && (
+            <figure className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+              <div className="bg-white p-3">
+                <img
+                  src={`/api/item-image/${encodeURIComponent(item.slug!)}?v=${item.updatedAt.getTime()}`}
+                  alt={item.name + ' rental tent preview'}
+                  width={760}
+                  height={520}
+                  loading="lazy"
+                  className="mx-auto max-h-72 w-full object-contain"
+                />
+              </div>
+              <figcaption className="border-t border-slate-200 px-4 py-3">
+                <p className="text-sm font-semibold text-slate-900">See what the {item.name} looks like.</p>
+                <p className="mt-1 text-xs leading-5 text-slate-600">This is the rental photo for this tent listing. Full event layouts belong in Design Your Event after you choose to plan an event; this product page stays focused on the tent itself.</p>
+              </figcaption>
+            </figure>
           )}
           {item.colorOptions && item.colorOptions.length > 0 && <div className="mb-4"><p className="text-sm font-medium text-gray-700 mb-1">Available colors:</p><div className="flex flex-wrap gap-2">{item.colorOptions.map((c) => <span key={c} className="text-xs bg-gray-100 border rounded-full px-3 py-1 text-gray-700">{c}</span>)}</div><p className="text-xs text-gray-500 mt-1">Choose your color while checking availability and adding the item to your order.</p></div>}
           <p className="text-gray-700 mb-6 whitespace-pre-line leading-7">{description}</p>

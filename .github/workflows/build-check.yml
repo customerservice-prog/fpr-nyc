@@ -36,6 +36,9 @@ jobs:
       - name: Test Greenville global security headers
         run: node --test tests/security-headers.test.cjs
 
+      - name: Test Greenville business-contact consistency
+        run: node --test tests/sc-business-contact-consistency.test.cjs
+
       - name: Test SC tracking destination isolation
         run: node --test tests/sc-tracking-isolation.test.cjs
 

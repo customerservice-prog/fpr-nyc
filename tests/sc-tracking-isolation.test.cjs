@@ -150,10 +150,11 @@ test('route listener does not send a blank or default GA config when SC analytic
   }
 })
 
-test('confirmation keeps the customer receipt and consumes its existing state without sending Google events while off', () => {
-  const { tracking, calls } = tracker()
-  const effects = [], states = [], removed = []
+test('confirmation requires a server-verified receipt and does not fire Google events itself', async () => {
+  const { calls } = tracker()
+  const effects = [], states = [], requests = []
   let index = 0
+  const verified = { paymentId:'pay-1',orderId:'offline-stub',orderNumber:'SC-STUB',amountPaid:25,totalPaid:25,totalAmount:100,balanceDue:75,currency:'USD',status:'succeeded',paidAt:'2026-09-22T12:00:00Z',purchaseEligible:true }
   const component = load('app/(public)/checkout/confirmation/page.tsx', {
     'react': { useEffect: effect => effects.push(effect), useState: initial => {
       const current = index++
@@ -162,17 +163,22 @@ test('confirmation keeps the customer receipt and consumes its existing state wi
     } },
     'react/jsx-runtime': { jsx, jsxs: jsx },
     'next/link': { default: 'Link' },
-    '@/lib/utils': { formatCurrency: value => '$' + value },
-    '@/lib/gtag': tracking,
-  }, { sessionStorage: { getItem: () => JSON.stringify({ orderId: 'offline-stub', orderNumber: 'SC-STUB', totalAmount: 100, depositAmount: 25, balanceDue: 75 }), removeItem: key => removed.push(key) } }).default
+    '@/components/public/PaymentReceiptSummary': { default: 'PaymentReceiptSummary' },
+  }, {
+    sessionStorage: { getItem: () => JSON.stringify({ orderId: 'offline-stub', stripePaymentId: 'pi_live_stub', totalAmount: 999999 }) },
+    fetch: async (url, options) => { requests.push({ url, options }); return { ok:true, json:async()=>({ receipt:verified }) } },
+  }).default
   component()
   effects.splice(0).forEach(effect => effect())
+  await new Promise(resolve => setImmediate(resolve))
   index = 0
   const rendered = JSON.stringify(component())
   assert.match(rendered, /Thank You!/)
-  assert.match(rendered, /SC-STUB/)
-  assert.match(rendered, /Deposit Paid/)
-  assert.deepEqual(removed, ['order_confirmation'])
+  assert.match(rendered, /PaymentReceiptSummary/)
+  assert.equal(states[0].amountPaid, 25)
+  assert.equal(requests.length, 1)
+  assert.deepEqual(JSON.parse(requests[0].options.body), { stripePaymentId:'pi_live_stub' })
+  assert.doesNotMatch(rendered, /999999/)
   assert.deepEqual(calls, [])
 })
 

@@ -1,160 +1,96 @@
 import { prisma } from '@/lib/prisma'
-import { filterToMarketingEligible, normalizeEmail } from '@/lib/marketing/eligibility'
-
-// Real, live audience + business-condition numbers for the Marketing
-// Overview and Audiences pages. No hardcoded counts - everything here is
-// computed from the actual Customer/Order tables at request time.
-//
-// Two Customer records can share the same email, and suppression /
-// marketing identity is email-based - so this groups activity by
-// normalized email first, then applies the shared eligibility service.
-
-const DAY_MS = 24 * 60 * 60 * 1000
-const DORMANT_DAYS = 365
-const REBOOKING_MIN_DAYS = 270
-const REBOOKING_MAX_DAYS = 456
-
-export interface MarketingSnapshot {
-    totalCustomerRecords: number
-    uniqueEmailIdentities: number
-    eligibleContacts: number
-    excluded: {
-      invalidFormat: number
-      testRecord: number
-      suppressed: number
-      duplicate: number
-    }
-    payingReachableCustomers: number
-    dormant12PlusMonths: number
-    annualRebookingWindow: number
-    upcomingEventCustomers: number
-    campaignDraftRecords: number
-    generatedAt: string
-}
-
-interface EmailActivity {
-    customerIds: string[]
-    hasPaidOrder: boolean
-    mostRecentPastEventDate: Date | null
-    hasUpcomingEvent: boolean
-}
-
-export async function getMarketingSnapshot(): Promise<MarketingSnapshot> {
-    const [customers, orders, campaignDraftRecords] = await Promise.all([
-          prisma.customer.findMany({ select: { id: true, email: true, firstName: true, lastName: true } }),
-          prisma.order.findMany({ select: { customerId: true, eventDate: true, amountPaid: true, status: true } }),
-          prisma.emailTemplateMarketing.count(),
-        ])
-
-  const totalCustomerRecords = customers.length
-    const now = Date.now()
-  const marketingCustomerIds = new Set(orders.filter(o => !['incomplete','draft'].includes(o.status)).map(o => o.customerId))
-
-  const emailByCustomerId = new Map<string, string>()
-    const activityByEmail = new Map<string, EmailActivity>()
-    const nameByEmail = new Map<string, { firstName: string; lastName: string }>()
-
-  for (const c of customers) {
-        if (!marketingCustomerIds.has(c.id)) continue
-        const email = normalizeEmail(c.email)
-        if (!email) continue
-        emailByCustomerId.set(c.id, email)
-        if (!activityByEmail.has(email)) {
-                activityByEmail.set(email, { customerIds: [], hasPaidOrder: false, mostRecentPastEventDate: null, hasUpcomingEvent: false })
-        }
-        activityByEmail.get(email)!.customerIds.push(c.id)
-        if (!nameByEmail.has(email)) nameByEmail.set(email, { firstName: c.firstName, lastName: c.lastName })
-  }
-
-  for (const o of orders) {
-        const email = emailByCustomerId.get(o.customerId)
-        if (!email) continue
-        const entry = activityByEmail.get(email)
-        if (!entry) continue
-        if (o.status === 'canceled') continue
-        if ((o.amountPaid || 0) > 0) entry.hasPaidOrder = true
-        if (o.eventDate.getTime() > now) {
-                entry.hasUpcomingEvent = true
-        } else if (!entry.mostRecentPastEventDate || o.eventDate > entry.mostRecentPastEventDate) {
-                entry.mostRecentPastEventDate = o.eventDate
-        }
-  }
-
-  const contacts = Array.from(activityByEmail.keys()).map((email) => ({
-        email,
-        firstName: nameByEmail.get(email)?.firstName,
-        lastName: nameByEmail.get(email)?.lastName,
-  }))
-    const { eligible, excluded } = await filterToMarketingEligible(contacts)
-    const eligibleSet = new Set(eligible)
-
-  let payingReachableCustomers = 0
-    let dormant12PlusMonths = 0
-    let annualRebookingWindow = 0
-    let upcomingEventCustomers = 0
-
-  for (const [email, entry] of activityByEmail.entries()) {
-        if (entry.hasUpcomingEvent) upcomingEventCustomers++
-        if (!eligibleSet.has(email)) continue
-        if (entry.hasPaidOrder) payingReachableCustomers++
-        if (entry.mostRecentPastEventDate) {
-                const daysSince = (now - entry.mostRecentPastEventDate.getTime()) / DAY_MS
-                if (daysSince >= DORMANT_DAYS) dormant12PlusMonths++
-                if (daysSince >= REBOOKING_MIN_DAYS && daysSince <= REBOOKING_MAX_DAYS) annualRebookingWindow++
-        }
-  }
-
-  return {
-        totalCustomerRecords,
-        uniqueEmailIdentities: activityByEmail.size,
-        eligibleContacts: eligible.length,
-        excluded,
-        payingReachableCustomers,
-        dormant12PlusMonths,
-        annualRebookingWindow,
-        upcomingEventCustomers,
-        campaignDraftRecords,
-        generatedAt: new Date().toISOString(),
-  }
-}
-
+import { getMarketingContacts, matchesMarketingSegment } from '@/lib/marketing/contacts'
+import { getAutomationPlan } from '@/lib/marketing/plannerData'
+import { AUTO_SCHEDULE_CONFIG, type AutomationPlan } from '@/lib/marketing/planner'
+import { SCHEDULE_CONFIG } from '@/lib/marketing/schedule'
 import type { CampaignDefinition } from '@/lib/marketing/campaignLibrary'
 
+export type PlannedCampaignAudience = {
+  count: number
+  label: string
+  dueCount: number
+  nextRunAt: string | null
+}
+
+export interface MarketingSnapshot {
+  totalCustomerRecords: number
+  uniqueEmailIdentities: number
+  eligibleContacts: number
+  excluded: { invalidFormat: number; testRecord: number; suppressed: number; duplicate: number }
+  payingReachableCustomers: number
+  dormant12PlusMonths: number
+  annualRebookingWindow: number
+  upcomingEventCustomers: number
+  campaignDraftRecords: number
+  generatedAt: string
+  campaignAudiences?: Record<string, PlannedCampaignAudience>
+}
+
+// The optional plan lets callers that already loaded it avoid a second planner query.
+export async function getMarketingSnapshot(now = new Date(), existingPlan?: AutomationPlan): Promise<MarketingSnapshot> {
+  const [contacts, campaignDraftRecords, plan] = await Promise.all([
+    getMarketingContacts(),
+    prisma.emailTemplateMarketing.count({ where: { status: { in: ['draft','review_ready','scheduled_review'] } } }),
+    existingPlan ? Promise.resolve(existingPlan) : getAutomationPlan(now),
+  ])
+  const count = (segment: string) => contacts.filter(c => matchesMarketingSegment(c, segment)).length
+  return {
+    totalCustomerRecords: contacts.reduce((sum,c) => sum + c.customerIds.length, 0),
+    uniqueEmailIdentities: contacts.filter(c => c.email).length,
+    eligibleContacts: count('eligible'),
+    payingReachableCustomers: contacts.filter(c => c.eligible && c.hasPaidOrder).length,
+    dormant12PlusMonths: count('dormant'), annualRebookingWindow: count('annualRebooking'), upcomingEventCustomers: count('upcoming'), campaignDraftRecords,
+    excluded: {
+      invalidFormat: contacts.filter(c => c.reason === 'Invalid email').length,
+      testRecord: contacts.filter(c => c.reason === 'Test record').length,
+      suppressed: contacts.filter(c => c.reason === 'Unsubscribed or restricted').length,
+      duplicate: contacts.reduce((sum,c) => sum + Math.max(0,c.customerIds.length - 1),0),
+    },
+    campaignAudiences: Object.fromEntries(plan.campaigns.map(c => [c.slug, {
+      count: c.audienceCount, label: c.reason, dueCount: c.dueCount, nextRunAt: c.nextRunAt,
+    }])),
+    generatedAt: now.toISOString(),
+  }
+}
+
 export interface CampaignAudience {
-    count: number
-    primaryLabel: string
-    breakdown: { label: string; count: number }[]
+  count: number
+  primaryLabel: string
+  breakdown: { label: string; count: number }[]
 }
 
 export function getCampaignAudience(campaign: CampaignDefinition, snapshot: MarketingSnapshot): CampaignAudience {
-    if (campaign.slug === 'annual-rebooking') {
-        return {
-            count: snapshot.annualRebookingWindow,
-            primaryLabel: 'Past customers roughly 9-15 months since their last event',
-            breakdown: [{ label: 'Annual rebooking window', count: snapshot.annualRebookingWindow }]
-        }
+  if (AUTO_SCHEDULE_CONFIG[campaign.slug]) {
+    const planned = snapshot.campaignAudiences?.[campaign.slug]
+    if (!planned) return {
+      count: 0, primaryLabel: 'A current customer-history plan is required for this targeted campaign.',
+      breakdown: [],
     }
-    if (campaign.slug === 'dormant-winback') {
-        return {
-            count: snapshot.dormant12PlusMonths,
-            primaryLabel: 'Past customers with no booking in 12+ months',
-            breakdown: [{ label: 'Dormant 12+ months', count: snapshot.dormant12PlusMonths }]
-        }
-    }
-    if (campaign.slug === 'open-availability-opportunity') {
-        return {
-            count: snapshot.eligibleContacts,
-            primaryLabel: 'All eligible contacts - urgency comes from the specific open date range, not audience targeting',
-            breakdown: [{ label: 'Eligible contacts', count: snapshot.eligibleContacts }]
-        }
-    }
-    const reachable = Math.max(0, snapshot.eligibleContacts - snapshot.upcomingEventCustomers)
     return {
-        count: reachable,
-        primaryLabel: 'Eligible contacts without an already-booked upcoming event',
-        breakdown: [
-            { label: 'Total eligible contacts', count: snapshot.eligibleContacts },
-            { label: 'Already have an upcoming booked event', count: snapshot.upcomingEventCustomers }
-            ]
+      count: planned.count,
+      primaryLabel: planned.label,
+      breakdown: [
+        { label: 'Matches the verified customer-history rule', count: planned.count },
+        { label: 'In its offer window now, before delivery protections', count: planned.dueCount },
+      ],
     }
+  }
+  const timing = SCHEDULE_CONFIG[campaign.slug]
+  const specialAudience = campaign.family === 'lifecycle' || campaign.family === 'opportunity' ||
+    (campaign.family === 'product' && campaign.tag !== 'product-spotlight') ||
+    (timing?.type === 'seasonal' && (timing.opportunityDriven || !!timing.conditionRequired))
+  if (specialAudience) return {
+    count: 0,
+    primaryLabel: 'Manual audience review required. This special trigger or availability condition is not enabled for automatic targeting.',
+    breakdown: [],
+  }
+  const reachable = Math.max(0, snapshot.eligibleContacts - snapshot.upcomingEventCustomers)
+  return {
+    count: reachable,
+    primaryLabel: 'Manual campaign only: broad eligible contacts without an upcoming booked event. Review the audience before sending.',
+    breakdown: [
+      { label: 'Total eligible contacts', count: snapshot.eligibleContacts },
+      { label: 'Already have an upcoming booked event', count: snapshot.upcomingEventCustomers },
+    ],
+  }
 }

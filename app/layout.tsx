@@ -34,6 +34,12 @@ const LOCAL_BUSINESS_JSONLD = {
     addressRegion: 'SC',
     addressCountry: 'US',
   },
+  openingHoursSpecification: [{
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+    opens: '09:00',
+    closes: '18:00',
+  }],
   areaServed: [{"@type": "Place", "name": "Greenville, SC"}, {"@type": "Place", "name": "Anderson, SC"}, {"@type": "Place", "name": "Belton, SC"}, {"@type": "Place", "name": "Berea, SC"}, {"@type": "Place", "name": "Boiling Springs, SC"}, {"@type": "Place", "name": "Central, SC"}, {"@type": "Place", "name": "Clemson, SC"}, {"@type": "Place", "name": "Duncan, SC"}, {"@type": "Place", "name": "Easley, SC"}, {"@type": "Place", "name": "Fountain Inn, SC"}, {"@type": "Place", "name": "Gantt, SC"}, {"@type": "Place", "name": "Gray Court, SC"}, {"@type": "Place", "name": "Greer, SC"}, {"@type": "Place", "name": "Honea Path, SC"}, {"@type": "Place", "name": "Inman, SC"}, {"@type": "Place", "name": "Judson, SC"}, {"@type": "Place", "name": "Landrum, SC"}, {"@type": "Place", "name": "Laurens, SC"}, {"@type": "Place", "name": "Liberty, SC"}, {"@type": "Place", "name": "Marietta, SC"}, {"@type": "Place", "name": "Mauldin, SC"}, {"@type": "Place", "name": "Parker, SC"}, {"@type": "Place", "name": "Pelzer, SC"}, {"@type": "Place", "name": "Pickens, SC"}, {"@type": "Place", "name": "Piedmont, SC"}, {"@type": "Place", "name": "Powdersville, SC"}, {"@type": "Place", "name": "Seneca, SC"}, {"@type": "Place", "name": "Simpsonville, SC"}, {"@type": "Place", "name": "Six Mile, SC"}, {"@type": "Place", "name": "Spartanburg, SC"}, {"@type": "Place", "name": "Taylors, SC"}, {"@type": "Place", "name": "Travelers Rest, SC"}, {"@type": "Place", "name": "Wade Hampton, SC"}, {"@type": "Place", "name": "Williamston, SC"}, {"@type": "Place", "name": "Woodruff, SC"}],
   priceRange: '$$',
 }

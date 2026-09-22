@@ -204,3 +204,24 @@ test('SC layout initializes its queue before hydration and keeps Google network 
   assert.match(source, /strategy="lazyOnload"/)
   assert.doesNotMatch(source, /G-NV8CF7GT5C|AW-18374628389/)
 })
+
+
+test('SC global response headers add browser protections without losing private noindex rules', () => {
+  const source = fs.readFileSync(path.join(root, 'next.config.js'), 'utf8')
+  for (const header of ['Content-Security-Policy','Strict-Transport-Security','X-Content-Type-Options','Referrer-Policy','X-Frame-Options','Cross-Origin-Opener-Policy']) assert.match(source, new RegExp(header))
+  assert.match(source, /form-action 'self' https:\/\/www\.friendlypartyrentalsc\.com https:\/\/friendlypartyrentalsc\.com/)
+  assert.doesNotMatch(source, /form-action[^\n]*friendlypartyrental\.com(?:\s|')/)
+  assert.match(source, /X-Robots-Tag/)
+  assert.match(source, /\/checkout\/:path\*/)
+})
+
+test('SC quick demo conversion handoff stays localized and does not sell unavailable designer access', () => {
+  const source = fs.readFileSync(path.join(root, 'components/public/EventDesignVideo.tsx'), 'utf8')
+  assert.match(source, /rentsketch_demo_started/)
+  assert.match(source, /rentsketch_demo_completed/)
+  assert.match(source, /rentsketch_demo_cta_click/)
+  assert.match(source, /Get Greenville Layout Help/)
+  assert.match(source, /Check My Event Date/)
+  assert.match(source, /Online Greenville RentSketch designer access is not active yet/)
+  assert.doesNotMatch(source, /rentSketchPurchaseUrl|EVENT_PASS_PRICE|Build my event/)
+})

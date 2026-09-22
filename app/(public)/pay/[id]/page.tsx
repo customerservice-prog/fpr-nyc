@@ -7,6 +7,8 @@ import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils'
 import { getStripe } from '@/lib/stripe-client'
 import CardPaymentForm from '@/components/public/CardPaymentForm'
 import PaymentCardAuthorization from '@/components/public/PaymentCardAuthorization'
+import PaymentReceiptSummary from '@/components/public/PaymentReceiptSummary'
+import type { PaymentReceipt } from '@/lib/paymentReceipt'
 
 interface PublicOrder {
   id: string
@@ -40,6 +42,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
   const [loading, setLoading] = useState(false)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [paid, setPaid] = useState(false)
+  const [receipt, setReceipt] = useState<PaymentReceipt | null>(null)
   const [saveCard, setSaveCard] = useState(false)
   const [paymentOption, setPaymentOption] = useState<'deposit' | 'full' | 'other'>('deposit')
   const [otherAmount, setOtherAmount] = useState('')
@@ -165,11 +168,15 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
   const handleCustomTip = (e: React.ChangeEvent<HTMLInputElement>) => { setCustomTip(e.target.value); setTipAmount(Math.max(0, parseFloat(e.target.value) || 0)) }
 
   const confirmPayment = async (stripePaymentId: string) => {
-    await fetch(`/api/orders/${id}/confirm-payment`, {
+    if (!stripePaymentId) throw new Error('Your payment result needs verification. Please contact us before paying again.')
+    const response = await fetch(`/api/orders/${id}/confirm-payment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount: amountDue, tipAmount, stripePaymentId, saveCard }),
     })
+    if (!response.ok) throw new Error('Your payment result needs verification. Please contact us before paying again.')
+    const result = await response.json()
+    if (result.receipt?.orderId === id && result.receipt.status === 'succeeded') setReceipt(result.receipt)
     setPaid(true)
   }
 
@@ -237,7 +244,8 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <h1 className="text-2xl font-bold text-dark mb-4">Thank You!</h1>
-        <p className="text-body">Your payment has been received for Order #{order.orderNumber}.</p>
+        <p className="text-body mb-4">Your payment has been received for Order #{order.orderNumber}.</p>
+        {receipt ? <PaymentReceiptSummary receipt={receipt} /> : <p className="text-body mt-4">Please contact us at 864-610-5324 if you need a copy of your verified receipt.</p>}
       </div>
     )
   }
@@ -257,7 +265,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
           <p className="text-sm text-body">Time: {order.eventTimeSlot}</p>
         )}
         {order.eventAddress && (
-          <p className="text-sm text-body">{order.eventAddress}, {order.eventCity} NY {order.eventZip}</p>
+          <p className="text-sm text-body">{order.eventAddress}, {order.eventCity} {order.eventState || 'SC'} {order.eventZip}</p>
         )}
         <p className="text-sm text-body">Delivery: {order.deliveryType}</p>
       </div>

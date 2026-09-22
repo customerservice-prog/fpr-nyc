@@ -225,3 +225,49 @@ test('SC quick demo conversion handoff stays localized and does not sell unavail
   assert.match(source, /Online Greenville RentSketch designer access is not active yet/)
   assert.doesNotMatch(source, /rentSketchPurchaseUrl|EVENT_PASS_PRICE|Build my event/)
 })
+
+
+test('verified payment receipt uses Stripe collected value and committed ledger evidence', () => {
+  const mod = load('lib/paymentReceipt.ts')
+  const payment = { id:'pay-1', orderId:'order-1', stripePaymentId:'pi_1', status:'succeeded', amount:125, createdAt:new Date('2026-09-22T12:00:00Z') }
+  const order = { id:'order-1', orderNumber:'SC-TEST', status:'active', amountPaid:125, totalAmount:500, balanceDue:375, payments:[payment] }
+  const intent = { id:'pi_1', status:'succeeded', currency:'usd', amount_received:12500, livemode:true, metadata:{orderId:'order-1'} }
+  const receipt = mod.buildPaymentReceipt(intent, order)
+  assert.equal(receipt.amountPaid,125)
+  assert.equal(receipt.totalAmount,500)
+  assert.equal(receipt.purchaseEligible,true)
+  assert.equal(mod.buildPaymentReceipt({...intent,amount_received:0},order),null)
+  assert.equal(mod.buildPaymentReceipt({...intent,metadata:{orderId:'other'}},order),null)
+})
+
+test('SC paid-booking tracking uses actual collected value and only the SC Ads destination', () => {
+  const events=[]
+  const tracking=load('lib/paidBookingTracking.ts', {
+    '@/lib/gtag': { AW_PURCHASE_DESTINATION: SC_ADS + '/' + SC_LABEL, trackEvent:(name,params)=>events.push([name,params]) },
+  }, { window:{} })
+  tracking.trackPaidBooking({ paymentId:'pay-1',orderId:'order-1',orderNumber:'SC-TEST',amountPaid:125,totalPaid:125,totalAmount:500,balanceDue:375,currency:'USD',status:'succeeded',paidAt:'2026-09-22T12:00:00Z',purchaseEligible:true })
+  assert.equal(events.length,2)
+  assert.equal(events[0][1].value,125)
+  assert.equal(events[1][1].send_to,SC_ADS+'/'+SC_LABEL)
+  assert.doesNotMatch(JSON.stringify(events),/AW-18374628389|ig-ZCL_Q1d0cEKWo2rlE/)
+})
+
+test('SC confirmation no longer trusts cached browser totals for purchase conversion', () => {
+  const confirmation = fs.readFileSync(path.join(root,'app/(public)/checkout/confirmation/page.tsx'),'utf8')
+  const payment = fs.readFileSync(path.join(root,'app/(public)/checkout/payment/page.tsx'),'utf8')
+  const route = fs.readFileSync(path.join(root,'app/api/orders/[id]/confirm-payment/route.ts'),'utf8')
+  assert.match(confirmation,/PaymentReceiptSummary/)
+  assert.match(confirmation,/stripePaymentId/)
+  assert.doesNotMatch(confirmation,/trackEvent\('purchase'/)
+  assert.doesNotMatch(confirmation,/parsed\.totalAmount/)
+  assert.match(payment,/stripePaymentId/)
+  assert.doesNotMatch(payment,/orderNumber: finalOrderNumber/)
+  assert.match(route,/amount_received/)
+  assert.match(route,/buildPaymentReceipt/)
+})
+
+test('SC public pay page renders the recorded state instead of a hardcoded NY state', () => {
+  const pay = fs.readFileSync(path.join(root,'app/(public)/pay/[id]/page.tsx'),'utf8')
+  assert.match(pay,/order\.eventState \|\| 'SC'/)
+  assert.doesNotMatch(pay,/\{order\.eventCity\} NY/)
+})

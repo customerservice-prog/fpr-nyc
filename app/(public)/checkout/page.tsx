@@ -210,8 +210,33 @@ export default function CheckoutPage() {
       if (!hasNewScheduling && exactTimeRequested && exactTimeFee && !specialRequests.includes(exactTimeFee.id)) {
         specialRequests.push(exactTimeFee.id)
       }
-      const finalData = { ...data, specialRequests, schedulingDetails: hasNewScheduling ? schedulingDetails : null, durationTierId: selectedTierId || null }
+      const checkoutDraftKey = sessionStorage.getItem('checkout_draft_key') || (globalThis.crypto?.randomUUID?.() || ('draft_' + Date.now() + '_' + Math.random().toString(36).slice(2)))
+      sessionStorage.setItem('checkout_draft_key', checkoutDraftKey)
+      const finalData = { ...data, checkoutDraftKey, deliveryType: 'delivery', specialRequests, schedulingDetails: hasNewScheduling ? schedulingDetails : null, durationTierId: selectedTierId || null }
       sessionStorage.setItem('checkout_data', JSON.stringify(finalData))
+      try {
+        const draftRes = await fetch('/api/checkout/draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...finalData,
+            stage: 'details_completed',
+            eventDate,
+            eventTimeSlot,
+            pickupTimeSlot,
+            deliveryType: 'delivery',
+            items: items.map((item) => ({ id: item.id, name: item.selectedColor ? item.name + ' — ' + item.selectedColor : item.name, quantity: item.quantity, unitPrice: item.price })),
+            subtotal,
+          }),
+        })
+        const draftResult = await draftRes.json().catch(() => ({}))
+        if (draftResult.requiresAssistance) {
+          router.push('/checkout/assistance')
+          return
+        }
+      } catch {
+        // Funnel tracking is best-effort and must never stop a valid checkout.
+      }
       trackEvent('begin_checkout', {
         value: subtotal,
         currency: 'USD',

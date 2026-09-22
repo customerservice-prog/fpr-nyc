@@ -55,6 +55,7 @@ export default function PaymentPage() {
   const [orderNumber, setOrderNumber] = useState<string | null>(null)
   const [orderId, setOrderId] = useState<string | null>(null)
   const paymentSucceededRef = useRef(false)
+  const draftSyncRef = useRef('')
 
   useEffect(() => {
     if (paymentSucceededRef.current || !loaded) return
@@ -186,6 +187,51 @@ export default function PaymentPage() {
   const paymentPrincipal = paymentChoice === 'full' ? grandTotal : paymentChoice === 'custom' ? Math.min(Math.max(parsedCustomPayAmount, depositAmount), grandTotal) : depositAmount
   const balanceDue = Math.round((grandTotal - paymentPrincipal) * 100) / 100
   const amountDueToday = Math.round((paymentPrincipal + tipAmount) * 100) / 100
+
+  useEffect(() => {
+    if (!loaded || !eventDate || !items.length || deliveryLoading || pricingLoading || deliveryError || pricingError) return
+    let checkoutData: any
+    try { checkoutData = JSON.parse(sessionStorage.getItem('checkout_data') || '{}') } catch { return }
+    if (!checkoutData.checkoutDraftKey || !checkoutData.email || !checkoutData.phone) return
+    const payload = {
+      ...checkoutData,
+      stage: 'payment_page',
+      eventDate,
+      eventTimeSlot,
+      pickupTimeSlot,
+      deliveryType: 'delivery',
+      items: items.map((i) => ({ id: i.id, name: i.selectedColor ? i.name + ' — ' + i.selectedColor : i.name, quantity: i.quantity, unitPrice: i.price })),
+      subtotal: adjustedSubtotal,
+      rentalDays: durationTier?.minDays || 1,
+      durationLabel: durationTier?.label || null,
+      durationFee,
+      specialRequestFee: specialRequestTotal,
+      specialRequestNames: selectedFees.map((fee) => fee.name).join(', ') || null,
+      deliveryFee,
+      deliveryDistance,
+      taxRate: taxRatePct,
+      taxAmount,
+      couponCode: couponDiscount > 0 ? checkoutData.couponCode : null,
+      couponDiscount,
+      damageWaiver,
+      damageWaiverFee,
+      totalAmount: grandTotal,
+      depositAmount: paymentPrincipal,
+      tipAmount,
+      lastMinuteFeeAmount: lastMinuteFee,
+      schedulingDetails: schedulingDetails?.eventStartTime ? schedulingDetails : null,
+    }
+    const signature = JSON.stringify(payload)
+    if (signature === draftSyncRef.current) return
+    draftSyncRef.current = signature
+    const timer = window.setTimeout(() => {
+      fetch('/api/checkout/draft', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+      }).catch(() => { draftSyncRef.current = '' })
+    }, 350)
+    return () => window.clearTimeout(timer)
+  }, [loaded, eventDate, eventTimeSlot, pickupTimeSlot, items, adjustedSubtotal, durationTier, durationFee, specialRequestTotal, selectedFees, deliveryFee, deliveryDistance, taxRatePct, taxAmount, couponDiscount, damageWaiver, damageWaiverFee, grandTotal, paymentPrincipal, tipAmount, lastMinuteFee, schedulingDetails, deliveryLoading, pricingLoading, deliveryError, pricingError])
+
   const applyTipNone = () => { setCustomTip(''); setTipAmount(0) }
   const applyTip10 = () => { setCustomTip(''); setTipAmount(Math.round(grandTotal * 0.1 * 100) / 100) }
   const applyTip15 = () => { setCustomTip(''); setTipAmount(Math.round(grandTotal * 0.15 * 100) / 100) }
@@ -205,6 +251,7 @@ export default function PaymentPage() {
     paymentSucceededRef.current = true
     clearCart()
     sessionStorage.removeItem('checkout_data')
+    sessionStorage.removeItem('checkout_draft_key')
     router.push('/checkout/confirmation')
   }
 

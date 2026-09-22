@@ -166,6 +166,10 @@ model Order {
   incompleteFollowUp3SentAt DateTime?
   incompleteFollowUp7SentAt DateTime?
   followUpsPaused Boolean @default(false)
+  checkoutDraftKey String? @unique
+  checkoutStage String?
+  checkoutLastSeenAt DateTime?
+  checkoutCompletedAt DateTime?
   lastMinuteFeeAmount Float @default(0)
   driverId String?
   driver Driver? @relation("DeliveryDriver", fields: [driverId], references: [id])

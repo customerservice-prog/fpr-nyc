@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { getNextOrderNumber } from '@/lib/orderNumber'
 import { BUSINESS } from '@/lib/utils'
 import { sendEmail, newOrderAdminNotificationEmail } from '@/lib/email'
+import { hasDeliverableCustomerEmail, orderReceivedEmail, ownerNotificationRecipients } from '@/lib/orderLifecycleNotifications'
 import { getItemAvailability } from '@/lib/availability'
 import { evaluateRentalRestrictions } from '@/lib/rentalRestrictions'
 import { DeliveryQuoteError, getDeliveryQuote, requireDeliveryMethod, requireMatchingDeliveryFee } from '@/lib/delivery'
@@ -63,6 +64,7 @@ export async function POST(request: NextRequest) {
       totalAmount: totalAmountInput,
       depositAmount,
       schedulingDetails,
+      checkoutDraftKey,
     } = body
 
     if (!firstName || !lastName || !email || !eventDate || !items?.length) {
@@ -79,6 +81,10 @@ export async function POST(request: NextRequest) {
 
     const normalizedEmail = String(email).trim().toLowerCase()
     const normalizedPhone = phone ? String(phone).trim() : null
+    const draftOrder = typeof checkoutDraftKey === 'string' && checkoutDraftKey
+      ? await prisma.order.findUnique({ where: { checkoutDraftKey } })
+      : null
+    const reusableDraft = draftOrder && draftOrder.status === 'incomplete' && draftOrder.source === 'online' ? draftOrder : null
 
     // --- Rental Restriction ("Do Not Rent") check ---
     // This MUST run before any Customer or Order record is created, and
@@ -209,7 +215,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    const orderNumber = await getNextOrderNumber()
+    const orderNumber = reusableDraft?.orderNumber || await getNextOrderNumber()
     const fee = deliveryQuote.fee
     const tax = taxAmount || 0
     const discount = couponDiscount || 0
@@ -225,64 +231,71 @@ export async function POST(request: NextRequest) {
       : Math.max(subtotal - discount, 0) + fee + tax + waiverFee + specialFee + lastMinuteFee + schedulingFeeTotal
     const totalAmount = baseTotalAmount + (Number(tipAmount) || 0)
 
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        customerId: customer.id,
-        status: 'quote',
-        eventDate: new Date(eventDate),
-        eventAddress: eventAddress || null,
-        eventCity: eventCity || null,
-        eventState: eventState || 'SC',
-        eventZip: eventZip || null,
-        eventTimeSlot: eventTimeSlot || null,
-        pickupTimeSlot: pickupTimeSlot || null,
-        deliveryType: 'delivery',
-        deliveryFee: fee,
-        deliveryDistance: deliveryQuote.distance,
-        subtotal,
-        rentalDays: rentalDays || 1,
-        durationLabel: durationLabel || null,
-        durationFee: durationFeeAmount,
-        specialRequestFee: specialFee,
-        specialRequestNames: specialRequestNames || null,
-        taxRate: taxRate || 0,
-        taxAmount: tax,
-        couponCode: couponCode || null,
-        couponDiscount: discount,
-        damageWaiver: !!damageWaiver,
-        damageWaiverFee: waiverFee,
-        lastMinuteFeeAmount: lastMinuteFee,
-        totalAmount,
-        depositAmount,
-        tipAmount: tipAmount || 0,
-        amountPaid: 0,
-        balanceDue: totalAmount,
-        notes: notes || null,
-        eventStartTime: schedulingDetails?.eventStartTime || null,
-        eventEndTime: schedulingDetails?.eventEndTime || null,
-        deliveryWindowStart: schedulingDetails?.deliveryWindowStart || null,
-        deliveryWindowEnd: schedulingDetails?.deliveryWindowEnd || null,
-        exactDeliveryRequested: !!schedulingDetails?.exactDeliveryRequested,
-        exactDeliveryTime: schedulingDetails?.exactDeliveryTime || null,
-        exactDeliveryFee: exactDeliveryFeeAmount,
-        pickupType: schedulingDetails?.pickupType || 'flexible',
-        pickupRequiredByTime: schedulingDetails?.pickupRequiredByTime || null,
-        exactPickupTime: schedulingDetails?.exactPickupTime || null,
-        exactPickupFee: exactPickupFeeAmount,
-        latePickupApprovalRequired: !!schedulingDetails?.latePickupApprovalRequired,
-        items: {
-          create: (items || []).map((item: any) => ({
-            itemId: item.id,
-            itemName: item.name,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            total: item.unitPrice * item.quantity,
-          })),
-        },
-      },
-      include: { items: true },
-    })
+    const baseOrderData: any = {
+      customerId: customer.id,
+      status: 'quote',
+      source: 'online',
+      checkoutStage: 'order_created',
+      checkoutLastSeenAt: new Date(),
+      eventDate: new Date(eventDate),
+      eventAddress: eventAddress || null,
+      eventCity: eventCity || null,
+      eventState: eventState || 'SC',
+      eventZip: eventZip || null,
+      eventTimeSlot: eventTimeSlot || null,
+      pickupTimeSlot: pickupTimeSlot || null,
+      deliveryType: 'delivery',
+      deliveryFee: fee,
+      deliveryDistance: deliveryQuote.distance,
+      subtotal,
+      rentalDays: rentalDays || 1,
+      durationLabel: durationLabel || null,
+      durationFee: durationFeeAmount,
+      specialRequestFee: specialFee,
+      specialRequestNames: specialRequestNames || null,
+      taxRate: taxRate || 0,
+      taxAmount: tax,
+      couponCode: couponCode || null,
+      couponDiscount: discount,
+      damageWaiver: !!damageWaiver,
+      damageWaiverFee: waiverFee,
+      lastMinuteFeeAmount: lastMinuteFee,
+      totalAmount,
+      depositAmount,
+      tipAmount: tipAmount || 0,
+      amountPaid: 0,
+      balanceDue: totalAmount,
+      notes: notes || null,
+      eventStartTime: schedulingDetails?.eventStartTime || null,
+      eventEndTime: schedulingDetails?.eventEndTime || null,
+      deliveryWindowStart: schedulingDetails?.deliveryWindowStart || null,
+      deliveryWindowEnd: schedulingDetails?.deliveryWindowEnd || null,
+      exactDeliveryRequested: !!schedulingDetails?.exactDeliveryRequested,
+      exactDeliveryTime: schedulingDetails?.exactDeliveryTime || null,
+      exactDeliveryFee: exactDeliveryFeeAmount,
+      pickupType: schedulingDetails?.pickupType || 'flexible',
+      pickupRequiredByTime: schedulingDetails?.pickupRequiredByTime || null,
+      exactPickupTime: schedulingDetails?.exactPickupTime || null,
+      exactPickupFee: exactPickupFeeAmount,
+      latePickupApprovalRequired: !!schedulingDetails?.latePickupApprovalRequired,
+    }
+    const itemCreates = (items || []).map((item: any) => ({
+      itemId: item.id,
+      itemName: item.name,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice,
+      total: item.unitPrice * item.quantity,
+    }))
+    const order = reusableDraft
+      ? await prisma.order.update({
+          where: { id: reusableDraft.id },
+          data: { ...baseOrderData, items: { deleteMany: {}, create: itemCreates } },
+          include: { items: true },
+        })
+      : await prisma.order.create({
+          data: { ...baseOrderData, orderNumber, ...(checkoutDraftKey ? { checkoutDraftKey } : {}), items: { create: itemCreates } },
+          include: { items: true },
+        })
 
     if (couponCode) {
       await prisma.coupon.update({
@@ -292,29 +305,37 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      await sendEmail({
-        to: BUSINESS.email,
-        subject: newOrderAdminNotificationEmail({
-          orderNumber: order.orderNumber,
-          customerName: firstName + ' ' + lastName,
-          customerPhone: phone,
-          customerEmail: email,
-          eventDate: new Date(eventDate).toLocaleDateString(),
-          totalAmount,
-          amountPaid: 0,
-        }).subject,
-        html: newOrderAdminNotificationEmail({
-          orderNumber: order.orderNumber,
-          customerName: firstName + ' ' + lastName,
-          customerPhone: phone,
-          customerEmail: email,
-          eventDate: new Date(eventDate).toLocaleDateString(),
-          totalAmount,
-          amountPaid: 0,
-        }).html,
+      const ownerContent = newOrderAdminNotificationEmail({
+        orderNumber: order.orderNumber,
+        customerName: firstName + ' ' + lastName,
+        customerPhone: phone,
+        customerEmail: normalizedEmail,
+        eventDate: new Date(eventDate).toLocaleDateString(),
+        totalAmount,
+        amountPaid: 0,
       })
+      const customerContent = orderReceivedEmail({
+        id: order.id,
+        orderNumber: order.orderNumber,
+        customerName: firstName + ' ' + lastName,
+        eventDate: order.eventDate,
+        eventAddress: order.eventAddress,
+        eventCity: order.eventCity,
+        eventState: order.eventState,
+        eventZip: order.eventZip,
+        totalAmount: order.totalAmount,
+        depositAmount: order.depositAmount,
+        items: order.items,
+      })
+      const sends: Promise<unknown>[] = [
+        sendEmail({ to: ownerNotificationRecipients(), subject: ownerContent.subject, html: ownerContent.html }),
+      ]
+      if (hasDeliverableCustomerEmail(normalizedEmail)) {
+        sends.push(sendEmail({ to: normalizedEmail, subject: customerContent.subject, html: customerContent.html }))
+      }
+      await Promise.allSettled(sends)
     } catch (err) {
-      console.error('New order admin notification email error:', err)
+      console.error('New order notification email error:', err)
     }
 
     return NextResponse.json({ order: { id: order.id, orderNumber: order.orderNumber } })

@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { sendEmail } from '@/lib/email'
+import { automaticCancellationEmail, hasDeliverableCustomerEmail, ownerCancellationEmail, ownerNotificationRecipients } from '@/lib/orderLifecycleNotifications'
 
 export async function GET(
   _request: NextRequest,
@@ -59,9 +61,8 @@ export async function PUT(
 
   const body = await request.json()
 
-  const existingOrder = body.items
-    ? await prisma.order.findUnique({ where: { id: (await params).id }, include: { items: true } })
-    : null
+  const existingOrder = await prisma.order.findUnique({ where: { id: (await params).id }, include: { items: true } })
+  if (!existingOrder) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   const allItemsZeroPriced = !!(body.items && body.items.length > 0 && body.items.every((i: any) => !i.unitPrice))
   const legacyLumpSum = allItemsZeroPriced && !!existingOrder && (existingOrder.subtotal || 0) > 0
   const safeSubtotal = legacyLumpSum ? existingOrder!.subtotal : body.subtotal
@@ -150,6 +151,22 @@ export async function PUT(
       contacts: { orderBy: { createdAt: 'asc' } },
     },
   })
+
+  const wasCanceled = ['canceled','cancelled'].includes(existingOrder.status)
+  const isNowCanceled = ['canceled','cancelled'].includes(order.status)
+  if (!wasCanceled && isNowCanceled) {
+    const customerName = order.customer.firstName + ' ' + order.customer.lastName
+    const customerContent = automaticCancellationEmail({ orderNumber: order.orderNumber, customerName, eventDate: order.eventDate })
+    const ownerContent = ownerCancellationEmail({
+      id: order.id, orderNumber: order.orderNumber, customerName,
+      customerEmail: order.customer.email, customerPhone: order.customer.phone,
+      eventDate: order.eventDate, amountPaid: order.amountPaid,
+      balanceDue: Math.max(Math.round((order.totalAmount - order.amountPaid) * 100) / 100, 0),
+    })
+    const sends: Promise<unknown>[] = [sendEmail({ to: ownerNotificationRecipients(), subject: ownerContent.subject, html: ownerContent.html })]
+    if (hasDeliverableCustomerEmail(order.customer.email)) sends.push(sendEmail({ to: order.customer.email, subject: customerContent.subject, html: customerContent.html }))
+    await Promise.allSettled(sends)
+  }
 
   return NextResponse.json({ order })
 }

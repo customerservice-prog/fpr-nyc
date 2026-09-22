@@ -78,7 +78,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
     }
   }, [order, editInitialized])
 
-  const canSelfEdit = !!order && order.status === 'quote' && order.items.every((i) => !!i.itemId)
+  const canSelfEdit = !!order && (order.status === 'quote' || order.status === 'incomplete') && order.items.every((i) => !!i.itemId)
 
   const changeQty = (idx: number, delta: number) => {
     setEditItems((prev) => prev.map((it, i) => (i === idx ? { ...it, quantity: Math.max(1, it.quantity + delta) } : it)))

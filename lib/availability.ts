@@ -74,7 +74,7 @@ const recentQuoteCutoff = new Date(Date.now() - RECENT_QUOTE_WINDOW_MS)
 const orders = await prisma.order.findMany({
   where: {
     eventDate: { gte: dayStart, lte: dayEnd },
-    status: { not: 'canceled' },
+    status: { notIn: ['canceled', 'cancelled', 'draft', 'incomplete'] },
     OR: [
       { status: { not: 'quote' } },
       { status: 'quote', createdAt: { gte: recentQuoteCutoff } },
@@ -125,7 +125,7 @@ const recentQuoteCutoff = new Date(Date.now() - RECENT_QUOTE_WINDOW_MS)
       itemId: { not: null },
       order: {
         eventDate: { gte: dayStart, lte: dayEnd },
-        status: { not: 'canceled' },
+        status: { notIn: ['canceled', 'cancelled', 'draft', 'incomplete'] },
         OR: [
           { status: { not: 'quote' } },
           { status: 'quote', createdAt: { gte: recentQuoteCutoff } },

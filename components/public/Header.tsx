@@ -101,13 +101,13 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
       <div className="min-w-0 text-sm text-gray-700 leading-relaxed">
         <p><a href={`tel:${BUSINESS.phone}`} className="font-bold text-dark hover:underline">{BUSINESS.phone}</a>{' | '}<a href={`sms:${BUSINESS.text}`} className="font-bold text-dark hover:underline">Text Us</a></p>
         <p className="break-all"><a href={BUSINESS.emailHref} className="hover:underline">{BUSINESS.email}</a></p>
-        <p>{BUSINESS.address}</p><p className="text-xs text-gray-600 mt-0.5">Mon–Sat: 9am–6pm</p><p>Serving {BUSINESS.serviceArea}</p>
+        <p>{BUSINESS.address}</p><p className="text-xs text-gray-600 mt-0.5">{BUSINESS.hours}</p><p>Serving {BUSINESS.serviceArea}</p>
       </div>
       <div className={'min-w-0 flex justify-center' + (cfg.grayscale ? ' grayscale' : '')}>{logo}</div>
       <div className="flex flex-col items-center md:items-end gap-2"><div className={'flex items-center gap-3' + (cfg.grayscale ? ' grayscale' : '')}>
         <a href={BUSINESS.facebook} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="Facebook"><Facebook size={24} fill="currentColor"/></a>
         <a href={BUSINESS.youtube} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="YouTube"><Youtube size={24}/></a>
-        <a href={BUSINESS.yelp} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold" aria-label="Yelp" title="Yelp">Y</a>
+        {BUSINESS.yelp && <a href={BUSINESS.yelp} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold" aria-label="Yelp" title="Yelp">Y</a>}
       </div><Link href="/order-by-date" className="btn-primary text-sm py-2 px-5 whitespace-nowrap" prefetch={false}>Book Now &#9658;</Link></div>
     </div></div>}
     {cfg.mode === 'logoOnly' && <div className="flex justify-center py-3">{logo}</div>}

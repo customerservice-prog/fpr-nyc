@@ -4,7 +4,6 @@ import type { Metadata } from 'next'
 import { Playfair_Display } from 'next/font/google'
 import Link from 'next/link'
 import Image from 'next/image'
-import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 
 const playfair = Playfair_Display({ weight: ['600', '700'], subsets: ['latin'], display: 'swap' })
 
@@ -34,10 +33,10 @@ export default function DesignYourEventPage() {
           <h1 className={`${playfair.className} max-w-xl text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl`}>Build Your Event. See It Before Setup Day.</h1>
           <p className="mt-5 max-w-xl text-base leading-7 text-white/75 sm:text-lg">See how a 2D floor plan becomes a 3D event layout. Our Greenville team can help you choose equipment and plan your space; ask us about layout assistance with your order.</p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <DesignYourEventCTA source="design_your_event_page" label="Start Designing My Event" variant="primary" />
-            <Link href="/category" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/35 px-6 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-[#0B1F3A]">Browse Rentals</Link>
+            <a href="#quick-demo" className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#E07B00] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#c96d00]">Watch the Quick Demo</a>
+            <Link href="/contact_us" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/35 px-6 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-[#0B1F3A]">Get Greenville Layout Help</Link>
           </div>
-          <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-white/65"><span>✓ No download</span><span>✓ No commitment</span><span>✓ Phone, tablet & desktop</span></div>
+          <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-white/65"><span>✓ Quick walkthrough</span><span>✓ No account needed</span><span>✓ Phone, tablet & desktop</span></div>
         </div>
         <div className="relative">
           <div className="absolute -inset-5 rounded-[2.25rem] bg-[#E07B00]/10 blur-2xl" />
@@ -49,7 +48,7 @@ export default function DesignYourEventPage() {
       </div>
     </section>
 
-    <StorefrontDesigner />
+    <div id="quick-demo" className="scroll-mt-24"><StorefrontDesigner /></div>
     <section className="border-b border-gray-100 bg-[#FAFAF8]">
       <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-gray-200 px-4 py-5 text-center md:grid-cols-4">
         {['Use real rental equipment','Plan around your guest count','Switch between 2D + 3D','Send your layout to our team'].map((item)=><div key={item} className="px-3 py-2 text-xs font-extrabold sm:text-sm">{item}</div>)}
@@ -68,7 +67,7 @@ export default function DesignYourEventPage() {
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg"><div className="px-4 py-3 text-sm font-black">2D Floor Plan</div><Image src="/images/design-your-event-2d-preview.png" alt="RentSketch 2D event floor plan" width={1200} height={675} className="w-full" /></div>
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg sm:mt-10"><div className="px-4 py-3 text-sm font-black">3D Preview</div><Image src="/images/design-your-event-3d-preview.png" alt="RentSketch 3D event preview" width={1200} height={675} className="w-full" /></div>
           </div>
-          <div><p className="text-xs font-extrabold uppercase tracking-[.2em] text-[#D66E00]">See the difference</p><h2 className={`${playfair.className} mt-2 text-3xl font-bold sm:text-4xl`}>Plan the space, then step inside the idea.</h2><p className="mt-4 max-w-xl leading-7 text-gray-600">Use the floor plan to work out placement and spacing. Then switch to 3D to see how the tent, tables, chairs and event area work together.</p><div className="mt-7"><DesignYourEventCTA source="design_your_event_visual" label="Open the Event Designer" variant="primary" /></div></div>
+          <div><p className="text-xs font-extrabold uppercase tracking-[.2em] text-[#D66E00]">See the difference</p><h2 className={`${playfair.className} mt-2 text-3xl font-bold sm:text-4xl`}>Plan the space, then step inside the idea.</h2><p className="mt-4 max-w-xl leading-7 text-gray-600">Use the floor plan to work out placement and spacing. Then switch to 3D to see how the tent, tables, chairs and event area work together.</p><div className="mt-7 flex flex-wrap gap-3"><a href="#quick-demo" className="btn-primary inline-flex min-h-12 items-center justify-center rounded-full px-6 py-3 font-semibold">Watch the Quick Demo</a><Link href="/contact_us" className="inline-flex min-h-12 items-center justify-center rounded-full border-2 border-[#0B1F3A] px-6 py-3 font-semibold text-[#0B1F3A]">Ask About My Layout</Link></div></div>
         </div>
       </div>
     </section>
@@ -81,7 +80,7 @@ export default function DesignYourEventPage() {
     <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 md:pb-20 lg:px-8">
       <div className="overflow-hidden rounded-[2rem] bg-[#0B1F3A] px-6 py-10 text-white md:px-10 lg:grid lg:grid-cols-[1fr_auto] lg:items-center lg:gap-10">
         <div><p className="text-xs font-extrabold uppercase tracking-[.2em] text-[#F4C542]">When your layout is ready</p><h2 className={`${playfair.className} mt-2 text-3xl font-bold`}>Send it to Friendly Party Rental.</h2><p className="mt-3 max-w-2xl leading-7 text-white/70">Your layout ideas help our Greenville team understand the setup you are trying to create. We will confirm equipment, availability, site details and final pricing before the order is finalized.</p></div>
-        <div className="mt-7 lg:mt-0"><DesignYourEventCTA source="design_your_event_footer" label="Start Designing" variant="primary" /></div>
+        <div className="mt-7 flex flex-col gap-3 lg:mt-0"><a href="#quick-demo" className="btn-primary inline-flex min-h-12 items-center justify-center rounded-full px-6 py-3 font-semibold">Watch the Quick Demo</a><Link href="/contact_us" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/40 px-6 py-3 text-sm font-bold text-white">Get Layout Help</Link></div>
       </div>
       <p className="mx-auto mt-5 max-w-3xl text-center text-xs leading-5 text-gray-500">The Event Designer is a planning and visualization tool. Designs and estimates are not reservations. Final equipment availability, site requirements and pricing are confirmed by Friendly Party Rental.</p>
     </section>

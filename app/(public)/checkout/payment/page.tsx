@@ -9,6 +9,7 @@ import { formatCurrency } from '@/lib/utils'
 import { getStripe } from '@/lib/stripe-client'
 import { normalizeDeliveryZip, requireDeliveryMethod } from '@/lib/delivery'
 import CardPaymentForm from '@/components/public/CardPaymentForm'
+import PaymentCardAuthorization from '@/components/public/PaymentCardAuthorization'
 
 interface PricingTier {
   id: string
@@ -352,10 +353,7 @@ export default function PaymentPage() {
       {!clientSecret && <>
         {belowMinimum && <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-sm text-red-700">Minimum order is {formatCurrency(minimumOrder)} for delivery orders. Please go back and add more items.</div>}
         {isHardBlocked && <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-sm text-red-700">Orders cannot be placed within 24 hours of the event date. Please call our office to check last-minute availability.</div>}
-        <label className="flex items-start gap-2 mb-4 text-sm text-body bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer">
-          <input type="checkbox" className="mt-0.5" checked={saveCard} onChange={(event) => setSaveCard(event.target.checked)} />
-          <span>Save my card on file and automatically charge my remaining balance 3 days before my event (Autopay). You can cancel anytime by contacting us.</span>
-        </label>
+        <PaymentCardAuthorization checked={saveCard} onChange={setSaveCard} required={false} compact />
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm text-body"><p>Payment is processed securely through Stripe.</p></div>
         <button onClick={handleContinue} disabled={loading || !totalsReady || belowMinimum || isHardBlocked || (isLastMinuteBooking && !lastMinuteFeeAccepted) || (paymentChoice === 'custom' && parsedCustomPayAmount < depositAmount)} className="btn-primary w-full text-lg py-3">
           {loading ? 'Processing...' : !totalsReady ? deliveryError || pricingError ? 'Resolve pricing to continue' : 'Calculating your total...' : `Pay ${formatCurrency(amountDueToday)}`}

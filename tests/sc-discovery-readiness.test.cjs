@@ -4,6 +4,7 @@ const fs=require('node:fs')
 const read=p=>fs.readFileSync(p,'utf8')
 // Discovery wave build marker: 2026-09-22
 // Google profile review loop build marker
+// City quality build marker
 
 test('SC public entity matches the live Google profile name while preserving legal name',()=>{
   const layout=read('app/layout.tsx')
@@ -69,6 +70,27 @@ test('SC Google profile is linked consistently and review requests stay location
   assert.ok(contact.includes('BUSINESS.googleProfile'))
   assert.ok(contact.includes('View Friendly Party Rental SC on Google'))
   assert.ok(!email.includes('friendlypartyrental.com/#reviews'))
+})
+
+
+test('only substantive priority city guides are indexable and submitted in the sitemap',()=>{
+  const resources=read('lib/scLocalPlanningResources.ts')
+  const serviceAreas=read('lib/scServiceAreas.ts')
+  const guide=read('components/public/CityRentalGuide.tsx')
+  const sitemap=read('app/sitemap.ts')
+  const priority=['greer','simpsonville','mauldin','easley','travelers-rest','taylors','anderson','spartanburg']
+  for(const slug of priority){
+    assert.ok(resources.includes('"'+slug+'":'),slug+' local planning resource')
+    assert.ok(serviceAreas.includes("'"+slug+"'"),slug+' priority area')
+  }
+  assert.ok(guide.includes('const hasLocalGuide=Boolean(SC_LOCAL_PLANNING[slug])'))
+  assert.ok(guide.includes('hasLocalGuide)}'))
+  assert.ok(guide.includes('Friendly Party Rental SC'))
+  assert.ok(sitemap.includes("SC_LOCAL_PLANNING[a.slug]"))
+  assert.ok(sitemap.includes("a.href!=='/'&&SC_LOCAL_PLANNING[a.slug]"))
+  for(const thin of ['belton','central','gray-court','honea-path','six-mile']){
+    assert.ok(!resources.includes('"'+thin+'":'),thin+' should stay non-indexable until unique local value exists')
+  }
 })
 
 test('SC search revision reflects the discovery wave',()=>{

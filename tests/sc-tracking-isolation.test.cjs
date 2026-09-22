@@ -309,3 +309,15 @@ test('SC Popular Rentals candidate filter rejects add-ons and non-products', () 
     assert.equal(mod.isHomepageFeatureCandidate({...valid,name,slug:name.toLowerCase().replace(/ /g,'-')}),false)
   }
 })
+
+
+test('SC category directory renders published image URLs on the server instead of fetching them after hydration', () => {
+  const page=fs.readFileSync(path.join(root,'app/(public)/category/page.tsx'),'utf8')
+  const browse=fs.readFileSync(path.join(root,'app/(public)/category/CategoryBrowse.tsx'),'utf8')
+  const catalog=fs.readFileSync(path.join(root,'lib/publicCatalog.ts'),'utf8')
+  assert.match(page,/getPublicCategoryPictures/)
+  assert.doesNotMatch(page,/useEffect|fetch\('\/api\/categories/)
+  assert.match(browse,/pictures\[category\.slug\]\|\|category\.image/)
+  assert.match(catalog,/displayToCustomer: true/)
+  assert.match(catalog,/\/api\/category-image\//)
+})

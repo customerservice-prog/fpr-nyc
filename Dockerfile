@@ -1,9 +1,9 @@
-FROM node:20-alpine
+FROM node:24-alpine
 WORKDIR /app
 RUN apk add --no-cache openssl
 ENV HOSTNAME=0.0.0.0
 COPY package*.json .npmrc ./
-RUN npm install --legacy-peer-deps --ignore-scripts
+RUN npm ci --legacy-peer-deps --ignore-scripts
 COPY . .
 RUN npx prisma generate
 ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY

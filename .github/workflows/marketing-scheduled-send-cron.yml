@@ -1,12 +1,22 @@
-name: Marketing Scheduled Send
+name: Marketing Scheduler Diagnostic
+# Railway owns the recurring five-minute schedule. This is a manual diagnostic only.
 on:
-  schedule:
-    - cron: '*/15 * * * *'
   workflow_dispatch: {}
+
+permissions:
+  contents: read
+
 jobs:
-  call-endpoint:
+  check-scheduler:
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - name: Call marketing scheduled send endpoint
-        run: |
-          curl -f -X GET https://friendlypartyrentalsc.com/api/cron/marketing-scheduled-send -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"        
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run the validated scheduler check
+        env:
+          MARKETING_CRON_SECRET: ${{ secrets.MARKETING_CRON_SECRET }}
+          MARKETING_SITE_ORIGIN: https://www.friendlypartyrentalsc.com
+        run: node scripts/marketing-review-cron.mjs

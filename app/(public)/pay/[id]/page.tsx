@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils'
 import { getStripe } from '@/lib/stripe-client'
 import CardPaymentForm from '@/components/public/CardPaymentForm'
+import PaymentCardAuthorization from '@/components/public/PaymentCardAuthorization'
 
 interface PublicOrder {
   id: string
@@ -39,6 +40,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
   const [loading, setLoading] = useState(false)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [paid, setPaid] = useState(false)
+  const [saveCard, setSaveCard] = useState(false)
   const [paymentOption, setPaymentOption] = useState<'deposit' | 'full' | 'other'>('deposit')
   const [otherAmount, setOtherAmount] = useState('')
   const [tipAmount, setTipAmount] = useState(0)
@@ -166,7 +168,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
     await fetch(`/api/orders/${id}/confirm-payment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: amountDue, tipAmount, stripePaymentId }),
+      body: JSON.stringify({ amount: amountDue, tipAmount, stripePaymentId, saveCard }),
     })
     setPaid(true)
   }
@@ -182,7 +184,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: order.id, amount: amountDue }),
+        body: JSON.stringify({ orderId: order.id, amount: amountDue, tipAmount, saveCard }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Payment failed')
@@ -422,6 +424,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
 
       {!clientSecret && (
         <>
+          <PaymentCardAuthorization checked={saveCard} onChange={setSaveCard} required={false} compact />
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm text-body">
             <p>Payment is processed securely through Stripe.</p>
           </div>

@@ -18,6 +18,7 @@ import {
   Menu,
   X,
   LayoutTemplate,
+  ClipboardList,
 } from 'lucide-react'
 
 const navItems = [
@@ -26,6 +27,7 @@ const navItems = [
   { href: '/admin/settings', icon: Settings, label: 'Admin', ownerOnly: true },
   { href: '/admin/scheduling', icon: Calendar, label: 'Scheduling', ownerOnly: false },
   { href: '/admin/customers', icon: Users, label: 'Customers', ownerOnly: false },
+  { href: '/admin/planning-inquiries', icon: ClipboardList, label: 'Planning', ownerOnly: false },
   { href: '/admin/do-not-rent', icon: Ban, label: 'Do Not Rent', ownerOnly: false },
   { href: '/admin/delivery', icon: Truck, label: 'Delivery', ownerOnly: false },
   { href: '/admin/reports', icon: BarChart2, label: 'Reports', ownerOnly: true },

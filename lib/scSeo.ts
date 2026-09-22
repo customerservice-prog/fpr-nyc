@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 export const SC_SITE_URL = 'https://www.friendlypartyrentalsc.com'
 export const SC_BUSINESS_ID = SC_SITE_URL + '/#business'
 export const SC_SEARCH_REVISION = '2026-09-21-sc-search-v1'
-export const SC_STATIC_SEARCH_PATHS = ['/', '/about_us', '/category', '/weddings', '/graduation-rentals', '/contact_us', '/employment', '/frequently_asked_questions', '/gallery', '/order-by-date', '/service-area', '/chiavari-chair-rentals', '/event-planning', '/design-your-event', '/wedding-vendors']
+export const SC_STATIC_SEARCH_PATHS = ['/', '/about_us', '/category', '/weddings', '/graduation-rentals', '/contact_us', '/employment', '/frequently_asked_questions', '/gallery', '/order-by-date', '/service-area', '/chiavari-chair-rentals', '/event-planning', '/event-planning/wedding-coordination', '/event-planning/corporate-events', '/event-planning/private-parties', '/event-planning/festivals-fundraisers', '/design-your-event', '/wedding-vendors']
 export const SC_NON_SEARCH_PATHS = ['/items','/wedding-packages','/category/weddings','/pay-now','/unsubscribe','/admin','/driver','/checkout','/pay','/contract','/schedule','/api','/_next','/robots.txt','/sitemap.xml']
 export function isSearchableSlug(value:unknown):value is string {
  return typeof value==='string' && value.length>0 && value===value.trim() && !['null','undefined','.','..'].includes(value.toLowerCase()) && !/[\\/?#\u0000-\u0020\u007f]/.test(value)

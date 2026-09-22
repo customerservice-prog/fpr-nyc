@@ -1,4 +1,11 @@
-// An SC tenant must be configured explicitly. Never reuse New York's tenant.
-const configured=(process.env.NEXT_PUBLIC_RENTSKETCH_SC_TENANT||'').trim()
-export const SC_RENTSKETCH_TENANT=/^[a-z0-9][a-z0-9-]{1,63}$/.test(configured)&&configured!=='friendly'?configured:null
-export const scOrderAccessUrl=SC_RENTSKETCH_TENANT?'https://rentsketch.com/my-event/?tenant='+encodeURIComponent(SC_RENTSKETCH_TENANT)+'&mode=order':null
+// SECURITY: Greenville customer RentSketch access is deliberately disabled.
+//
+// Do not enable this with an environment variable alone. The RentSketch tenant
+// must first have a server-enforced customer access policy that requires either
+// a verified eligible Greenville order or a verified paid Event Pass.
+//
+// NY's tenant slug ("friendly") must never be reused here. Until Greenville has
+// its own server-side order-or-paid entitlement integration, every SC CTA stays
+// on the local contact/layout-help path and no RentSketch designer URL is emitted.
+export const SC_RENTSKETCH_TENANT: string | null = null
+export const scOrderAccessUrl: string | null = null

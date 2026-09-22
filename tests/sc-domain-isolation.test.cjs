@@ -34,5 +34,7 @@ test('intentional shared NY evidence remains explicitly isolated',()=>{
   const media=fs.readFileSync('lib/nyMediaSnapshot.json','utf8')
   assert.ok(media.includes('friendlypartyrental.com'))
   const rentSketch=fs.readFileSync('lib/scRentSketch.ts','utf8')
-  assert.ok(rentSketch.includes("configured!=='friendly'?configured:null"))
+  assert.match(rentSketch,/SC_RENTSKETCH_TENANT: string \| null = null/)
+  assert.match(rentSketch,/order-or-paid/)
+  assert.doesNotMatch(rentSketch,/NEXT_PUBLIC_RENTSKETCH_SC_TENANT/)
 })

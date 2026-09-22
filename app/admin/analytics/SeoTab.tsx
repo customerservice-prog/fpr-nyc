@@ -11,6 +11,7 @@ import {
   num,
   pct,
 } from './AnalyticsUI';
+import LocalRankGrid from './LocalRankGrid';
 
 interface GscQuery {
   query: string;
@@ -78,6 +79,8 @@ export default function SeoTab(_props: { data?: unknown }) {
         <h1 className='text-[22px] font-bold text-slate-900'>SEO</h1>
         <p className='text-sm text-slate-500 mt-1'>Google search visibility and organic performance.</p>
       </div>
+
+      <LocalRankGrid />
 
       {gsc.loading ? (
         <p className='text-sm text-slate-400'>Loading search data...</p>

@@ -3,6 +3,7 @@ const assert=require('node:assert/strict')
 const fs=require('node:fs')
 const read=p=>fs.readFileSync(p,'utf8')
 // Discovery wave build marker: 2026-09-22
+// Google profile review loop build marker
 
 test('SC public entity matches the live Google profile name while preserving legal name',()=>{
   const layout=read('app/layout.tsx')
@@ -48,6 +49,26 @@ test('Railway-generated hostname redirects to the canonical SC domain',()=>{
   assert.ok(config.includes("friendly-party-rental-greenville-sc-production.up.railway.app"))
   assert.ok(config.includes("https://www.friendlypartyrentalsc.com/:path*"))
   assert.ok(config.includes("permanent: true"))
+})
+
+
+test('SC Google profile is linked consistently and review requests stay location-safe',()=>{
+  const cid='14184978817653836417'
+  const profile='https://www.google.com/maps?cid='+cid
+  const layout=read('app/layout.tsx')
+  const utils=read('lib/utils.ts')
+  const email=read('lib/email.ts')
+  const contact=read('app/(public)/contact_us/page.tsx')
+  assert.ok(utils.includes(profile))
+  assert.ok(layout.includes("hasMap: GOOGLE_PROFILE_URL"))
+  assert.ok(layout.includes("sameAs: [GOOGLE_PROFILE_URL]"))
+  assert.ok(email.includes('BUSINESS.googleProfile'))
+  assert.ok(email.includes('honest Google review'))
+  assert.ok(email.includes('positive or critical'))
+  assert.ok(email.includes('from: { name: BUSINESS.name'))
+  assert.ok(contact.includes('BUSINESS.googleProfile'))
+  assert.ok(contact.includes('View Friendly Party Rental SC on Google'))
+  assert.ok(!email.includes('friendlypartyrental.com/#reviews'))
 })
 
 test('SC search revision reflects the discovery wave',()=>{

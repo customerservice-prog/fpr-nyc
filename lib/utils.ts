@@ -87,6 +87,7 @@ export const BUSINESS = {
   tiktok: 'https://www.tiktok.com/@friendlypartyrental',
   twitter: 'https://twitter.com/friendlypartyrent',
   mapUrl: 'https://maps.google.com/?q=Greenville+SC',
+  googleProfile: 'https://www.google.com/maps?cid=14184978817653836417',
 }
 
 export const NAV_RENTALS = [

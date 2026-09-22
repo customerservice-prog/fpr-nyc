@@ -16,6 +16,7 @@ const roboto = Roboto({
 })
 
 const SITE_URL = 'https://www.friendlypartyrentalsc.com'
+const GOOGLE_PROFILE_URL = 'https://www.google.com/maps?cid=14184978817653836417'
 const SITE_DESCRIPTION =
   'Friendly Party Rental SC provides party and event rentals in Greenville, SC and surrounding Upstate South Carolina communities, including tents, tables, chairs, inflatables, weddings and event equipment.'
 
@@ -30,6 +31,8 @@ const LOCAL_BUSINESS_JSONLD = {
   telephone: '+1-864-610-5324',
   email: 'customerservice@friendlypartyrental.com',
   url: SITE_URL,
+  hasMap: GOOGLE_PROFILE_URL,
+  sameAs: [GOOGLE_PROFILE_URL],
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'Greenville',

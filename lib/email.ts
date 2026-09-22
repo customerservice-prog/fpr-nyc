@@ -39,7 +39,7 @@ export async function sendEmail({
 
   try {
     const delivery = await transporter.sendMail({
-      from: { name: 'Friendly Party Rental - South Carolina', address: (process.env.EMAIL_FROM || process.env.EMAIL_USER || SC_EMAIL_ADDRESS).replace(/^.*<([^>]+)>.*$/, '$1').trim() },
+      from: { name: BUSINESS.name, address: (process.env.EMAIL_FROM || process.env.EMAIL_USER || SC_EMAIL_ADDRESS).replace(/^.*<([^>]+)>.*$/, '$1').trim() },
       to: to.toLowerCase() === 'customerservice@friendlypartyrentalsc.com' ? SC_EMAIL_ADDRESS : to,
       replyTo: replyTo || SC_EMAIL_ADDRESS,
       subject: scEmailSubject(subject),
@@ -638,15 +638,19 @@ export function thankYouEmail(order: {
   customerName: string
 }, setting?: { subject?: string }) {
   return {
-    subject: setting?.subject || `Thank you for renting with Friendly Party Rental!`,
+    subject: setting?.subject || `Thank you for choosing ${BUSINESS.name}!`,
     html: `
       <div style="font-family: Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
         ${emailHeader()}
         <h2 style="color: #1A6FD4;">Thank You!</h2>
         <p>Dear ${order.customerName},</p>
-        <p>Thank you for choosing Friendly Party Rental for your recent event! We hope everything was set up to your satisfaction and that your event was a success.</p>
+        <p>Thank you for choosing ${BUSINESS.name} for your recent event. We hope everything went smoothly and that your celebration was a success.</p>
         <p><strong>Order Number:</strong> ${order.orderNumber}</p>
-        <p>We would love to hear about your experience. If anything wasn't quite right, please reply to this email or give us a call so we can make it right.</p>
+        <p>If you have a moment, we would appreciate an honest Google review. Your feedback—positive or critical—helps other Greenville-area customers know what to expect and helps our local team improve.</p>
+        <p style="margin:24px 0;">
+          <a href="${BUSINESS.googleProfile}" style="background:#1A6FD4;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:bold;">Review ${BUSINESS.name} on Google</a>
+        </p>
+        <p>If anything needs our attention, you can also reply directly to this email or call us at ${BUSINESS.phone}.</p>
         <p>We hope to be part of your next celebration!</p>
         ${emailFooter()}
       </div>

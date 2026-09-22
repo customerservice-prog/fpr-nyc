@@ -239,14 +239,10 @@ export default function PaymentPage() {
   const applyCustomTip = (event: ChangeEvent<HTMLInputElement>) => { setCustomTip(event.target.value); setTipAmount(Math.max(0, parseFloat(event.target.value) || 0)) }
   const pendingTotalLabel = deliveryError || pricingError ? 'Unavailable' : 'Calculating...'
 
-  const finalizeOrder = (finalOrderNumber: string) => {
+  const finalizeOrder = (finalOrderId: string, stripePaymentId: string) => {
     sessionStorage.setItem('order_confirmation', JSON.stringify({
-      orderNumber: finalOrderNumber,
-      orderId,
-      depositAmount: paymentPrincipal,
-      tipAmount,
-      balanceDue,
-      totalAmount: grandTotal,
+      orderId: finalOrderId,
+      stripePaymentId,
     }))
     paymentSucceededRef.current = true
     clearCart()
@@ -255,13 +251,15 @@ export default function PaymentPage() {
     router.push('/checkout/confirmation')
   }
 
-  const confirmPayment = async (finalOrderNumber: string, finalOrderId: string, stripePaymentId?: string) => {
-    await fetch('/api/orders/' + finalOrderId + '/confirm-payment', {
+  const confirmPayment = async (_finalOrderNumber: string, finalOrderId: string, stripePaymentId?: string) => {
+    if (!stripePaymentId) throw new Error('Your payment result needs verification. Please contact us before paying again.')
+    const response = await fetch('/api/orders/' + finalOrderId + '/confirm-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ amount: amountDueToday, stripePaymentId, saveCard }),
     })
-    finalizeOrder(finalOrderNumber)
+    if (!response.ok) throw new Error('Your payment result needs verification. Please contact us before paying again.')
+    finalizeOrder(finalOrderId, stripePaymentId)
   }
 
   const handleContinue = async () => {

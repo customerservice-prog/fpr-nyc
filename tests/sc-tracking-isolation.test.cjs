@@ -140,14 +140,13 @@ test('route listener does not send a blank or default GA config when SC analytic
   for (const id of ['', SC_GA]) {
     const effects = [], calls = []
     const component = load('components/GoogleAnalyticsListener.tsx', {
-      'react': { useEffect: effect => effects.push(effect) },
+      'react': { useEffect: effect => effects.push(effect), useRef: value => ({ current: value }) },
       'next/navigation': { usePathname: () => '/category/tent-rentals' },
       '@/lib/gtag': { GA_MEASUREMENT_ID: id },
     }, { window: { gtag: (...args) => calls.push(args) } }).default
     component()
     effects.forEach(effect => effect())
-    assert.equal(calls.length, id ? 1 : 0)
-    if (id) assert.equal(calls[0][1], SC_GA)
+    assert.equal(calls.length, 0)
   }
 })
 
@@ -181,4 +180,27 @@ test('server rendering never emits browser events even when SC destinations are 
   const { tracking, calls } = tracker(configured, false)
   assert.doesNotThrow(() => tracking.trackEvent('purchase'))
   assert.deepEqual(calls, [])
+})
+
+
+test('SC events queue before the remote tag loads and transaction events dedupe', () => {
+  const browserWindow = {}
+  const tracking = load('lib/gtag.ts', {}, { process: { env: configured }, window: browserWindow })
+  tracking.trackEvent('begin_checkout', { value: 100, currency: 'USD' })
+  tracking.trackEvent('purchase', { transaction_id: 'SC-100', value: 100, currency: 'USD' })
+  tracking.trackEvent('purchase', { transaction_id: 'SC-100', value: 100, currency: 'USD' })
+  tracking.trackEvent('conversion', { transaction_id: 'SC-100', send_to: SC_ADS + '/' + SC_LABEL })
+  tracking.trackEvent('conversion', { transaction_id: 'SC-100', send_to: SC_ADS + '/' + SC_LABEL })
+  const commands = Array.from(browserWindow.dataLayer || [], entry => Array.from(entry))
+  assert.equal(commands.length, 3)
+  assert.deepEqual(commands.map(entry => entry[1]), ['begin_checkout', 'purchase', 'conversion'])
+  assert.equal(commands[0][2].send_to, SC_GA)
+  assert.equal(commands[2][2].send_to, SC_ADS + '/' + SC_LABEL)
+})
+
+test('SC layout initializes its queue before hydration and keeps Google network loading lazy', () => {
+  const source = fs.readFileSync(path.join(root, 'app/layout.tsx'), 'utf8')
+  assert.match(source, /<Script id="ga4-init" strategy="beforeInteractive">/)
+  assert.match(source, /strategy="lazyOnload"/)
+  assert.doesNotMatch(source, /G-NV8CF7GT5C|AW-18374628389/)
 })

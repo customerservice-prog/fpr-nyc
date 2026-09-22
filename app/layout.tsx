@@ -91,13 +91,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: safeJsonLd(LOCAL_BUSINESS_JSONLD) }}
         />
         {GOOGLE_TAG_ID && <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`}
-            strategy="afterInteractive"
-          />
-          <Script id="ga4-init" strategy="afterInteractive">
+          <Script id="ga4-init" strategy="beforeInteractive">
             {GOOGLE_TAG_BOOTSTRAP}
           </Script>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`}
+            strategy="lazyOnload"
+          />
         </>}
       </head>
       <body className={roboto.className}>

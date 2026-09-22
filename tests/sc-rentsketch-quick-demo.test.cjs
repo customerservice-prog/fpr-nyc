@@ -1,0 +1,12 @@
+const test=require('node:test')
+const assert=require('node:assert/strict')
+const fs=require('node:fs')
+test('Greenville design page labels the walkthrough as a quick demo and does not promise unavailable designer access',()=>{
+ const page=fs.readFileSync('app/(public)/design-your-event/page.tsx','utf8')
+ assert.match(page,/id="quick-demo"/)
+ assert.match(page,/Watch the Quick Demo/)
+ assert.match(page,/Get Greenville Layout Help/)
+ assert.doesNotMatch(page,/Start Designing My Event/)
+ assert.doesNotMatch(page,/Open the Event Designer/)
+ assert.doesNotMatch(page,/label="Start Designing"/)
+})

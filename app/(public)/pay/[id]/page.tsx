@@ -21,6 +21,7 @@ interface PublicOrder {
   eventTimeSlot?: string | null
   eventAddress?: string
   eventCity?: string
+  eventState?: string
   eventZip?: string
   deliveryType: string
   deliveryFee: number

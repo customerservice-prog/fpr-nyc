@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { PUBLIC_ITEM_SELECT } from '@/lib/availability'
 import CategoryClient from './CategoryClient'
+import CategoryPlanningGuide from '@/components/public/CategoryPlanningGuide'
 import { safeJsonLd } from '@/lib/jsonLd'
 import { categoryDescriptionForSc, itemDescriptionForSc } from '@/lib/scPublicCopy'
 
@@ -158,6 +159,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
         initialItems,
       })
     ),
+    createElement(CategoryPlanningGuide, { slug, name: categoryLabel }),
     seoSection
   )
 }

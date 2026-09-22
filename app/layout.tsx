@@ -24,6 +24,7 @@ const LOCAL_BUSINESS_JSONLD = {
   '@type': 'LocalBusiness',
   '@id': 'https://www.friendlypartyrentalsc.com/#business',
   name: 'Friendly Party Rental',
+  description: SITE_DESCRIPTION,
   image: `${SITE_URL}/images/logo.png`,
   telephone: '+1-864-610-5324',
   email: 'customerservice@friendlypartyrental.com',
@@ -41,7 +42,29 @@ const LOCAL_BUSINESS_JSONLD = {
     closes: '18:00',
   }],
   areaServed: [{"@type": "Place", "name": "Greenville, SC"}, {"@type": "Place", "name": "Anderson, SC"}, {"@type": "Place", "name": "Belton, SC"}, {"@type": "Place", "name": "Berea, SC"}, {"@type": "Place", "name": "Boiling Springs, SC"}, {"@type": "Place", "name": "Central, SC"}, {"@type": "Place", "name": "Clemson, SC"}, {"@type": "Place", "name": "Duncan, SC"}, {"@type": "Place", "name": "Easley, SC"}, {"@type": "Place", "name": "Fountain Inn, SC"}, {"@type": "Place", "name": "Gantt, SC"}, {"@type": "Place", "name": "Gray Court, SC"}, {"@type": "Place", "name": "Greer, SC"}, {"@type": "Place", "name": "Honea Path, SC"}, {"@type": "Place", "name": "Inman, SC"}, {"@type": "Place", "name": "Judson, SC"}, {"@type": "Place", "name": "Landrum, SC"}, {"@type": "Place", "name": "Laurens, SC"}, {"@type": "Place", "name": "Liberty, SC"}, {"@type": "Place", "name": "Marietta, SC"}, {"@type": "Place", "name": "Mauldin, SC"}, {"@type": "Place", "name": "Parker, SC"}, {"@type": "Place", "name": "Pelzer, SC"}, {"@type": "Place", "name": "Pickens, SC"}, {"@type": "Place", "name": "Piedmont, SC"}, {"@type": "Place", "name": "Powdersville, SC"}, {"@type": "Place", "name": "Seneca, SC"}, {"@type": "Place", "name": "Simpsonville, SC"}, {"@type": "Place", "name": "Six Mile, SC"}, {"@type": "Place", "name": "Spartanburg, SC"}, {"@type": "Place", "name": "Taylors, SC"}, {"@type": "Place", "name": "Travelers Rest, SC"}, {"@type": "Place", "name": "Wade Hampton, SC"}, {"@type": "Place", "name": "Williamston, SC"}, {"@type": "Place", "name": "Woodruff, SC"}],
-  priceRange: '$$',
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Party and event rentals in Greenville, SC',
+    itemListElement: [
+      { '@type': 'OfferCatalog', name: 'Tent Rentals', url: `${SITE_URL}/category/tent-rentals` },
+      { '@type': 'OfferCatalog', name: 'Table & Chair Rentals', url: `${SITE_URL}/category/table-chair-rentals` },
+      { '@type': 'OfferCatalog', name: 'Bounce House & Water Slide Rentals', url: `${SITE_URL}/category/bounce-house-rentals` },
+      { '@type': 'OfferCatalog', name: 'Wedding Rentals', url: `${SITE_URL}/weddings` },
+      { '@type': 'OfferCatalog', name: 'Linen Rentals', url: `${SITE_URL}/category/linen-rentals` },
+      { '@type': 'OfferCatalog', name: 'Dance Floor & Stage Rentals', url: `${SITE_URL}/category/dance-floor-stage-rentals` },
+    ],
+  },
+  priceRange: '$',
+}
+
+const WEBSITE_JSONLD = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': SITE_URL + '/#website',
+  url: SITE_URL,
+  name: 'Friendly Party Rental - Greenville, SC',
+  description: SITE_DESCRIPTION,
+  publisher: { '@id': SITE_URL + '/#business' },
 }
 
 export const metadata: Metadata = {
@@ -95,6 +118,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: safeJsonLd(LOCAL_BUSINESS_JSONLD) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(WEBSITE_JSONLD) }}
         />
         {GOOGLE_TAG_ID && <>
           <Script id="ga4-init" strategy="beforeInteractive">

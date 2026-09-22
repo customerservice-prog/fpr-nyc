@@ -17,7 +17,7 @@ const playfair = Playfair_Display({
   display: 'swap',
 })
 
-export const metadata = scPageMetadata("/weddings","Wedding Rentals in Greenville, SC","Compare Greenville wedding rental packages and listed inclusions for tents, tables, chairs, linens and lighting. Travel fees and tax are separate.")
+export const metadata = scPageMetadata("/weddings","Wedding Rentals in Greenville, SC | Tents, Chairs, Linens & Packages","Browse Greenville wedding rentals, tents, tables, chairs, Chiavari seating, linens, lighting, dance floors and wedding packages with delivery and setup options.")
 export const dynamic = 'force-dynamic'
 
 const faqItems = [

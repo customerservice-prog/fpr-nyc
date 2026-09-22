@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run snapshot:wedding-art && next build",
+    "build": "npm run snapshot:wedding-art && npm run test:sc-ranking && next build",
     "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
     "lint": "next lint",
     "db:migrate": "prisma migrate deploy",
@@ -12,7 +12,8 @@
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
     "postinstall": "prisma generate",
-    "snapshot:wedding-art": "node scripts/snapshot-ny-wedding-art.mjs"
+    "snapshot:wedding-art": "node scripts/snapshot-ny-wedding-art.mjs",
+    "test:sc-ranking": "node --test tests/sc-ranking-readiness.test.cjs"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

@@ -8,6 +8,7 @@ import BookingCalendar from '@/components/public/BookingCalendar'
 import CartDrawer from '@/components/public/CartDrawer'
 import { useCart, DEFAULT_SCHEDULING_DETAILS } from '@/components/public/CartContext'
 import { formatDateShort } from '@/lib/utils'
+import { categorySearchName } from '@/lib/scSearchReadiness'
 import { ShoppingCart, CalendarDays, Pencil, Truck, MapPin } from 'lucide-react'
 
 const APPOINTMENT_SLOTS = [
@@ -404,7 +405,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
       )}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-dark">{category?.name || slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}</h1>
+          <h1 className="text-2xl font-bold text-dark">{category ? `${categorySearchName(slug, category.name)} in Greenville, SC` : slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) + ' in Greenville, SC'}</h1>
         </div>
         <button onClick={() => setCartOpen(true)} className="btn-primary flex items-center gap-2">
           <ShoppingCart size={20} />

@@ -10,7 +10,7 @@ import { getHomepagePopularItems } from '@/lib/homepageMerchandising'
 import { IMAGE_CACHE_BUST } from '@/lib/imageVersion'
 import { prisma } from '@/lib/prisma'
 
-export const metadata = scPageMetadata('/','Party Rentals in Greenville, SC','Rent tents, tables, chairs, bounce houses, linens and wedding equipment in Greenville and nearby Upstate South Carolina communities. Check your event date online.')
+export const metadata = scPageMetadata('/','Party Rentals in Greenville, SC | Tents, Tables, Chairs & More','Rent tents, tables, chairs, bounce houses, water slides, linens and wedding equipment in Greenville, SC with delivery and online date availability.')
 export const revalidate = 60
 
 export default async function HomePage() {

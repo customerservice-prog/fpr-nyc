@@ -7,15 +7,15 @@ export default function ScHomeSeo() {
       <p className="text-body text-sm">Compare <Link href="/category/tent-rentals" prefetch={false} className="underline">pole tents, frame tents, and canopies</Link> for weddings, graduations, backyard parties, corporate events, and community celebrations. Choose a tent around guest count, seating, serving space, surface, access, and weather needs, then have our Greenville team confirm anchoring and installation requirements for the site.</p>
     </div>
     <div>
-      <h2 className="text-xl font-bold text-dark mb-3">Table and Chair Rentals</h2>
+      <h2 className="text-xl font-bold text-dark mb-3">Table &amp; Chair Rentals in Greenville, SC</h2>
       <p className="text-body text-sm">Browse <Link href="/category/table-chair-rentals" prefetch={false} className="underline">banquet tables, round tables, cocktail tables, folding chairs, resin chairs, and Chiavari chairs</Link> for ceremonies, meals, and casual gatherings. Check the <Link href="/service-area#delivery-estimate" prefetch={false} className="underline">delivery fee for your event ZIP code</Link> while planning your order.</p>
     </div>
     <div>
-      <h2 className="text-xl font-bold text-dark mb-3">Bounce Houses, Water Slides &amp; Party Fun</h2>
+      <h2 className="text-xl font-bold text-dark mb-3">Bounce House &amp; Water Slide Rentals in Greenville, SC</h2>
       <p className="text-body text-sm">Explore <Link href="/category/bounce-house-rentals" prefetch={false} className="underline">bounce houses and water slides</Link>, plus concessions, yard games, movie screens, foam-party equipment, generators, and other event add-ons. Review the item page for setup space, power, water, and other requirements before checkout.</p>
     </div>
     <div>
-      <h2 className="text-xl font-bold text-dark mb-3">Wedding Rentals in Greenville</h2>
+      <h2 className="text-xl font-bold text-dark mb-3">Wedding Rentals in Greenville, SC</h2>
       <p className="text-body text-sm">Compare <Link href="/weddings#packages" prefetch={false} className="underline">wedding packages</Link>, tents, tables, chairs, linens, lighting, dance floors, ceremony pieces, and reception equipment. Use our event-layout walkthrough to explore your setup, then have the Greenville team confirm availability, site requirements, and final pricing.</p>
     </div>
     <div>

@@ -65,31 +65,6 @@ export const SC_ITEM_MEDIA: Record<string,{path:string;updatedAt:string;referenc
     "updatedAt": "2026-09-13T09:47:52.785Z",
     "reference": true
   },
-  "wedding-package-backyard-elopement": {
-    "path": "/images/storefront/pkg-basic.jpg",
-    "updatedAt": "2026-09-12T22:08:20.590Z",
-    "reference": true
-  },
-  "wedding-package-classic-ceremony": {
-    "path": "/images/storefront/pkg-standard.jpg",
-    "updatedAt": "2026-09-12T22:08:44.600Z",
-    "reference": true
-  },
-  "wedding-package-garden-reception": {
-    "path": "/images/storefront/pkg-premium.jpg",
-    "updatedAt": "2026-09-12T22:09:08.597Z",
-    "reference": true
-  },
-  "wedding-package-luxury-estate": {
-    "path": "/images/storefront/pkg-luxury.jpg",
-    "updatedAt": "2026-09-12T22:09:33.586Z",
-    "reference": true
-  },
-  "wedding-package-all-inclusive-premium": {
-    "path": "/images/storefront/pkg-elite.jpg",
-    "updatedAt": "2026-09-12T22:07:54.579Z",
-    "reference": true
-  },
   "8ft-plastic-folding-table": {
     "path": "/images/storefront/item-8ft-plastic-folding-table.jpg",
     "updatedAt": "2026-09-12T21:29:37.577Z",

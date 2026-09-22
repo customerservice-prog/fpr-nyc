@@ -47,14 +47,14 @@ export default function WeddingPackageCard({
         <div className="relative w-full h-64 overflow-hidden">
           <Image
             src={image}
-            alt={`${name}: illustrative event setting; included equipment is listed below`}
+            alt={name}
             fill
             sizes="(max-width: 768px) 100vw, 400px"
-            className="object-cover bg-gray-50 group-hover:scale-105 transition-transform duration-300"
+            className="object-contain bg-gray-50 group-hover:scale-105 transition-transform duration-300"
           />
         </div>
       )}
-      <div className="p-6"><p className="mb-3 text-[11px] leading-4 text-gray-500">Event imagery is illustrative. The included equipment and price below define this Greenville package.</p>
+      <div className="p-6">
         {packageNumber && !signature && (
           <p className="text-xs text-primary font-bold uppercase tracking-[0.2em] mb-2">Package {packageNumber}</p>
         )}

@@ -6,10 +6,10 @@ import { localizeScPublicCopy } from '@/lib/scPublicCopy'
 
 const fallbackById = new Map(WEDDING_PACKAGES.map((pkg) => [pkg.id, pkg]))
 
-// The public wedding page uses the real SC WeddingPackage rows, while matching
-// inventory items remain the source of truth for the price a customer pays.
-// If an older SC package row has no stored image/description yet, use the
-// curated package fallback so the storefront never renders an empty card.
+// Greenville keeps its own WeddingPackage rows and inventory prices. The five
+// canonical package visuals are intentionally locked to the exact public NY
+// artwork copied into the SC deployment at build time. No NY customer, order,
+// payment, account, or runtime storefront data is used here.
 export async function getSyncedWeddingPackages() {
   const packages = await prisma.weddingPackage.findMany({
     where: { isActive: true },
@@ -26,10 +26,9 @@ export async function getSyncedWeddingPackages() {
   return packages.map((p) => {
     const fallback = fallbackById.get(p.id)
     const liveCost = costByName.get(`Wedding Package - ${p.name}`)
-    const legacyArt = p.updatedAt.toISOString() === '2026-08-23T19:15:02.017Z'
-    const image = legacyArt ? (SC_WEDDING_IMAGES[p.id] || '/images/sc-event-reception.jpg') : p.image
+    const image = SC_WEDDING_IMAGES[p.id] || (p.image
       ? `/api/wedding-package-image/${p.id}?v=${p.updatedAt ? new Date(p.updatedAt).toISOString() : IMAGE_CACHE_BUST}`
-      : fallback?.image || null
+      : fallback?.image || null)
     const description = localizeScPublicCopy(p.description) || fallback?.description || ''
     const packageItems = Array.isArray(p.items) && p.items.length ? p.items : (fallback?.items || [])
 

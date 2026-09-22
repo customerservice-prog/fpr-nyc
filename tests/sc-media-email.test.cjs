@@ -69,15 +69,17 @@ test('invalid contact email creates no record and sends nothing',async()=>{
 test('public sender diagnostic contains no credentials and does not claim active SMTP',async()=>{
  const {route}=contact(async()=>{});const r=await route.GET();assert.equal(r.body.notificationsEnabled,false);assert.equal(r.body.email,business.email);assert.equal(Object.keys(r.body).length,3)
 })
-test('all new category and wedding assets exist, with five distinct wedding previews',()=>{
+test('all category assets exist and five wedding previews are SC-local build snapshots',()=>{
  const categories=load('lib/scCategoryImages.ts').SC_CATEGORY_IMAGES;assert.equal(Object.keys(categories).length,19);assert.ok(categories['order-by-date'])
  const weddings=load('lib/scWeddingImages.ts').SC_WEDDING_IMAGES;assert.equal(new Set(Object.values(weddings)).size,5)
- for(const file of [...Object.values(categories),...Object.values(weddings)])assert.ok(fs.existsSync(path.join('public',file)),file)
+ for(const file of Object.values(categories))assert.ok(fs.existsSync(path.join('public',file)),file)
+ for(const url of Object.values(weddings)){assert.ok(url.startsWith('/api/wedding-art/'));assert.ok(!url.includes('friendlypartyrental.com'))}
+ const capture=fs.readFileSync('scripts/snapshot-ny-wedding-art.mjs','utf8');assert.ok(capture.includes('public'));assert.ok(capture.includes('ny-parity'));assert.ok(capture.includes('weddings'))
 })
 test('audited item references are revision-locked and have real image files',()=>{
- const media=load('lib/scItemMedia.ts').SC_ITEM_MEDIA;assert.equal(Object.keys(media).length,34)
+ const media=load('lib/scItemMedia.ts').SC_ITEM_MEDIA;assert.equal(Object.keys(media).length,29)
  for(const row of Object.values(media)){assert.ok(row.updatedAt);assert.equal(row.reference,true);assert.ok(fs.existsSync(path.join('public',row.path)))}
- const route=fs.readFileSync('app/api/item-image/[slug]/route.ts','utf8');assert.ok(route.includes('item.updatedAt.toISOString() === media.updatedAt'))
+ const route=fs.readFileSync('app/api/item-image/[slug]/route.ts','utf8');assert.ok(route.includes('item.updatedAt.toISOString() === media.updatedAt'));assert.ok(route.includes('SC_WEDDING_ITEM_TO_PACKAGE[slug]'));assert.ok(route.indexOf('SC_WEDDING_ITEM_TO_PACKAGE[slug]')<route.indexOf('const media = SC_ITEM_MEDIA[slug]'))
 })
 test('desktop planning pictures and original mobile video/category order are preserved',()=>{
  const mobile=fs.readFileSync('components/public/MobileHome.tsx','utf8');assert.ok(!mobile.includes('<PlanningShortcuts'));assert.ok(mobile.includes('<HomeYouTube/>'));assert.ok(mobile.includes('<HomeCategoryGrid'));assert.ok(mobile.indexOf('<HomeYouTube/>')<mobile.indexOf('<HomeCategoryGrid'))

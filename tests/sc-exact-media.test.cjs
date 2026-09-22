@@ -16,3 +16,14 @@ test('exact NY cover, crop and click-to-play are retained without SC artwork ove
 test('all rental categories keep their own local checkout destinations',()=>{
  const source=read('lib/nyHomeMedia.ts');assert.ok(source.includes('order-by-date'));assert.ok(!source.includes('https://www.friendlypartyrental.com'));assert.ok(!source.includes('/admin/'))
 })
+
+test('wedding package artwork is snapshotted from NY at build time and served only through SC URLs',()=>{
+ const pkg=JSON.parse(read('package.json'));assert.equal(pkg.scripts['snapshot:wedding-art'],'node scripts/snapshot-ny-wedding-art.mjs');assert.ok(pkg.scripts.build.startsWith('npm run snapshot:wedding-art && '))
+ const capture=read('scripts/snapshot-ny-wedding-art.mjs')
+ for(const id of ['pkg-basic','pkg-standard','pkg-premium','pkg-luxury','pkg-elite'])assert.ok(capture.includes('https://www.friendlypartyrental.com/api/wedding-package-image/'+id))
+ assert.ok(capture.includes("writeFile(path.join(outDir, packageId + '.bin'), bytes)"));assert.ok(capture.includes("createHash('sha256')"))
+ const map=read('lib/scWeddingImages.ts');for(const id of ['pkg-basic','pkg-standard','pkg-premium','pkg-luxury','pkg-elite'])assert.ok(map.includes('"'+id+'": "/api/wedding-art/'+id+'"'))
+ assert.ok(!map.includes('https://www.friendlypartyrental.com'))
+ const card=read('components/public/WeddingPackageCard.tsx');assert.ok(card.includes('object-contain bg-gray-50'));assert.ok(!card.includes('illustrative event setting'))
+ const detail=read('app/(public)/wedding-packages/page.tsx');assert.ok(detail.includes('w-full h-auto object-contain bg-gray-50'));assert.ok(!detail.includes('max-h-[520px] object-cover'))
+})

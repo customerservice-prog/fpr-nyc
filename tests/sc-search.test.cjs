@@ -36,5 +36,5 @@ test('canonical metadata consolidates search URLs without moving origin-scoped c
  assert.ok(redirects.every(r=>r.destination.startsWith('/')&&!r.destination.startsWith('//')))
  for(const path of ['/','/category','/order-by-date'])assert.equal(seo.scPageMetadata(path,'Title','Description').alternates.canonical,seo.SC_SITE_URL+path)
  for(const p of ['/checkout/:path*','/admin/:path*','/driver/:path*','/items'])assert.ok(headers.some(h=>h.source===p&&h.headers[0].value.includes('noindex')))
- const s=read('app/robots.ts');for(const p of ['/api/item-image/','/api/category-image/','/api/wedding-package-image/','/api/shared-gallery/'])assert.ok(s.includes(p))
+ const s=read('app/robots.ts');for(const p of ['/api/item-image/','/api/category-image/','/api/wedding-package-image/','/api/wedding-art/','/api/shared-gallery/'])assert.ok(s.includes(p))
 })

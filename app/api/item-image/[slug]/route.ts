@@ -3,6 +3,8 @@ import sharp from 'sharp'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { SC_ITEM_MEDIA } from '@/lib/scItemMedia'
+import { SC_WEDDING_ITEM_TO_PACKAGE } from '@/lib/scWeddingImages'
+import { readScWeddingArtwork } from '@/lib/scWeddingArtworkServer'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -54,6 +56,21 @@ export async function GET(
 
   if (!item) {
     return new NextResponse('Not found', { status: 404 })
+  }
+
+  const weddingPackageId = SC_WEDDING_ITEM_TO_PACKAGE[slug]
+  if (weddingPackageId) {
+    try {
+      const artwork = await readScWeddingArtwork(weddingPackageId)
+      if (artwork) return new NextResponse(artwork.bytes, { headers: {
+        'Content-Type': artwork.contentType,
+        'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
+        'X-Image-Reference': 'exact-public-NY-artwork-local-SC-snapshot',
+        'X-Content-Type-Options': 'nosniff',
+      } })
+    } catch {
+      return fallbackImage(item.name, 'wedding-art-unavailable')
+    }
   }
 
   const media = SC_ITEM_MEDIA[slug]

@@ -1,0 +1,14 @@
+name: IndexNow Live Catalog Refresh
+
+on:
+  schedule:
+    - cron: '25 14 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  call-endpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Submit current SC searchable URLs to IndexNow
+        run: |
+          curl -f -X GET https://www.friendlypartyrentalsc.com/api/cron/indexnow -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

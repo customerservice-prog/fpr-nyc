@@ -5,6 +5,7 @@ const read=p=>fs.readFileSync(p,'utf8')
 // Discovery wave build marker: 2026-09-22
 // Google profile review loop build marker
 // City quality build marker
+// Live catalog IndexNow build marker
 
 test('SC public entity matches the live Google profile name while preserving legal name',()=>{
   const layout=read('app/layout.tsx')
@@ -113,6 +114,25 @@ test('all SC cron workflows use the canonical host and required CRON_SECRET auth
   }
   const thankYouRoute=read('app/api/cron/thank-you/route.ts')
   assert.ok(thankYouRoute.includes('authHeader !== `Bearer ${process.env.CRON_SECRET}`'))
+})
+
+
+test('daily IndexNow refresh submits the live SC catalog safely',()=>{
+  const helper=read('lib/scIndexNow.ts')
+  const route=read('app/api/cron/indexnow/route.ts')
+  const workflow=read('.github/workflows/indexnow-refresh-cron.yml')
+  assert.ok(helper.includes("currentSearchableScUrls"))
+  assert.ok(helper.includes("SC_LOCAL_PLANNING[area.slug]"))
+  assert.ok(helper.includes("displayToCustomer: true"))
+  assert.ok(helper.includes("websitePage.findMany"))
+  assert.ok(helper.includes("https://api.indexnow.org/indexnow"))
+  assert.ok(helper.includes("https://www.friendlypartyrentalsc.com/"))
+  assert.ok(helper.includes(".slice(0, 10000)"))
+  assert.ok(route.includes("authHeader !== `Bearer ${process.env.CRON_SECRET}`"))
+  assert.ok(route.includes("currentSearchableScUrls()"))
+  assert.ok(route.includes("submitScIndexNow(urls)"))
+  assert.ok(workflow.includes("https://www.friendlypartyrentalsc.com/api/cron/indexnow"))
+  assert.ok(workflow.includes("Authorization: Bearer ${{ secrets.CRON_SECRET }}"))
 })
 
 test('SC search revision reflects the discovery wave',()=>{

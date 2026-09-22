@@ -36,6 +36,9 @@ jobs:
       - name: Test SC tracking destination isolation
         run: node --test tests/sc-tracking-isolation.test.cjs
 
+      - name: Test SC marketing autopilot safety and localization
+        run: node --test tests/sc-marketing-autopilot-parity.test.cjs
+
       - name: Test Greenville delivery-only policy and quote regressions
         run: node --experimental-strip-types --test tests/sc-delivery.test.mjs
 

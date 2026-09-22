@@ -1,203 +1,276 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { sendEmail } from '@/lib/email'
+import { getMarketingContacts, matchesMarketingSegment } from '@/lib/marketing/contacts'
+import { feedbackHeaders } from '@/lib/marketing/feedbackToken'
+import { sendMarketingEmail as sendEmail, marketingTransportStatus } from '@/lib/marketing/delivery'
+import { getAutomationPlan } from '@/lib/marketing/plannerData'
+import { automationSegmentForCampaign } from '@/lib/marketing/planner'
 import { filterToMarketingEligible, type EligibilityResult } from '@/lib/marketing/eligibility'
-
-// Wrap builder HTML in a professional, email-client-safe branded shell.
-// Table-based layout with inline styles for maximum client compatibility (Gmail, Outlook, Apple Mail).
-function wrapEmail(bodyHtml: string, recipient: string, origin: string, preheaderText?: string): string {
-  const unsubUrl = origin + '/api/unsubscribe?email=' + encodeURIComponent(recipient)
-  const year = new Date().getFullYear()
-  return `<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<title>Friendly Party Rental</title>
-</head>
-<body style="margin:0;padding:0;background-color:#f4f6fb;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;color:#f4f6fb;">${(preheaderText || 'Party & event rentals delivered and set up for you across Greenville and Upstate South Carolina.').replace(/[&<>]/g, (c) => (c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;'))}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f6fb;"><tr><td align="center" style="padding:0;">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;margin:0 auto;">
-<tr><td style="background-color:#0b3d91;padding:22px 24px;text-align:center;border-radius:0;">
-<img src="https://www.friendlypartyrentalsc.com/images/logo.png" width="150" alt="Friendly Party Rental" style="display:inline-block;max-width:150px;height:auto;border:0;" />
-</td></tr>
-<tr><td style="height:4px;background-color:#f5a623;line-height:4px;font-size:4px;">&nbsp;</td></tr>
-<tr><td style="background-color:#ffffff;padding:12px 10px;text-align:center;border-bottom:1px solid #e5e7eb;">
-<a href="${origin}/rentals?category=tents" style="color:#0b3d91;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;text-decoration:none;padding:0 8px;">Tents</a><span style="color:#e5e7eb;">|</span>
-<a href="${origin}/rentals?category=tables-chairs" style="color:#0b3d91;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;text-decoration:none;padding:0 8px;">Tables & Chairs</a><span style="color:#e5e7eb;">|</span>
-<a href="${origin}/rentals?category=linens" style="color:#0b3d91;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;text-decoration:none;padding:0 8px;">Linens</a><span style="color:#e5e7eb;">|</span>
-<a href="${origin}/rentals?category=beverage-and-food-service" style="color:#0b3d91;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;text-decoration:none;padding:0 8px;">Beverage & Food</a><span style="color:#e5e7eb;">|</span>
-<a href="${origin}/quote" style="color:#0b3d91;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;text-decoration:none;padding:0 8px;">Get a Quote</a>
-</td></tr>
-<tr><td style="background-color:#ffffff;padding:28px 32px;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;font-size:16px;line-height:1.6;">
-${bodyHtml}
-</td></tr>
-<tr><td style="background-color:#ffffff;padding:6px 32px 4px;font-family:Arial,Helvetica,sans-serif;text-align:center;">
-<div style="font-size:19px;font-weight:bold;color:#1a1a1a;padding:8px 0 2px;">Shop by Category</div>
-<div style="font-size:14px;color:#6b7280;padding-bottom:6px;">Everything you need for an unforgettable event</div>
-</td></tr>
-<tr><td style="background-color:#ffffff;padding:6px 24px 26px;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-<tr>
-<td width="50%" style="padding:6px;">
-<a href="${origin}/rentals?category=tents" style="display:block;text-align:center;text-decoration:none;background-color:#f4f6fb;border:1px solid #e5e7eb;border-radius:8px;padding:16px 8px;color:#0b3d91;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;">Tents & Canopies</a>
-</td>
-<td width="50%" style="padding:6px;">
-<a href="${origin}/rentals?category=tables-chairs" style="display:block;text-align:center;text-decoration:none;background-color:#f4f6fb;border:1px solid #e5e7eb;border-radius:8px;padding:16px 8px;color:#0b3d91;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;">Tables & Chairs</a>
-</td>
-</tr>
-<tr>
-<td width="50%" style="padding:6px;">
-<a href="${origin}/rentals?category=linens" style="display:block;text-align:center;text-decoration:none;background-color:#f4f6fb;border:1px solid #e5e7eb;border-radius:8px;padding:16px 8px;color:#0b3d91;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;">Linens & Draping</a>
-</td>
-<td width="50%" style="padding:6px;">
-<a href="${origin}/rentals?category=heating-cooling" style="display:block;text-align:center;text-decoration:none;background-color:#f4f6fb;border:1px solid #e5e7eb;border-radius:8px;padding:16px 8px;color:#0b3d91;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;">Heating & Cooling</a>
-</td>
-</tr>
-<tr>
-<td width="50%" style="padding:6px;">
-<a href="${origin}/rentals?category=beverage-and-food-service" style="display:block;text-align:center;text-decoration:none;background-color:#f4f6fb;border:1px solid #e5e7eb;border-radius:8px;padding:16px 8px;color:#0b3d91;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;">Beverage & Food</a>
-</td>
-<td width="50%" style="padding:6px;">
-<a href="${origin}/rentals" style="display:block;text-align:center;text-decoration:none;background-color:#f4f6fb;border:1px solid #e5e7eb;border-radius:8px;padding:16px 8px;color:#0b3d91;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;">Shop All Rentals</a>
-</td>
-</tr>
-</table>
-</td></tr>
-<tr><td style="background-color:#0b3d91;padding:20px 24px;text-align:center;font-family:Arial,Helvetica,sans-serif;">
-<div style="color:#ffffff;font-size:16px;font-weight:bold;padding-bottom:4px;">Free delivery, setup &amp; pickup included</div>
-<div style="color:#cfe0ff;font-size:13px;">Serving Greenville & Upstate South Carolina since day one</div>
-<div style="padding-top:12px;"><a href="${origin}/quote" style="display:inline-block;background-color:#f5a623;color:#1a1a1a;font-size:15px;font-weight:bold;text-decoration:none;padding:12px 28px;border-radius:6px;">Request a Free Quote</a></div>
-</td></tr>
-<tr><td style="background-color:#ffffff;padding:24px 32px;font-family:Arial,Helvetica,sans-serif;text-align:center;border-top:1px solid #e5e7eb;">
-<div style="font-size:15px;font-weight:bold;color:#1a1a1a;">Friendly Party Rental</div>
-<div style="font-size:13px;color:#6b7280;padding-top:4px;">Greenville, SC</div>
-<div style="font-size:13px;color:#6b7280;padding-top:2px;">864-610-5324 &nbsp;&bull;&nbsp; customerservice@friendlypartyrental.com</div>
-<div style="padding-top:8px;"><a href="${origin}" style="color:#0b3d91;font-size:13px;font-weight:bold;text-decoration:none;">www.friendlypartyrentalsc.com</a></div>
-<div style="font-size:11px;color:#6b7280;line-height:1.6;padding-top:16px;border-top:1px solid #e5e7eb;margin-top:16px;">
-You are receiving this email because you are a customer of Friendly Party Rental.<br />
-<a href="${unsubUrl}" style="color:#6b7280;text-decoration:underline;">Unsubscribe from marketing emails</a><br />
-&copy; ${year} Friendly Party Rental, Greenville, SC. All rights reserved.
-</div>
-</td></tr>
-</table>
-</td></tr></table>
-</body>
-</html>`
+import { checkFrequencyProtection } from '@/lib/marketing/schedule'
+import { resolveRequestAuth } from '@/lib/marketing/adminAuth'
+import {
+  acquireLaunchLock,
+  releaseLaunchLock,
+  heartbeatLaunchLock,
+  processClaimedSend,
+  validateFinalEmailLinks,
+  sendOwnerMonitoringCopy,
+} from '@/lib/marketing/launch'
+import { wrapEmail, unsubscribeHeaders } from '@/lib/marketing/message'
+type Segment = 'all' | 'outstanding' | 'recent' | 'lapsed' | 'manual' | 'highConfidence' | 'annualRebooking' | 'dormant' | `automation:${string}`
+async function resolveRecipients(segment: Segment, manual: string): Promise<EligibilityResult> {
+  if (segment.startsWith('automation:')) {
+    const slug = segment.slice('automation:'.length)
+    if (!automationSegmentForCampaign(slug)) return { eligible: [], excluded: { invalidFormat: 0, testRecord: 0, suppressed: 0, duplicate: 0 } }
+    const plan = await getAutomationPlan()
+    return filterToMarketingEligible(plan.opportunities.filter(o => o.slug === slug).map(o => ({ email: o.email })))
+  }
+  if (segment === 'manual') return filterToMarketingEligible(manual.split(/[,;\n]/).map(email => ({email:email.trim()})).filter(c => c.email))
+  const contacts = await getMarketingContacts()
+  return filterToMarketingEligible(contacts.filter(c => matchesMarketingSegment(c,segment)))
 }
 
-type Segment = 'all' | 'outstanding' | 'recent' | 'lapsed' | 'manual'
+const INTERNAL_TEST_DOMAIN = '@friendlypartyrental.com'
 
-async function resolveRecipients(segment: Segment, manual: string): Promise<EligibilityResult> {
-      if (segment === 'manual') {
-            const manualContacts = manual
-              .split(/[,;\n]/)
-              .map((e) => ({ email: e.trim() }))
-              .filter((c) => c.email)
-            return filterToMarketingEligible(manualContacts)
-      }
+function publicOrigin(request: NextRequest): string {
+  const configured = (process.env.PUBLIC_BASE_URL || '').trim().replace(/\/$/, '')
+  if (configured) return configured
+  return new URL(request.url).origin
+}
 
-    const now = Date.now()
-      const DAY = 24 * 60 * 60 * 1000
-      const select = { email: true, firstName: true, lastName: true }
+export async function POST(request: NextRequest) {
+  const auth = await resolveRequestAuth(request)
+  if (!auth.isAuthenticated && !auth.isCron) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (auth.isAuthenticated && !auth.isCron && !auth.isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-    let customers: { email: string; firstName: string; lastName: string }[]
+const body = await request.json()
+  const subject: string = (body.subject || '').trim()
+  const html: string = body.html || ''
+  const mode: string = body.mode || 'test'
+  const segment: Segment = body.segment || (mode === 'controlledLaunch' ? 'highConfidence' : 'all')
+  const manual: string = body.manual || ''
+  const testEmail: string = (body.testEmail || '').trim()
+  const preheaderText: string = body.preheaderText || ''
+  const campaignId: string = (body.campaignId || '').trim()
+  const campaignName: string = (body.campaignName || subject || 'Untitled campaign').trim()
+  const subjectSlug = subject.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 60)
+  const campaignSlug: string = campaignId || `manual-${subjectSlug || Date.now()}`
 
-    if (segment === 'outstanding') {
-          customers = await prisma.customer.findMany({
-                  where: { email: { not: '' }, orders: { some: { balanceDue: { gt: 0 } } } },
-                  select,
-          })
-    } else if (segment === 'recent') {
-          const cutoff = new Date(now - 90 * DAY)
-          customers = await prisma.customer.findMany({
-                  where: { email: { not: '' }, orders: { some: { createdAt: { gte: cutoff } } } },
-                  select,
-          })
-    } else if (segment === 'lapsed') {
-          const cutoff = new Date(now - 180 * DAY)
-          customers = await prisma.customer.findMany({
-                  where: {
-                            email: { not: '' },
-                            orders: { some: {}, every: { createdAt: { lt: cutoff } } },
-                  },
-                  select,
-          })
-    } else {
-          customers = await prisma.customer.findMany({
-                  where: { email: { not: '' } },
-                  select,
-          })
-    }
+const origin = publicOrigin(request)
 
-    return filterToMarketingEligible(customers)
-  }
+if (mode === 'preview') {
+  const { eligible: previewRecipients, excluded: previewExcluded } = await resolveRecipients(segment, manual)
+  const claimed = campaignId ? await prisma.marketingSendClaim.findMany({where:{campaignSlug:campaignId},select:{email:true}}) : []
+  const used = new Set(claimed.map(c=>c.email))
+  const unclaimed = previewRecipients.filter(email=>!used.has(email)).length
+  return NextResponse.json({ mode: 'preview', segment, recipients: previewRecipients.length, unclaimed, excluded: previewExcluded })
+}
 
-  export async function POST(request: NextRequest) {
-      const session = await getServerSession(authOptions)
-      const authHeader = request.headers.get('authorization')
-      const isCron = !!process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`
-      if (!session && !isCron) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-      if (session && !isCron && (session.user as any).role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-
-    const body = await request.json()
-      const subject: string = (body.subject || '').trim()
-      const html: string = body.html || ''
-      const mode: string = body.mode || 'test'
-      const segment: Segment = body.segment || 'all'
-      const manual: string = body.manual || ''
-      const testEmail: string = (body.testEmail || '').trim()
-const preheaderText: string = body.preheaderText || ''
-
-    if (!subject) return NextResponse.json({ error: 'Subject is required' }, { status: 400 })
-      if (!html) return NextResponse.json({ error: 'Email content is required' }, { status: 400 })
-
-    const origin = new URL(request.url).origin
-
-    const OUTBOUND_MARKETING_DISABLED = true
-      if (OUTBOUND_MARKETING_DISABLED) {
-            return NextResponse.json(
-              { error: 'Outbound marketing is disabled (Draft Only mode) while the marketing safety foundation is being built. No email was sent.' },
-              { status: 423 }
-                  )
-      }
+if (!subject) return NextResponse.json({ error: 'Subject is required' }, { status: 400 })
+  if (!html) return NextResponse.json({ error: 'Email content is required' }, { status: 400 })
 
     if (mode === 'test') {
-          if (!testEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(testEmail)) {
-                  return NextResponse.json({ error: 'A valid test email address is required' }, { status: 400 })
-          }
-          const wrapped = wrapEmail(html, testEmail, origin, preheaderText)
-          const res = await sendEmail({ to: testEmail, subject: '[TEST] ' + subject, html: wrapped })
-          return NextResponse.json({ mode: 'test', recipients: 1, result: res })
+      if (!testEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(testEmail)) {
+        return NextResponse.json({ error: 'A valid test email address is required' }, { status: 400 })
+      }
+      if (!testEmail.toLowerCase().endsWith(INTERNAL_TEST_DOMAIN)) {
+        return NextResponse.json(
+          { error: `Test sends are restricted to an internal ${INTERNAL_TEST_DOMAIN} address for preview testing. Real customer campaigns require a separately confirmed administrator launch.` },
+          { status: 423 }
+          )
+      }
+      const wrapped = wrapEmail(html, testEmail, origin, preheaderText)
+      const res = await sendEmail({ to: testEmail, subject: '[TEST] ' + subject, html: wrapped, headers: unsubscribeHeaders(origin, testEmail) })
+      return NextResponse.json({ mode: 'test', recipients: 1, result: res })
     }
 
-    const { eligible: recipients, excluded } = await resolveRecipients(segment, manual)
-      if (recipients.length === 0) {
-            return NextResponse.json({ error: 'No recipients matched this segment', excluded }, { status: 400 })
+if (mode === 'controlledLaunch') {
+  if (!auth.isAdmin || auth.isCron) {
+    return NextResponse.json({ error: 'Controlled launch requires an authenticated admin session and cannot be triggered by an automated/cron caller.' }, { status: 403 })
+  }
+  if (body.action !== 'LAUNCH_REAL_CUSTOMER_CAMPAIGN' || body.confirmProductionSend !== true) {
+    return NextResponse.json(
+      { error: 'A real customer launch requires an explicit confirmation ("action":"LAUNCH_REAL_CUSTOMER_CAMPAIGN","confirmProductionSend":true). This is intentionally separate from "mode" so no preview/test/audit call can ever drift into a real send.' },
+      { status: 400 }
+      )
+  }
+  if (!campaignId) {
+    return NextResponse.json(
+      { error: 'campaignId is required for a controlled launch so two concurrent requests for the same campaign always share the same idempotency key (campaignSlug).' },
+      { status: 400 }
+      )
+  }
+
+  if (!marketingTransportStatus().configured) {
+    return NextResponse.json(
+      { error: 'The marketing email connection is not configured. Set valid marketing credentials or the existing business email credentials before launching.' },
+      { status: 503 }
+      )
+  }
+
+  const limit = Number(body.limit)
+  if (!Number.isInteger(limit) || limit <= 0 || limit > 300) {
+    return NextResponse.json({ error: 'limit must be a positive integer up to ' + 300 + ' for a controlled launch batch.' }, { status: 400 })
+  }
+
+  if (!['all','outstanding','recent','lapsed','highConfidence','annualRebooking','dormant'].includes(segment) && !(segment.startsWith('automation:') && automationSegmentForCampaign(segment.slice(11)))) return NextResponse.json({ error: 'Select a supported campaign audience' }, { status: 400 })
+  const { eligible: highConfidence, excluded: hcExcluded } = await resolveRecipients(segment, '')
+  const previousClaims = await prisma.marketingSendClaim.findMany({ where: { campaignSlug }, select: { email: true } })
+  const previouslyClaimed = new Set(previousClaims.map(c => c.email))
+  const batch = highConfidence.filter(email => !previouslyClaimed.has(email)).slice(0, limit)
+  if (batch.length === 0) {
+    return NextResponse.json({ error: 'No new eligible recipients remain for this campaign', excluded: hcExcluded }, { status: 400 })
+  }
+
+  const previewWrapped = wrapEmail(html, 'preflight-check@friendlypartyrental.com', origin, preheaderText)
+  const linkCheck = validateFinalEmailLinks(previewWrapped, origin)
+  if (!linkCheck.valid) {
+    return NextResponse.json(
+      { error: 'Final email failed link preflight - refusing to launch.', issues: linkCheck.issues },
+      { status: 422 }
+      )
+  }
+
+  const initiatedByName = auth.name || auth.username || null
+  const initiatedByUserId = auth.userId
+
+  const run = await prisma.marketingRun.create({
+    data: {
+      campaignSlug,
+      campaignName,
+      subject,
+      mode: 'controlledLaunch',
+      segment,
+      requestedLimit: limit,
+      resolvedAudienceCount: highConfidence.length,
+      initiatedByUserId,
+      initiatedByName,
+      status: 'queued',
+    },
+  })
+
+  const lock = await acquireLaunchLock(run.id)
+  if (!lock.acquired) {
+    await prisma.marketingRun.update({
+      where: { id: run.id },
+      data: { status: 'blocked', errorMessage: lock.reason, completedAt: new Date() },
+    })
+    return NextResponse.json({ error: lock.reason, runId: run.id }, { status: 409 })
+  }
+
+  await prisma.marketingRun.update({ where: { id: run.id }, data: { status: 'running', startedAt: new Date() } })
+  let clSent = 0
+  let clFailed = 0
+  let clSimulated = 0
+  let clSuppressedByFrequency = 0
+  let clDuplicateBlocked = 0
+  const clErrors: string[] = []
+    const clSuppressedSample: { email: string; reason: string }[] = []
+      let abortedReason: string | null = null
+
+  try {
+    for (let i = 0; i < batch.length; i++) {
+      const to = batch[i]
+
+    const heartbeat = await heartbeatLaunchLock(run.id)
+      if (!heartbeat.ownsLock) {
+        abortedReason = 'Lost ownership of the global launch lock mid-run (stale takeover or the lock row was otherwise reassigned) - aborting the remaining batch rather than continuing to send without exclusive ownership.'
+        break
       }
 
-    let sent = 0
-      let failed = 0
-      const errors: string[] = []
+    const result = await processClaimedSend({
+      campaignSlug,
+      campaignName,
+      email: to,
+      runId: run.id,
+      recheck: async () => {
+        if (segment.startsWith('automation:')) {
+          const current = await resolveRecipients(segment, '')
+          return { allowed: current.eligible.includes(to), reason: 'This customer no longer matches the campaign trigger.' }
+        }
+        const current = await getMarketingContacts(to)
+        return { allowed: current.some(c => c.email === to && matchesMarketingSegment(c,segment)), reason: 'This customer no longer matches the selected audience.' }
+      },
+      send: () => sendEmail({ to, subject, html: wrapEmail(html, to, origin, preheaderText, { campaignSlug, runId: run.id }), headers: { ...unsubscribeHeaders(origin, to), ...feedbackHeaders(to, run.id) } }),
+    })
 
-          for (const to of recipients) {
-                try {
-                        const wrapped = wrapEmail(html, to, origin, preheaderText)
-                        const res = await sendEmail({ to, subject, html: wrapped })
-                        if (res && (res as { success?: boolean }).success) sent++
-                        else failed++
-                } catch (e) {
-                        failed++
-                        if (errors.length < 5) errors.push((e as Error).message)
-                }
-                await new Promise((r) => setTimeout(r, 150))
-          }
+    if (result.outcome === 'duplicate') {
+      clDuplicateBlocked++
+    } else if (result.outcome === 'suppressed') {
+      clSuppressedByFrequency++
+      if (clSuppressedSample.length < 20) {
+        clSuppressedSample.push({ email: to, reason: result.suppressionReason || 'Frequency cap exceeded' })
+      }
+    } else if (result.outcome === 'simulated') {
+      clSimulated++
+      abortedReason = 'Email provider reported a simulated send mid-run (credentials likely became unavailable). Aborting the remaining batch rather than continuing to "send" simulated messages.'
+      break
+    } else if (result.outcome === 'sent') {
+      clSent++
+    } else if (result.outcome === 'failed') {
+      clFailed++
+    } else if (result.outcome === 'ambiguous') {
+      clFailed++
+      if (clErrors.length < 5) clErrors.push(result.error || 'Ambiguous send outcome')
+    }
 
-    return NextResponse.json({ mode: 'bulk', segment, recipients: recipients.length, excluded, sent, failed, errors })
+    await new Promise((r) => setTimeout(r, 150))
+    }
+  } finally {
+    await releaseLaunchLock(run.id)
   }
+
+  let ownerMonitoringCopyStatus: 'sent' | 'disabled' | 'failed' = 'disabled'
+  try {
+    const ownerWrapped = wrapEmail(html, 'owner-monitoring-copy@friendlypartyrental.com', origin, preheaderText)
+    ownerMonitoringCopyStatus = await sendOwnerMonitoringCopy({ subject, html: ownerWrapped })
+  } catch {
+    ownerMonitoringCopyStatus = 'failed'
+  }
+
+  await prisma.marketingRun.update({
+    where: { id: run.id },
+    data: {
+      status: abortedReason ? 'failed' : 'completed',
+      completedAt: new Date(),
+      claimedCount: clSent + clFailed + clSimulated,
+      sentCount: clSent,
+      failedCount: clFailed,
+      suppressedCount: clSuppressedByFrequency,
+      duplicateBlockedCount: clDuplicateBlocked,
+      simulatedCount: clSimulated,
+      ownerMonitoringCopyStatus,
+      errorMessage: abortedReason,
+    },
+  })
+
+  await prisma.emailTemplateMarketing.updateMany({ where: { id: campaignId }, data: {
+    status: abortedReason || clFailed ? 'partial' : clSent > 0 ? 'sent' : 'review_ready', sentAt: clSent > 0 ? new Date() : undefined,
+    recipientCount: await prisma.marketingSendLog.count({ where: { campaignSlug } }), sendError: abortedReason || (clFailed ? `${clFailed} deliveries need review in send history.` : null),
+  } })
+
+  return NextResponse.json({
+    mode: 'controlledLaunch',
+    runId: run.id,
+    campaignSlug,
+    totalHighConfidenceEligible: highConfidence.length,
+    batchSize: batch.length,
+    excluded: hcExcluded,
+    sent: clSent,
+    failed: clFailed,
+    simulated: clSimulated,
+    duplicateBlocked: clDuplicateBlocked,
+    suppressedByFrequency: clSuppressedByFrequency,
+    suppressedSample: clSuppressedSample,
+    ownerMonitoringCopyStatus,
+    aborted: !!abortedReason,
+    abortedReason,
+    errors: clErrors,
+  })
+}
+
+return NextResponse.json({ error: 'Choose a preview, internal test, or explicitly confirmed administrator launch. Automatic campaigns are managed in Marketing → Automations.' }, { status: 423 })
+}
+

@@ -1,0 +1,45 @@
+const test=require('node:test')
+const assert=require('node:assert/strict')
+const fs=require('node:fs')
+const read=p=>fs.readFileSync(p,'utf8')
+
+test('Greenville marketing autopilot defaults to review and requires explicit readiness approval',()=>{
+  const settings=read('lib/marketing/autopilotSettings.ts')
+  const route=read('app/api/admin/marketing-autopilot/route.ts')
+  assert.match(settings,/mode: 'review'/)
+  assert.match(settings,/approvedAt: null/)
+  assert.match(settings,/domainAuthenticationConfirmed: false/)
+  assert.match(settings,/feedbackMonitoringConfirmed: false/)
+  assert.match(settings,/audiencePermissionConfirmed: false/)
+  assert.match(route,/confirmAutomaticSending !== true/)
+  assert.match(route,/verifyMarketingTransport/)
+})
+
+test('Greenville marketing uses SC origin and never a New York street address',()=>{
+  const autopilot=read('lib/marketing/autopilot.ts')
+  const message=read('lib/marketing/message.ts')
+  assert.match(autopilot,/https:\/\/www\.friendlypartyrentalsc\.com/)
+  assert.doesNotMatch(autopilot,/https:\/\/www\.friendlypartyrental\.com/)
+  assert.match(message,/Greenville/)
+  assert.match(message,/864-610-5324/)
+  assert.match(message,/www\.friendlypartyrentalsc\.com/)
+  assert.doesNotMatch(message,/330 Costello Parkway/)
+  assert.doesNotMatch(message,/Minoa, NY/)
+})
+
+test('unfinished checkout records are excluded from ordinary marketing',()=>{
+  const contacts=read('lib/marketing/contacts.ts')
+  const planner=read('lib/marketing/plannerData.ts')
+  assert.match(contacts,/notIn: \['canceled','cancelled','quote','draft','incomplete'\]/)
+  assert.match(contacts,/if \(!c\.orders\.length\) continue/)
+  assert.match(planner,/notIn: \['canceled','cancelled','quote','draft','incomplete'\]/)
+})
+
+test('marketing send safety uses persistent claims, global lock and daily queue',()=>{
+  const launch=read('lib/marketing/launch.ts')
+  const queue=read('lib/marketing/queue.ts')
+  assert.match(launch,/marketingLaunchLock/)
+  assert.match(launch,/marketingSendClaim/)
+  assert.match(queue,/dailyMarketingUsage/)
+  assert.match(queue,/fairMarketingQueue/)
+})

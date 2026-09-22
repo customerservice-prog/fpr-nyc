@@ -1034,3 +1034,86 @@ model ExactTimeSettings {
   lateNightFee Float @default(125)
   updatedAt DateTime @updatedAt
 }
+
+
+model MarketingSendLog {
+  id String @id @default(cuid())
+  campaignSlug String
+  campaignName String
+  email String
+  customerId String?
+  sentAt DateTime @default(now())
+  channel String @default("email")
+  createdAt DateTime @default(now())
+runId String?
+  openedAt DateTime?
+  lastOpenedAt DateTime?
+  openCount Int @default(0)
+  clickedAt DateTime?
+  lastClickedAt DateTime?
+  clickCount Int @default(0)
+  lastClickedUrl String?
+
+  @@index([email, sentAt])
+  @@index([campaignSlug])
+}
+
+
+model MarketingRun {
+id String @id @default(cuid())
+campaignSlug String
+campaignName String
+subject String
+mode String
+segment String?
+requestedLimit Int?
+resolvedAudienceCount Int?
+initiatedByUserId String?
+initiatedByName String?
+status String @default("queued")
+createdAt DateTime @default(now())
+startedAt DateTime?
+completedAt DateTime?
+claimedCount Int @default(0)
+sentCount Int @default(0)
+failedCount Int @default(0)
+suppressedCount Int @default(0)
+duplicateBlockedCount Int @default(0)
+simulatedCount Int @default(0)
+ownerMonitoringCopyStatus String @default("not_sent")
+errorMessage String?
+updatedAt DateTime @updatedAt
+
+claims MarketingSendClaim[]
+
+@@index([campaignSlug])
+@@index([status])
+}
+
+
+model MarketingSendClaim {
+id String @id @default(cuid())
+campaignSlug String
+email String
+runId String
+run MarketingRun @relation(fields: [runId], references: [id])
+status String @default("claimed")
+claimedAt DateTime @default(now())
+resolvedAt DateTime?
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
+@@unique([campaignSlug, email])
+@@index([email])
+@@index([runId])
+}
+
+
+model MarketingLaunchLock {
+id String @id
+status String @default("idle")
+runId String?
+lockedAt DateTime?
+heartbeatAt DateTime?
+updatedAt DateTime @updatedAt
+}

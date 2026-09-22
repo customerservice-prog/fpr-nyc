@@ -12,7 +12,10 @@ eventDate: string
 totalAmount: number
 amountPaid: number
 balanceDue: number
-customer: { firstName: string; lastName: string }
+checkoutStage?: string | null
+checkoutLastSeenAt?: string | null
+createdAt: string
+customer: { firstName: string; lastName: string; email?: string | null; phone?: string | null }
 }
 
 export default function OrdersPage() {
@@ -83,7 +86,7 @@ className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
 <th className="px-4 py-3 text-left font-semibold text-dark">Order#</th>
 <th className="px-4 py-3 text-left font-semibold text-dark">Customer</th>
 <th className="px-4 py-3 text-left font-semibold text-dark">Event Date</th>
-<th className="px-4 py-3 text-left font-semibold text-dark">Status</th>
+<th className="px-4 py-3 text-left font-semibold text-dark">Status / Funnel</th>
 <th className="px-4 py-3 text-right font-semibold text-dark">Total</th>
 <th className="px-4 py-3 text-right font-semibold text-dark">Paid</th>
 <th className="px-4 py-3 text-right font-semibold text-dark">Balance</th>
@@ -94,10 +97,10 @@ className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
 {orders.map((order, idx) => (
 <tr key={order.id} className={'border-b border-gray-100 hover:bg-blue-50/50 transition-colors ' + (idx % 2 === 1 ? 'bg-gray-50/40' : '')}>
 <td className="px-4 py-3 font-medium">{order.orderNumber}</td>
-<td className="px-4 py-3">{order.customer.firstName} {order.customer.lastName}</td>
+<td className="px-4 py-3"><div>{order.customer.firstName} {order.customer.lastName}</div>{order.status === 'incomplete' && <div className="mt-1 text-xs text-gray-500">{order.customer.email || ''}{order.customer.phone ? ' · ' + order.customer.phone : ''}</div>}</td>
 <td className="px-4 py-3">{formatDate(order.eventDate)}</td>
 <td className="px-4 py-3">
-<span className={statusBadgeClass(order.status)}>{order.status}</span>
+<span className={statusBadgeClass(order.status)}>{order.status}</span>{order.checkoutStage && <div className="mt-1 text-[11px] font-medium text-gray-500">{order.checkoutStage.replaceAll('_',' ')}</div>}
 </td>
 <td className="px-4 py-3 text-right">{formatCurrency(order.totalAmount)}</td>
 <td className="px-4 py-3 text-right">{formatCurrency(order.amountPaid)}</td>

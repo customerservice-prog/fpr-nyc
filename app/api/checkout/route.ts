@@ -3,6 +3,21 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
+import { getItemAvailability } from '@/lib/availability'
+import { evaluateRentalRestrictions } from '@/lib/rentalRestrictions'
+import { DeliveryQuoteError, getDeliveryQuote, requireDeliveryMethod, requireMatchingDeliveryFee } from '@/lib/delivery'
+
+async function reserveExactTimeSlot(tx: any, date: Date, time: string, type: 'delivery' | 'pickup', defaultCapacity: number) {
+  const dayDate = new Date(date); dayDate.setHours(0,0,0,0)
+  const existing = await tx.exactTimeSlot.findUnique({ where: { date_time_type: { date: dayDate, time, type } } })
+  if (existing) {
+    if (existing.isBlocked || existing.bookedCount >= existing.capacity) return false
+    await tx.exactTimeSlot.update({ where: { id: existing.id }, data: { bookedCount: { increment: 1 } } })
+    return true
+  }
+  await tx.exactTimeSlot.create({ data: { date: dayDate, time, type, capacity: defaultCapacity, bookedCount: 1, isBlocked: false } })
+  return true
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,9 +34,48 @@ export async function POST(request: NextRequest) {
 
     const tip = Number(tipAmount) || 0
 
-    const order = await prisma.order.findUnique({ where: { id: orderId } })
+    let order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true, customer: true } })
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    }
+
+    if (order.status === 'incomplete') {
+      requireDeliveryMethod(order.deliveryType)
+      if (order.checkoutStage === 'details_completed') {
+        return NextResponse.json({ error: 'This saved checkout still needs final pricing. Please return to checkout to continue.' }, { status: 409 })
+      }
+      const restriction = await evaluateRentalRestrictions({
+        customerId: order.customerId,
+        emails: [order.customer?.email || ''],
+        phones: [order.customer?.phone || ''],
+        address: order.eventAddress ? { street1: order.eventAddress, city: order.eventCity, state: order.eventState, zip: order.eventZip } : null,
+      })
+      if (restriction.matched) {
+        return NextResponse.json({ error: 'We are unable to complete this reservation online. Please contact our Greenville team.' }, { status: 403 })
+      }
+      const deliveryQuote = await getDeliveryQuote(order.eventZip)
+      requireMatchingDeliveryFee(order.deliveryFee, deliveryQuote)
+      for (const line of order.items) {
+        if (!line.itemId || line.quantity <= 0) continue
+        const available = await getItemAvailability(line.itemId, order.eventDate)
+        if (line.quantity > available) return NextResponse.json({ error: '"' + line.itemName + '" is no longer available in the saved quantity. Please contact us or restart checkout.' }, { status: 409 })
+      }
+      const exactSettings = await prisma.exactTimeSettings.findFirst()
+      const capacity = exactSettings?.defaultCapacityPerSlot ?? 1
+      if ((order.exactDeliveryRequested && order.exactDeliveryTime) || (order.pickupType === 'exact' && order.exactPickupTime)) {
+        if (exactSettings?.enabled === false) return NextResponse.json({ error: 'Exact-time scheduling is currently unavailable. Please contact our office.' }, { status: 409 })
+        const reserved = await prisma.$transaction(async tx => {
+          if (order!.exactDeliveryRequested && order!.exactDeliveryTime && !await reserveExactTimeSlot(tx, order!.eventDate, order!.exactDeliveryTime, 'delivery', capacity)) return false
+          if (order!.pickupType === 'exact' && order!.exactPickupTime && !await reserveExactTimeSlot(tx, order!.eventDate, order!.exactPickupTime, 'pickup', capacity)) return false
+          return true
+        })
+        if (!reserved) return NextResponse.json({ error: 'An exact scheduling time on this saved checkout is no longer available. Please contact our office.' }, { status: 409 })
+      }
+      order = await prisma.order.update({
+        where: { id: order.id },
+        data: { status: 'quote', checkoutStage: 'payment_started', checkoutLastSeenAt: new Date() },
+        include: { items: true, customer: true },
+      })
     }
 
     // SECURITY: never trust the client-supplied amount blindly. Compute the real
@@ -54,7 +108,7 @@ export async function POST(request: NextRequest) {
     if (!stripe || !process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_live_xxx') {
       await prisma.order.update({
         where: { id: orderId },
-        data: { stripePaymentId: 'simulated_' + Date.now() },
+        data: { stripePaymentId: 'simulated_' + Date.now(), checkoutStage: 'payment_started', checkoutLastSeenAt: new Date() },
       })
       return NextResponse.json({
         success: true,
@@ -106,7 +160,7 @@ export async function POST(request: NextRequest) {
 
     await prisma.order.update({
       where: { id: orderId },
-      data: { stripePaymentId: paymentIntent.id },
+      data: { stripePaymentId: paymentIntent.id, checkoutStage: 'payment_started', checkoutLastSeenAt: new Date() },
     })
 
     return NextResponse.json({
@@ -114,6 +168,7 @@ export async function POST(request: NextRequest) {
       paymentIntentId: paymentIntent.id,
     })
   } catch (error) {
+    if (error instanceof DeliveryQuoteError) return NextResponse.json({ error: error.message }, { status: error.status })
     console.error('Checkout error:', error)
     return NextResponse.json({ error: 'Payment failed' }, { status: 500 })
   }

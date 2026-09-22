@@ -48,12 +48,14 @@ export async function getMarketingSnapshot(): Promise<MarketingSnapshot> {
 
   const totalCustomerRecords = customers.length
     const now = Date.now()
+  const marketingCustomerIds = new Set(orders.filter(o => !['incomplete','draft'].includes(o.status)).map(o => o.customerId))
 
   const emailByCustomerId = new Map<string, string>()
     const activityByEmail = new Map<string, EmailActivity>()
     const nameByEmail = new Map<string, { firstName: string; lastName: string }>()
 
   for (const c of customers) {
+        if (!marketingCustomerIds.has(c.id)) continue
         const email = normalizeEmail(c.email)
         if (!email) continue
         emailByCustomerId.set(c.id, email)

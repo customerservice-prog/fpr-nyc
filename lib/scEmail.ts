@@ -9,6 +9,6 @@ export function scEmailHref(subject = 'Greenville rental inquiry', body = ''): s
 }
 export function scEmailHtml(html: string): string {
  if (html.includes('data-fpr-location="greenville-sc"')) return html
- const banner = '<div data-fpr-location="greenville-sc" style="font-family:Arial,sans-serif;background:#0B1F3A;color:#ffffff;padding:16px 20px;margin-bottom:20px;border-radius:8px;"><strong>SOUTH CAROLINA &bull; GREENVILLE</strong><br><span style="font-size:12px;">Friendly Party Rental &middot; friendlypartyrentalsc.com &middot; 864-610-5324</span></div>'
+ const banner = '<div data-fpr-location="greenville-sc" style="font-family:Arial,sans-serif;background:#0B1F3A;color:#ffffff;padding:16px 20px;margin-bottom:20px;border-radius:8px;"><strong>SOUTH CAROLINA &bull; GREENVILLE</strong><br><span style="font-size:12px;">Friendly Party Rental SC &middot; friendlypartyrentalsc.com &middot; 864-610-5324</span></div>'
  return /<body\b[^>]*>/i.test(html) ? html.replace(/<body\b[^>]*>/i, match => match + banner) : banner + html
 }

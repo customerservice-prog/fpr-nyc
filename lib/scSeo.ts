@@ -20,7 +20,7 @@ export function scMetaText(value:string,max=160):string {
 export function scPageMetadata(path:string,title:string,description:string,index=true):Metadata {
  const url=scUrl(path)
  return {title:title.replace(/\s*\|\s*Friendly Party Rental(?: SC| Greenville SC)?$/i,''),description:scMetaText(description),alternates:{canonical:url},robots:{index,follow:true},
- openGraph:{title,description:scMetaText(description),url,siteName:'Friendly Party Rental SC',locale:'en_US',type:'website',images:[{url:SC_SITE_URL+'/images/logo.png',alt:'Friendly Party Rental — South Carolina'}]},
+ openGraph:{title,description:scMetaText(description),url,siteName:'Friendly Party Rental SC',locale:'en_US',type:'website',images:[{url:SC_SITE_URL+'/images/logo.png',alt:'Friendly Party Rental SC'}]},
  twitter:{card:'summary_large_image',title,description:scMetaText(description),images:[SC_SITE_URL+'/images/logo.png']}}
 }
 export function scBreadcrumbs(parts:Array<{name:string;path:string}>){return {'@context':'https://schema.org','@type':'BreadcrumbList',itemListElement:parts.map((part,index)=>({'@type':'ListItem',position:index+1,name:part.name,item:scUrl(part.path)}))}}

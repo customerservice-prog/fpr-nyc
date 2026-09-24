@@ -23,7 +23,7 @@ export function localizeScPublicCopy(value?: string | null): string {
 export function itemDescriptionForSc(name: string, value?: string | null): string {
   const localized = localizeScPublicCopy(value)
   if (localized) return localized
-  return `Rent the ${name} from Friendly Party Rental for events in Greenville, SC and surrounding Upstate South Carolina communities. Check your date online for current availability and pricing.`
+  return `Rent the ${name} from Friendly Party Rental SC for events in Greenville, SC and surrounding Upstate South Carolina communities. Check your date online for current availability and pricing.`
 }
 
 export function categoryDescriptionForSc(name: string, value?: string | null): string {

@@ -283,7 +283,7 @@ model ClosedDate {
 model ServiceArea {
   id String @id @default(cuid())
   city String
-  state String @default("NY")
+  state String @default("SC")
   zip String
   region String?
   baseFee Float @default(0)
@@ -363,7 +363,7 @@ model SpecialRequestFee {
 
 model CompanySettings {
   id String @id @default(cuid())
-  businessName String @default("Friendly Party Rental")
+  businessName String @default("Friendly Party Rental SC")
   phone String?
   email String?
   address String?

@@ -11,7 +11,7 @@ function transportConfiguration() {
   const pass = process.env[`${prefix}PASS`] || ''
   const host = process.env[`${prefix}HOST`]?.trim() || 'smtp.gmail.com'
   const port = Number(process.env[`${prefix}PORT`] || '587')
-  const from = process.env[`${prefix}FROM`]?.trim() || `Friendly Party Rental <${user}>`
+  const from = process.env[`${prefix}FROM`]?.trim() || `Friendly Party Rental SC <${user}>`
   const mailbox = normalizeSuppressionEmail(from.match(/^[^<>\r\n]*<([^<>]+)>$/)?.[1] || from)
   const replyTo = process.env[`${prefix}REPLY_TO`]?.trim() || undefined
   const configured = !!(user && pass && mailbox && host && Number.isInteger(port) && port > 0 && port <= 65535 && !/[\r\n]/.test(host + user + from + (replyTo || '')))

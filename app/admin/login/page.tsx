@@ -34,7 +34,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-admin-dark flex items-center justify-center">
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-dark">Friendly Party Rental</h1>
+          <h1 className="text-2xl font-bold text-dark">Friendly Party Rental SC</h1>
           <p className="text-body text-sm mt-1">Admin Control Panel</p>
         </div>
 

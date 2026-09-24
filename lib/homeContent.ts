@@ -7,7 +7,7 @@ export const DEFAULT_HOME_CONTENT: Record<string, string> = {
   heroTagline: 'Local & Family-Owned • Delivery & setup available',
   desktopPlanningHeading: 'What are you planning?',
   desktopIntroHeading: 'Party Rentals in Greenville, SC & Surrounding Areas',
-  desktopIntroBody: 'Friendly Party Rental provides tents, tables, chairs, inflatables, wedding rentals, event essentials, delivery, setup, and pickup throughout Greenville and nearby Upstate South Carolina communities.\n\nBrowse by category or start with your event date to see the rentals that fit your celebration.',
+  desktopIntroBody: 'Friendly Party Rental SC provides tents, tables, chairs, inflatables, wedding rentals, event essentials, delivery, setup, and pickup throughout Greenville and nearby Upstate South Carolina communities.\n\nBrowse by category or start with your event date to see the rentals that fit your celebration.',
   desktopIntroButton: 'Book Your Party Rentals Online',
   desktopBenefit1Heading: 'Local & Family-Owned',
   desktopBenefit1Body: 'Friendly local service for Greenville and Upstate South Carolina events.',

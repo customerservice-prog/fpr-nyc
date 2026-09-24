@@ -82,7 +82,7 @@ const CONTENT_LABELS: Record<string, string> = {
 
 const SEO_SECTION = (
     <section className="max-w-4xl mx-auto px-4 py-8 space-y-6 text-sm text-body">
-        <p>Friendly Party Rental provides reliable and affordable party rentals in Greenville, SC and surrounding Upstate South Carolina communities.</p>
+        <p>Friendly Party Rental SC provides reliable and affordable party rentals in Greenville, SC and surrounding Upstate South Carolina communities.</p>
         <p>Serving Greenville, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, Piedmont, and surrounding Upstate South Carolina areas.</p>
     </section>
   )

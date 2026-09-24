@@ -368,7 +368,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
           {alreadyFullyPaid ? (
             <>
               <h2 className="font-semibold text-dark mb-2 text-lg">You're All Paid Up! 🎉</h2>
-              <p className="text-sm text-body mb-4">Thanks so much for choosing Friendly Party Rental! If you'd like to leave something extra for the crew, it's always appreciated — totally up to you.</p>
+              <p className="text-sm text-body mb-4">Thanks so much for choosing Friendly Party Rental SC! If you'd like to leave something extra for the crew, it's always appreciated — totally up to you.</p>
             </>
           ) : (
             <>

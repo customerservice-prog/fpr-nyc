@@ -224,7 +224,7 @@ export default function PlanningEstimator({ initialType = '' }: { initialType?: 
           </>}
           {step === 3 && <>
             <p className={styles.intro}>A clear starting point for your conversation with our team. Review the details, then send your choices without starting over.</p><div className={styles.nextSteps}><div><span>1</span><strong>Review</strong><small>Check your event, planning package, rentals and known-charge subtotal.</small></div><div><span>2</span><strong>Send</strong><small>Your choices attach to the consultation form. Nothing is submitted until you complete it.</small></div><div><span>3</span><strong>Confirm</strong><small>Our office verifies availability, site needs, fees and scope before anything becomes a booking.</small></div></div>
-            <p className={styles.printOnly}>Friendly Party Rental · 864-610-5324 · friendlypartyrentalsc.com/event-planning</p>
+            <p className={styles.printOnly}>Friendly Party Rental SC · 864-610-5324 · friendlypartyrentalsc.com/event-planning</p>
             <div className={styles.reviewPhoto}><Photo src={selectedEvent.image} alt={selectedEvent.alt} sizes="(max-width: 767px) 80vw, 700px"/></div>
             <dl className={styles.reviewDetails}><div><dt>Your event</dt><dd>{selectedEvent.label}</dd></div><div><dt>Guest count</dt><dd>{details.guests} guests · {details.setting}</dd></div><div><dt>Date</dt><dd>{details.eventDate || 'Still deciding'}</dd></div><div><dt>Venue / city</dt><dd>{details.location || 'To be confirmed'}</dd></div></dl>
             <h4 className={styles.subheading}>Your estimate breakdown</h4>

@@ -128,7 +128,7 @@ function newBlock(type: BlockType): Block {
       }
     case 'badges':
       return {
-        id, type, title: 'Why Friendly Party Rental?',
+        id, type, title: 'Why Friendly Party Rental SC?',
         cards: [
           { image: 'https://www.friendlypartyrentalsc.com/images/badge-all-day-8-hour-rental.png', caption: '', url: '' },
           { image: 'https://www.friendlypartyrentalsc.com/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
@@ -221,7 +221,7 @@ function blockHtml(b: Block, theme: VisualThemeTokens): string {
         return '<div style="text-align:center;padding:10px 0 6px;"><span style="font-family:' + theme.headingFont + ';font-size:15px;font-weight:bold;color:' + theme.headingColor + ';letter-spacing:1px;">FRIENDLY PARTY RENTAL</span></div>'
       }
       if (variant === 'editorial') {
-        return '<div style="text-align:center;padding:6px 0 18px;"><div style="font-family:' + theme.headingFont + ';font-size:14px;font-weight:normal;color:' + theme.headingColor + ';letter-spacing:3px;text-transform:uppercase;">Friendly Party Rental</div><div style="font-size:11px;color:' + theme.mutedColor + ';letter-spacing:1px;margin-top:4px;font-family:' + theme.bodyFont + ';font-style:italic;">Greenville &amp; Upstate South Carolina</div></div>'
+        return '<div style="text-align:center;padding:6px 0 18px;"><div style="font-family:' + theme.headingFont + ';font-size:14px;font-weight:normal;color:' + theme.headingColor + ';letter-spacing:3px;text-transform:uppercase;">Friendly Party Rental SC</div><div style="font-size:11px;color:' + theme.mutedColor + ';letter-spacing:1px;margin-top:4px;font-family:' + theme.bodyFont + ';font-style:italic;">Greenville &amp; Upstate South Carolina</div></div>'
       }
       return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="padding:16px 0;border-bottom:3px solid ' + theme.accent + ';">' +
         '<div style="font-family:' + theme.headingFont + ';font-size:19px;font-weight:bold;color:' + theme.headingColor + ';letter-spacing:1.5px;">FRIENDLY PARTY RENTAL</div>' +
@@ -279,12 +279,12 @@ function blockHtml(b: Block, theme: VisualThemeTokens): string {
       }
       if (variant === 'corporate') {
         return '<div style="text-align:center;border-top:1px solid ' + theme.borderColor + ';padding-top:16px;margin-top:20px;font-family:' + theme.bodyFont + ';font-size:12px;color:' + theme.mutedColor + ';">' +
-          '<div style="font-weight:bold;color:' + theme.headingColor + ';margin-bottom:3px;">Friendly Party Rental</div>' +
+          '<div style="font-weight:bold;color:' + theme.headingColor + ';margin-bottom:3px;">Friendly Party Rental SC</div>' +
           'Tents &bull; Tables &bull; Chairs &bull; Event Rentals &mdash; Greenville / Upstate South Carolina<br/>' + contact + '<br/>' +
           '<a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Manage preferences</a> &nbsp;|&nbsp; <a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Unsubscribe</a></div>'
       }
       return '<div style="text-align:center;border-top:1px solid ' + theme.borderColor + ';padding-top:16px;margin-top:20px;font-family:' + theme.bodyFont + ';font-size:12px;color:' + theme.mutedColor + ';">' +
-        '<div style="font-weight:bold;color:' + theme.headingColor + ';margin-bottom:3px;">Friendly Party Rental</div>' +
+        '<div style="font-weight:bold;color:' + theme.headingColor + ';margin-bottom:3px;">Friendly Party Rental SC</div>' +
         'Tents &bull; Tables &bull; Chairs &bull; Event Rentals<br/>Greenville, SC &nbsp;•&nbsp; ' + contact + '<br/>' +
         '<a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Manage preferences</a> &nbsp;|&nbsp; <a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Unsubscribe</a></div>'
     }
@@ -339,7 +339,7 @@ function starterBlocks(): Block[] {
     },
     { id: uid(), type: 'divider' },
     {
-      id: uid(), type: 'badges', title: 'Why Friendly Party Rental?',
+      id: uid(), type: 'badges', title: 'Why Friendly Party Rental SC?',
       cards: [
         { image: ORIGIN + '/images/badge-all-day-8-hour-rental.png', caption: '', url: '' },
         { image: ORIGIN + '/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },

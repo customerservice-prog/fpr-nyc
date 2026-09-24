@@ -14,7 +14,7 @@ export default function UnsubscribePage({
         </h1>
         <p style={{ color: '#4b5563', lineHeight: 1.6 }}>
           {done
-            ? 'You will no longer receive marketing emails from Friendly Party Rental. Order-related emails (like confirmations and balance reminders) may still be sent for any active reservations.'
+            ? 'You will no longer receive marketing emails from Friendly Party Rental SC. Order-related emails (like confirmations and balance reminders) may still be sent for any active reservations.'
             : 'It looks like this link is missing information. If you meant to unsubscribe, please use the link at the bottom of the email you received.'}
         </p>
         <p style={{ marginTop: 20 }}>

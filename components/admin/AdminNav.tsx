@@ -59,7 +59,7 @@ export default function AdminNav() {
         <Link href="https://www.friendlypartyrentalsc.com" target="_blank" rel="noopener noreferrer">
           <Image
             src="/images/logo.png"
-            alt="Friendly Party Rental"
+            alt="Friendly Party Rental SC"
             width={140}
             height={48}
             className="h-12 w-auto object-contain"

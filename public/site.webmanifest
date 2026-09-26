@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Friendly Party Rental SC",
-  "short_name": "FPR SC",
-  "description": "Party and event rentals in Greenville and Upstate South Carolina.",
+  "name": "Friendly Party Rental NYC",
+  "short_name": "FPR NYC",
+  "description": "Party and event rentals serving Riverdale, the Bronx and Lower Westchester.",
   "start_url": "/",
   "scope": "/",
   "display": "browser",

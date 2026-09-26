@@ -116,3 +116,16 @@ Downstate uses the same production Google tags as Friendly Party Rental:
 - Google Ads tag ID: `AW-18374628389`
 
 Custom Downstate events are sent through `gtag('event', ...)` and mirrored to `dataLayer` / `fpr:conversion`.
+
+
+## High-intent local SEO pages
+
+The generator includes six focused city/service pages:
+- /riverdale/tent-rentals/
+- /riverdale/bounce-house-rentals/
+- /yonkers/tent-rentals/
+- /yonkers/bounce-house-rentals/
+- /bronx/tent-rentals/
+- /bronx/bounce-house-rentals/
+
+Each page has its own site-fit copy, local FAQs, packages, and quote source attribution. These are intentionally limited to the strongest initial combinations rather than mass-generating thin city pages.

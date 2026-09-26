@@ -283,5 +283,187 @@
       ],
       "note": "Dance floor and photo booth options are quoted after the final layout is confirmed."
     }
+  ],
+  "searchLandingPages": [
+    {
+      "citySlug": "riverdale",
+      "serviceSlug": "tent-rentals",
+      "slug": "riverdale/tent-rentals",
+      "city": "Riverdale",
+      "service": "Tent Rentals",
+      "title": "Tent Rentals in Riverdale, Bronx NY | Friendly Party Rental",
+      "description": "Tent rentals for Riverdale backyard parties, graduations, weddings and school events with tables, chairs, lighting and professional setup.",
+      "intro": "Riverdale properties can range from open lawns to tighter driveways and sloped residential lots. We size the tent around the usable space, guest plan, setup surface, access path, and the rest of the event equipment—not just the headcount.",
+      "bullets": [
+        "Pole tents for suitable grass sites",
+        "Frame-style or weighted options may fit paved sites",
+        "Tables, chairs, linens, lighting and fans can be combined",
+        "Setup and breakdown are coordinated with the rental order"
+      ],
+      "faq": [
+        [
+          "Can you put a tent on a Riverdale driveway?",
+          "Possibly. Paved or stake-restricted sites may need a frame-style or weighted setup. Send the address, surface type, and approximate dimensions so we can confirm the right option."
+        ],
+        [
+          "How much space should I leave around the tent?",
+          "The tent footprint is only part of the site plan. We also need working clearance, access, anchoring space where applicable, and room for guest movement."
+        ],
+        [
+          "Can I add tables and chairs to the tent order?",
+          "Yes. Downstate service is built around complete event orders, so seating, tables, lighting, linens and other add-ons can be included in the same quote."
+        ]
+      ]
+    },
+    {
+      "citySlug": "riverdale",
+      "serviceSlug": "inflatables",
+      "slug": "riverdale/bounce-house-rentals",
+      "city": "Riverdale",
+      "service": "Bounce House Rentals",
+      "title": "Bounce House Rentals in Riverdale, Bronx NY | Friendly Party Rental",
+      "description": "Bounce house and inflatable rentals for suitable Riverdale backyards and event sites, with delivery, setup and party-rental add-ons.",
+      "intro": "For Riverdale inflatables, the first questions are space, access, anchoring, power, and surface. We confirm those details before promising a unit so the setup actually works at the property.",
+      "bullets": [
+        "Bounce houses and selected inflatable options",
+        "Site and access check before confirmation",
+        "Tables, chairs, tents and concessions can be bundled",
+        "Power requirements are confirmed with the quote"
+      ],
+      "faq": [
+        [
+          "What does a Riverdale bounce-house setup need?",
+          "A suitable flat setup area, safe anchoring conditions, a clear delivery path, and dependable power. Exact requirements depend on the inflatable."
+        ],
+        [
+          "Can you set up an inflatable on every property?",
+          "No. Some yards, paved areas, slopes, gates, overhead obstructions, or access routes are not suitable. We confirm the site before booking."
+        ],
+        [
+          "Can I rent a tent and bounce house together?",
+          "Yes. That is one of the main advantages of the Downstate service: tents, seating, inflatables and event extras can be combined into one coordinated order."
+        ]
+      ]
+    },
+    {
+      "citySlug": "yonkers",
+      "serviceSlug": "tent-rentals",
+      "slug": "yonkers/tent-rentals",
+      "city": "Yonkers",
+      "service": "Tent Rentals",
+      "title": "Tent Rentals in Yonkers NY | Friendly Party Rental",
+      "description": "Yonkers tent rentals for backyard parties, graduations, receptions, schools and community events with professional setup and event-rental add-ons.",
+      "intro": "Yonkers gives us a wide mix of backyard, school, church and community-event sites. We quote the tent around the surface, guest layout, access, event schedule and supporting rentals so the whole setup works together.",
+      "bullets": [
+        "Backyard tent packages",
+        "Graduation and milestone-event setups",
+        "Tables, chairs, lighting and linens available",
+        "Site-appropriate anchoring or weighted options"
+      ],
+      "faq": [
+        [
+          "Do you deliver and set up tents in Yonkers?",
+          "Yes, for accepted Downstate orders. Delivery, professional setup, breakdown and pickup requirements are confirmed on the quote."
+        ],
+        [
+          "Can you help choose the tent size?",
+          "Yes. Guest count matters, but so do table style, buffet space, dance floor, bars, walkways and the usable dimensions of the property."
+        ],
+        [
+          "Do you rent tents for schools or community events?",
+          "We can quote suitable school, church, corporate and community sites after reviewing access, surface, schedule and any venue requirements."
+        ]
+      ]
+    },
+    {
+      "citySlug": "yonkers",
+      "serviceSlug": "inflatables",
+      "slug": "yonkers/bounce-house-rentals",
+      "city": "Yonkers",
+      "service": "Bounce House Rentals",
+      "title": "Bounce House Rentals in Yonkers NY | Friendly Party Rental",
+      "description": "Bounce house and inflatable rentals in Yonkers for suitable backyards, schools and private events, with setup and complete party-rental packages.",
+      "intro": "Yonkers inflatable orders can be paired with tents, seating and concessions so families and organizations do not have to coordinate several rental companies for one event.",
+      "bullets": [
+        "Bounce houses for suitable sites",
+        "Water-slide options when seasonal inventory permits",
+        "Tables, chairs, tents and games available",
+        "Setup details and power needs confirmed in advance"
+      ],
+      "faq": [
+        [
+          "Do you set up bounce houses in Yonkers backyards?",
+          "Yes, when the property has suitable space, access, surface and anchoring conditions."
+        ],
+        [
+          "Can I add tables and chairs?",
+          "Yes. Complete orders can include seating, tables, tents, concessions, games and other event extras."
+        ],
+        [
+          "What if I do not know whether my yard is large enough?",
+          "Send the address and approximate setup area with your request. We can confirm what information or measurements are needed before finalizing the booking."
+        ]
+      ]
+    },
+    {
+      "citySlug": "bronx",
+      "serviceSlug": "tent-rentals",
+      "slug": "bronx/tent-rentals",
+      "city": "The Bronx",
+      "service": "Tent Rentals",
+      "title": "Tent Rentals in the Bronx NY | Friendly Party Rental",
+      "description": "Selected Bronx tent rentals for private properties, schools, weddings and community events with tables, chairs, lighting and professional setup.",
+      "intro": "Bronx tent jobs are accepted selectively because surface, loading access, parking, carry distance and usable space can change the installation dramatically. We review the site before confirming the tent and final price.",
+      "bullets": [
+        "Selected Bronx delivery areas",
+        "Grass and paved-site options reviewed separately",
+        "Tables, chairs, linens and lighting available",
+        "Access and setup requirements confirmed before booking"
+      ],
+      "faq": [
+        [
+          "Do you serve every Bronx address?",
+          "Not automatically. We confirm the address, order size, access, surface and setup requirements before accepting a Downstate delivery."
+        ],
+        [
+          "Can a tent go on concrete or asphalt?",
+          "Some tent systems can work on paved sites with the correct anchoring or weighting method. The exact setup must be approved for the site."
+        ],
+        [
+          "Can you provide a complete event setup?",
+          "Yes. Tenting can be combined with seating, tables, linens, lighting, cocktail tables and other event rentals."
+        ]
+      ]
+    },
+    {
+      "citySlug": "bronx",
+      "serviceSlug": "inflatables",
+      "slug": "bronx/bounce-house-rentals",
+      "city": "The Bronx",
+      "service": "Bounce House Rentals",
+      "title": "Bounce House Rentals in the Bronx NY | Friendly Party Rental",
+      "description": "Selected Bronx bounce house and inflatable rentals for suitable private properties, schools and events with delivery, setup and party-rental add-ons.",
+      "intro": "Bronx inflatable deliveries depend heavily on access and the exact setup area. We confirm gate width, carry path, surface, anchoring conditions, power and event location before accepting the rental.",
+      "bullets": [
+        "Selected Bronx service areas",
+        "Bounce houses and seasonal inflatable options",
+        "Tents, seating, games and concessions can be added",
+        "Site, access and power requirements reviewed first"
+      ],
+      "faq": [
+        [
+          "Do you deliver bounce houses throughout the Bronx?",
+          "We serve selected locations where the property, route and order fit our equipment and operating requirements."
+        ],
+        [
+          "Can an inflatable be installed on pavement?",
+          "It depends on the specific unit and approved anchoring method. We do not assume a paved site is suitable without reviewing it."
+        ],
+        [
+          "Do you handle setup and pickup?",
+          "Accepted Downstate inflatable orders include the setup/pickup plan in the quote so the customer knows the event-day responsibilities before booking."
+        ]
+      ]
+    }
   ]
 }

@@ -4,7 +4,7 @@ import { ArrowRight, CalendarDays, MapPin, MessageCircle, Phone, Truck } from 'l
 import DeliveryFeeChecker from '@/components/public/DeliveryFeeChecker'
 import ServiceAreaDirectory from '@/components/public/ServiceAreaDirectory'
 import {scPageMetadata,scBreadcrumbs,SC_BUSINESS_ID,scUrl} from '@/lib/nycSeo'
-import {SC_PRIORITY_AREAS,NYC_SERVICE_AREAS} from '@/lib/nycServiceAreas'
+import {NYC_PRIORITY_AREAS,NYC_SERVICE_AREAS} from '@/lib/nycServiceAreas'
 import {safeJsonLd} from '@/lib/jsonLd'
 import styles from '@/components/public/NycServiceArea.module.css'
 
@@ -12,7 +12,7 @@ export const metadata=scPageMetadata('/service-area','Party Rental Delivery Area
 
 export default function ServiceAreaPage(){
  const schema={'@context':'https://schema.org','@type':'Service','@id':scUrl('/service-area')+'#delivery',name:'Party rental delivery in Greenville and Upstate South Carolina',serviceType:'Party and event equipment rental delivery',provider:{'@id':SC_BUSINESS_ID},areaServed:NYC_SERVICE_AREAS.map(a=>({'@type':'Place',name:a.name+', SC'})),url:scUrl('/service-area')}
- const priority=SC_PRIORITY_AREAS.map(slug=>NYC_SERVICE_AREAS.find(area=>area.slug===slug)).filter(Boolean) as typeof NYC_SERVICE_AREAS
+ const priority=NYC_PRIORITY_AREAS.map(slug=>NYC_SERVICE_AREAS.find(area=>area.slug===slug)).filter(Boolean) as typeof NYC_SERVICE_AREAS
  return <div className={styles.page}>
   <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(schema)}}/>
   <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(scBreadcrumbs([{name:'Home',path:'/'},{name:'South Carolina Delivery Areas',path:'/service-area'}]))}}/>

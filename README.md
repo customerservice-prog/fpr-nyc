@@ -127,3 +127,8 @@ Each page has its own site-fit copy, local FAQs, packages, and quote source attr
 ## Custom-domain cutover
 
 Deferred by owner request. Keep the Railway production URL as the canonical base until the custom-domain step is resumed.
+
+
+## Search indexing gate
+
+The temporary Railway hostname is intentionally **noindex** while the branded domain is deferred. The generator and production server only allow indexing when `PUBLIC_INDEXABLE=true` is explicitly set. Do not enable this until the final public domain is ready and `PUBLIC_BASE_URL` points to it.

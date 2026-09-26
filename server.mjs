@@ -7,6 +7,7 @@ import { randomUUID } from 'node:crypto';
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
 const root=path.join(__dirname,'dist');
 const port=Number(process.env.PORT||3000);
+const publicIndexable=process.env.PUBLIC_INDEXABLE==='true';
 const leadRate=new Map();
 function allowLead(req){
   const ip=String(req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown').split(',')[0].trim();
@@ -201,7 +202,7 @@ function serve(req,res){
 
   const ext=path.extname(file).toLowerCase();
   const headers={'Content-Type':mime[ext]||'application/octet-stream','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin','X-Frame-Options':'DENY','Permissions-Policy':'camera=(), microphone=(), geolocation=()'};
-  if(ext==='.html') headers['Cache-Control']='public, max-age=0, must-revalidate';
+  if(ext==='.html'){headers['Cache-Control']='public, max-age=0, must-revalidate';if(!publicIndexable)headers['X-Robots-Tag']='noindex, nofollow';}
   else headers['Cache-Control']='public, max-age=3600';
   res.writeHead(file.endsWith('404.html')?404:200,headers);
   fs.createReadStream(file).pipe(res);

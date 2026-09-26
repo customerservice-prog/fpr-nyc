@@ -7,27 +7,95 @@
   "phoneDisplay": "Call for availability",
   "phoneHref": "",
   "primaryDomain": "friendlypartyrental.com",
-  "publicBaseUrl": "",
+  "publicBaseUrl": "https://fpr-nyc-production.up.railway.app",
   "minimumOrder": {
     "enabled": true,
     "display": "Delivered orders start with a market-test minimum. Final minimum depends on service zone, date, equipment, and setup requirements.",
     "internalStartingTarget": 750
   },
   "areas": [
-    {"slug":"riverdale","name":"Riverdale","region":"Bronx, NY","priority":1,"summary":"Backyard celebrations, school events, weddings, family parties, and premium residential setups."},
-    {"slug":"fieldston","name":"Fieldston","region":"Bronx, NY","priority":1,"summary":"Residential events with room for tents, seating, lighting, and upscale backyard layouts."},
-    {"slug":"kingsbridge","name":"Kingsbridge","region":"Bronx, NY","priority":2,"summary":"Neighborhood parties, schools, community events, tables, chairs, tents, and inflatables."},
-    {"slug":"yonkers","name":"Yonkers","region":"Westchester County, NY","priority":1,"summary":"Backyard parties, graduations, weddings, school events, inflatables, and full event setups."},
-    {"slug":"mount-vernon","name":"Mount Vernon","region":"Westchester County, NY","priority":2,"summary":"Tent packages, backyard parties, family events, tables, chairs, and entertainment rentals."},
-    {"slug":"new-rochelle","name":"New Rochelle","region":"Westchester County, NY","priority":2,"summary":"Weddings, backyard events, graduations, tent rentals, seating, lighting, and event packages."},
-    {"slug":"bronx","name":"The Bronx","region":"New York City","priority":2,"summary":"Selected Bronx locations with site-appropriate tenting, inflatables, tables, chairs, and event rentals."},
-    {"slug":"lower-westchester","name":"Lower Westchester","region":"Westchester County, NY","priority":1,"summary":"A connected service area for premium suburban events with more room for tents and inflatables."}
+    {
+      "slug": "riverdale",
+      "name": "Riverdale",
+      "region": "Bronx, NY",
+      "priority": 1,
+      "summary": "Backyard celebrations, school events, weddings, family parties, and premium residential setups."
+    },
+    {
+      "slug": "fieldston",
+      "name": "Fieldston",
+      "region": "Bronx, NY",
+      "priority": 1,
+      "summary": "Residential events with room for tents, seating, lighting, and upscale backyard layouts."
+    },
+    {
+      "slug": "kingsbridge",
+      "name": "Kingsbridge",
+      "region": "Bronx, NY",
+      "priority": 2,
+      "summary": "Neighborhood parties, schools, community events, tables, chairs, tents, and inflatables."
+    },
+    {
+      "slug": "yonkers",
+      "name": "Yonkers",
+      "region": "Westchester County, NY",
+      "priority": 1,
+      "summary": "Backyard parties, graduations, weddings, school events, inflatables, and full event setups."
+    },
+    {
+      "slug": "mount-vernon",
+      "name": "Mount Vernon",
+      "region": "Westchester County, NY",
+      "priority": 2,
+      "summary": "Tent packages, backyard parties, family events, tables, chairs, and entertainment rentals."
+    },
+    {
+      "slug": "new-rochelle",
+      "name": "New Rochelle",
+      "region": "Westchester County, NY",
+      "priority": 2,
+      "summary": "Weddings, backyard events, graduations, tent rentals, seating, lighting, and event packages."
+    },
+    {
+      "slug": "bronx",
+      "name": "The Bronx",
+      "region": "New York City",
+      "priority": 2,
+      "summary": "Selected Bronx locations with site-appropriate tenting, inflatables, tables, chairs, and event rentals."
+    },
+    {
+      "slug": "lower-westchester",
+      "name": "Lower Westchester",
+      "region": "Westchester County, NY",
+      "priority": 1,
+      "summary": "A connected service area for premium suburban events with more room for tents and inflatables."
+    }
   ],
   "services": [
-    {"slug":"tent-rentals","name":"Tent Rentals","blurb":"Pole tents for suitable grass sites plus frame-style options for paved or space-sensitive setups."},
-    {"slug":"tables-chairs","name":"Tables & Chairs","blurb":"Folding chairs, resin chairs, Chiavari seating, banquet tables, round tables, and cocktail tables."},
-    {"slug":"inflatables","name":"Bounce Houses & Water Slides","blurb":"Family-focused inflatables for suitable private properties, schools, and approved event sites."},
-    {"slug":"weddings","name":"Weddings & Receptions","blurb":"Tents, seating, linens, lighting, cocktail tables, dance floors, and coordinated setup."},
-    {"slug":"event-extras","name":"Event Extras","blurb":"Bistro lighting, fans, dance floors, concessions, games, photo booth options, coolers, and more."}
+    {
+      "slug": "tent-rentals",
+      "name": "Tent Rentals",
+      "blurb": "Pole tents for suitable grass sites plus frame-style options for paved or space-sensitive setups."
+    },
+    {
+      "slug": "tables-chairs",
+      "name": "Tables & Chairs",
+      "blurb": "Folding chairs, resin chairs, Chiavari seating, banquet tables, round tables, and cocktail tables."
+    },
+    {
+      "slug": "inflatables",
+      "name": "Bounce Houses & Water Slides",
+      "blurb": "Family-focused inflatables for suitable private properties, schools, and approved event sites."
+    },
+    {
+      "slug": "weddings",
+      "name": "Weddings & Receptions",
+      "blurb": "Tents, seating, linens, lighting, cocktail tables, dance floors, and coordinated setup."
+    },
+    {
+      "slug": "event-extras",
+      "name": "Event Extras",
+      "blurb": "Bistro lighting, fans, dance floors, concessions, games, photo booth options, coolers, and more."
+    }
   ]
 }

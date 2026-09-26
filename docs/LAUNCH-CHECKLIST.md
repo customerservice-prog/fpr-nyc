@@ -36,6 +36,28 @@
 - [x] Google Ads work deferred by owner request
 - [x] Custom-domain/DNS work deferred by owner request
 
+- [x] Downstate lead stages: New / Qualified / Quoted / Booked / Lost
+- [x] Standardized lost-reason suggestions
+- [x] Site-photo request email action and request timestamp
+- [x] Secure inquiry → Create Quote handoff
+- [x] Office / Manager access to Planning Inquiries
+- [x] Linked quotes automatically mark lead Quoted
+- [x] Active linked orders automatically mark lead Booked
+- [x] Manual Downstate route/delivery fee review required before quote creation
+- [x] Syracuse/Minoa automatic travel-fee calculation blocked for Downstate inquiry handoff
+- [x] Downstate 90-day scorecard
+- [x] Area-level leads / quotes / bookings / booked-dollar reporting
+- [x] Downstate lead regression suite
+## Ongoing 90-day test discipline
+
+- [ ] Review the Downstate scorecard weekly.
+- [ ] Mark every lead Qualified, Quoted, Booked, or Lost instead of leaving old leads New.
+- [ ] Record a lost reason when a lead is Lost.
+- [ ] Use the site-photo request when the property is unclear.
+- [ ] Use Create Quote from Lead rather than retyping the customer.
+- [ ] Manually review route economics for every Downstate quote.
+- [ ] Do not open a local warehouse based on lead count alone.
+
 ## Final checks before public launch
 
 - [ ] Submit one real owner/staff test inquiry using a real deliverable email and phone.

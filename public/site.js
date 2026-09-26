@@ -4,8 +4,8 @@ forms.forEach(form=>form.addEventListener('submit',async(e)=>{
   const status=form.querySelector('[data-status]');
   const button=form.querySelector('button[type="submit"]');
   button.disabled=true; button.textContent='Sending…';
+  const payload=Object.fromEntries(new FormData(form).entries());
   try{
-    const payload=Object.fromEntries(new FormData(form).entries());
     const res=await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const data=await res.json().catch(()=>({}));
     if(!res.ok) throw new Error(data.error||'Unable to send request');

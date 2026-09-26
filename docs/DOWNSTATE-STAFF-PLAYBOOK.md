@@ -213,3 +213,27 @@ Staff must still choose:
 - taxes, discounts, and final quote details.
 
 Do not turn the customer’s free-text requested-rentals sentence directly into priced line items without verifying the actual catalog item.
+
+
+## Downstate route fee review
+
+When a Downstate inquiry is opened in the normal Friendly order builder:
+
+- the ordinary Syracuse/Minoa ZIP-based travel-fee calculator is disabled for that inquiry;
+- staff must enter the Downstate route/delivery fee manually;
+- staff must check the **Downstate route review** acknowledgment before creating the quote;
+- the reviewed fee is written into the order's internal notes.
+
+Review at minimum:
+
+- round-trip truck time;
+- crew hours;
+- fuel;
+- tolls;
+- parking/loading restrictions;
+- setup and breakdown labor;
+- pickup timing / second-trip risk;
+- special access or long carry;
+- whether the job still clears the Downstate minimum and target contribution.
+
+Do not click a Syracuse auto-fee button or copy a local delivery fee into a Downstate quote.

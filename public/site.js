@@ -31,6 +31,7 @@ forms.forEach(form=>{
       const data=await res.json().catch(()=>({}));
       if(!res.ok) throw new Error(data.error||'Unable to send request');
       track('lead_submit_success',{source:payload.source,city:payload.city,eventType:payload.eventType,utmSource:payload.utmSource});
+      track('generate_lead',{lead_source:'downstate',source:payload.source,city:payload.city,event_type:payload.eventType,utm_source:payload.utmSource});
       status.className='status ok'; status.textContent='Request received. We’ll review the date, location, and equipment before confirming availability.'+(data.reference?' Reference: '+data.reference:'');
       form.reset();
     }catch(err){

@@ -13,6 +13,8 @@ function planningRelayPayload(clean){
     '[DOWNSTATE RENTAL INQUIRY]',
     'Original event type: '+(clean.eventType||'Not specified'),
     'Event address: '+clean.eventAddress,
+    'City / neighborhood: '+clean.city,
+    'ZIP: '+clean.eventZip,
     'Property / venue: '+clean.propertyType,
     'Setup surface: '+(clean.surface||'Not specified'),
     clean.setupDimensions ? 'Approx. usable setup size: '+clean.setupDimensions : '',
@@ -32,7 +34,7 @@ function planningRelayPayload(clean){
     eventType:mapPlanningEventType(clean.eventType),
     eventDate:clean.eventDate,
     guestCount:clean.guests,
-    location:[clean.eventAddress,clean.city].filter(Boolean).join(', '),
+    location:[clean.eventAddress,clean.city,clean.eventZip].filter(Boolean).join(', '),
     venueStatus:clean.propertyType==='Home / Backyard'?'Hosting at home':clean.propertyType==='Venue / Event Space'?'Have a venue in mind':'Still deciding',
     help:['Rentals'],
     name:clean.name,
@@ -56,11 +58,11 @@ export default async function handler(req,res){
   const body=typeof req.body==='string'?JSON.parse(req.body||'{}'):(req.body||{});
   if(String(body.website||'').trim()) return res.status(200).json({ok:true});
 
-  const required=['name','email','phone','eventDate','eventAddress','city','eventType','propertyType','items'];
+  const required=['name','email','phone','eventDate','eventAddress','city','eventZip','eventType','propertyType','items'];
   for(const key of required){if(!String(body[key]||'').trim()) return res.status(400).json({error:`Missing ${key}`});}
   const clean={
     name:String(body.name).slice(0,120),email:String(body.email).slice(0,180),phone:String(body.phone||'').slice(0,80),
-    eventDate:String(body.eventDate).slice(0,40),eventAddress:String(body.eventAddress||'').slice(0,220),city:String(body.city).slice(0,120),propertyType:String(body.propertyType||'').slice(0,100),setupDimensions:String(body.setupDimensions||'').slice(0,100),accessNotes:String(body.accessNotes||'').slice(0,1200),minimumAcknowledged:String(body.minimumAcknowledged||'').slice(0,10),items:String(body.items).slice(0,1600),
+    eventDate:String(body.eventDate).slice(0,40),eventAddress:String(body.eventAddress||'').slice(0,220),city:String(body.city).slice(0,120),eventZip:String(body.eventZip||'').slice(0,10),propertyType:String(body.propertyType||'').slice(0,100),setupDimensions:String(body.setupDimensions||'').slice(0,100),accessNotes:String(body.accessNotes||'').slice(0,1200),minimumAcknowledged:String(body.minimumAcknowledged||'').slice(0,10),items:String(body.items).slice(0,1600),
     guests:String(body.guests||'').slice(0,40),
       eventType:String(body.eventType||'').slice(0,100),
       surface:String(body.surface||'').slice(0,80),
@@ -75,6 +77,7 @@ export default async function handler(req,res){
   if(!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(clean.email)) return res.status(400).json({error:'Please enter a valid email address'});
   if(!/^[+()0-9.\- ]{7,25}$/.test(clean.phone)||clean.phone.replace(/\D/g,'').length<7) return res.status(400).json({error:'Please enter a valid phone number'});
   if(!/^\d{4}-\d{2}-\d{2}$/.test(clean.eventDate)) return res.status(400).json({error:'Please choose a valid event date'});
+  if(!/^\d{5}(?:-\d{4})?$/.test(clean.eventZip)) return res.status(400).json({error:'Please enter a valid event ZIP code'});
   if(clean.minimumAcknowledged!=='yes') return res.status(400).json({error:'Please acknowledge the Downstate minimum before submitting'});
   console.log('FPR_DOWNSTATE_LEAD '+JSON.stringify({receivedAt:new Date().toISOString(),...clean}));
   let delivered=false;
@@ -96,7 +99,7 @@ export default async function handler(req,res){
     const r=await fetch('https://api.resend.com/emails',{method:'POST',headers:{'Authorization':`Bearer ${process.env.RESEND_API_KEY}`,'Content-Type':'application/json'},body:JSON.stringify({
       from:process.env.LEAD_FROM_EMAIL||'Friendly Downstate <onboarding@resend.dev>',to:[process.env.LEAD_TO_EMAIL],
       subject:`Downstate quote lead — ${clean.city} — ${clean.eventDate}`,
-      text:`Name: ${clean.name}\nEmail: ${clean.email}\nPhone: ${clean.phone}\nEvent date: ${clean.eventDate}\nEvent address: ${clean.eventAddress}\nCity: ${clean.city}\nProperty / venue: ${clean.propertyType}\nApprox. setup size: ${clean.setupDimensions}\nAccess / site notes: ${clean.accessNotes}\nGuests: ${clean.guests}\nEvent type: ${clean.eventType}\nSurface: ${clean.surface}\nItems: ${clean.items}\nUTM source: ${clean.utmSource}\nUTM medium: ${clean.utmMedium}\nUTM campaign: ${clean.utmCampaign}\nUTM term: ${clean.utmTerm}\nUTM content: ${clean.utmContent}\nLanding page: ${clean.landingPage}`
+      text:`Name: ${clean.name}\nEmail: ${clean.email}\nPhone: ${clean.phone}\nEvent date: ${clean.eventDate}\nEvent address: ${clean.eventAddress}\nCity: ${clean.city}\nZIP: ${clean.eventZip}\nProperty / venue: ${clean.propertyType}\nApprox. setup size: ${clean.setupDimensions}\nAccess / site notes: ${clean.accessNotes}\nGuests: ${clean.guests}\nEvent type: ${clean.eventType}\nSurface: ${clean.surface}\nItems: ${clean.items}\nUTM source: ${clean.utmSource}\nUTM medium: ${clean.utmMedium}\nUTM campaign: ${clean.utmCampaign}\nUTM term: ${clean.utmTerm}\nUTM content: ${clean.utmContent}\nLanding page: ${clean.landingPage}`
     })});
     delivered=r.ok;
   }

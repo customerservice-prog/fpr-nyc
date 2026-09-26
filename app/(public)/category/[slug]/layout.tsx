@@ -2,7 +2,7 @@ import {categorySearchName} from '@/lib/nycSearchReadiness'
 import {cache} from 'react'
 import {prisma} from '@/lib/prisma'
 import {safeJsonLd} from '@/lib/jsonLd'
-import {categoryDescriptionForSc} from '@/lib/nycPublicCopy'
+import {categoryDescriptionForNyc} from '@/lib/nycPublicCopy'
 import {scPageMetadata,scBreadcrumbs,scUrl,SC_BUSINESS_ID} from '@/lib/nycSeo'
 import {getCategoryPlanningContent} from '@/lib/categoryPlanningContent'
 const getCategory=cache((slug:string)=>prisma.category.findUnique({where:{slug}}))

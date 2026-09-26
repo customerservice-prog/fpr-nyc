@@ -4,3 +4,39 @@
 .hero-card{background:linear-gradient(180deg,rgba(6,35,25,.08) 0%,rgba(6,35,25,.22) 45%,rgba(6,35,25,.90) 100%),url("https://www.friendlypartyrental.com/images/desktop-hero-tent-reception.jpg") center/cover no-repeat}
 .hero-card:before{inset:0;width:auto;height:auto;border-radius:0;background:linear-gradient(135deg,rgba(217,242,106,.10),transparent 45%);opacity:1;right:0;top:0;z-index:1}
 .hero-card:after{z-index:2}.tent-art{display:none}.hero-card h3,.hero-card p{position:relative;z-index:2;text-shadow:0 2px 18px rgba(0,0,0,.28)}
+
+/* Downstate launch pass: image-led categories, packages, local SEO blocks. */
+.service-grid{grid-template-columns:repeat(5,1fr)}
+.media-card{padding:0;overflow:hidden;display:block}
+.card-media{height:190px;background-size:cover;background-position:center;background-color:#e7eee9}
+.card-body{padding:24px}
+.package-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.package-card{overflow:hidden;background:#fff;border:1px solid #dfe7e2;border-radius:28px;box-shadow:0 14px 38px rgba(35,62,48,.06)}
+.package-media{height:220px;background-size:cover;background-position:center;position:relative;background-color:#e7eee9}
+.package-tag{position:absolute;left:16px;top:16px;background:rgba(10,47,35,.92);color:#fff;border-radius:999px;padding:8px 12px;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.package-body{padding:24px}
+.package-top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+.package-top h3{font-size:23px;line-height:1.04;margin:7px 0 0}
+.package-price{font-size:28px;font-weight:950;color:var(--green);white-space:nowrap;text-align:right}
+.package-price small{display:block;color:#7a867f;font-size:10px;text-transform:uppercase;letter-spacing:.12em}
+.package-guests{font-weight:800;color:#49584f;margin:12px 0}
+.package-body ul,.local-ideal ul{padding-left:20px;margin:14px 0 18px}
+.package-body li,.local-ideal li{margin:8px 0;color:#526158}
+.package-btn{width:100%}
+.center-actions{text-align:center;margin-top:26px}
+.local-split{display:grid;grid-template-columns:1.15fr .85fr;gap:30px;align-items:start}
+.local-ideal{background:#fff;border:1px solid #dfe7e2;border-radius:28px;padding:26px;box-shadow:0 12px 34px rgba(35,62,48,.05)}
+.package-strip{background:#eef3ee}
+.trust-section{background:#0f3025;color:#fff}
+.trust-section .section-intro{color:#cad9d1}
+.trust-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.trust-list{display:grid;gap:12px}
+.trust-list>div{border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:18px;background:rgba(255,255,255,.04)}
+.trust-list strong,.trust-list span{display:block}
+.trust-list span{color:#c9d7d0;font-size:14px;margin-top:4px}
+.pricing-notice{margin:0 0 24px}
+.service-hero{position:relative;overflow:hidden}
+.service-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(247,246,241,1) 0%,rgba(247,246,241,.92) 44%,rgba(247,246,241,.30) 100%),var(--service-image) right center/50% cover no-repeat;z-index:-1}
+.topbar a{color:inherit;text-decoration:none}
+@media(max-width:1100px){.service-grid{grid-template-columns:repeat(3,1fr)}.package-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.service-grid,.package-grid,.local-split,.trust-grid{grid-template-columns:1fr}.card-media{height:210px}.package-media{height:235px}.package-top{gap:10px}.package-price{font-size:24px}.service-hero:after{background:linear-gradient(180deg,rgba(247,246,241,.88),rgba(247,246,241,.98)),var(--service-image) center/cover no-repeat}}

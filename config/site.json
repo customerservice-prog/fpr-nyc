@@ -10,8 +10,8 @@
   "publicBaseUrl": "https://fpr-nyc-production.up.railway.app",
   "minimumOrder": {
     "enabled": true,
-    "display": "Downstate delivered orders have a minimum based on service zone, event date, equipment, and setup requirements. We confirm the total before booking.",
-    "internalStartingTarget": 750
+    "display": "Downstate complete-event deliveries generally start around $1,500 before tax. The exact minimum depends on service zone, event date, equipment, access, and setup requirements.",
+    "internalStartingTarget": 1500
   },
   "areas": [
     {
@@ -19,86 +19,269 @@
       "name": "Riverdale",
       "region": "Bronx, NY",
       "priority": 1,
-      "summary": "Backyard celebrations, school events, weddings, family parties, and premium residential setups."
+      "summary": "Backyard celebrations, school events, weddings, family parties, and premium residential setups.",
+      "details": "Riverdale is the center of our Downstate service area. We focus on backyard parties, milestone celebrations, school events, ceremonies, and receptions where a full rental order can be delivered and professionally set up.",
+      "idealFor": [
+        "Backyard birthdays and graduations",
+        "School and community events",
+        "Tent receptions and family celebrations",
+        "Complete tent + table + chair orders"
+      ]
     },
     {
       "slug": "fieldston",
       "name": "Fieldston",
       "region": "Bronx, NY",
       "priority": 1,
-      "summary": "Residential events with room for tents, seating, lighting, and upscale backyard layouts."
+      "summary": "Residential events with room for tents, seating, lighting, and upscale backyard layouts.",
+      "details": "Fieldston events often benefit from a site review before a tent is selected. Driveways, lawns, gates, slopes, overhead clearance, and the planned guest layout can change the best tent and anchoring method.",
+      "idealFor": [
+        "Residential celebrations",
+        "Formal backyard dinners",
+        "Wedding-related gatherings",
+        "Premium seating and lighting setups"
+      ]
     },
     {
       "slug": "kingsbridge",
       "name": "Kingsbridge",
       "region": "Bronx, NY",
       "priority": 2,
-      "summary": "Neighborhood parties, schools, community events, tables, chairs, tents, and inflatables."
+      "summary": "Neighborhood parties, schools, community events, tables, chairs, tents, and inflatables.",
+      "details": "Kingsbridge orders are quoted around access and setup conditions first. Compact yards, paved areas, schools, churches, and community spaces can each require a different equipment plan.",
+      "idealFor": [
+        "School and church events",
+        "Birthdays and family parties",
+        "Tables, chairs and concessions",
+        "Site-appropriate tents and inflatables"
+      ]
     },
     {
       "slug": "yonkers",
       "name": "Yonkers",
       "region": "Westchester County, NY",
       "priority": 1,
-      "summary": "Backyard parties, graduations, weddings, school events, inflatables, and full event setups."
+      "summary": "Backyard parties, graduations, weddings, school events, inflatables, and full event setups.",
+      "details": "Yonkers gives us a strong mix of residential, school, venue, and community-event opportunities. We quote the complete setup around the address, surface, access, event hours, and pickup requirements.",
+      "idealFor": [
+        "Graduation parties",
+        "Backyard tent packages",
+        "Weddings and receptions",
+        "Inflatables with seating packages"
+      ]
     },
     {
       "slug": "mount-vernon",
       "name": "Mount Vernon",
       "region": "Westchester County, NY",
       "priority": 2,
-      "summary": "Tent packages, backyard parties, family events, tables, chairs, and entertainment rentals."
+      "summary": "Tent packages, backyard parties, family events, tables, chairs, and entertainment rentals.",
+      "details": "Mount Vernon orders are built around complete event setups rather than small one-item deliveries. Combining tents, seating, tables, lighting, and entertainment helps keep the Downstate route efficient.",
+      "idealFor": [
+        "Family celebrations",
+        "Church and community events",
+        "Tent + seating packages",
+        "Birthday and graduation setups"
+      ]
     },
     {
       "slug": "new-rochelle",
       "name": "New Rochelle",
       "region": "Westchester County, NY",
       "priority": 2,
-      "summary": "Weddings, backyard events, graduations, tent rentals, seating, lighting, and event packages."
+      "summary": "Weddings, backyard events, graduations, tent rentals, seating, lighting, and event packages.",
+      "details": "New Rochelle events can range from backyard celebrations to more formal receptions. We confirm property access, setup surface, tent clearances, delivery timing, and venue requirements before finalizing the quote.",
+      "idealFor": [
+        "Backyard receptions",
+        "Wedding-related events",
+        "Graduations and milestone parties",
+        "Premium tent and seating orders"
+      ]
     },
     {
       "slug": "bronx",
       "name": "The Bronx",
       "region": "New York City",
       "priority": 2,
-      "summary": "Selected Bronx locations with site-appropriate tenting, inflatables, tables, chairs, and event rentals."
+      "summary": "Selected Bronx locations with site-appropriate tenting, inflatables, tables, chairs, and event rentals.",
+      "details": "We serve selected Bronx locations where the order, access, surface, and setup plan fit our equipment and route. For tents and inflatables, a site review may be required before the booking is confirmed.",
+      "idealFor": [
+        "Private-property events",
+        "Schools and community spaces",
+        "Complete party packages",
+        "Frame-style setups on suitable paved sites"
+      ]
     },
     {
       "slug": "lower-westchester",
       "name": "Lower Westchester",
       "region": "Westchester County, NY",
       "priority": 1,
-      "summary": "A connected service area for premium suburban events with more room for tents and inflatables."
+      "summary": "A connected service area for premium suburban events with more room for tents and inflatables.",
+      "details": "Lower Westchester is a priority growth corridor for Friendly Party Rental because complete backyard and event setups can combine the inventory we already specialize in: tents, seating, inflatables, lighting, dance floors, and event extras.",
+      "idealFor": [
+        "Backyard parties",
+        "Weddings and showers",
+        "School and corporate events",
+        "Full-service event rental packages"
+      ]
     }
   ],
   "services": [
     {
       "slug": "tent-rentals",
       "name": "Tent Rentals",
-      "blurb": "Pole tents for suitable grass sites plus frame-style options for paved or space-sensitive setups."
+      "blurb": "Pole tents for suitable grass sites plus frame-style options for paved or space-sensitive setups.",
+      "image": "https://www.friendlypartyrental.com/api/item-image/20x20-pole-tent",
+      "details": "Choose the tent around the property first: grass, pavement, access, guest count, tables, walkways, food service, and any dance floor all affect the right setup.",
+      "highlights": [
+        "Pole tents for suitable grass sites",
+        "Frame-style options for paved sites",
+        "Sidewalls, lighting and fans available",
+        "Professional installation and breakdown"
+      ]
     },
     {
       "slug": "tables-chairs",
       "name": "Tables & Chairs",
-      "blurb": "Folding chairs, resin chairs, Chiavari seating, banquet tables, round tables, and cocktail tables."
+      "blurb": "Folding chairs, resin chairs, Chiavari seating, banquet tables, round tables, and cocktail tables.",
+      "image": "https://www.friendlypartyrental.com/api/item-image/white-resin-folding-chair",
+      "details": "Build seating around the number of guests who need seats at the same time, then add serving, gift, cocktail, buffet, and registration tables separately.",
+      "highlights": [
+        "White folding and resin chairs",
+        "Gold, white and mahogany Chiavari options",
+        "Banquet, round and cocktail tables",
+        "Linens and table accents available"
+      ]
     },
     {
       "slug": "inflatables",
       "name": "Bounce Houses & Water Slides",
-      "blurb": "Family-focused inflatables for suitable private properties, schools, and approved event sites."
+      "blurb": "Family-focused inflatables for suitable private properties, schools, and approved event sites.",
+      "image": "https://www.friendlypartyrental.com/api/item-image/crayon-bounce-house",
+      "details": "Inflatables work best on sites with adequate flat space, a clear access path, proper anchoring, and suitable power. Water units also require a workable water source.",
+      "highlights": [
+        "Bounce houses",
+        "Water slides and combo units",
+        "Generator options when appropriate",
+        "Setup requirements confirmed before booking"
+      ]
     },
     {
       "slug": "weddings",
       "name": "Weddings & Receptions",
-      "blurb": "Tents, seating, linens, lighting, cocktail tables, dance floors, and coordinated setup."
+      "blurb": "Tents, seating, linens, lighting, cocktail tables, dance floors, and coordinated setup.",
+      "image": "https://www.friendlypartyrental.com/api/wedding-package-image/pkg-premium",
+      "details": "Wedding orders can combine tenting, ceremony seating, reception tables, linens, lighting, cocktail tables, dance floor, photo booth options, and coordinated setup.",
+      "highlights": [
+        "Ceremony and reception seating",
+        "Premium linens and Chiavari chairs",
+        "Lighting and dance-floor options",
+        "One coordinated rental order"
+      ]
     },
     {
       "slug": "event-extras",
       "name": "Event Extras",
-      "blurb": "Bistro lighting, fans, dance floors, concessions, games, photo booth options, coolers, and more."
+      "blurb": "Bistro lighting, fans, dance floors, concessions, games, photo booth options, coolers, and more.",
+      "image": "https://www.friendlypartyrental.com/images/desktop-hero-tent-reception.jpg",
+      "details": "Finish the event with practical and entertainment add-ons sized around your tent, guest count, power plan, and venue rules.",
+      "highlights": [
+        "Bistro and tent lighting",
+        "Fans, generators and coolers",
+        "Dance floors, games and concessions",
+        "Photo booth and event accessories"
+      ]
     }
   ],
   "email": "customerservice@friendlypartyrental.com",
   "emailDisplay": "customerservice@friendlypartyrental.com",
-  "emailHref": "mailto:customerservice@friendlypartyrental.com"
+  "emailHref": "mailto:customerservice@friendlypartyrental.com",
+  "domainPlan": {
+    "preferredSubdomain": "nyc.friendlypartyrental.com",
+    "availableStandalone": "friendlypartyrentalnyc.com"
+  },
+  "packages": [
+    {
+      "slug": "riverdale-backyard-32",
+      "name": "Riverdale Backyard 32",
+      "price": 1795,
+      "label": "Backyard Essential",
+      "guests": "Up to 32 seated guests",
+      "image": "https://www.friendlypartyrental.com/api/item-image/20x20-pole-tent",
+      "includes": [
+        "20×20 tent — site appropriate",
+        "4 folding tables",
+        "32 white folding chairs",
+        "Professional setup & breakdown"
+      ],
+      "note": "Grass/staking or paved-site requirements are confirmed before booking."
+    },
+    {
+      "slug": "family-fun-32",
+      "name": "Family Fun 32",
+      "price": 2095,
+      "label": "Birthday Favorite",
+      "guests": "Up to 32 seated guests",
+      "image": "https://www.friendlypartyrental.com/api/item-image/crayon-bounce-house",
+      "includes": [
+        "20×20 tent — site appropriate",
+        "4 tables + 32 chairs",
+        "1 standard bounce house",
+        "Professional setup & breakdown"
+      ],
+      "note": "Inflatable space, access, anchoring, and power must be approved."
+    },
+    {
+      "slug": "celebration-60",
+      "name": "Celebration 60",
+      "price": 2395,
+      "label": "Graduations & Milestones",
+      "guests": "Up to 60 seated guests",
+      "image": "https://www.friendlypartyrental.com/api/item-image/20x30-pole-tent",
+      "includes": [
+        "20×30 tent — site appropriate",
+        "Up to 8 tables",
+        "Up to 60 white folding chairs",
+        "Perimeter tent lighting",
+        "Professional setup & breakdown"
+      ],
+      "note": "Final table count depends on the layout and event use."
+    },
+    {
+      "slug": "garden-reception-80",
+      "name": "Garden Reception 80",
+      "price": 3495,
+      "label": "Reception Package",
+      "guests": "Up to 80 guests",
+      "image": "https://www.friendlypartyrental.com/api/wedding-package-image/pkg-premium",
+      "includes": [
+        "20×40 tent — site appropriate",
+        "8 round banquet tables",
+        "80 upgraded chairs",
+        "8 table linens",
+        "Perimeter string lighting",
+        "Professional setup & breakdown"
+      ],
+      "note": "Dance floors, cocktail tables, photo booth, and premium seating can be added."
+    },
+    {
+      "slug": "signature-wedding-80",
+      "name": "Signature Wedding 80",
+      "price": 4995,
+      "label": "Premium",
+      "guests": "Up to 80 guests",
+      "image": "https://www.friendlypartyrental.com/images/desktop-hero-tent-reception.jpg",
+      "includes": [
+        "Larger reception tent sized to the layout",
+        "8 round banquet tables",
+        "80 Gold Chiavari chairs",
+        "Premium table linens",
+        "4 cocktail tables with covers",
+        "Perimeter lighting",
+        "Professional setup & breakdown"
+      ],
+      "note": "Dance floor and photo booth options are quoted after the final layout is confirmed."
+    }
+  ]
 }

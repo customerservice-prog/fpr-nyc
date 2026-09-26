@@ -77,3 +77,23 @@ Then verify:
 ## Important operating rule
 
 This repo is separate from Friendly Party Rental's Syracuse and South Carolina sites. The first 90 days are for evidence gathering. Do not make a warehouse commitment solely because traffic increases.
+
+
+## Downstate pricing strategy
+
+The public site now uses a complete-event strategy rather than copying Syracuse item pricing.
+
+- Internal delivered-order floor: about **$1,500** before tax, adjusted by zone/date/site.
+- Public package cards start at **$1,795**.
+- Single-item Downstate drops are not the primary offer.
+- Package prices are starting points; access, surface, tent anchoring/weights, exact timing, long carries, and special venue rules can change the quote.
+
+## Domain plan
+
+Preferred branded subdomain: **nyc.friendlypartyrental.com**
+
+Standalone fallback checked on September 26, 2026: **friendlypartyrentalnyc.com** was available at the time of the check. Domain availability can change until registered.
+
+## Conversion events
+
+The browser now emits `dataLayer` events and `fpr:conversion` CustomEvents for quote CTAs, rental-category clicks, package quote clicks, phone clicks, email clicks, and lead submit outcomes. UTM source, medium, campaign, landing page, and referrer are carried with quote submissions.

@@ -56,6 +56,13 @@ async function handleLead(req,res){
       city:String(body.city).slice(0,120),
       items:String(body.items).slice(0,1600),
       guests:String(body.guests||'').slice(0,40),
+      eventType:String(body.eventType||'').slice(0,100),
+      surface:String(body.surface||'').slice(0,80),
+      utmSource:String(body.utmSource||'').slice(0,120),
+      utmMedium:String(body.utmMedium||'').slice(0,120),
+      utmCampaign:String(body.utmCampaign||'').slice(0,160),
+      landingPage:String(body.landingPage||'').slice(0,500),
+      referrer:String(body.referrer||'').slice(0,500),
       source:String(body.source||'downstate-site').slice(0,100)
     };
 
@@ -78,7 +85,7 @@ async function handleLead(req,res){
           to:[process.env.LEAD_TO_EMAIL],
           reply_to:clean.email,
           subject:`Downstate quote lead — ${clean.city} — ${clean.eventDate}`,
-          text:`Name: ${clean.name}\nEmail: ${clean.email}\nPhone: ${clean.phone}\nEvent date: ${clean.eventDate}\nCity: ${clean.city}\nGuests: ${clean.guests}\nItems: ${clean.items}\nSource: ${clean.source}`
+          text:`Name: ${clean.name}\nEmail: ${clean.email}\nPhone: ${clean.phone}\nEvent date: ${clean.eventDate}\nCity: ${clean.city}\nGuests: ${clean.guests}\nEvent type: ${clean.eventType}\nSurface: ${clean.surface}\nItems: ${clean.items}\nUTM source: ${clean.utmSource}\nUTM medium: ${clean.utmMedium}\nUTM campaign: ${clean.utmCampaign}\nLanding page: ${clean.landingPage}\nSource: ${clean.source}`
         })
       });
       delivered=r.ok;

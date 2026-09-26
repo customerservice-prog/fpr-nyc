@@ -113,6 +113,7 @@ async function handleLead(req,res){
       source:String(body.source||'downstate-site').slice(0,100)
     };
 
+    console.log('FPR_DOWNSTATE_LEAD '+JSON.stringify({receivedAt:new Date().toISOString(),...clean}));
     let delivered=false;
     let relayReference='';
     try{

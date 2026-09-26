@@ -1,33 +1,35 @@
 const REPLACEMENTS: Array<[RegExp, string]> = [
-  [/Syracuse,?\s*NY/gi, 'Greenville, SC'],
-  [/Syracuse/gi, 'Greenville'],
-  [/Minoa,?\s*NY/gi, 'Greenville, SC'],
-  [/Minoa/gi, 'Greenville'],
-  [/Central New York/gi, 'Upstate South Carolina'],
-  [/\bCNY\b/g, 'Upstate SC'],
-  [/Onondaga County/gi, 'Greenville County'],
-  [/315[-.\s]?884[-.\s]?1498/g, '864-610-5324'],
+  [/Friendly Party Rental SC/gi, 'Friendly Party Rental NYC'],
+  [/Greenville,?\s*SC/gi, 'Riverdale, NY'],
+  [/Greenville/gi, 'Riverdale'],
+  [/Upstate South Carolina/gi, 'Downstate New York'],
+  [/Upstate SC/gi, 'Downstate New York'],
+  [/South Carolina/gi, 'Downstate New York'],
+  [/Syracuse,?\s*NY/gi, 'Riverdale, NY'],
+  [/Syracuse/gi, 'Riverdale'],
+  [/Minoa,?\s*NY/gi, 'Riverdale, NY'],
+  [/Minoa/gi, 'Riverdale'],
+  [/Central New York/gi, 'Downstate New York'],
+  [/\bCNY\b/g, 'Downstate New York'],
+  [/Onondaga County/gi, 'the Bronx and Lower Westchester'],
+  [/Greenville County/gi, 'Lower Westchester'],
+  [/864[-.\s]?610[-.\s]?5324/g, '315-884-1498'],
 ]
 
-/**
- * SC inventory/category records originated from the original NY catalog.
- * Keep the underlying shared item data intact, but never expose stale NY
- * location copy on the Greenville storefront.
- */
-export function localizeScPublicCopy(value?: string | null): string {
+export function localizeNycPublicCopy(value?: string | null): string {
   let text = (value || '').trim()
   for (const [pattern, replacement] of REPLACEMENTS) text = text.replace(pattern, replacement)
   return text
 }
 
-export function itemDescriptionForSc(name: string, value?: string | null): string {
-  const localized = localizeScPublicCopy(value)
+export function itemDescriptionForNyc(name: string, value?: string | null): string {
+  const localized = localizeNycPublicCopy(value)
   if (localized) return localized
-  return `Rent the ${name} from Friendly Party Rental SC for events in Greenville, SC and surrounding Upstate South Carolina communities. Check your date online for current availability and pricing.`
+  return `Rent the ${name} from Friendly Party Rental NYC for events in Riverdale, the Bronx, and Lower Westchester. Check your date online for current availability and pricing.`
 }
 
-export function categoryDescriptionForSc(name: string, value?: string | null): string {
-  const localized = localizeScPublicCopy(value)
+export function categoryDescriptionForNyc(name: string, value?: string | null): string {
+  const localized = localizeNycPublicCopy(value)
   if (localized) return localized
-  return `${name} for weddings, birthdays, graduations, corporate events, and backyard celebrations throughout Greenville and Upstate South Carolina.`
+  return `${name} for weddings, birthdays, graduations, corporate events, and backyard celebrations across Riverdale, the Bronx, and Lower Westchester.`
 }

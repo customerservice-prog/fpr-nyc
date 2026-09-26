@@ -4,8 +4,8 @@
   "headline": "Backyard parties, weddings, and events across Riverdale and Lower Westchester",
   "subheadline": "Tents, tables, chairs, inflatables, lighting, dance floors, and event essentials — delivered and professionally set up.",
   "quoteCta": "Check My Date",
-  "phoneDisplay": "Call for availability",
-  "phoneHref": "",
+  "phoneDisplay": "315-884-1498",
+  "phoneHref": "tel:+13158841498",
   "primaryDomain": "friendlypartyrental.com",
   "publicBaseUrl": "https://fpr-nyc-production.up.railway.app",
   "minimumOrder": {
@@ -97,5 +97,6 @@
       "name": "Event Extras",
       "blurb": "Bistro lighting, fans, dance floors, concessions, games, photo booth options, coolers, and more."
     }
-  ]
+  ],
+  "email": "customerservice@friendlypartyrental.com"
 }

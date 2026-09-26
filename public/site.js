@@ -8,8 +8,12 @@ document.querySelectorAll('a[href^="tel:"]').forEach(a=>a.addEventListener('clic
 document.querySelectorAll('a[href^="mailto:"]').forEach(a=>a.addEventListener('click',()=>track('email_click',{page:location.pathname})));
 document.querySelectorAll('[data-track]').forEach(el=>el.addEventListener('click',()=>track(el.dataset.track,{label:el.dataset.label||el.textContent.trim(),page:location.pathname})));
 
+const selectedPackage=params.get('package')||'';
+const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const forms=document.querySelectorAll('[data-quote-form]');
 forms.forEach(form=>{
+  const dateField=form.elements.eventDate;if(dateField instanceof HTMLInputElement)dateField.min=today;
+  const itemsField=form.elements.items;if(selectedPackage&&itemsField instanceof HTMLTextAreaElement&&!itemsField.value.trim())itemsField.value='Interested in package: '+selectedPackage+'\n';
   const map={utmSource:'utm_source',utmMedium:'utm_medium',utmCampaign:'utm_campaign'};
   Object.entries(map).forEach(([field,key])=>{const input=form.elements[field];if(input)input.value=params.get(key)||''});
   if(form.elements.landingPage)form.elements.landingPage.value=location.href;

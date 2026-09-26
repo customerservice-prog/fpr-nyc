@@ -1,0 +1,51 @@
+name: Downstate relay smoke
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  relay-smoke:
+    if: contains(github.event.head_commit.message, '[relay-smoke]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Wait for Railway release
+        shell: bash
+        run: |
+          for i in {1..30}; do
+            if curl -fsS --max-time 10 https://fpr-nyc-production.up.railway.app/health | grep -q '"ok":true'; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Railway health endpoint did not become ready" >&2
+          exit 1
+
+      - name: Submit QA Downstate inquiry
+        shell: bash
+        run: |
+          response="$(curl -fsS --max-time 20             -H 'Content-Type: application/json'             -d '{
+              "name":"DOWNSTATE RELAY QA — DO NOT CONTACT",
+              "email":"downstate-relay-qa@example.invalid",
+              "phone":"3155550100",
+              "eventDate":"2026-10-10",
+              "city":"Riverdale, Bronx, NY",
+              "guests":"32",
+              "eventType":"Birthday / Family Party",
+              "surface":"Grass",
+              "items":"QA TEST ONLY — 20x20 tent, 4 tables, 32 chairs. DO NOT CONTACT.",
+              "source":"github-relay-smoke",
+              "utmSource":"github-actions",
+              "utmMedium":"qa",
+              "utmCampaign":"downstate-relay-smoke"
+            }'             https://fpr-nyc-production.up.railway.app/api/lead)"
+          echo "$response"
+          python - "$response" <<'PY'
+import json,sys
+data=json.loads(sys.argv[1])
+assert data.get("ok") is True, data
+ref=data.get("reference") or ""
+assert ref.startswith("planning_"), data
+print("Verified production lead reference:",ref)
+PY

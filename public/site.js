@@ -38,7 +38,7 @@ forms.forEach(form=>{
       track('lead_submit_fallback',{source:payload.source,city:payload.city,eventType:payload.eventType,utmSource:payload.utmSource});
       status.className='status err';
       const subject=encodeURIComponent('Downstate rental quote request — '+(payload.city||'NY')+' — '+(payload.eventDate||''));
-      const body=encodeURIComponent('Name: '+(payload.name||'')+'\nEmail: '+(payload.email||'')+'\nPhone: '+(payload.phone||'')+'\nEvent date: '+(payload.eventDate||'')+'\nCity/neighborhood: '+(payload.city||'')+'\nEstimated guests: '+(payload.guests||'')+'\nEvent type: '+(payload.eventType||'')+'\nSurface: '+(payload.surface||'')+'\nItems needed: '+(payload.items||''));
+      const body=encodeURIComponent('Name: '+(payload.name||'')+'\nEmail: '+(payload.email||'')+'\nPhone: '+(payload.phone||'')+'\nEvent date: '+(payload.eventDate||'')+'\nEvent address: '+(payload.eventAddress||'')+'\nCity/neighborhood: '+(payload.city||'')+'\nEstimated guests: '+(payload.guests||'')+'\nEvent type: '+(payload.eventType||'')+'\nProperty/venue: '+(payload.propertyType||'')+'\nSurface: '+(payload.surface||'')+'\nApprox. setup size: '+(payload.setupDimensions||'')+'\nAccess/site notes: '+(payload.accessNotes||'')+'\nItems needed: '+(payload.items||''));
       status.innerHTML='We couldn’t send the form automatically. <a href="mailto:customerservice@friendlypartyrental.com?subject='+subject+'&body='+body+'">Email this request to Friendly</a> or call <a href="tel:+13158841498">(315) 884-1498</a>.';
     }finally{button.disabled=false;button.textContent='Request My Quote'}
   });

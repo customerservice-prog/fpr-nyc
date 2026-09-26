@@ -63,7 +63,11 @@ function planningRelayPayload(clean){
   const notes=[
     '[DOWNSTATE RENTAL INQUIRY]',
     'Original event type: '+(clean.eventType||'Not specified'),
+    'Event address: '+clean.eventAddress,
+    'Property / venue: '+clean.propertyType,
     'Setup surface: '+(clean.surface||'Not specified'),
+    clean.setupDimensions ? 'Approx. usable setup size: '+clean.setupDimensions : '',
+    clean.accessNotes ? 'Access / site notes: '+clean.accessNotes : '',
     'Requested rentals: '+clean.items,
     'Downstate source: '+clean.source,
     clean.utmSource ? 'UTM source: '+clean.utmSource : '',
@@ -82,8 +86,8 @@ function planningRelayPayload(clean){
     eventType:mapPlanningEventType(clean.eventType),
     eventDate:clean.eventDate,
     guestCount:clean.guests,
-    location:clean.city,
-    venueStatus:'Still deciding',
+    location:[clean.eventAddress,clean.city].filter(Boolean).join(', '),
+    venueStatus:clean.propertyType==='Home / Backyard'?'Hosting at home':clean.propertyType==='Venue / Event Space'?'Have a venue in mind':'Still deciding',
     help:['Rentals'],
     name:clean.name,
     phone:clean.phone,
@@ -109,7 +113,7 @@ async function handleLead(req,res){
     const body=JSON.parse(raw||'{}');
     if(String(body.website||'').trim()) return json(res,200,{ok:true});
 
-    const required=['name','email','phone','eventDate','city','items'];
+    const required=['name','email','phone','eventDate','eventAddress','city','eventType','propertyType','items'];
     for(const key of required){
       if(!String(body[key]||'').trim()) return json(res,400,{error:`Missing ${key}`});
     }
@@ -118,7 +122,12 @@ async function handleLead(req,res){
       email:String(body.email).slice(0,180),
       phone:String(body.phone||'').slice(0,80),
       eventDate:String(body.eventDate).slice(0,40),
+      eventAddress:String(body.eventAddress||'').slice(0,220),
       city:String(body.city).slice(0,120),
+      propertyType:String(body.propertyType||'').slice(0,100),
+      setupDimensions:String(body.setupDimensions||'').slice(0,100),
+      accessNotes:String(body.accessNotes||'').slice(0,1200),
+      minimumAcknowledged:String(body.minimumAcknowledged||'').slice(0,10),
       items:String(body.items).slice(0,1600),
       guests:String(body.guests||'').slice(0,40),
       eventType:String(body.eventType||'').slice(0,100),
@@ -139,6 +148,7 @@ async function handleLead(req,res){
     if(!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(clean.email)) return json(res,400,{error:'Please enter a valid email address'});
     if(!/^[+()0-9.\- ]{7,25}$/.test(clean.phone)||clean.phone.replace(/\D/g,'').length<7) return json(res,400,{error:'Please enter a valid phone number'});
     if(!/^\d{4}-\d{2}-\d{2}$/.test(clean.eventDate)) return json(res,400,{error:'Please choose a valid event date'});
+    if(clean.minimumAcknowledged!=='yes') return json(res,400,{error:'Please acknowledge the Downstate minimum before submitting'});
     console.log('FPR_DOWNSTATE_LEAD '+JSON.stringify({receivedAt:new Date().toISOString(),...clean}));
     let delivered=false;
     let relayReference='';
@@ -169,7 +179,7 @@ async function handleLead(req,res){
           to:[process.env.LEAD_TO_EMAIL],
           reply_to:clean.email,
           subject:`Downstate quote lead — ${clean.city} — ${clean.eventDate}`,
-          text:`Name: ${clean.name}\nEmail: ${clean.email}\nPhone: ${clean.phone}\nEvent date: ${clean.eventDate}\nCity: ${clean.city}\nGuests: ${clean.guests}\nEvent type: ${clean.eventType}\nSurface: ${clean.surface}\nItems: ${clean.items}\nUTM source: ${clean.utmSource}\nUTM medium: ${clean.utmMedium}\nUTM campaign: ${clean.utmCampaign}\nUTM term: ${clean.utmTerm}\nUTM content: ${clean.utmContent}\nGCLID: ${clean.gclid}\nGBRAID: ${clean.gbraid}\nWBRAID: ${clean.wbraid}\nLanding page: ${clean.landingPage}\nSource: ${clean.source}`
+          text:`Name: ${clean.name}\nEmail: ${clean.email}\nPhone: ${clean.phone}\nEvent date: ${clean.eventDate}\nEvent address: ${clean.eventAddress}\nCity: ${clean.city}\nProperty / venue: ${clean.propertyType}\nApprox. setup size: ${clean.setupDimensions}\nAccess / site notes: ${clean.accessNotes}\nGuests: ${clean.guests}\nEvent type: ${clean.eventType}\nSurface: ${clean.surface}\nItems: ${clean.items}\nUTM source: ${clean.utmSource}\nUTM medium: ${clean.utmMedium}\nUTM campaign: ${clean.utmCampaign}\nUTM term: ${clean.utmTerm}\nUTM content: ${clean.utmContent}\nGCLID: ${clean.gclid}\nGBRAID: ${clean.gbraid}\nWBRAID: ${clean.wbraid}\nLanding page: ${clean.landingPage}\nSource: ${clean.source}`
         })
       });
       delivered=r.ok;

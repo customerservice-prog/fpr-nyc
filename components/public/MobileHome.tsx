@@ -12,7 +12,7 @@ import HomeCategoryGrid from './HomeCategoryGrid'
 import HomeWeddingBanner from './HomeWeddingBanner'
 import styles from './MobileHome.module.css'
 import HomeYouTube from './HomeYouTube'
-import { SC_CATEGORY_IMAGES } from '@/lib/scCategoryImages'
+import { NYC_CATEGORY_IMAGES } from '@/lib/nycCategoryImages'
 import { formatCurrency } from '@/lib/utils'
 interface MobileCategory {slug:string;name:string;href:string;image?:string}
 interface MobilePopularItem {id:string;name:string;slug:string|null;cost:number;picture:string|null;status?:string|null;category?:{name:string|null}|null}

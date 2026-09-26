@@ -7,7 +7,7 @@ import { getSearchConsoleSummary } from '@/lib/search-console'
 
 /**
  * Admin-only endpoint returning live Google Search Console numbers.
- * Falls back to { connected: false } when Google credentials / GSC_SITE_URL
+ * Falls back to { connected: false } when Google credentials / GNYC_SITE_URL
  * are not configured in the environment.
  */
 export async function GET() {

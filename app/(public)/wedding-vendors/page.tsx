@@ -1,8 +1,8 @@
-import { scPageMetadata } from '@/lib/scSeo'
+import { nycPageMetadata } from '@/lib/nycSeo'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
-export const metadata = scPageMetadata("/wedding-vendors","Upstate South Carolina Wedding Vendor Guide","Explore wedding vendor resources for Greenville and Upstate South Carolina while planning your rental equipment, celebration and event services.")
+export const metadata = nycPageMetadata("/wedding-vendors","Upstate South Carolina Wedding Vendor Guide","Explore wedding vendor resources for Greenville and Upstate South Carolina while planning your rental equipment, celebration and event services.")
 
 export default function WeddingVendorsPage() {
   return (

@@ -1,10 +1,10 @@
 // Only this storefront's Search Console properties may appear in its SEO dashboard.
-export const SC_GSC_DOMAIN_PROPERTY = 'sc-domain:friendlypartyrentalsc.com'
-export const SC_GSC_URL_PREFIX = 'https://www.friendlypartyrentalsc.com/'
+export const NYC_GNYC_DOMAIN_PROPERTY = 'sc-domain:friendlypartyrentalsc.com'
+export const NYC_GNYC_URL_PREFIX = 'https://www.friendlypartyrentalsc.com/'
 export function normalizeScSearchProperty(value: unknown): string | null {
   if (typeof value !== 'string' || !value.trim()) return null
   const input = value.trim()
-  if (input.toLowerCase() === SC_GSC_DOMAIN_PROPERTY) return SC_GSC_DOMAIN_PROPERTY
+  if (input.toLowerCase() === NYC_GNYC_DOMAIN_PROPERTY) return NYC_GNYC_DOMAIN_PROPERTY
   try {
     const url = new URL(input)
     if (url.protocol !== 'https:' || url.username || url.password || url.port || url.search || url.hash || url.pathname !== '/') return null

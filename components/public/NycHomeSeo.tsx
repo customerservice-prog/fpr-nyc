@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-export default function ScHomeSeo() {
+export default function NycHomeSeo() {
   return <div className="mt-8 space-y-8">
     <div>
       <h2 className="text-xl font-bold text-dark mb-3">Tent Rentals in Greenville, SC</h2>

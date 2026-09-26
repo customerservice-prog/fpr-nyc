@@ -1,5 +1,5 @@
 // Replace only the audited legacy revision; a later admin upload always wins.
-export const SC_ITEM_MEDIA: Record<string,{path:string;updatedAt:string;reference:boolean}> = {
+export const NYC_ITEM_MEDIA: Record<string,{path:string;updatedAt:string;reference:boolean}> = {
   "20x20-tent-package-4-tables-32-chairs": {
     "path": "/images/storefront/item-20x20-tent-package-4-tables-32-chairs.jpg",
     "updatedAt": "2026-09-13T09:41:26.756Z",

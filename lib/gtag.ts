@@ -5,9 +5,9 @@ function configuredId(value: string | undefined, format: RegExp, blockedValue: s
 
 // SC must never fall back to the copied New York destinations. These public
 // values are optional and are inlined by Next.js at build time.
-export const GA_MEASUREMENT_ID = configuredId(process.env.NEXT_PUBLIC_SC_GA_MEASUREMENT_ID, /^G-[A-Z0-9]+$/, 'G-NV8CF7GT5C')
-export const AW_CONVERSION_ID = configuredId(process.env.NEXT_PUBLIC_SC_GOOGLE_ADS_ID, /^AW-\d+$/, 'AW-18374628389')
-const purchaseLabel = configuredId(process.env.NEXT_PUBLIC_SC_GOOGLE_ADS_PURCHASE_LABEL, /^[A-Za-z0-9_-]+$/, 'ig-ZCL_Q1d0cEKWo2rlE')
+export const GA_MEASUREMENT_ID = configuredId(process.env.NEXT_PUBLIC_NYC_GA_MEASUREMENT_ID, /^G-[A-Z0-9]+$/, 'G-NV8CF7GT5C')
+export const AW_CONVERSION_ID = configuredId(process.env.NEXT_PUBLIC_NYC_GOOGLE_ADS_ID, /^AW-\d+$/, 'AW-18374628389')
+const purchaseLabel = configuredId(process.env.NEXT_PUBLIC_NYC_GOOGLE_ADS_PURCHASE_LABEL, /^[A-Za-z0-9_-]+$/, 'ig-ZCL_Q1d0cEKWo2rlE')
 export const AW_PURCHASE_DESTINATION = AW_CONVERSION_ID && purchaseLabel ? `${AW_CONVERSION_ID}/${purchaseLabel}` : ''
 export const GOOGLE_TAG_ID = GA_MEASUREMENT_ID || AW_CONVERSION_ID
 export const GOOGLE_TAG_BOOTSTRAP = GOOGLE_TAG_ID ? `

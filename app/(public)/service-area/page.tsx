@@ -3,19 +3,19 @@ import Link from 'next/link'
 import { ArrowRight, CalendarDays, MapPin, MessageCircle, Phone, Truck } from 'lucide-react'
 import DeliveryFeeChecker from '@/components/public/DeliveryFeeChecker'
 import ServiceAreaDirectory from '@/components/public/ServiceAreaDirectory'
-import {scPageMetadata,scBreadcrumbs,SC_BUSINESS_ID,scUrl} from '@/lib/scSeo'
-import {SC_PRIORITY_AREAS,SC_SERVICE_AREAS} from '@/lib/scServiceAreas'
+import {nycPageMetadata,nycBreadcrumbs,NYC_BUSINESS_ID,nycUrl} from '@/lib/nycSeo'
+import {NYC_PRIORITY_AREAS,NYC_SERVICE_AREAS} from '@/lib/nycServiceAreas'
 import {safeJsonLd} from '@/lib/jsonLd'
-import styles from '@/components/public/ScServiceArea.module.css'
+import styles from '@/components/public/NycServiceArea.module.css'
 
-export const metadata=scPageMetadata('/service-area','Party Rental Delivery Areas & Fee Checker — Greenville, SC','Check your delivery fee and explore Friendly Party Rental service areas across Greenville and 34 nearby Upstate South Carolina communities.')
+export const metadata=nycPageMetadata('/service-area','Party Rental Delivery Areas & Fee Checker — Greenville, SC','Check your delivery fee and explore Friendly Party Rental service areas across Greenville and 34 nearby Upstate South Carolina communities.')
 
 export default function ServiceAreaPage(){
- const schema={'@context':'https://schema.org','@type':'Service','@id':scUrl('/service-area')+'#delivery',name:'Party rental delivery in Greenville and Upstate South Carolina',serviceType:'Party and event equipment rental delivery',provider:{'@id':SC_BUSINESS_ID},areaServed:SC_SERVICE_AREAS.map(a=>({'@type':'Place',name:a.name+', SC'})),url:scUrl('/service-area')}
- const priority=SC_PRIORITY_AREAS.map(slug=>SC_SERVICE_AREAS.find(area=>area.slug===slug)).filter(Boolean) as typeof SC_SERVICE_AREAS
+ const schema={'@context':'https://schema.org','@type':'Service','@id':nycUrl('/service-area')+'#delivery',name:'Party rental delivery in Greenville and Upstate South Carolina',serviceType:'Party and event equipment rental delivery',provider:{'@id':NYC_BUSINESS_ID},areaServed:NYC_SERVICE_AREAS.map(a=>({'@type':'Place',name:a.name+', SC'})),url:nycUrl('/service-area')}
+ const priority=NYC_PRIORITY_AREAS.map(slug=>NYC_SERVICE_AREAS.find(area=>area.slug===slug)).filter(Boolean) as typeof NYC_SERVICE_AREAS
  return <div className={styles.page}>
   <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(schema)}}/>
-  <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(scBreadcrumbs([{name:'Home',path:'/'},{name:'South Carolina Delivery Areas',path:'/service-area'}]))}}/>
+  <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(nycBreadcrumbs([{name:'Home',path:'/'},{name:'South Carolina Delivery Areas',path:'/service-area'}]))}}/>
   <DeliveryFeeChecker/>
 
   <section className={`${styles.wrap} ${styles.hero}`} aria-labelledby="service-area-heading">

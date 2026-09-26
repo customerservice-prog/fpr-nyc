@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import {prisma} from '@/lib/prisma'
-import {isSearchableSlug} from '@/lib/scSeo'
+import {isSearchableSlug} from '@/lib/nycSeo'
 
 /** Link the complete existing wedding catalog from the indexable wedding hub.
  * Featured cards are intentionally limited; this visible directory covers the rest.

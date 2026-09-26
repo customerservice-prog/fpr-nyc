@@ -3,10 +3,10 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, contactFormEmail } from '@/lib/email'
-import { SC_EMAIL_ADDRESS, scEmailHref } from '@/lib/scEmail'
+import { NYC_EMAIL_ADDRESS, nycEmailHref } from '@/lib/nycEmail'
 
 export async function GET() {
- return NextResponse.json({ email: SC_EMAIL_ADDRESS, emailHref: scEmailHref(), notificationsEnabled: !!(process.env.EMAIL_USER && process.env.EMAIL_PASS) }, { headers: { 'Cache-Control': 'no-store' } })
+ return NextResponse.json({ email: NYC_EMAIL_ADDRESS, emailHref: nycEmailHref(), notificationsEnabled: !!(process.env.EMAIL_USER && process.env.EMAIL_PASS) }, { headers: { 'Cache-Control': 'no-store' } })
 }
 
 export async function POST(request: NextRequest) {
@@ -73,10 +73,10 @@ export async function POST(request: NextRequest) {
 
     let notificationSent = false
     try {
-      await sendEmail({ to: SC_EMAIL_ADDRESS, subject: emailContent.subject, html: emailContent.html, replyTo: trimmedEmail })
+      await sendEmail({ to: NYC_EMAIL_ADDRESS, subject: emailContent.subject, html: emailContent.html, replyTo: trimmedEmail })
       notificationSent = true
     } catch { console.warn('Greenville inquiry saved; email notification pending configuration or retry.') }
-    return NextResponse.json({ success: true, saved: true, notificationSent, emailHref: scEmailHref('Greenville inquiry from ' + trimmedName, 'Website: friendlypartyrentalsc.com\nName: ' + trimmedName + '\nPhone: ' + trimmedPhone + '\nEvent date: ' + (eventDate || '') + '\n\n' + trimmedMessage) }, { status: notificationSent ? 200 : 202 })
+    return NextResponse.json({ success: true, saved: true, notificationSent, emailHref: nycEmailHref('Greenville inquiry from ' + trimmedName, 'Website: friendlypartyrentalsc.com\nName: ' + trimmedName + '\nPhone: ' + trimmedPhone + '\nEvent date: ' + (eventDate || '') + '\n\n' + trimmedMessage) }, { status: notificationSent ? 200 : 202 })
   } catch (error) {
     console.error('Contact form error:', error)
     return NextResponse.json({ error: 'Failed to submit' }, { status: 500 })

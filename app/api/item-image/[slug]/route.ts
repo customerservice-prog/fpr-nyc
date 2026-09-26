@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import sharp from 'sharp'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
-import { SC_ITEM_MEDIA } from '@/lib/scItemMedia'
-import { SC_WEDDING_ITEM_TO_PACKAGE } from '@/lib/scWeddingImages'
-import { readScWeddingArtwork } from '@/lib/scWeddingArtworkServer'
+import { NYC_ITEM_MEDIA } from '@/lib/nycItemMedia'
+import { NYC_WEDDING_ITEM_TO_PACKAGE } from '@/lib/nycWeddingImages'
+import { readScWeddingArtwork } from '@/lib/nycWeddingArtworkServer'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
@@ -58,7 +58,7 @@ export async function GET(
     return new NextResponse('Not found', { status: 404 })
   }
 
-  const weddingPackageId = SC_WEDDING_ITEM_TO_PACKAGE[slug]
+  const weddingPackageId = NYC_WEDDING_ITEM_TO_PACKAGE[slug]
   if (weddingPackageId) {
     try {
       const artwork = await readScWeddingArtwork(weddingPackageId)
@@ -73,7 +73,7 @@ export async function GET(
     }
   }
 
-  const media = SC_ITEM_MEDIA[slug]
+  const media = NYC_ITEM_MEDIA[slug]
   if (media && item.updatedAt.toISOString() === media.updatedAt) {
     return new NextResponse(await readFile(path.join(process.cwd(), 'public', media.path)), { headers: {
       'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',

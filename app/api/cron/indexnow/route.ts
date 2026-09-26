@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { currentSearchableScUrls, submitScIndexNow } from '@/lib/scIndexNow'
+import { currentSearchableScUrls, submitScIndexNow } from '@/lib/nycIndexNow'
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization')

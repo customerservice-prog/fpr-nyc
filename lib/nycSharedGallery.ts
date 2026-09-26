@@ -1,5 +1,5 @@
 // Shared NY brand photography; the public gallery must retain its attribution.
-export const SC_SHARED_GALLERY = [
+export const NYC_SHARED_GALLERY = [
   { id: 'shared-ny-1', url: '/images/shared-gallery/brand-1.jpg', caption: 'Elegant Event Setup' },
   { id: 'shared-ny-2', url: '/api/shared-gallery/2?v=orientation-1', caption: 'Outdoor Party Tent' },
   { id: 'shared-ny-3', url: '/images/shared-gallery/brand-3.jpg', caption: 'Wedding Reception Setup' },

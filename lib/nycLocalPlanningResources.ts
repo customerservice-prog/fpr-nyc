@@ -1,5 +1,5 @@
 // Official public venue-planning resources checked September 22, 2026. No partnership implied.
-export const SC_LOCAL_PLANNING: Record<string,{heading:string;body:string;label:string;url:string}> = {
+export const NYC_LOCAL_PLANNING: Record<string,{heading:string;body:string;label:string;url:string}> = {
   "greer": {
     "heading": "Planning at a Greer city venue",
     "body": "Greer publishes rental information for City Park, City Hall and the Cannon Centre through its city events team. Confirm the venue reservation and ask which tables, chairs, tent locations and delivery entrances are permitted before choosing outside rental equipment. Street or downtown events have a separate city planning process.",

@@ -1,10 +1,10 @@
-import { normalizeScSearchProperty } from './scSearchReadiness'
+import { normalizeScSearchProperty } from './nycSearchReadiness'
 import { getAccessToken, hasGoogleCredentials } from './google-auth'
 
 /**
  * Google Search Console (Search Analytics API) integration.
  *
- * Reads search-query performance for the site identified by GSC_SITE_URL.
+ * Reads search-query performance for the site identified by GNYC_SITE_URL.
  * For a domain property use the form "sc-domain:friendlypartyrentalsc.com";
  * for a URL-prefix property use the full "https://www.friendlypartyrentalsc.com/".
  *
@@ -13,7 +13,7 @@ import { getAccessToken, hasGoogleCredentials } from './google-auth'
  * whenever credentials or the site url are missing.
  */
 
-const GSC_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly'
+const GNYC_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly'
 
 export interface GscQueryRow {
   query: string
@@ -97,13 +97,13 @@ async function query(siteUrl: string, token: string, body: unknown): Promise<{ r
 }
 
 export async function getSearchConsoleSummary(rangeDays = 28): Promise<GscSummary> {
-  const configuredSite = process.env.GSC_SITE_URL
-  if (!configuredSite) return notConnected('Greenville Search Console reporting is not configured (GSC_SITE_URL is not set). This does not mean the website is absent from Google.')
+  const configuredSite = process.env.GNYC_SITE_URL
+  if (!configuredSite) return notConnected('Greenville Search Console reporting is not configured (GNYC_SITE_URL is not set). This does not mean the website is absent from Google.')
   const siteUrl = normalizeScSearchProperty(configuredSite)
   if (!siteUrl) return notConnected('Only the friendlypartyrentalsc.com domain or its HTTPS root URL-prefix properties may be used here. New York and unrelated properties are not Greenville search data.')
   if (!hasGoogleCredentials()) return notConnected('Google credentials are not configured')
 
-  const token = await getAccessToken(GSC_SCOPE)
+  const token = await getAccessToken(GNYC_SCOPE)
   if (!token) return notConnected('Could not obtain a Google access token')
 
   const startDate = isoDaysAgo(rangeDays)

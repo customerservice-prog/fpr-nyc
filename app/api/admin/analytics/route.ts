@@ -138,7 +138,7 @@ export async function GET(request: Request) {
   const google = {
     measurementId: GA_MEASUREMENT_ID,
     analyticsConnected: Boolean(process.env.GA_PROPERTY_ID && process.env.GOOGLE_APPLICATION_CREDENTIALS),
-    searchConsoleConnected: Boolean(process.env.GSC_SITE_URL && process.env.GOOGLE_APPLICATION_CREDENTIALS),
+    searchConsoleConnected: Boolean(process.env.GNYC_SITE_URL && process.env.GOOGLE_APPLICATION_CREDENTIALS),
     analyticsUrl: 'https://analytics.google.com/',
     searchConsoleUrl: 'https://search.google.com/search-console',
   }

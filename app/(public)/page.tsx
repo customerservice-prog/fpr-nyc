@@ -1,7 +1,7 @@
 import { headers } from 'next/headers'
 import ResponsiveHome from '@/components/public/ResponsiveHome'
-import ScHomeSeo from '@/components/public/ScHomeSeo'
-import { scPageMetadata } from '@/lib/scSeo'
+import NycHomeSeo from '@/components/public/NycHomeSeo'
+import { nycPageMetadata } from '@/lib/nycSeo'
 import { initialHomeDevice } from '@/lib/homeDevice'
 import { PUBLIC_CATEGORIES } from '@/lib/utils'
 import { DEFAULT_HOME_CONTENT } from '@/lib/homeContent'
@@ -10,7 +10,7 @@ import { getHomepagePopularItems } from '@/lib/homepageMerchandising'
 import { IMAGE_CACHE_BUST } from '@/lib/imageVersion'
 import { prisma } from '@/lib/prisma'
 
-export const metadata = scPageMetadata('/','Party Rentals in Greenville, SC | Tents, Tables, Chairs & More','Rent tents, tables, chairs, bounce houses, water slides, linens and wedding equipment in Greenville, SC with delivery and online date availability.')
+export const metadata = nycPageMetadata('/','Party Rentals in Greenville, SC | Tents, Tables, Chairs & More','Rent tents, tables, chairs, bounce houses, water slides, linens and wedding equipment in Greenville, SC with delivery and online date availability.')
 export const revalidate = 60
 
 export default async function HomePage() {
@@ -107,6 +107,6 @@ export default async function HomePage() {
     weddingImage={packages[0]?.image || null}
     hero={hero}
     content={content}
-    seoSection={<ScHomeSeo />}
+    seoSection={<NycHomeSeo />}
   />
 }

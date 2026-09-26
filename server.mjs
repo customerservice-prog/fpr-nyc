@@ -207,7 +207,7 @@ async function handleLead(req,res){
 
 function serve(req,res){
   const url=new URL(req.url||'/',`http://${req.headers.host||'localhost'}`);
-  if(url.pathname==='/health') return json(res,200,{ok:true,reference});
+  if(url.pathname==='/health') return json(res,200,{ok:true});
   if(url.pathname==='/api/lead') return handleLead(req,res);
 
   let pathname=decodeURIComponent(url.pathname);

@@ -1,4 +1,3 @@
-import crypto from 'node:crypto';
 async function saveToFriendlyPlanning(clean){
   const mapType=(value)=>{
     const v=String(value||'').toLowerCase();
@@ -53,7 +52,7 @@ function mapPlanningEventType(value){
 }
 function planningRelayPayload(clean){
   const notes=[
-    '[DOWNSTATE RENTAL QUOTE]',
+    '[DOWNSTATE RENTAL INQUIRY]',
     'Original event type: '+(clean.eventType||'Not specified'),
     'Setup surface: '+(clean.surface||'Not specified'),
     'Requested rentals: '+clean.items,
@@ -107,20 +106,15 @@ export default async function handler(req,res){
   };
   console.log('FPR_DOWNSTATE_LEAD '+JSON.stringify({receivedAt:new Date().toISOString(),...clean}));
   let delivered=false;
-  let reference=null;
+  let relayReference='';
   try{
-    reference=await saveToFriendlyPlanning(clean);
-    delivered=true;
-    console.log('FPR_DOWNSTATE_CRM_SAVED '+JSON.stringify({reference,email:clean.email,city:clean.city}));
-  }catch(err){
-    console.error('FPR_DOWNSTATE_CRM_ERROR '+String(err?.message||err));
+    const relayed=await relayToFriendly(clean);
+    delivered=relayed.ok;
+    relayReference=relayed.reference||'';
+    console.log('FPR_DOWNSTATE_CRM_SAVED '+JSON.stringify({reference:relayReference,email:clean.email,city:clean.city}));
+  }catch(error){
+    console.warn('FPR_DOWNSTATE_CRM_ERROR '+(error instanceof Error?error.message:'unknown error'));
   }
-    let relayReference='';
-    try{
-      const relayed=await relayToFriendly(clean);
-      delivered=relayed.ok;
-      relayReference=relayed.reference||'';
-    }catch(error){console.warn('Friendly lead relay failed:',error instanceof Error?error.message:'unknown error')}
 
   if(!delivered&&process.env.LEAD_WEBHOOK_URL){
     const r=await fetch(process.env.LEAD_WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(clean)});

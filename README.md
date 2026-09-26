@@ -90,9 +90,7 @@ The public site now uses a complete-event strategy rather than copying Syracuse 
 
 ## Domain plan
 
-Preferred branded subdomain: **nyc.friendlypartyrental.com**
-
-Standalone fallback checked on September 26, 2026: **friendlypartyrentalnyc.com** was available at the time of the check. Domain availability can change until registered.
+Custom-domain work is intentionally deferred until the rest of the Downstate launch is complete.
 
 ## Conversion events
 
@@ -111,12 +109,7 @@ The Downstate server translates local event-type wording into the production pla
 
 ## Analytics
 
-Downstate uses the same production Google tags as Friendly Party Rental:
-- GA4 measurement ID: `G-NV8CF7GT5C`
-- Google Ads tag ID: `AW-18374628389`
-
-Custom Downstate events are sent through `gtag('event', ...)` and mirrored to `dataLayer` / `fpr:conversion`.
-
+Downstate uses Friendly Party Rental's GA4 measurement for basic website analytics and lead-event measurement. The site preserves generic UTM and referrer context with quote submissions.
 
 ## High-intent local SEO pages
 
@@ -133,15 +126,4 @@ Each page has its own site-fit copy, local FAQs, packages, and quote source attr
 
 ## Custom-domain cutover
 
-Railway has `nyc.friendlypartyrental.com` attached to the Downstate service.
-
-HostGator DNS still needs:
-- Type: CNAME
-- Host/name: `nyc`
-- Target/value: `gxm0mla0.up.railway.app`
-
-After Railway validates the domain/certificate, set:
-
-`PUBLIC_BASE_URL=https://nyc.friendlypartyrental.com`
-
-The build uses `PUBLIC_BASE_URL` for canonical URLs, robots.txt, and sitemap.xml, while the Railway URL remains the fallback until DNS is ready.
+Deferred by owner request. Keep the Railway production URL as the canonical base until the custom-domain step is resumed.

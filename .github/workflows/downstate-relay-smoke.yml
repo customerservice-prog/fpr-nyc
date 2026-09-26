@@ -1,12 +1,10 @@
 name: Downstate relay smoke
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   relay-smoke:
-    if: ${{ contains(github.event.head_commit.message, '[relay-smoke]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -25,6 +23,6 @@ jobs:
       - name: Submit QA Downstate inquiry
         shell: bash
         run: |
-          response="$(curl -fsS --max-time 20             -H 'Content-Type: application/json'             --data-binary '{"name":"DOWNSTATE RELAY QA — DO NOT CONTACT","email":"downstate-relay-qa@example.invalid","phone":"3155550100","eventDate":"2026-10-10","city":"Riverdale, Bronx, NY","guests":"32","eventType":"Birthday / Family Party","surface":"Grass","items":"QA TEST ONLY — 20x20 tent, 4 tables, 32 chairs. DO NOT CONTACT.","source":"github-relay-smoke","utmSource":"github-actions","utmMedium":"qa","utmCampaign":"downstate-relay-smoke"}'             https://fpr-nyc-production.up.railway.app/api/lead)"
+          response="$(curl -fsS --max-time 20 -H 'Content-Type: application/json' --data-binary '{"name":"DOWNSTATE RELAY QA — DO NOT CONTACT","email":"downstate-relay-qa@example.invalid","phone":"3155550100","eventDate":"2026-10-10","city":"Riverdale, Bronx, NY","guests":"32","eventType":"Birthday / Family Party","surface":"Grass","items":"QA TEST ONLY — 20x20 tent, 4 tables, 32 chairs. DO NOT CONTACT.","source":"github-relay-smoke","utmSource":"github-actions","utmMedium":"qa","utmCampaign":"downstate-relay-smoke"}' https://fpr-nyc-production.up.railway.app/api/lead)"
           echo "$response"
           python -c 'import json,sys; d=json.loads(sys.argv[1]); assert d.get("ok") is True, d; r=d.get("reference") or ""; assert r.startswith("planning_"), d; print("Verified production lead reference:", r)' "$response"

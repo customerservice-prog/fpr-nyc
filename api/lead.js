@@ -1,7 +1,54 @@
+import { randomUUID } from 'node:crypto';
+
+function mapPlanningEventType(value){
+  const v=String(value||'').toLowerCase();
+  if(v.includes('wedding')||v.includes('reception')) return 'Wedding';
+  if(v.includes('corporate')) return 'Corporate event';
+  if(v.includes('community')||v.includes('festival')||v.includes('fundraiser')) return 'Festival / fundraiser';
+  if(v.includes('birthday')||v.includes('graduation')||v.includes('family')||v.includes('party')||v.includes('shower')||v.includes('anniversary')) return 'Private party / celebration';
+  return 'Other / not sure yet';
+}
+function planningRelayPayload(clean){
+  const notes=[
+    '[DOWNSTATE RENTAL QUOTE]',
+    'Original event type: '+(clean.eventType||'Not specified'),
+    'Setup surface: '+(clean.surface||'Not specified'),
+    'Requested rentals: '+clean.items,
+    'Downstate source: '+clean.source,
+    clean.utmSource ? 'UTM source: '+clean.utmSource : '',
+    clean.utmMedium ? 'UTM medium: '+clean.utmMedium : '',
+    clean.utmCampaign ? 'UTM campaign: '+clean.utmCampaign : '',
+    clean.landingPage ? 'Landing page: '+clean.landingPage : '',
+    clean.referrer ? 'Referrer: '+clean.referrer : ''
+  ].filter(Boolean).join('\n');
+  return {
+    requestId:randomUUID(),
+    eventType:mapPlanningEventType(clean.eventType),
+    eventDate:clean.eventDate,
+    guestCount:clean.guests,
+    location:clean.city,
+    venueStatus:'Still deciding',
+    help:['Rentals'],
+    name:clean.name,
+    phone:clean.phone,
+    email:clean.email,
+    message:notes,
+    website:''
+  };
+}
+async function relayToFriendly(clean){
+  const url=process.env.LEAD_RELAY_URL||'https://www.friendlypartyrental.com/api/event-planning';
+  const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(planningRelayPayload(clean))});
+  let data={};
+  try{data=await response.json()}catch{}
+  if(!response.ok) throw new Error((data&&data.error)||('Friendly relay returned '+response.status));
+  return {ok:true,reference:data&&data.reference?String(data.reference):''};
+}
+
 export default async function handler(req,res){
   if(req.method!=='POST') return res.status(405).json({error:'Method not allowed'});
   const body=typeof req.body==='string'?JSON.parse(req.body||'{}'):(req.body||{});
-  const required=['name','email','eventDate','city','items'];
+  const required=['name','email','phone','eventDate','city','items'];
   for(const key of required){if(!String(body[key]||'').trim()) return res.status(400).json({error:`Missing ${key}`});}
   const clean={
     name:String(body.name).slice(0,120),email:String(body.email).slice(0,180),phone:String(body.phone||'').slice(0,80),
@@ -16,6 +63,13 @@ export default async function handler(req,res){
       referrer:String(body.referrer||'').slice(0,500),source:String(body.source||'downstate-site').slice(0,100)
   };
   let delivered=false;
+    let relayReference='';
+    try{
+      const relayed=await relayToFriendly(clean);
+      delivered=relayed.ok;
+      relayReference=relayed.reference||'';
+    }catch(error){console.warn('Friendly lead relay failed:',error instanceof Error?error.message:'unknown error')}
+
   if(process.env.LEAD_WEBHOOK_URL){
     const r=await fetch(process.env.LEAD_WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(clean)});
     delivered=r.ok;
@@ -29,5 +83,5 @@ export default async function handler(req,res){
     delivered=r.ok;
   }
   if(!delivered) return res.status(503).json({error:'Lead delivery is not configured yet'});
-  return res.status(200).json({ok:true});
+  return res.status(200).json({ok:true,reference:relayReference||null});
 }

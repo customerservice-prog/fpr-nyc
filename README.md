@@ -97,3 +97,13 @@ Standalone fallback checked on September 26, 2026: **friendlypartyrentalnyc.com*
 ## Conversion events
 
 The browser now emits `dataLayer` events and `fpr:conversion` CustomEvents for quote CTAs, rental-category clicks, package quote clicks, phone clicks, email clicks, and lead submit outcomes. UTM source, medium, campaign, landing page, and referrer are carried with quote submissions.
+
+
+## Lead relay
+
+Downstate quote forms relay server-to-server into Friendly Party Rental's existing production `/api/event-planning` intake. That production endpoint persists the inquiry to the main database and attempts the normal office notification email.
+
+Optional override:
+- `LEAD_RELAY_URL` — defaults to `https://www.friendlypartyrental.com/api/event-planning`
+
+The Downstate server translates local event-type wording into the production planning inquiry categories and tags the saved message with `[DOWNSTATE RENTAL QUOTE]`, the original event type, surface, requested rentals, and UTM/referrer context.

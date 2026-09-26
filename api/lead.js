@@ -53,6 +53,8 @@ async function relayToFriendly(clean){
 export default async function handler(req,res){
   if(req.method!=='POST') return res.status(405).json({error:'Method not allowed'});
   const body=typeof req.body==='string'?JSON.parse(req.body||'{}'):(req.body||{});
+  if(String(body.website||'').trim()) return res.status(200).json({ok:true});
+
   const required=['name','email','phone','eventDate','city','items'];
   for(const key of required){if(!String(body[key]||'').trim()) return res.status(400).json({error:`Missing ${key}`});}
   const clean={
@@ -72,6 +74,9 @@ export default async function handler(req,res){
       landingPage:String(body.landingPage||'').slice(0,500),
       referrer:String(body.referrer||'').slice(0,500),source:String(body.source||'downstate-site').slice(0,100)
   };
+  if(!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(clean.email)) return res.status(400).json({error:'Please enter a valid email address'});
+  if(!/^[+()0-9.\- ]{7,25}$/.test(clean.phone)||clean.phone.replace(/\D/g,'').length<7) return res.status(400).json({error:'Please enter a valid phone number'});
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(clean.eventDate)) return res.status(400).json({error:'Please choose a valid event date'});
   console.log('FPR_DOWNSTATE_LEAD '+JSON.stringify({receivedAt:new Date().toISOString(),...clean}));
   let delivered=false;
   let relayReference='';

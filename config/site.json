@@ -149,7 +149,7 @@
       "details": "Build seating around the number of guests who need seats at the same time, then add serving, gift, cocktail, buffet, and registration tables separately.",
       "highlights": [
         "White folding and resin chairs",
-        "Gold, white and mahogany Chiavari options",
+        "Gold and white Chiavari options",
         "Banquet, round and cocktail tables",
         "Linens and table accents available"
       ]
@@ -465,5 +465,181 @@
         ]
       ]
     }
+  ],
+  "catalogGroups": [
+    {
+      "slug": "tents",
+      "name": "Tents & Canopies",
+      "intro": "Tent availability is confirmed around the event date, setup surface, usable space, access, and anchoring plan.",
+      "items": [
+        "20×20 Pole Tent",
+        "20×30 Pole Tent",
+        "20×40 Pole Tent",
+        "30×30 Pole Tent",
+        "30×45 Pole Tent",
+        "30×60 Pole Tent",
+        "40×40 Pole Tent",
+        "40×60 Pole Tent",
+        "40×100 Pole Tent",
+        "20×20 Frame Tent",
+        "20×30 Frame Tent",
+        "20×40 Frame Tent",
+        "30×40 Classic Frame Tent",
+        "10×10 Pop-Up Canopy",
+        "10×20 Pop-Up Canopy"
+      ]
+    },
+    {
+      "slug": "tables-chairs",
+      "name": "Tables & Chairs",
+      "intro": "Seating and tables can be combined with tents, linens, lighting, cocktail service, buffet layouts, and ceremony setups.",
+      "items": [
+        "White Plastic Folding Chairs",
+        "White Resin Folding Chairs",
+        "Gold Chiavari Chairs",
+        "White Chiavari Chairs",
+        "6 ft Plastic Tables",
+        "8 ft Banquet Tables",
+        "5 ft Round Tables",
+        "Cocktail Tables"
+      ]
+    },
+    {
+      "slug": "linens",
+      "name": "Linens",
+      "intro": "Linen options are quoted by table type, size, event look, and current color/style availability.",
+      "items": [
+        "120 in Round Linens",
+        "72×120 Overlays",
+        "Spandex Cocktail Table Covers",
+        "Satin & Specialty Linens",
+        "Napkins"
+      ]
+    },
+    {
+      "slug": "inflatables",
+      "name": "Inflatables",
+      "intro": "Inflatables require a suitable setup area, delivery path, approved anchoring, power, weather conditions, and—when applicable—water access.",
+      "items": [
+        "Standard Bounce Houses",
+        "Crayon Bounce Arena",
+        "Pink Bounce House",
+        "Cotton Candy Bounce House",
+        "18 ft Purple Tropical Double Bay Water Slide",
+        "Tidal Wave Water Slide"
+      ]
+    },
+    {
+      "slug": "lighting-flooring",
+      "name": "Lighting, Flooring & Comfort",
+      "intro": "These add-ons are sized around the tent, guest layout, power plan, and event schedule.",
+      "items": [
+        "Bistro / String Lighting",
+        "20 in Fans",
+        "Dance Floor Sections",
+        "Generators",
+        "20 ft Sidewalls"
+      ]
+    },
+    {
+      "slug": "event-extras",
+      "name": "Event Extras",
+      "intro": "Complete-event orders can add practical service pieces, presentation equipment, games, concessions, and entertainment.",
+      "items": [
+        "Cocktail Tables",
+        "4 ft Fill & Chill Tables",
+        "120 qt Coolers",
+        "Water Barrel Covers",
+        "Stanchions",
+        "Podium & Microphone",
+        "Red Carpet",
+        "Bluetooth Speaker",
+        "Cotton Candy Machine",
+        "Popcorn Machine",
+        "Snow Cone Machine",
+        "Chocolate Fountains",
+        "Tumbling Timbers",
+        "Connect Four",
+        "Cornhole",
+        "Photo Booth",
+        "Queen Tiffany Throne Chair"
+      ]
+    }
+  ],
+  "globalFaq": [
+    [
+      "What is the Downstate minimum?",
+      "Downstate complete-event deliveries generally start around $1,500 before tax. The exact minimum depends on the service zone, date, equipment, access, setup requirements, and pickup plan."
+    ],
+    [
+      "Do you serve every Bronx or Westchester address?",
+      "Not automatically. We review the address, order size, route, access, surface, and setup requirements before accepting a Downstate delivery."
+    ],
+    [
+      "Do you set up and take down the equipment?",
+      "Accepted tent, inflatable, and complete-event orders include the applicable setup and breakdown plan in the quote. The quote confirms exactly what our crew handles."
+    ],
+    [
+      "Can a pole tent go on concrete or asphalt?",
+      "Pole tents are best suited to appropriate grass sites where staking is allowed. Paved or stake-restricted sites may require a frame-style or weighted setup, subject to the equipment and site."
+    ],
+    [
+      "What do you need to approve an inflatable site?",
+      "We review usable flat space, gate and carry access, surface, anchoring conditions, overhead clearance, power, and water access when the unit requires water."
+    ],
+    [
+      "Can I rent only a few chairs or one small item?",
+      "Small orders may be possible, but the Downstate complete-event delivery minimum still applies. The service is designed primarily for larger coordinated event orders."
+    ],
+    [
+      "How do I know whether a tent will fit?",
+      "Send the address, approximate usable dimensions, surface type, guest count, and any layout needs such as buffet space, dance floor, bars, or walkways. We will tell you what else is needed before confirming the setup."
+    ],
+    [
+      "When are delivery and pickup times confirmed?",
+      "The delivery, setup, and pickup plan is confirmed in the written quote or booking details after we review the event schedule, location, access, and route."
+    ],
+    [
+      "Can schools, churches, and venues request a certificate of insurance?",
+      "Tell us the venue or organization requirements when requesting the quote so we can review what documentation is needed before booking."
+    ],
+    [
+      "Does submitting the quote form reserve the date?",
+      "No. A request starts the review process. Equipment, staffing, site suitability, and the event date are confirmed through the booking process."
+    ]
+  ],
+  "siteReadiness": [
+    [
+      "Measure the usable event area",
+      "Measure the clear area where the tent or inflatable would actually sit—not the entire yard. Include nearby fences, trees, sheds, pools, driveways, and structures."
+    ],
+    [
+      "Identify the setup surface",
+      "Tell us whether the site is grass, concrete, asphalt, pavers, mixed surface, or an indoor/venue setup. Surface type affects tent anchoring and inflatable approval."
+    ],
+    [
+      "Check the delivery path",
+      "Note gates, stairs, narrow passages, steep slopes, elevators, long carries, loading docks, or any place large rental equipment must pass through."
+    ],
+    [
+      "Look above and below the site",
+      "Flag tree limbs, power lines, roof overhangs, irrigation, septic areas, buried utilities, and other obstacles that can affect tent staking or equipment placement."
+    ],
+    [
+      "Plan power and water",
+      "Inflatables, lighting, fans, photo booths, and other equipment may need reliable power. Water slides also need a workable water source and hose reach."
+    ],
+    [
+      "Confirm parking and loading",
+      "Dense Bronx and lower Westchester sites can have limited truck access. Tell us about loading restrictions, parking rules, gates, driveways, and carry distance."
+    ],
+    [
+      "Share the real event schedule",
+      "Give us guest arrival, start/end time, venue access time, and any hard setup or pickup restrictions so the crew plan is realistic."
+    ],
+    [
+      "Send venue requirements early",
+      "Schools, churches, parks, venues, and managed properties may have rules for insurance, vendors, anchoring, power, access, or operating hours. Send those requirements with the quote request."
+    ]
   ]
 }

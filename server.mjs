@@ -7,6 +7,16 @@ import { randomUUID } from 'node:crypto';
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
 const root=path.join(__dirname,'dist');
 const port=Number(process.env.PORT||3000);
+const leadRate=new Map();
+function allowLead(req){
+  const ip=String(req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown').split(',')[0].trim();
+  const now=Date.now(), windowMs=10*60*1000, max=8;
+  const recent=(leadRate.get(ip)||[]).filter(ts=>now-ts<windowMs);
+  if(recent.length>=max){leadRate.set(ip,recent);return false}
+  recent.push(now);leadRate.set(ip,recent);
+  if(leadRate.size>1000) for(const [key,list] of leadRate) if(!list.some(ts=>now-ts<windowMs)) leadRate.delete(key);
+  return true;
+}
 
 const mime={
   '.html':'text/html; charset=utf-8',
@@ -24,7 +34,7 @@ const mime={
 };
 
 function json(res,status,body){
-  res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});
+  res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin','X-Frame-Options':'DENY','Permissions-Policy':'camera=(), microphone=(), geolocation=()'});
   res.end(JSON.stringify(body));
 }
 
@@ -93,9 +103,12 @@ async function relayToFriendly(clean){
 
 async function handleLead(req,res){
   if(req.method!=='POST') return json(res,405,{error:'Method not allowed'});
+  if(!allowLead(req)) return json(res,429,{error:'Too many quote requests. Please try again shortly or call us.'});
   try{
     const raw=await readBody(req);
     const body=JSON.parse(raw||'{}');
+    if(String(body.website||'').trim()) return json(res,200,{ok:true});
+
     const required=['name','email','phone','eventDate','city','items'];
     for(const key of required){
       if(!String(body[key]||'').trim()) return json(res,400,{error:`Missing ${key}`});
@@ -123,6 +136,9 @@ async function handleLead(req,res){
       source:String(body.source||'downstate-site').slice(0,100)
     };
 
+    if(!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(clean.email)) return json(res,400,{error:'Please enter a valid email address'});
+    if(!/^[+()0-9.\- ]{7,25}$/.test(clean.phone)||clean.phone.replace(/\D/g,'').length<7) return json(res,400,{error:'Please enter a valid phone number'});
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(clean.eventDate)) return json(res,400,{error:'Please choose a valid event date'});
     console.log('FPR_DOWNSTATE_LEAD '+JSON.stringify({receivedAt:new Date().toISOString(),...clean}));
     let delivered=false;
     let relayReference='';
@@ -180,7 +196,7 @@ function serve(req,res){
   if(!fs.existsSync(file)||fs.statSync(file).isDirectory()) file=path.join(root,'404.html');
 
   const ext=path.extname(file).toLowerCase();
-  const headers={'Content-Type':mime[ext]||'application/octet-stream'};
+  const headers={'Content-Type':mime[ext]||'application/octet-stream','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin','X-Frame-Options':'DENY','Permissions-Policy':'camera=(), microphone=(), geolocation=()'};
   if(ext==='.html') headers['Cache-Control']='public, max-age=0, must-revalidate';
   else headers['Cache-Control']='public, max-age=3600';
   res.writeHead(file.endsWith('404.html')?404:200,headers);

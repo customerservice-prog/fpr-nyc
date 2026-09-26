@@ -8,7 +8,7 @@ import { safeJsonLd } from '@/lib/jsonLd'
 import ItemGallery from '@/components/public/ItemGallery'
 import SuggestedAddons from '@/components/public/SuggestedAddons'
 import { matchesTentLighting } from '@/lib/nycAddonMatching'
-import { itemDescriptionForSc } from '@/lib/nycPublicCopy'
+import { itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 
 export const dynamic = 'force-dynamic'
 const BASE_URL = 'https://www.friendlypartyrentalsc.com'
@@ -45,7 +45,7 @@ async function findItem(slugParts: string[]) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
   const item = await findItem((await params).slug)
   if (!item) return { title: 'Rental not found', robots:{index:false,follow:true} }
-  const fullDescription = itemDescriptionForSc(item.name, item.description)
+  const fullDescription = itemDescriptionForNyc(item.name, item.description)
   const desc = scMetaText(`Rent ${item.name} in Greenville, SC. ${fullDescription}`)
   const canonical = `${BASE_URL}/items/${item.slug}`
   return {
@@ -68,7 +68,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
   const lastRequested = (slugParts || []).join('/').split('/').pop() || ''
   if (item.slug !== (slugParts || []).join('/')) permanentRedirect(`/items/${encodeURIComponent(item.slug!)}`)
 
-  const description = itemDescriptionForSc(item.name, item.description)
+  const description = itemDescriptionForNyc(item.name, item.description)
   const relatedItems = await prisma.item.findMany({ where: { categoryId: item.categoryId, id: { not: item.id }, displayToCustomer: true }, orderBy: { name: 'asc' }, take: 4 })
   const validRelatedItems = relatedItems.filter((ri) => { const slug = typeof ri.slug === 'string' ? ri.slug.trim() : ''; return slug.length > 0 && slug.toLowerCase() !== 'null' && slug.toLowerCase() !== 'undefined' })
   let suggestedAddons = item.suggestedAddonIds && item.suggestedAddonIds.length > 0 ? await prisma.item.findMany({ where: { id: { in: item.suggestedAddonIds }, displayToCustomer: true }, select: { id: true, name: true, slug: true, description: true, cost: true, picture: true, quantity: true } }) : []

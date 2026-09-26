@@ -59,6 +59,11 @@ function planningRelayPayload(clean){
     clean.utmSource ? 'UTM source: '+clean.utmSource : '',
     clean.utmMedium ? 'UTM medium: '+clean.utmMedium : '',
     clean.utmCampaign ? 'UTM campaign: '+clean.utmCampaign : '',
+    clean.utmTerm ? 'UTM term: '+clean.utmTerm : '',
+    clean.utmContent ? 'UTM content: '+clean.utmContent : '',
+    clean.gclid ? 'GCLID: '+clean.gclid : '',
+    clean.gbraid ? 'GBRAID: '+clean.gbraid : '',
+    clean.wbraid ? 'WBRAID: '+clean.wbraid : '',
     clean.landingPage ? 'Landing page: '+clean.landingPage : '',
     clean.referrer ? 'Referrer: '+clean.referrer : ''
   ].filter(Boolean).join('\n');
@@ -108,6 +113,11 @@ async function handleLead(req,res){
       utmSource:String(body.utmSource||'').slice(0,120),
       utmMedium:String(body.utmMedium||'').slice(0,120),
       utmCampaign:String(body.utmCampaign||'').slice(0,160),
+      utmTerm:String(body.utmTerm||'').slice(0,200),
+      utmContent:String(body.utmContent||'').slice(0,200),
+      gclid:String(body.gclid||'').slice(0,300),
+      gbraid:String(body.gbraid||'').slice(0,300),
+      wbraid:String(body.wbraid||'').slice(0,300),
       landingPage:String(body.landingPage||'').slice(0,500),
       referrer:String(body.referrer||'').slice(0,500),
       source:String(body.source||'downstate-site').slice(0,100)
@@ -143,7 +153,7 @@ async function handleLead(req,res){
           to:[process.env.LEAD_TO_EMAIL],
           reply_to:clean.email,
           subject:`Downstate quote lead — ${clean.city} — ${clean.eventDate}`,
-          text:`Name: ${clean.name}\nEmail: ${clean.email}\nPhone: ${clean.phone}\nEvent date: ${clean.eventDate}\nCity: ${clean.city}\nGuests: ${clean.guests}\nEvent type: ${clean.eventType}\nSurface: ${clean.surface}\nItems: ${clean.items}\nUTM source: ${clean.utmSource}\nUTM medium: ${clean.utmMedium}\nUTM campaign: ${clean.utmCampaign}\nLanding page: ${clean.landingPage}\nSource: ${clean.source}`
+          text:`Name: ${clean.name}\nEmail: ${clean.email}\nPhone: ${clean.phone}\nEvent date: ${clean.eventDate}\nCity: ${clean.city}\nGuests: ${clean.guests}\nEvent type: ${clean.eventType}\nSurface: ${clean.surface}\nItems: ${clean.items}\nUTM source: ${clean.utmSource}\nUTM medium: ${clean.utmMedium}\nUTM campaign: ${clean.utmCampaign}\nUTM term: ${clean.utmTerm}\nUTM content: ${clean.utmContent}\nGCLID: ${clean.gclid}\nGBRAID: ${clean.gbraid}\nWBRAID: ${clean.wbraid}\nLanding page: ${clean.landingPage}\nSource: ${clean.source}`
         })
       });
       delivered=r.ok;

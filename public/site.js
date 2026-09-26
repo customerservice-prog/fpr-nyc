@@ -15,7 +15,7 @@ const forms=document.querySelectorAll('[data-quote-form]');
 forms.forEach(form=>{
   const dateField=form.elements.eventDate;if(dateField instanceof HTMLInputElement)dateField.min=today;
   const itemsField=form.elements.items;if(selectedPackage&&itemsField instanceof HTMLTextAreaElement&&!itemsField.value.trim())itemsField.value='Interested in package: '+selectedPackage+'\n';
-  const map={utmSource:'utm_source',utmMedium:'utm_medium',utmCampaign:'utm_campaign'};
+  const map={utmSource:'utm_source',utmMedium:'utm_medium',utmCampaign:'utm_campaign',utmTerm:'utm_term',utmContent:'utm_content',gclid:'gclid',gbraid:'gbraid',wbraid:'wbraid'};
   Object.entries(map).forEach(([field,key])=>{const input=form.elements[field];if(input)input.value=params.get(key)||''});
   if(form.elements.landingPage)form.elements.landingPage.value=location.href;
   if(form.elements.referrer)form.elements.referrer.value=document.referrer||'';
@@ -30,8 +30,8 @@ forms.forEach(form=>{
       const res=await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
       const data=await res.json().catch(()=>({}));
       if(!res.ok) throw new Error(data.error||'Unable to send request');
-      track('lead_submit_success',{source:payload.source,city:payload.city,eventType:payload.eventType,utmSource:payload.utmSource});
-      track('generate_lead',{lead_source:'downstate',source:payload.source,city:payload.city,event_type:payload.eventType,utm_source:payload.utmSource});
+      track('lead_submit_success',{source:payload.source,city:payload.city,eventType:payload.eventType,utmSource:payload.utmSource,gclid:payload.gclid||'',gbraid:payload.gbraid||'',wbraid:payload.wbraid||''});
+      track('generate_lead',{lead_source:'downstate',source:payload.source,city:payload.city,event_type:payload.eventType,utm_source:payload.utmSource,utm_campaign:payload.utmCampaign,utm_term:payload.utmTerm,utm_content:payload.utmContent,gclid:payload.gclid||'',gbraid:payload.gbraid||'',wbraid:payload.wbraid||''});
       status.className='status ok'; status.textContent='Request received. We’ll review the date, location, and equipment before confirming availability.'+(data.reference?' Reference: '+data.reference:'');
       form.reset();
     }catch(err){

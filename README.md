@@ -107,3 +107,12 @@ Optional override:
 - `LEAD_RELAY_URL` — defaults to `https://www.friendlypartyrental.com/api/event-planning`
 
 The Downstate server translates local event-type wording into the production planning inquiry categories and tags the saved message with `[DOWNSTATE RENTAL QUOTE]`, the original event type, surface, requested rentals, and UTM/referrer context.
+
+
+## Analytics
+
+Downstate uses the same production Google tags as Friendly Party Rental:
+- GA4 measurement ID: `G-NV8CF7GT5C`
+- Google Ads tag ID: `AW-18374628389`
+
+Custom Downstate events are sent through `gtag('event', ...)` and mirrored to `dataLayer` / `fpr:conversion`.

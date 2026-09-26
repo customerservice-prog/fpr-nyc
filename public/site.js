@@ -2,6 +2,7 @@ const params=new URLSearchParams(location.search);
 function track(name,data={}){
   window.dataLayer=window.dataLayer||[];
   window.dataLayer.push({event:name,...data});
+  if(typeof window.gtag==='function')window.gtag('event',name,data);
   window.dispatchEvent(new CustomEvent('fpr:conversion',{detail:{name,...data}}));
 }
 document.querySelectorAll('a[href^="tel:"]').forEach(a=>a.addEventListener('click',()=>track('phone_click',{href:a.getAttribute('href'),page:location.pathname})));

@@ -24,7 +24,7 @@ async function saveToFriendlyPlanning(clean){
     requestId:crypto.randomUUID(),
     name:clean.name,
     email:clean.email,
-    phone:clean.phone||'315-884-1498',
+    phone:clean.phone,
     eventType:mapType(clean.eventType),
     eventDate:clean.eventDate||'',
     guestCount:clean.guests||'',

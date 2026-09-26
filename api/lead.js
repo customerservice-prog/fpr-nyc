@@ -62,6 +62,7 @@ export default async function handler(req,res){
       landingPage:String(body.landingPage||'').slice(0,500),
       referrer:String(body.referrer||'').slice(0,500),source:String(body.source||'downstate-site').slice(0,100)
   };
+  console.log('FPR_DOWNSTATE_LEAD '+JSON.stringify({receivedAt:new Date().toISOString(),...clean}));
   let delivered=false;
     let relayReference='';
     try{

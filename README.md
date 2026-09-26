@@ -129,3 +129,19 @@ The generator includes six focused city/service pages:
 - /bronx/bounce-house-rentals/
 
 Each page has its own site-fit copy, local FAQs, packages, and quote source attribution. These are intentionally limited to the strongest initial combinations rather than mass-generating thin city pages.
+
+
+## Custom-domain cutover
+
+Railway has `nyc.friendlypartyrental.com` attached to the Downstate service.
+
+HostGator DNS still needs:
+- Type: CNAME
+- Host/name: `nyc`
+- Target/value: `gxm0mla0.up.railway.app`
+
+After Railway validates the domain/certificate, set:
+
+`PUBLIC_BASE_URL=https://nyc.friendlypartyrental.com`
+
+The build uses `PUBLIC_BASE_URL` for canonical URLs, robots.txt, and sitemap.xml, while the Railway URL remains the fallback until DNS is ready.

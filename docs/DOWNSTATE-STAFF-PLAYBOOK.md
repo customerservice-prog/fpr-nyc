@@ -173,3 +173,43 @@ For the 90-day test, record:
 - whether Syracuse distance was the main reason the job was lost.
 
 The Downstate decision should be based on profitable booked work, not raw inquiry count.
+
+
+## Lead stages
+
+Use the Downstate stage controls in **Admin → Planning inquiries**:
+
+- **New** — inquiry received, not yet qualified.
+- **Qualified** — date, territory, order size, and site appear worth pursuing.
+- **Quoted** — a real quote/order record has been created from the inquiry.
+- **Booked** — the linked order has become Active.
+- **Lost** — not moving forward; record a concise lost reason.
+
+Creating a quote with **Create quote from this lead** automatically links the order and marks the lead **Quoted**.
+When that linked order becomes **Active**, the lead automatically becomes **Booked**.
+
+## Create Quote handoff
+
+For a Downstate inquiry, use **Create quote from this lead** instead of retyping the customer manually.
+
+The order builder preloads:
+- customer name;
+- email;
+- phone;
+- event date;
+- event address;
+- city;
+- ZIP;
+- customer-submitted event/site context in internal notes.
+
+Staff must still choose:
+- actual inventory items;
+- quantities;
+- current unit prices;
+- schedule;
+- travel/delivery fee;
+- setup surface;
+- any exact-time fee;
+- taxes, discounts, and final quote details.
+
+Do not turn the customer’s free-text requested-rentals sentence directly into priced line items without verifying the actual catalog item.

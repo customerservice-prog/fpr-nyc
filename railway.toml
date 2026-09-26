@@ -1,0 +1,6 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "sh -c 'npx prisma migrate deploy && (node scripts/submit-indexnow.mjs || true) && exec node node_modules/next/dist/bin/next start -H 0.0.0.0 -p ${PORT:-8080}'"
+restartPolicyType = "ON_FAILURE"

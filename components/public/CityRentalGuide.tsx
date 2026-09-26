@@ -1,0 +1,25 @@
+import Link from 'next/link'
+import {notFound} from 'next/navigation'
+import {SC_SERVICE_AREAS} from '@/lib/scServiceAreas'
+import {SC_LOCAL_PLANNING} from '@/lib/scLocalPlanningResources'
+import {scPageMetadata,scBreadcrumbs,scUrl,SC_BUSINESS_ID} from '@/lib/scSeo'
+import {safeJsonLd} from '@/lib/jsonLd'
+const rentals=[['Tent rentals','/category/tent-rentals'],['Tables and chairs','/category/table-chair-rentals'],['Bounce houses and inflatables','/category/bounce-house-rentals'],['Linens and tablecloths','/category/linen-rentals'],['Dance floors and stages','/category/dance-floor-stage-rentals'],['Wedding rentals','/weddings']]
+export function cityRentalMetadata(slug:string){const area=SC_SERVICE_AREAS.find(a=>a.slug===slug);if(!area)return {robots:{index:false,follow:true}};const hasLocalGuide=Boolean(SC_LOCAL_PLANNING[slug]);return scPageMetadata(area.href,`Party Rentals in ${area.name}, SC`,`Rent tents, tables, chairs and event equipment for ${area.name}, SC. Check event-date availability and delivery with the Friendly Party Rental SC Greenville team.`,hasLocalGuide)}
+export default function CityRentalGuide({slug}:{slug:string}){
+ const area=SC_SERVICE_AREAS.find(a=>a.slug===slug);if(!area)notFound();const resource=SC_LOCAL_PLANNING[slug]
+ const schema={'@context':'https://schema.org','@type':'Service','@id':scUrl(area.href)+'#rentals',name:`Party rental delivery to ${area.name}, SC`,serviceType:'Party and event equipment rentals',url:scUrl(area.href),provider:{'@id':SC_BUSINESS_ID},areaServed:{'@type':'Place',name:area.name+', South Carolina'}}
+ return <article className="mx-auto max-w-4xl px-4 py-12" data-sc-city-guide={slug}>
+  <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(schema)}}/><script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(scBreadcrumbs([{name:'Home',path:'/'},{name:'South Carolina Delivery Areas',path:'/service-area'},{name:area.name+', SC',path:area.href}]))}}/>
+  <nav className="mb-5 text-sm text-blue-800" aria-label="Breadcrumb"><Link href="/">Home</Link> / <Link href="/service-area">Delivery areas</Link> / {area.name}, SC</nav>
+  <h1 className="mb-6 text-3xl font-bold text-dark">Party Rentals in {area.name}, SC</h1>
+  <p className="mb-4 leading-7 text-body">Plan your {area.name} event with rental equipment from Friendly Party Rental SC. Browse tents, tables, chairs, inflatables and event essentials, then select your date to review availability. Our Greenville team arranges delivery to your event; this is a service-area guide, not a separate {area.name} storefront.</p>
+  <p className="mb-8 text-sm text-gray-600">Listed local ZIP codes: {area.zips.join(', ')}. Use your full event address to confirm delivery arrangements; a ZIP code alone does not confirm venue access or an exact arrival time.</p>
+  <h2 className="mb-3 text-xl font-bold text-dark">Choose equipment for your {area.name} event</h2><ul className="mb-8 grid gap-3 sm:grid-cols-2">{rentals.map(([name,href])=><li key={href}><Link href={href} prefetch={false} className="block rounded-xl border p-4 font-semibold text-blue-800 hover:bg-amber-50">{name}</Link></li>)}</ul>
+  {resource&&<section className="mb-8 rounded-2xl bg-amber-50 p-6"><h2 className="mb-3 text-xl font-bold">{resource.heading}</h2><p className="leading-7 text-body">{resource.body}</p><a href={resource.url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-sm text-blue-800 underline">{resource.label}</a><p className="mt-3 text-xs leading-5 text-gray-600">Independent public planning resource, checked September 21, 2026. Confirm current requirements directly with the venue or city. No venue partnership or previous event installation is implied.</p></section>}
+  <h2 className="mb-3 text-xl font-bold text-dark">Arrange delivery and collection</h2><p className="mb-4 leading-7 text-body">Share your event address, date, guest count and equipment list. For a tent, tell us the setup surface and available space. For powered equipment, ask about electrical requirements. For a reserved venue, confirm its delivery entrance and permitted setup and collection times.</p>
+  <p className="mb-6 leading-7 text-body">Customer pickup at the warehouse is not offered. Travel fees and tax are separate from rental prices, and the equipment listing or package specifies what is included. Review those details before reserving; delivery to {area.name} does not by itself mean that every setup service is included.</p>
+  <div className="flex flex-wrap gap-3"><Link href="/order-by-date" className="btn-accent">Check My Event Date</Link><Link href="/service-area#delivery-estimate" className="btn-primary">Estimate Delivery</Link><a href="tel:+18646105324" className="rounded-lg border px-5 py-3 font-bold">Call 864-610-5324</a></div>
+  <p className="mt-8 text-sm"><Link href="/category" className="text-blue-800 underline">Browse all rental categories</Link> · <Link href="/service-area#communities" className="text-blue-800 underline">All Upstate South Carolina delivery communities</Link></p>
+ </article>
+}

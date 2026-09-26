@@ -1,0 +1,65 @@
+export const dynamic = 'force-dynamic'
+
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+
+export async function GET() {
+  const session = await getServerSession(authOptions)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const profiles = await prisma.recurringProfile.findMany({ orderBy: { createdAt: 'asc' } })
+  return NextResponse.json({ profiles })
+  }
+
+export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as any).role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const body = await request.json()
+  const profile = await prisma.recurringProfile.create({
+    data: {
+      name: body.name,
+      frequency: body.frequency || 'Monthly',
+      dayOfMonth: body.dayOfMonth ? parseInt(body.dayOfMonth) : null,
+      dayOfWeek: body.dayOfWeek,
+      notes: body.notes,
+      isActive: body.isActive ?? true,
+      },
+    })
+  return NextResponse.json({ profile })
+  }
+
+export async function PATCH(request: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as any).role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const body = await request.json()
+  if (!body.id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+  const data: Record<string, unknown> = {}
+  if ('name' in body) data.name = body.name
+  if ('frequency' in body) data.frequency = body.frequency
+  if ('dayOfMonth' in body) data.dayOfMonth = body.dayOfMonth ? parseInt(body.dayOfMonth) : null
+  if ('dayOfWeek' in body) data.dayOfWeek = body.dayOfWeek
+  if ('notes' in body) data.notes = body.notes
+  if ('isActive' in body) data.isActive = body.isActive
+
+  const profile = await prisma.recurringProfile.update({ where: { id: body.id }, data })
+  return NextResponse.json({ profile })
+  }
+
+export async function DELETE(request: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if ((session.user as any).role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const id = request.nextUrl.searchParams.get('id')
+  if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+  await prisma.recurringProfile.delete({ where: { id } })
+  return NextResponse.json({ success: true })
+  }

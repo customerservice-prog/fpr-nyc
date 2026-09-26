@@ -1,0 +1,2 @@
+ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "incompleteFollowUp3SentAt" TIMESTAMP(3);
+ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "incompleteFollowUp7SentAt" TIMESTAMP(3);

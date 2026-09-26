@@ -1,0 +1,281 @@
+{
+  "referenceRepo": "customerservice-prog/friendly-party-rental-app",
+  "referenceCommit": "097637f1494f7badac3abfd5b7132dd762810957",
+  "capturedAt": "2026-09-21T18:03:40.897680+00:00",
+  "assets": [
+    {
+      "label": "category-order-by-date",
+      "url": "https://www.friendlypartyrental.com/images/order-by-date.png",
+      "file": "assets/category-order-by-date.png",
+      "sha256": "6bf669d70c84517940314d1b3bc6dd778d98c90e85e2735632e06027df8e5069",
+      "pixelSha256": "23d8f8472594d73039afe0d955b4610cbb29324f870accc63e17103516b6519a",
+      "size": [
+        1254,
+        1254
+      ],
+      "path": "public/images/order-by-date.png",
+      "publicPath": "/images/order-by-date.png"
+    },
+    {
+      "label": "category-bounce-house-rentals",
+      "url": "https://www.friendlypartyrental.com/api/category-image/bounce-house-rentals?v=2026-08-18T14:18:50.888Z",
+      "file": "assets/category-bounce-house-rentals.png",
+      "sha256": "5aaf9fee8433522d1cd4dde24699ed66db30d673a95f950953c3ff40e3a305eb",
+      "pixelSha256": "6a48670aaa68c2eacf6ed59b707edb4d27f5ee83bc3fcdb0ff9c576931d685fb",
+      "size": [
+        1024,
+        1536
+      ],
+      "path": "public/images/ny-parity/category-bounce-house-rentals.png",
+      "publicPath": "/images/ny-parity/category-bounce-house-rentals.png"
+    },
+    {
+      "label": "category-tent-rentals",
+      "url": "https://www.friendlypartyrental.com/api/category-image/tent-rentals?v=2026-08-18T13:51:45.847Z",
+      "file": "assets/category-tent-rentals.png",
+      "sha256": "ec081fce1097cc939a65a7b583d97790d511ac6b64b2c877ce393100fd374e80",
+      "pixelSha256": "9ac14d2b9080b7d0c0be9bbc7519d1b76d27658242447d30c88964544b223bb6",
+      "size": [
+        1536,
+        1024
+      ],
+      "path": "public/images/ny-parity/category-tent-rentals.png",
+      "publicPath": "/images/ny-parity/category-tent-rentals.png"
+    },
+    {
+      "label": "category-table-chair-rentals",
+      "url": "https://www.friendlypartyrental.com/api/category-image/table-chair-rentals?v=2026-08-18T14:18:03.217Z",
+      "file": "assets/category-table-chair-rentals.png",
+      "sha256": "b438bc1068c1349cb2706777bf7a7552adfd228deb203c60a82b7f173d28bed9",
+      "pixelSha256": "c056a67e5c06484826be0b0d77f70b7f8d97eb6f863d34433a0bbd732ae1fa20",
+      "size": [
+        1536,
+        1024
+      ],
+      "path": "public/images/ny-parity/category-table-chair-rentals.png",
+      "publicPath": "/images/ny-parity/category-table-chair-rentals.png"
+    },
+    {
+      "label": "category-concession-machine-rentals",
+      "url": "https://www.friendlypartyrental.com/api/category-image/concession-machine-rentals?v=2026-08-18T14:17:24.933Z",
+      "file": "assets/category-concession-machine-rentals.png",
+      "sha256": "2f0346666e20933ca3e647635195b2c3b57a3044808047db66674e08ea200ff4",
+      "pixelSha256": "80b6e7c88eb7c0a94ad7c653a2a001cde004db6dba788d6e06f9ec0be9ae8ff2",
+      "size": [
+        1536,
+        1024
+      ],
+      "path": "public/images/ny-parity/category-concession-machine-rentals.png",
+      "publicPath": "/images/ny-parity/category-concession-machine-rentals.png"
+    },
+    {
+      "label": "category-generator-rentals",
+      "url": "https://www.friendlypartyrental.com/api/category-image/generator-rentals?v=2026-08-18T14:16:49.842Z",
+      "file": "assets/category-generator-rentals.png",
+      "sha256": "af65ca0c1ebbb634723850e6d757558376a6cc0b6640a1d4c1329d506bf01218",
+      "pixelSha256": "6caabd2f1d653dd3922302245946cd2dd0293c0a8f6437f5147ed82d14aef4e9",
+      "size": [
+        1536,
+        1024
+      ],
+      "path": "public/images/ny-parity/category-generator-rentals.png",
+      "publicPath": "/images/ny-parity/category-generator-rentals.png"
+    },
+    {
+      "label": "category-yard-game-rentals",
+      "url": "https://www.friendlypartyrental.com/api/category-image/yard-game-rentals?v=2026-08-18T14:18:12.468Z",
+      "file": "assets/category-yard-game-rentals.png",
+      "sha256": "4bf04b1f88c53cfeb53237224f3ab809fee7b862511e3807f58e3c0d535b5def",
+      "pixelSha256": "4e1fa44a9dc438d3d4cd26662c2e164636070d752bbe1302e36398df7aacfa77",
+      "size": [
+        1536,
+        1024
+      ],
+      "path": "public/images/ny-parity/category-yard-game-rentals.png",
+      "publicPath": "/images/ny-parity/category-yard-game-rentals.png"
+    },
+    {
+      "label": "category-photobooth-rentals",
+      "url": "https://www.friendlypartyrental.com/api/category-image/photobooth-rentals?v=2026-08-23T02:38:10.021Z",
+      "file": "assets/category-photobooth-rentals.png",
+      "sha256": "646c107d40b110a4b917f89ff65407870cd069554fccc9daee565305d18fd941",
+      "pixelSha256": "4ed8229d42f9049f0cd539acc4ce9917fbc1acc32196aa3478d7d966ab3f7805",
+      "size": [
+        1536,
+        1024
+      ],
+      "path": "public/images/ny-parity/category-photobooth-rentals.png",
+      "publicPath": "/images/ny-parity/category-photobooth-rentals.png"
+    },
+    {
+      "label": "category-foam-party-machine-rentals",
+      "url": "https://www.friendlypartyrental.com/api/category-image/foam-party-machine-rentals?v=2026-08-18T14:16:49.510Z",
+      "file": "assets/category-foam-party-machine-rentals.png",
+      "sha256": "67508ebf0cec363dc6422d241c58f981d288605782067b9d29c19a52daad12a7",
+      "pixelSha256": "831eb69a35d918d5f17aede98fc60c7d49b0508a7f6c1dc88176da2ecb61f9a2",
+      "size": [
+        1535,
+        1024
+      ],
+      "path": "public/images/ny-parity/category-foam-party-machine-rentals.png",
+      "publicPath": "/images/ny-parity/category-foam-party-machine-rentals.png"
+    },
+    {
+      "label": "category-event-lighting-rentals",
+      "url": "https://www.friendlypartyrental.com/api/category-image/event-lighting-rentals?v=2026-08-18T14:06:57.459Z",
+      "file": "assets/category-event-lighting-rentals.png",
+      "sha256": "5b2545b812451968b71d11b41ee158dfc3a54385def83fb1dab5bc994cd7e2f0",
+      "pixelSha256": "22fd7df1dcc59af8a491ded75636f6ee965555767e74c625243090e8fe4ddfe7",
+      "size": [
+        1536,
+        1024
+      ],
+      "path": "public/images/ny-parity/category-event-lighting-rentals.png",
+      "publicPath": "/images/ny-parity/category-event-lighting-rentals.png"
+    },
+    {
+      "label": "category-linen-rentals",
+      "url": "https://www.friendlypartyrental.com/api/category-image/linen-rentals?v=2026-08-18T14:03:47.460Z",
+      "file": "assets/category-linen-rentals.png",
+      "sha256": "e51213d6aac11da43ee38a2d90c1df9eec08cbc89f0d34f4e448324ead2e9207",
+      "pixelSha256": "fc27b55d233773758a845c0c99174bce03e4ff481b5e210cc9aa472e63510545",
+      "size": [
+        1536,
+        1024
+      ],
+      "path": "public/images/ny-parity/category-linen-rentals.png",
+      "publicPath": "/images/ny-parity/category-linen-rentals.png"
+    },
+    {
+      "label": "category-dance-floor-stage-rentals",
+      "url": "https://www.friendlypartyrental.com/api/category-image/dance-floor-stage-rentals?v=2026-08-18T13:09:22.296Z",
+      "file": "assets/category-dance-floor-stage-rentals.png",
+      "sha256": "22d28208ef8d4fa2ed33b5c09dc6f3e4ce58a605794d68a92714cd758e47d267",
+      "pixelSha256": "615282c6f7abbb85a3e5dc5d9de2560a07f28f3a2b8a7cbc44a989d01eb4275f",
+      "size": [
+        1536,
+        1024
+      ],
+      "path": "public/images/ny-parity/category-dance-floor-stage-rentals.png",
+      "publicPath": "/images/ny-parity/category-dance-floor-stage-rentals.png"
+    },
+    {
+      "label": "category-heater-fan-rentals",
+      "url": "https://www.friendlypartyrental.com/api/category-image/heater-fan-rentals?v=2026-08-18T14:03:45.467Z",
+      "file": "assets/category-heater-fan-rentals.png",
+      "sha256": "a4c63ea9f93e387c7db7014caa8ae4c24eaf6a8620826dc97f2c45b1a0498e03",
+      "pixelSha256": "f0feb75f012a05bc7d0ffdf290695f0a30dfb93a4d2b71c899083e0f9fea4861",
+      "size": [
+        1536,
+        1024
+      ],
+      "path": "public/images/ny-parity/category-heater-fan-rentals.png",
+      "publicPath": "/images/ny-parity/category-heater-fan-rentals.png"
+    },
+    {
+      "label": "category-inflatable-movie-screen-rentals",
+      "url": "https://www.friendlypartyrental.com/api/category-image/inflatable-movie-screen-rentals?v=2026-09-15T22:49:09.787Z",
+      "file": "assets/category-inflatable-movie-screen-rentals.png",
+      "sha256": "41df51490aa11afeed99c66e425331a3abe7f948f7b979582421ad0b8198ac65",
+      "pixelSha256": "fc4c8d2b21d49b3d1dd361d974cc4fe784e810b79016595bee66ee1a5b27dc37",
+      "size": [
+        1402,
+        1122
+      ],
+      "path": "public/images/ny-parity/category-inflatable-movie-screen-rentals.png",
+      "publicPath": "/images/ny-parity/category-inflatable-movie-screen-rentals.png"
+    },
+    {
+      "label": "category-beverage-food-service",
+      "url": "https://www.friendlypartyrental.com/api/category-image/beverage-food-service?v=2026-08-18T14:03:44.461Z",
+      "file": "assets/category-beverage-food-service.png",
+      "sha256": "0d8fac10b0d9e57e6ed12caea6c8bdb40d0b64235b3eeedac7bd1589f80b3668",
+      "pixelSha256": "9c5331c776bac6803eabde739f2fcd149ec52a32054dd6780b7eec554a54ff0a",
+      "size": [
+        1536,
+        1024
+      ],
+      "path": "public/images/ny-parity/category-beverage-food-service.png",
+      "publicPath": "/images/ny-parity/category-beverage-food-service.png"
+    },
+    {
+      "label": "category-party-rental-packages",
+      "url": "https://www.friendlypartyrental.com/api/category-image/party-rental-packages?v=2026-08-18T14:02:21.671Z",
+      "file": "assets/category-party-rental-packages.png",
+      "sha256": "4ef802274b4c6c98dcbc7ea81a4c7e8cef9f513d1908ca1fbec6226fbbb6e1e0",
+      "pixelSha256": "b5586bd3e1dca100b96286f7d9ef393c7a563295f3c65e66417274532bfbdf6c",
+      "size": [
+        1536,
+        1024
+      ],
+      "path": "public/images/ny-parity/category-party-rental-packages.png",
+      "publicPath": "/images/ny-parity/category-party-rental-packages.png"
+    },
+    {
+      "label": "category-weddings",
+      "url": "https://www.friendlypartyrental.com/api/category-image/weddings?v=2026-08-18T14:33:30.006Z",
+      "file": "assets/category-weddings.png",
+      "sha256": "2fb96b050866ed2543453e3dfbbf9b98fc3ece883cfe6110b62ef7b1df0cc131",
+      "pixelSha256": "f2a8f1423e680b0492ecba12b38dd54d4776f1f083193e38e29201d78bd32e44",
+      "size": [
+        1338,
+        1175
+      ],
+      "path": "public/images/ny-parity/category-weddings.png",
+      "publicPath": "/images/ny-parity/category-weddings.png"
+    },
+    {
+      "label": "category-party-rental-accessories",
+      "url": "https://www.friendlypartyrental.com/api/category-image/party-rental-accessories?v=2026-08-18T14:12:50.526Z",
+      "file": "assets/category-party-rental-accessories.png",
+      "sha256": "0afbbea753272f7907c9d90f84da4c1cc97eb46c0b9f122be084739b0b9816d0",
+      "pixelSha256": "6b79f57fb39c63646946ce21b83f58854f13a6a1a508710ef67cdf4093e3d26a",
+      "size": [
+        1536,
+        1024
+      ],
+      "path": "public/images/ny-parity/category-party-rental-accessories.png",
+      "publicPath": "/images/ny-parity/category-party-rental-accessories.png"
+    },
+    {
+      "label": "category-restroom-rentals",
+      "url": "https://www.friendlypartyrental.com/api/category-image/restroom-rentals?v=2026-08-24T00:06:43.449Z",
+      "file": "assets/category-restroom-rentals.jpg",
+      "sha256": "7e2458d9fd36f71a0bb3928ad934a9b97f20b8c6a532d83adabf7474590e0073",
+      "pixelSha256": "19f080782957f6c68ecb68551631a8253e89d6fa5d01516d19c18e9b18bd4630",
+      "size": [
+        1957,
+        1836
+      ],
+      "path": "public/images/ny-parity/category-restroom-rentals.jpg",
+      "publicPath": "/images/ny-parity/category-restroom-rentals.jpg"
+    },
+    {
+      "label": "shortcut-6",
+      "url": "https://www.friendlypartyrental.com/images/event-planning/outdoor-tent-setup/image.jpg",
+      "file": "assets/shortcut-6.jpg",
+      "sha256": "1abaf6bb5b7deff60f60af946329ebd46839231cfc0bde15f47ef64e701f6af5",
+      "pixelSha256": "46321f572eecf31bccfa295ace071a116aa630bff104dfe5fffb9fa6c5100f30",
+      "size": [
+        256,
+        256
+      ],
+      "path": "public/images/ny-parity/shortcut-6.jpg",
+      "publicPath": "/images/ny-parity/shortcut-6.jpg"
+    },
+    {
+      "label": "youtube-video-thumbnail",
+      "url": "https://www.friendlypartyrental.com/images/youtube-video-thumbnail.jpg",
+      "file": "assets/youtube-video-thumbnail.jpg",
+      "sha256": "fe45cf66797c15393c6f9bd22edff869d91bc4cbeddc0e8c804c04c2a684fa20",
+      "pixelSha256": "494f732105286f0a5b79898f5c764d94e57040316ec9c179f524eba9ff95d1cc",
+      "size": [
+        1280,
+        720
+      ],
+      "path": "public/images/youtube-video-thumbnail.jpg",
+      "publicPath": "/images/youtube-video-thumbnail.jpg"
+    }
+  ],
+  "scope": "Exact category artwork and YouTube thumbnail. SC contact, offers, accounts and checkout are separate."
+}

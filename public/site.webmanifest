@@ -1,0 +1,26 @@
+{
+  "id": "/",
+  "name": "Friendly Party Rental SC",
+  "short_name": "FPR SC",
+  "description": "Party and event rentals in Greenville and Upstate South Carolina.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "lang": "en-US",
+  "background_color": "#ffffff",
+  "theme_color": "#0B1F3A",
+  "icons": [
+    {
+      "src": "/sc-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/sc-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

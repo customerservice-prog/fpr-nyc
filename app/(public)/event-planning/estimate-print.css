@@ -1,0 +1,28 @@
+/* Only the estimator review prints when that step is open. Normal storefront
+   printing and every on-screen layout remain unchanged. No DOM is rewritten. */
+@media print {
+  body:has([data-planning-estimator] [data-estimator-step="3"]) > :not(:has([data-planning-estimator])):not([data-planning-estimator]),
+  body:has([data-planning-estimator] [data-estimator-step="3"]) :has([data-planning-estimator]) > :not(:has([data-planning-estimator])):not([data-planning-estimator]) {
+    display: none !important;
+  }
+  body:has([data-planning-estimator] [data-estimator-step="3"]),
+  body:has([data-planning-estimator] [data-estimator-step="3"]) :has([data-planning-estimator]) {
+    display: block !important;
+    position: static !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    overflow: visible !important;
+    background: white !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  [data-planning-estimator]:has([data-estimator-step="3"]) {
+    border: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+}

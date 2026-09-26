@@ -8,7 +8,7 @@ import BookingCalendar from '@/components/public/BookingCalendar'
 import CartDrawer from '@/components/public/CartDrawer'
 import { useCart, DEFAULT_SCHEDULING_DETAILS } from '@/components/public/CartContext'
 import { formatDateShort } from '@/lib/utils'
-import { categorySearchName } from '@/lib/scSearchReadiness'
+import { categorySearchName } from '@/lib/nycSearchReadiness'
 import { ShoppingCart, CalendarDays, Pencil, Truck, MapPin } from 'lucide-react'
 
 const APPOINTMENT_SLOTS = [

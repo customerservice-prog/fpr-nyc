@@ -1,4 +1,4 @@
-import { scPageMetadata } from '@/lib/scSeo'
+import { scPageMetadata } from '@/lib/nycSeo'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 export const metadata = scPageMetadata("/about_us","About Friendly Party Rental SC in Greenville, SC","Meet Friendly Party Rental SC serving Greenville and nearby Upstate South Carolina communities with party and event equipment rentals.")

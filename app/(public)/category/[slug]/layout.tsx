@@ -1,9 +1,9 @@
-import {categorySearchName} from '@/lib/scSearchReadiness'
+import {categorySearchName} from '@/lib/nycSearchReadiness'
 import {cache} from 'react'
 import {prisma} from '@/lib/prisma'
 import {safeJsonLd} from '@/lib/jsonLd'
-import {categoryDescriptionForSc} from '@/lib/scPublicCopy'
-import {scPageMetadata,scBreadcrumbs,scUrl,SC_BUSINESS_ID} from '@/lib/scSeo'
+import {categoryDescriptionForSc} from '@/lib/nycPublicCopy'
+import {scPageMetadata,scBreadcrumbs,scUrl,SC_BUSINESS_ID} from '@/lib/nycSeo'
 import {getCategoryPlanningContent} from '@/lib/categoryPlanningContent'
 const getCategory=cache((slug:string)=>prisma.category.findUnique({where:{slug}}))
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}){

@@ -2,7 +2,7 @@ export const revalidate = 60
 
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { categoryDescriptionForSc, itemDescriptionForSc } from '@/lib/scPublicCopy'
+import { categoryDescriptionForSc, itemDescriptionForSc } from '@/lib/nycPublicCopy'
 
 export async function GET(
   _request: Request,

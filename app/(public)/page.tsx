@@ -1,7 +1,7 @@
 import { headers } from 'next/headers'
 import ResponsiveHome from '@/components/public/ResponsiveHome'
-import ScHomeSeo from '@/components/public/ScHomeSeo'
-import { scPageMetadata } from '@/lib/scSeo'
+import NycHomeSeo from '@/components/public/NycHomeSeo'
+import { scPageMetadata } from '@/lib/nycSeo'
 import { initialHomeDevice } from '@/lib/homeDevice'
 import { PUBLIC_CATEGORIES } from '@/lib/utils'
 import { DEFAULT_HOME_CONTENT } from '@/lib/homeContent'
@@ -107,6 +107,6 @@ export default async function HomePage() {
     weddingImage={packages[0]?.image || null}
     hero={hero}
     content={content}
-    seoSection={<ScHomeSeo />}
+    seoSection={<NycHomeSeo />}
   />
 }

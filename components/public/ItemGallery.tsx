@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { IMAGE_CACHE_BUST } from '@/lib/imageVersion'
-import { SC_ITEM_MEDIA } from '@/lib/scItemMedia'
+import { NYC_ITEM_MEDIA } from '@/lib/nycItemMedia'
 
 interface ItemGalleryProps {
   slug: string
@@ -13,14 +13,14 @@ interface ItemGalleryProps {
 
 export default function ItemGallery({ slug, name, hasPicture, additionalImages }: ItemGalleryProps) {
   const mainImageSrc = `/api/item-image/${slug}?v=${IMAGE_CACHE_BUST}`
-  const images = hasPicture || SC_ITEM_MEDIA[slug] ? [mainImageSrc, ...additionalImages] : additionalImages
+  const images = hasPicture || NYC_ITEM_MEDIA[slug] ? [mainImageSrc, ...additionalImages] : additionalImages
   const [activeImage, setActiveImage] = useState<string | null>(images[0] || null)
   const [reference, setReference] = useState(false)
   // The route protects subsequent admin uploads. Read its actual response marker
   // rather than permanently labeling a newer, exact product photo as a reference.
   useEffect(() => {
     setReference(false)
-    if (!SC_ITEM_MEDIA[slug]) return
+    if (!NYC_ITEM_MEDIA[slug]) return
     const controller = new AbortController()
     fetch(mainImageSrc, { method: 'HEAD', signal: controller.signal })
       .then(response => { if (!controller.signal.aborted) setReference(response.ok && response.headers.has('X-Image-Reference')) })

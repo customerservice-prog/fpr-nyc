@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readScWeddingArtwork } from '@/lib/scWeddingArtworkServer'
+import { readScWeddingArtwork } from '@/lib/nycWeddingArtworkServer'
 
 export const dynamic = 'force-dynamic'
 

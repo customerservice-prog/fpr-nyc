@@ -1,4 +1,4 @@
-import { scPageMetadata } from '@/lib/scSeo'
+import { scPageMetadata } from '@/lib/nycSeo'
 import Accordion from '@/components/public/Accordion'
 import type { Metadata } from 'next'
 import { safeJsonLd } from '@/lib/jsonLd'

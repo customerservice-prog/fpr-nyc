@@ -1,4 +1,4 @@
-import { scPageMetadata } from '@/lib/scSeo'
+import { scPageMetadata } from '@/lib/nycSeo'
 import Link from 'next/link'
 import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 import WeddingPackageCard from '@/components/public/WeddingPackageCard'

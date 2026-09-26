@@ -1,6 +1,6 @@
 // Existing published SC communities, not separate physical storefronts.
 export interface ScServiceArea {name:string;slug:string;href:string;zips:string[]}
-export const SC_SERVICE_AREAS: ScServiceArea[] = [
+export const NYC_SERVICE_AREAS: ScServiceArea[] = [
   {
     "name": "Greenville",
     "slug": "greenville",

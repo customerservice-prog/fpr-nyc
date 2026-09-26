@@ -1,5 +1,5 @@
 import type {MetadataRoute} from 'next'
-import {SC_SITE_URL} from '@/lib/scSeo'
+import {SC_SITE_URL} from '@/lib/nycSeo'
 export default function robots():MetadataRoute.Robots{return {
  rules:{userAgent:'*',allow:['/','/api/item-image/','/api/category-image/','/api/wedding-package-image/','/api/wedding-art/','/api/shared-gallery/','/api/uploads/'],disallow:['/api/']},
  // Private URLs send noindex, and may be crawled so that directive can be read.

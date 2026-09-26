@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { SC_RENTSKETCH_TENANT } from '@/lib/scRentSketch'
+import { SC_RENTSKETCH_TENANT } from '@/lib/nycRentSketch'
 
 export type DesignYourEventSource = string
 

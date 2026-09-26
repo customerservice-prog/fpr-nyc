@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback, createElement as h } from 're
 import Link from 'next/link'
 import { X } from 'lucide-react'
 
-import { SC_RENTSKETCH_TENANT } from '@/lib/scRentSketch'
+import { SC_RENTSKETCH_TENANT } from '@/lib/nycRentSketch'
 
 const RENTSKETCH_ORIGIN = 'https://rentsketch.com'
 

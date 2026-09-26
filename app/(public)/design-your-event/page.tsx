@@ -1,4 +1,4 @@
-import { scPageMetadata } from '@/lib/scSeo'
+import { scPageMetadata } from '@/lib/nycSeo'
 import StorefrontDesigner from '@/components/public/StorefrontDesigner'
 import type { Metadata } from 'next'
 import { Playfair_Display } from 'next/font/google'

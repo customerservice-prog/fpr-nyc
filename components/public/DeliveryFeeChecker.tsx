@@ -1,7 +1,7 @@
 'use client'
 import { useRef, useState, useEffect, type FormEvent } from 'react'
 import Link from 'next/link'
-import { deliveryZipFromInput } from '@/lib/scDeliveryInput'
+import { deliveryZipFromInput } from '@/lib/nycDeliveryInput'
 interface Quote {fee:number;distance:number;zip:string;isEstimate:boolean;distanceBasis:string}
 export default function DeliveryFeeChecker(){
  const [address,setAddress]=useState(''),[loading,setLoading]=useState(false),[error,setError]=useState(''),[quote,setQuote]=useState<Quote|null>(null)

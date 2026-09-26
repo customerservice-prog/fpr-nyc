@@ -7,7 +7,7 @@ import { PUBLIC_ITEM_SELECT } from '@/lib/availability'
 import CategoryClient from './CategoryClient'
 import CategoryPlanningGuide from '@/components/public/CategoryPlanningGuide'
 import { safeJsonLd } from '@/lib/jsonLd'
-import { categoryDescriptionForSc, itemDescriptionForSc } from '@/lib/scPublicCopy'
+import { categoryDescriptionForSc, itemDescriptionForSc } from '@/lib/nycPublicCopy'
 
 export default async function CategorySlugPage(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params

@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
-import {scPageMetadata} from '@/lib/scSeo'
+import {scPageMetadata} from '@/lib/nycSeo'
 
 export const dynamic = 'force-dynamic'
 

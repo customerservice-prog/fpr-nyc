@@ -1,5 +1,5 @@
 import PopularRentalsShared from '@/components/public/PopularRentalsShared'
-import { scPageMetadata } from '@/lib/scSeo'
+import { scPageMetadata } from '@/lib/nycSeo'
 
 export const revalidate = 60
 export const metadata = scPageMetadata(

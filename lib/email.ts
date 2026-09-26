@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer'
-import { SC_EMAIL_ADDRESS, scEmailSubject, scEmailHtml } from '@/lib/scEmail'
+import { NYC_EMAIL_ADDRESS, nycEmailSubject, nycEmailHtml } from '@/lib/nycEmail'
 import { BUSINESS, formatDateTime } from '@/lib/utils'
 
 const transporter = nodemailer.createTransport({
@@ -39,11 +39,11 @@ export async function sendEmail({
 
   try {
     const delivery = await transporter.sendMail({
-      from: { name: BUSINESS.name, address: (process.env.EMAIL_FROM || process.env.EMAIL_USER || SC_EMAIL_ADDRESS).replace(/^.*<([^>]+)>.*$/, '$1').trim() },
-      to: to.toLowerCase() === 'customerservice@friendlypartyrentalsc.com' ? SC_EMAIL_ADDRESS : to,
-      replyTo: replyTo || SC_EMAIL_ADDRESS,
-      subject: scEmailSubject(subject),
-      html: scEmailHtml(html),
+      from: { name: BUSINESS.name, address: (process.env.EMAIL_FROM || process.env.EMAIL_USER || NYC_EMAIL_ADDRESS).replace(/^.*<([^>]+)>.*$/, '$1').trim() },
+      to: to.toLowerCase() === 'customerservice@friendlypartyrentalsc.com' ? NYC_EMAIL_ADDRESS : to,
+      replyTo: replyTo || NYC_EMAIL_ADDRESS,
+      subject: nycEmailSubject(subject),
+      html: nycEmailHtml(html),
       text: 'SOUTH CAROLINA - GREENVILLE | friendlypartyrentalsc.com\n\n' + (text || html.replace(/<[^>]*>/g, '')),
       headers: { 'X-FPR-Location': 'greenville-sc', 'X-FPR-Website': 'friendlypartyrentalsc.com' },
     })

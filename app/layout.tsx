@@ -8,6 +8,8 @@ import GoogleAnalyticsListener from '@/components/GoogleAnalyticsListener'
 import VisitorTracker from '@/components/VisitorTracker'
 import './globals.css'
 import { safeJsonLd } from '@/lib/jsonLd'
+import { BUSINESS } from '@/lib/utils'
+import { NYC_SERVICE_AREAS } from '@/lib/nycServiceAreas'
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
@@ -15,50 +17,45 @@ const roboto = Roboto({
   display: 'swap',
 })
 
-const SITE_URL = 'https://fpr-nyc-production.up.railway.app'
-const GOOGLE_PROFILE_URL = 'https://www.google.com/maps?cid=14184978817653836417'
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://fpr-nyc-production.up.railway.app').replace(/\/$/, '')
+const INDEXABLE = process.env.PUBLIC_INDEXABLE === 'true'
 const SITE_DESCRIPTION =
-  'Friendly Party Rental NYC provides party and event rentals in Riverdale, NY and surrounding Downstate New York communities, including tents, tables, chairs, inflatables, weddings and event equipment.'
+  'Friendly Party Rental NYC provides party and event rentals in Riverdale, selected Bronx neighborhoods, Yonkers, Mount Vernon, New Rochelle and nearby Lower Westchester communities.'
 
 const LOCAL_BUSINESS_JSONLD = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
-  '@id': 'https://fpr-nyc-production.up.railway.app/#business',
-  name: 'Friendly Party Rental NYC',
-  legalName: 'Friendly Party Rental L.L.C.',
+  '@id': SITE_URL + '/#business',
+  name: BUSINESS.name,
+  legalName: BUSINESS.legalName,
   description: SITE_DESCRIPTION,
-  image: `${SITE_URL}/images/logo.png`,
-  telephone: '+1-315-884-1498',
-  email: 'customerservice@friendlypartyrental.com',
+  image: SITE_URL + '/images/logo.png',
+  telephone: '+1-' + BUSINESS.phone,
+  email: BUSINESS.email,
   url: SITE_URL,
-  hasMap: GOOGLE_PROFILE_URL,
-  sameAs: [GOOGLE_PROFILE_URL],
-  address: {
-    '@type': 'PostalAddress',
-    addressLocality: 'Riverdale',
-    addressRegion: 'SC',
-    addressCountry: 'US',
-  },
   openingHoursSpecification: [{
     '@type': 'OpeningHoursSpecification',
     dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
     opens: '09:00',
     closes: '18:00',
   }],
-  areaServed: [{"@type": "Place", "name": "Riverdale, NY"}, {"@type": "Place", "name": "Anderson, SC"}, {"@type": "Place", "name": "Belton, SC"}, {"@type": "Place", "name": "Berea, SC"}, {"@type": "Place", "name": "Boiling Springs, SC"}, {"@type": "Place", "name": "Central, SC"}, {"@type": "Place", "name": "Clemson, SC"}, {"@type": "Place", "name": "Duncan, SC"}, {"@type": "Place", "name": "Easley, SC"}, {"@type": "Place", "name": "Fountain Inn, SC"}, {"@type": "Place", "name": "Gantt, SC"}, {"@type": "Place", "name": "Gray Court, SC"}, {"@type": "Place", "name": "Greer, SC"}, {"@type": "Place", "name": "Honea Path, SC"}, {"@type": "Place", "name": "Inman, SC"}, {"@type": "Place", "name": "Judson, SC"}, {"@type": "Place", "name": "Landrum, SC"}, {"@type": "Place", "name": "Laurens, SC"}, {"@type": "Place", "name": "Liberty, SC"}, {"@type": "Place", "name": "Marietta, SC"}, {"@type": "Place", "name": "Mauldin, SC"}, {"@type": "Place", "name": "Parker, SC"}, {"@type": "Place", "name": "Pelzer, SC"}, {"@type": "Place", "name": "Pickens, SC"}, {"@type": "Place", "name": "Piedmont, SC"}, {"@type": "Place", "name": "Powdersville, SC"}, {"@type": "Place", "name": "Seneca, SC"}, {"@type": "Place", "name": "Simpsonville, SC"}, {"@type": "Place", "name": "Six Mile, SC"}, {"@type": "Place", "name": "Spartanburg, SC"}, {"@type": "Place", "name": "Taylors, SC"}, {"@type": "Place", "name": "Travelers Rest, SC"}, {"@type": "Place", "name": "Wade Hampton, SC"}, {"@type": "Place", "name": "Williamston, SC"}, {"@type": "Place", "name": "Woodruff, SC"}],
+  areaServed: NYC_SERVICE_AREAS.map((area) => ({
+    '@type': 'Place',
+    name: area.name + ', NY',
+  })),
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
-    name: 'Party and event rentals in Riverdale, NY',
+    name: 'Party and event rentals in Riverdale, the Bronx and Lower Westchester',
     itemListElement: [
-      { '@type': 'OfferCatalog', name: 'Tent Rentals', url: `${SITE_URL}/category/tent-rentals` },
-      { '@type': 'OfferCatalog', name: 'Table & Chair Rentals', url: `${SITE_URL}/category/table-chair-rentals` },
-      { '@type': 'OfferCatalog', name: 'Bounce House & Water Slide Rentals', url: `${SITE_URL}/category/bounce-house-rentals` },
-      { '@type': 'OfferCatalog', name: 'Wedding Rentals', url: `${SITE_URL}/weddings` },
-      { '@type': 'OfferCatalog', name: 'Linen Rentals', url: `${SITE_URL}/category/linen-rentals` },
-      { '@type': 'OfferCatalog', name: 'Dance Floor & Stage Rentals', url: `${SITE_URL}/category/dance-floor-stage-rentals` },
+      { '@type': 'OfferCatalog', name: 'Tent Rentals', url: SITE_URL + '/category/tent-rentals' },
+      { '@type': 'OfferCatalog', name: 'Table & Chair Rentals', url: SITE_URL + '/category/table-chair-rentals' },
+      { '@type': 'OfferCatalog', name: 'Bounce House & Water Slide Rentals', url: SITE_URL + '/category/bounce-house-rentals' },
+      { '@type': 'OfferCatalog', name: 'Wedding Rentals', url: SITE_URL + '/weddings' },
+      { '@type': 'OfferCatalog', name: 'Linen Rentals', url: SITE_URL + '/category/linen-rentals' },
+      { '@type': 'OfferCatalog', name: 'Dance Floor & Stage Rentals', url: SITE_URL + '/category/dance-floor-stage-rentals' },
     ],
   },
-  priceRange: '$',
+  priceRange: '$$',
 }
 
 const WEBSITE_JSONLD = {
@@ -66,49 +63,50 @@ const WEBSITE_JSONLD = {
   '@type': 'WebSite',
   '@id': SITE_URL + '/#website',
   url: SITE_URL,
-  name: 'Friendly Party Rental NYC',
+  name: BUSINESS.name,
   description: SITE_DESCRIPTION,
   publisher: { '@id': SITE_URL + '/#business' },
 }
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  applicationName: 'Friendly Party Rental NYC',
+  applicationName: BUSINESS.name,
   manifest: '/site.webmanifest',
   icons: {
     icon: [
-      { url: '/favicon.ico?v=sc-20260921', sizes: 'any', type: 'image/x-icon' },
-      { url: '/favicon-32x32.png?v=sc-20260921', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon-48x48.png?v=sc-20260921', sizes: '48x48', type: 'image/png' },
-      { url: '/favicon-96x96.png?v=sc-20260921', sizes: '96x96', type: 'image/png' },
+      { url: '/favicon.ico?v=nyc-20260927', sizes: 'any', type: 'image/x-icon' },
+      { url: '/favicon-32x32.png?v=nyc-20260927', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-48x48.png?v=nyc-20260927', sizes: '48x48', type: 'image/png' },
+      { url: '/favicon-96x96.png?v=nyc-20260927', sizes: '96x96', type: 'image/png' },
     ],
-    shortcut: '/favicon.ico?v=sc-20260921',
-    apple: [{ url: '/apple-touch-icon.png?v=sc-20260921', sizes: '180x180', type: 'image/png' }],
+    shortcut: '/favicon.ico?v=nyc-20260927',
+    apple: [{ url: '/apple-touch-icon.png?v=nyc-20260927', sizes: '180x180', type: 'image/png' }],
   },
   title: {
-    default: 'Friendly Party Rental NYC | Party Rentals in Riverdale, NY',
+    default: 'Friendly Party Rental NYC | Party Rentals in Riverdale, the Bronx & Lower Westchester',
     template: '%s | Friendly Party Rental NYC',
   },
   description: SITE_DESCRIPTION,
   keywords: [
     'Friendly Party Rental NYC',
     'party rentals Riverdale NY',
-    'Carolina party rental',
+    'party rentals Bronx NY',
+    'party rentals Yonkers NY',
     'tent rentals Riverdale',
     'bounce house rentals Riverdale NY',
-    'table and chair rentals Downstate New York',
+    'table and chair rentals Lower Westchester',
     'wedding rentals Riverdale NY',
   ],
   openGraph: {
-    title: 'Friendly Party Rental NYC | Party Rentals in Riverdale, NY',
+    title: 'Friendly Party Rental NYC | Party Rentals in Riverdale, the Bronx & Lower Westchester',
     description: SITE_DESCRIPTION,
-    siteName: 'Friendly Party Rental NYC',
+    siteName: BUSINESS.name,
     locale: 'en_US',
     type: 'website',
-    images: [{ url: `${SITE_URL}/images/logo.png`, width: 1731, height: 909, alt: 'Friendly Party Rental NYC' }],
+    images: [{ url: SITE_URL + '/images/logo.png', width: 1731, height: 909, alt: BUSINESS.name }],
   },
   robots: {
-    index: true,
+    index: INDEXABLE,
     follow: true,
   },
   verification: {

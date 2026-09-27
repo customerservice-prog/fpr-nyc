@@ -1,10 +1,10 @@
-export const PLANNING_PHONE = '864-610-5324'
-export const PLANNING_ORIGIN = 'https://www.friendlypartyrentalsc.com'
+export const PLANNING_PHONE = '315-884-1498'
+export const PLANNING_ORIGIN = 'https://fpr-nyc-production.up.railway.app'
 export const PLANNING_HELP = ['Rentals', 'Event design / layout', 'Vendor coordination', 'Day-of coordination', 'Full planning', 'Not sure yet'] as const
 export const planningServices = [
   {
     slug: 'wedding-coordination', label: 'Weddings', type: 'Wedding',
-    title: 'Wedding Planning & Coordination in Greenville, SC',
+    title: 'Wedding Planning & Coordination in Riverdale, NY',
     summary: 'Enjoy the day you have been planning. Bring the ceremony, reception, rentals and timeline together with one local team.',
     image: '/images/event-planning/ceremony-deck/image.png', alt: 'Outdoor ceremony seating arranged on a deck',
     intro: 'Already have a venue and vendors? Start with coordination. Still deciding how the day should look and feel? Discuss partial or full planning. We will help you choose a scope based on what is already booked and what you still need, rather than treating every wedding as the same project.',
@@ -17,7 +17,7 @@ export const planningServices = [
   },
   {
     slug: 'corporate-events', label: 'Corporate Events', type: 'Corporate event',
-    title: 'Corporate Event Planning in Greenville, SC',
+    title: 'Corporate Event Planning in Riverdale, NY',
     summary: 'A clear plan for employee events, company celebrations and business gatherings, from rental layout to event-day coordination.',
     image: '/images/event-planning/tent-patio-setup/image.png', alt: 'Tent and patio seating layout',
     intro: 'Company events need to work for both guests and the people running them. Begin with your event goals, schedule, location and headcount. We can scope planning and rental support around the needs of your gathering and the responsibilities your internal team will retain.',
@@ -30,7 +30,7 @@ export const planningServices = [
   },
   {
     slug: 'private-parties', label: 'Private Parties & Celebrations', type: 'Private party / celebration',
-    title: 'Party Planning in Greenville, SC',
+    title: 'Party Planning in Riverdale, NY',
     summary: 'Bring your birthday, graduation, shower or anniversary celebration together without managing every detail yourself.',
     image: '/images/event-planning/outdoor-tent-setup/image.png', alt: 'Outdoor tent with tables and chairs',
     intro: 'Whether you are hosting at home or at a venue, start with the kind of celebration you want, the number of guests and the space you have. We will help you identify what rental equipment and planning support you need, with a scope that fits your actual event.',
@@ -43,7 +43,7 @@ export const planningServices = [
   },
   {
     slug: 'festivals-fundraisers', label: 'Festivals & Fundraisers', type: 'Festival / fundraiser',
-    title: 'Festival & Fundraiser Planning in Greenville, SC',
+    title: 'Festival & Fundraiser Planning in Riverdale, NY',
     summary: 'A custom planning conversation for community gatherings, fundraisers and events with multiple activity areas.',
     image: '/images/event-planning/tent-patio-setup/image.png', alt: 'Outdoor tent and adjacent event space',
     intro: 'Larger events rarely fit a single package without discussion. Share your event footprint, schedule, expected attendance and the people or organizations involved. We will review whether our rental and coordination services match your needs before preparing a custom scope.',
@@ -123,10 +123,10 @@ export const planningPackages = [
   },
 ]
 export const planningFaqs = [
-  { question: 'Can I add planning to an existing rental order?', answer: 'Yes. Include your order number in the inquiry or call 864-610-5324. We will review your existing rentals and discuss any additional planning services, subject to availability.' },
+  { question: 'Can I add planning to an existing rental order?', answer: 'Yes. Include your order number in the inquiry or call 315-884-1498. We will review your existing rentals and discuss any additional planning services, subject to availability.' },
   { question: 'Do you plan more than weddings?', answer: 'Yes. We discuss corporate events, private celebrations, festivals and fundraisers as well as weddings. Events that do not fit a published package are scoped individually.' },
   { question: 'Are rentals and delivery included in the planning price?', answer: 'The package details below describe planning and coordination services. Your written quote must confirm the rental equipment, delivery, setup, pickup, travel fees and taxes that apply to your event. Do not assume that an item or service not listed is included.' },
   { question: 'What happens if my event runs longer than the package hours?', answer: 'The published planning packages list their included meetings and on-site hours. Additional time is billed at $85 per hour. Discuss extra time with the team when confirming your scope.' },
-  { question: 'Where do you provide event planning?', answer: 'We serve Greenville and Upstate South Carolina, including Greer, Simpsonville, Mauldin, Taylors, Easley, Travelers Rest, Fountain Inn, Spartanburg, Anderson and Piedmont. Share your location so we can confirm service availability and any travel fees.' },
+  { question: 'Where do you provide event planning?', answer: 'We serve Riverdale and Downstate New York, including Greer, Simpsonville, Mauldin, Taylors, Easley, Travelers Rest, Fountain Inn, Spartanburg, Anderson and Piedmont. Share your location so we can confirm service availability and any travel fees.' },
   { question: 'Does sending an inquiry reserve my event date?', answer: 'No. An inquiry starts a conversation and does not reserve equipment, staffing or a date. Your quote and booking agreement confirm availability, scope and payment requirements.' },
 ]

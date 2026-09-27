@@ -60,7 +60,7 @@ export async function savePlanningInquiry(db: PrismaClient, inquiry: PlanningInq
       return { created: false, reference: existing.id }
     }
     const recent = await tx.contactMessage.count({ where: { id: { startsWith: 'planning_' }, email: inquiry.email, createdAt: { gte: new Date(now.getTime() - 3600000) } } })
-    if (recent >= 3) throw new PlanningInquiryError('Several inquiries have already been saved for this email. Please call 864-610-5324 for additional details.', 429)
+    if (recent >= 3) throw new PlanningInquiryError('Several inquiries have already been saved for this email. Please call 315-884-1498 for additional details.', 429)
     const { eventType, ...data } = inquiry
     await tx.contactMessage.create({ data })
     return { created: true, reference: inquiry.id }
@@ -70,5 +70,5 @@ export function planningInquiryEmail(inquiry: PlanningInquiry) {
   const escape = (value: string) => value.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!))
   const lines = [inquiry.name, inquiry.email, inquiry.phone, 'Date: ' + (inquiry.eventDate?.toISOString().slice(0,10) || 'Undecided'), '', inquiry.message, '', 'Reference: ' + inquiry.id]
   return { subject: '[SC EVENT PLANNING] ' + inquiry.eventType + ' — ' + inquiry.name,
-    html: '<h2>New Greenville / Upstate South Carolina planning inquiry</h2><p>' + lines.map(escape).join('<br/>') + '</p><p><a href="https://www.friendlypartyrentalsc.com/admin/planning-inquiries">Review planning inquiries</a></p>', text: lines.join('\n') }
+    html: '<h2>New Riverdale / Downstate New York planning inquiry</h2><p>' + lines.map(escape).join('<br/>') + '</p><p><a href="https://fpr-nyc-production.up.railway.app/admin/planning-inquiries">Review planning inquiries</a></p>', text: lines.join('\n') }
 }

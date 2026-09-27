@@ -266,7 +266,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
           <p className="text-sm text-body">Time: {order.eventTimeSlot}</p>
         )}
         {order.eventAddress && (
-          <p className="text-sm text-body">{order.eventAddress}, {order.eventCity} {order.eventState || 'SC'} {order.eventZip}</p>
+          <p className="text-sm text-body">{order.eventAddress}, {order.eventCity} {order.eventState || 'NY'} {order.eventZip}</p>
         )}
         <p className="text-sm text-body">Delivery: {order.deliveryType}</p>
       </div>

@@ -16,7 +16,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         headers: {
           'Content-Type': exactArtwork.contentType,
           'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
-          'X-Image-Reference': 'exact-public-NY-artwork-local-SC-snapshot',
+          'X-Image-Reference': 'exact-public-NY-artwork-local-NYC-snapshot',
           'X-Content-Type-Options': 'nosniff',
         },
       })

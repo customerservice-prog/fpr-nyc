@@ -209,7 +209,7 @@ async function main() {
       await prisma.serviceArea.create({
         data: {
           city: area.city,
-          state: 'NY',
+          state: 'SC',
           zip: area.zip,
           region: area.region,
           baseFee: area.baseFee,

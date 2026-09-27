@@ -109,29 +109,29 @@ function newBlock(type: BlockType): Block {
     case 'image':
       return { id, type, image: '', url: '', align: 'center' }
     case 'button':
-      return { id, type, text: 'Shop Now', url: 'https://www.friendlypartyrentalsc.com/rentals', align: 'center' }
+      return { id, type, text: 'Shop Now', url: 'https://fpr-nyc-production.up.railway.app/rentals', align: 'center' }
     case 'divider':
       return { id, type }
     case 'spacer':
       return { id, type }
     case 'hero':
-      return { id, type, image: 'https://www.friendlypartyrentalsc.com/images/wedding-backyard-elopement.jpg', url: 'https://www.friendlypartyrentalsc.com/rentals' }
+      return { id, type, image: 'https://fpr-nyc-production.up.railway.app/images/wedding-backyard-elopement.jpg', url: 'https://fpr-nyc-production.up.railway.app/rentals' }
     case 'offer':
-      return { id, type, eyebrow: 'Limited-Time Offer', title: 'Save 15% on your next order', subtitle: 'Book by June 30th — mention code SUMMER15 on your quote.', code: 'SUMMER15', buttonText: 'Browse Rentals', url: 'https://www.friendlypartyrentalsc.com/rentals' }
+      return { id, type, eyebrow: 'Limited-Time Offer', title: 'Save 15% on your next order', subtitle: 'Book by June 30th — mention code SUMMER15 on your quote.', code: 'SUMMER15', buttonText: 'Browse Rentals', url: 'https://fpr-nyc-production.up.railway.app/rentals' }
     case 'grid':
       return {
         id, type, title: 'Popular Rentals', subtitle: 'Tap any category to explore', columns: 2,
         cards: [
-          { image: 'https://www.friendlypartyrentalsc.com/api/category-image/tent-rentals', caption: 'Tents & Canopies', url: 'https://www.friendlypartyrentalsc.com/rentals' },
-          { image: 'https://www.friendlypartyrentalsc.com/api/category-image/table-chair-rentals', caption: 'Tables & Chairs', url: 'https://www.friendlypartyrentalsc.com/rentals' },
+          { image: 'https://fpr-nyc-production.up.railway.app/api/category-image/tent-rentals', caption: 'Tents & Canopies', url: 'https://fpr-nyc-production.up.railway.app/rentals' },
+          { image: 'https://fpr-nyc-production.up.railway.app/api/category-image/table-chair-rentals', caption: 'Tables & Chairs', url: 'https://fpr-nyc-production.up.railway.app/rentals' },
         ],
       }
     case 'badges':
       return {
         id, type, title: 'Why Friendly Party Rental SC?',
         cards: [
-          { image: 'https://www.friendlypartyrentalsc.com/images/badge-all-day-8-hour-rental.png', caption: '', url: '' },
-          { image: 'https://www.friendlypartyrentalsc.com/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
+          { image: 'https://fpr-nyc-production.up.railway.app/images/badge-all-day-8-hour-rental.png', caption: '', url: '' },
+          { image: 'https://fpr-nyc-production.up.railway.app/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
         ],
       }
     case 'masthead':
@@ -139,11 +139,11 @@ function newBlock(type: BlockType): Block {
     case 'eyebrow':
       return { id, type, text: 'SEASONAL COLLECTION' }
     case 'splitrow':
-      return { id, type, image: 'https://www.friendlypartyrentalsc.com/api/category-image/tent-rentals', title: 'What You May Need', text: 'A short description of this section.', url: 'https://www.friendlypartyrentalsc.com/rentals', align: 'left' }
+      return { id, type, image: 'https://fpr-nyc-production.up.railway.app/api/category-image/tent-rentals', title: 'What You May Need', text: 'A short description of this section.', url: 'https://fpr-nyc-production.up.railway.app/rentals', align: 'left' }
     case 'featureRow':
       return { id, type, title: 'Highlights', items: [{ title: 'Delivered & Set Up', text: '' }, { title: 'Local Support', text: '' }, { title: 'Flexible Scheduling', text: '' }] }
     case 'trust':
-      return { id, type, title: 'Trusted Across Upstate South Carolina', items: [{ title: 'Local Greenville business', text: '' }, { title: 'Delivery & setup included', text: '' }] }
+      return { id, type, title: 'Trusted Across Downstate New York', items: [{ title: 'Local Riverdale business', text: '' }, { title: 'Delivery & setup included', text: '' }] }
     case 'dateBanner':
       return { id, type, eyebrow: 'LIMITED AVAILABILITY', text: 'Open Dates This Month', subtitle: 'Check availability before it fills.' }
     case 'signature':
@@ -221,7 +221,7 @@ function blockHtml(b: Block, theme: VisualThemeTokens): string {
         return '<div style="text-align:center;padding:10px 0 6px;"><span style="font-family:' + theme.headingFont + ';font-size:15px;font-weight:bold;color:' + theme.headingColor + ';letter-spacing:1px;">FRIENDLY PARTY RENTAL</span></div>'
       }
       if (variant === 'editorial') {
-        return '<div style="text-align:center;padding:6px 0 18px;"><div style="font-family:' + theme.headingFont + ';font-size:14px;font-weight:normal;color:' + theme.headingColor + ';letter-spacing:3px;text-transform:uppercase;">Friendly Party Rental SC</div><div style="font-size:11px;color:' + theme.mutedColor + ';letter-spacing:1px;margin-top:4px;font-family:' + theme.bodyFont + ';font-style:italic;">Greenville &amp; Upstate South Carolina</div></div>'
+        return '<div style="text-align:center;padding:6px 0 18px;"><div style="font-family:' + theme.headingFont + ';font-size:14px;font-weight:normal;color:' + theme.headingColor + ';letter-spacing:3px;text-transform:uppercase;">Friendly Party Rental SC</div><div style="font-size:11px;color:' + theme.mutedColor + ';letter-spacing:1px;margin-top:4px;font-family:' + theme.bodyFont + ';font-style:italic;">Riverdale &amp; Downstate New York</div></div>'
       }
       return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="padding:16px 0;border-bottom:3px solid ' + theme.accent + ';">' +
         '<div style="font-family:' + theme.headingFont + ';font-size:19px;font-weight:bold;color:' + theme.headingColor + ';letter-spacing:1.5px;">FRIENDLY PARTY RENTAL</div>' +
@@ -272,7 +272,7 @@ function blockHtml(b: Block, theme: VisualThemeTokens): string {
       return '<div style="text-align:left;font-family:' + theme.headingFont + ';font-style:italic;font-size:15px;color:' + theme.textColor + ';margin:6px 0 4px;">' + esc(b.text || '') + '</div>'
     case 'footerBrand': {
       const variant = b.variant || 'standard'
-      const contact = '864-610-5324 &nbsp;•&nbsp; friendlypartyrentalsc.com'
+      const contact = '315-884-1498 &nbsp;•&nbsp; fpr-nyc-production.up.railway.app'
       if (variant === 'minimal') {
         return '<div style="text-align:center;border-top:1px solid ' + theme.borderColor + ';padding-top:14px;margin-top:18px;font-family:' + theme.bodyFont + ';font-size:12px;color:' + theme.mutedColor + ';">' +
           'Friendly Party Rental &nbsp;•&nbsp; ' + contact + '<br/><a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Manage email preferences</a></div>'
@@ -280,12 +280,12 @@ function blockHtml(b: Block, theme: VisualThemeTokens): string {
       if (variant === 'corporate') {
         return '<div style="text-align:center;border-top:1px solid ' + theme.borderColor + ';padding-top:16px;margin-top:20px;font-family:' + theme.bodyFont + ';font-size:12px;color:' + theme.mutedColor + ';">' +
           '<div style="font-weight:bold;color:' + theme.headingColor + ';margin-bottom:3px;">Friendly Party Rental SC</div>' +
-          'Tents &bull; Tables &bull; Chairs &bull; Event Rentals &mdash; Greenville / Upstate South Carolina<br/>' + contact + '<br/>' +
+          'Tents &bull; Tables &bull; Chairs &bull; Event Rentals &mdash; Riverdale / Downstate New York<br/>' + contact + '<br/>' +
           '<a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Manage preferences</a> &nbsp;|&nbsp; <a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Unsubscribe</a></div>'
       }
       return '<div style="text-align:center;border-top:1px solid ' + theme.borderColor + ';padding-top:16px;margin-top:20px;font-family:' + theme.bodyFont + ';font-size:12px;color:' + theme.mutedColor + ';">' +
         '<div style="font-weight:bold;color:' + theme.headingColor + ';margin-bottom:3px;">Friendly Party Rental SC</div>' +
-        'Tents &bull; Tables &bull; Chairs &bull; Event Rentals<br/>Greenville, SC &nbsp;•&nbsp; ' + contact + '<br/>' +
+        'Tents &bull; Tables &bull; Chairs &bull; Event Rentals<br/>Riverdale, NY &nbsp;•&nbsp; ' + contact + '<br/>' +
         '<a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Manage preferences</a> &nbsp;|&nbsp; <a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Unsubscribe</a></div>'
     }
     default:
@@ -318,7 +318,7 @@ function campaignReadiness(blocks: Block[], subject: string, preheader: string):
   ]
 }
 
-const ORIGIN = 'https://www.friendlypartyrentalsc.com'
+const ORIGIN = 'https://fpr-nyc-production.up.railway.app'
 
 function starterBlocks(): Block[] {
   return [
@@ -345,7 +345,7 @@ function starterBlocks(): Block[] {
         { image: ORIGIN + '/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
       ],
     },
-    { id: uid(), type: 'text', text: "Questions? Call 864-610-5324 — we're happy to help you plan the perfect event.", align: 'center' },
+    { id: uid(), type: 'text', text: "Questions? Call 315-884-1498 — we're happy to help you plan the perfect event.", align: 'center' },
   ]
 }
 function MarketingHubPage() {

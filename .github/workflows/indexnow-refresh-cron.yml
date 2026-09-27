@@ -9,6 +9,6 @@ jobs:
   call-endpoint:
     runs-on: ubuntu-latest
     steps:
-      - name: Submit current SC searchable URLs to IndexNow
+      - name: Submit current NYC searchable URLs to IndexNow
         run: |
-          curl -f -X GET https://www.friendlypartyrentalsc.com/api/cron/indexnow -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl -f -X GET https://fpr-nyc-production.up.railway.app/api/cron/indexnow -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

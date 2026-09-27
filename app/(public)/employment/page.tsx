@@ -31,7 +31,7 @@ export default function EmploymentPage() {
                 })
                 if (!res.ok) throw new Error('Failed')
                 const result = await res.json()
-                if (result.notificationSent === false) { setDirectEmail(result.emailHref || BUSINESS.emailHref); toast('Application saved. Email us directly to notify the Greenville team.'); return }
+                if (result.notificationSent === false) { setDirectEmail(result.emailHref || BUSINESS.emailHref); toast('Application saved. Email us directly to notify the NYC / Downstate team.'); return }
                 setDirectEmail(null)
                 toast.success('Application submitted! We will contact you soon.')
                 reset()
@@ -77,7 +77,7 @@ export default function EmploymentPage() {
       <div className="bg-gray-50 p-6 rounded-lg">
         <h2 className="text-xl font-bold text-dark mb-2">Apply Now</h2>
         <p className="text-body text-sm mb-6">Fill out the form below and we&apos;ll be in touch shortly!</p>
-        <div>{directEmail && <p role="status" className="mb-4 rounded-xl bg-amber-50 p-4 text-sm">Your application is saved, but its email notification was not delivered. <a href={directEmail} className="font-bold underline">Email the Greenville team</a>.</p>}</div><form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div>{directEmail && <p role="status" className="mb-4 rounded-xl bg-amber-50 p-4 text-sm">Your application is saved, but its email notification was not delivered. <a href={directEmail} className="font-bold underline">Email the NYC / Downstate team</a>.</p>}</div><form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-dark mb-1">Full Name *</label>
             <input {...register('name', { required: true })} className="w-full border rounded px-3 py-2" />

@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Call balance reminder endpoint
         run: |
-          curl -f -X GET https://www.friendlypartyrentalsc.com/api/cron/balance-reminder -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl -f -X GET https://fpr-nyc-production.up.railway.app/api/cron/balance-reminder -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

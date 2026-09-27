@@ -15,7 +15,7 @@ export default function ConfirmationPage() {
       try {
         const proof = JSON.parse(sessionStorage.getItem('order_confirmation') || 'null')
         if (!proof || typeof proof.orderId !== 'string' || typeof proof.stripePaymentId !== 'string') {
-          if (active) setMessage('No verified payment confirmation was found in this tab. Please check your receipt or contact us at 864-610-5324.')
+          if (active) setMessage('No verified payment confirmation was found in this tab. Please check your receipt or contact us at 315-884-1498.')
           return
         }
         const response = await fetch('/api/orders/' + encodeURIComponent(proof.orderId) + '/confirm-payment', {
@@ -30,7 +30,7 @@ export default function ConfirmationPage() {
         if (!active) return
         setReceipt(data.receipt)
       } catch {
-        if (active) setMessage('We could not load your verified payment receipt. Please contact us at 864-610-5324 before making another payment.')
+        if (active) setMessage('We could not load your verified payment receipt. Please contact us at 315-884-1498 before making another payment.')
       }
     }
     void verifyReceipt()
@@ -52,7 +52,7 @@ export default function ConfirmationPage() {
       <p className="text-body text-sm mb-4">Please review and sign your rental contract so we can confirm your delivery.</p>
       <Link href={'/contract/' + receipt.orderId} className="btn-primary inline-block">View &amp; Sign Your Contract</Link>
     </div>
-    <p className="text-body text-sm mb-8">Questions? Call us at <a href="tel:864-610-5324" className="text-secondary">864-610-5324</a> or email <a href="mailto:customerservice@friendlypartyrental.com?subject=%5BSouth%20Carolina%5D%20Greenville%20order%20question" className="text-secondary">customerservice@friendlypartyrental.com</a>.</p>
+    <p className="text-body text-sm mb-8">Questions? Call us at <a href="tel:315-884-1498" className="text-secondary">315-884-1498</a> or email <a href="mailto:customerservice@friendlypartyrental.com?subject=%5BSouth%20Carolina%5D%20Greenville%20order%20question" className="text-secondary">customerservice@friendlypartyrental.com</a>.</p>
     <Link href="/" className="btn-primary inline-block">Return Home</Link>
   </div>
 }

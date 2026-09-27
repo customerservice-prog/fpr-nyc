@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { getNextOrderNumber } from '@/lib/orderNumber'
 import { evaluateRentalRestrictions } from '@/lib/rentalRestrictions'
 import { DeliveryQuoteError, getDeliveryQuote, requireDeliveryMethod } from '@/lib/delivery'
+import { effectiveEventEndDate } from '@/lib/orderDates'
 
 function clean(value: unknown, max = 255) {
   return typeof value === 'string' ? value.trim().slice(0, max) : ''
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
     const phone = clean(body.phone, 60)
     const eventAddress = clean(body.eventAddress)
     const eventCity = clean(body.eventCity, 120)
-    const eventState = clean(body.eventState, 20) || 'SC'
+    const eventState = clean(body.eventState, 20) || 'NY'
     const eventZip = clean(body.eventZip, 20)
     const items = Array.isArray(body.items) ? body.items.filter((i: any) => i?.id && Number(i.quantity) > 0) : []
     const eventDate = new Date(body.eventDate)
@@ -62,14 +63,15 @@ export async function POST(request: NextRequest) {
     const totalAmount = Math.max(Number(body.totalAmount) || subtotal + deliveryQuote.fee, 0)
     const depositAmount = Math.max(Number(body.depositAmount) || 0, 0)
     const stage = ['details_completed','payment_page','payment_started'].includes(body.stage) ? body.stage : 'details_completed'
+    const rentalDayCount = Math.max(Number(body.rentalDays) || 1, 1)
     const data: any = {
       customerId: customer.id, status: 'incomplete', source: 'online',
       checkoutStage: stage, checkoutLastSeenAt: new Date(),
-      eventDate, eventAddress, eventCity, eventState, eventZip,
+      eventDate, eventEndDate: effectiveEventEndDate(eventDate, null, rentalDayCount), eventAddress, eventCity, eventState, eventZip,
       eventTimeSlot: clean(body.eventTimeSlot, 160) || null,
       pickupTimeSlot: clean(body.pickupTimeSlot, 160) || null,
       deliveryType: 'delivery', deliveryFee: deliveryQuote.fee, deliveryDistance: deliveryQuote.distance,
-      subtotal, rentalDays: Math.max(Number(body.rentalDays) || 1, 1),
+      subtotal, rentalDays: rentalDayCount,
       durationLabel: clean(body.durationLabel, 120) || null,
       durationFee: Math.max(Number(body.durationFee) || 0, 0),
       specialRequestFee: Math.max(Number(body.specialRequestFee) || 0, 0),

@@ -15,27 +15,27 @@ const roboto = Roboto({
   display: 'swap',
 })
 
-const SITE_URL = 'https://www.friendlypartyrentalsc.com'
+const SITE_URL = 'https://fpr-nyc-production.up.railway.app'
 const GOOGLE_PROFILE_URL = 'https://www.google.com/maps?cid=14184978817653836417'
 const SITE_DESCRIPTION =
-  'Friendly Party Rental SC provides party and event rentals in Greenville, SC and surrounding Upstate South Carolina communities, including tents, tables, chairs, inflatables, weddings and event equipment.'
+  'Friendly Party Rental SC provides party and event rentals in Riverdale, NY and surrounding Downstate New York communities, including tents, tables, chairs, inflatables, weddings and event equipment.'
 
 const LOCAL_BUSINESS_JSONLD = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
-  '@id': 'https://www.friendlypartyrentalsc.com/#business',
+  '@id': 'https://fpr-nyc-production.up.railway.app/#business',
   name: 'Friendly Party Rental SC',
   legalName: 'Friendly Party Rental L.L.C.',
   description: SITE_DESCRIPTION,
   image: `${SITE_URL}/images/logo.png`,
-  telephone: '+1-864-610-5324',
+  telephone: '+1-315-884-1498',
   email: 'customerservice@friendlypartyrental.com',
   url: SITE_URL,
   hasMap: GOOGLE_PROFILE_URL,
   sameAs: [GOOGLE_PROFILE_URL],
   address: {
     '@type': 'PostalAddress',
-    addressLocality: 'Greenville',
+    addressLocality: 'Riverdale',
     addressRegion: 'SC',
     addressCountry: 'US',
   },
@@ -45,10 +45,10 @@ const LOCAL_BUSINESS_JSONLD = {
     opens: '09:00',
     closes: '18:00',
   }],
-  areaServed: [{"@type": "Place", "name": "Greenville, SC"}, {"@type": "Place", "name": "Anderson, SC"}, {"@type": "Place", "name": "Belton, SC"}, {"@type": "Place", "name": "Berea, SC"}, {"@type": "Place", "name": "Boiling Springs, SC"}, {"@type": "Place", "name": "Central, SC"}, {"@type": "Place", "name": "Clemson, SC"}, {"@type": "Place", "name": "Duncan, SC"}, {"@type": "Place", "name": "Easley, SC"}, {"@type": "Place", "name": "Fountain Inn, SC"}, {"@type": "Place", "name": "Gantt, SC"}, {"@type": "Place", "name": "Gray Court, SC"}, {"@type": "Place", "name": "Greer, SC"}, {"@type": "Place", "name": "Honea Path, SC"}, {"@type": "Place", "name": "Inman, SC"}, {"@type": "Place", "name": "Judson, SC"}, {"@type": "Place", "name": "Landrum, SC"}, {"@type": "Place", "name": "Laurens, SC"}, {"@type": "Place", "name": "Liberty, SC"}, {"@type": "Place", "name": "Marietta, SC"}, {"@type": "Place", "name": "Mauldin, SC"}, {"@type": "Place", "name": "Parker, SC"}, {"@type": "Place", "name": "Pelzer, SC"}, {"@type": "Place", "name": "Pickens, SC"}, {"@type": "Place", "name": "Piedmont, SC"}, {"@type": "Place", "name": "Powdersville, SC"}, {"@type": "Place", "name": "Seneca, SC"}, {"@type": "Place", "name": "Simpsonville, SC"}, {"@type": "Place", "name": "Six Mile, SC"}, {"@type": "Place", "name": "Spartanburg, SC"}, {"@type": "Place", "name": "Taylors, SC"}, {"@type": "Place", "name": "Travelers Rest, SC"}, {"@type": "Place", "name": "Wade Hampton, SC"}, {"@type": "Place", "name": "Williamston, SC"}, {"@type": "Place", "name": "Woodruff, SC"}],
+  areaServed: [{"@type": "Place", "name": "Riverdale, NY"}, {"@type": "Place", "name": "Anderson, SC"}, {"@type": "Place", "name": "Belton, SC"}, {"@type": "Place", "name": "Berea, SC"}, {"@type": "Place", "name": "Boiling Springs, SC"}, {"@type": "Place", "name": "Central, SC"}, {"@type": "Place", "name": "Clemson, SC"}, {"@type": "Place", "name": "Duncan, SC"}, {"@type": "Place", "name": "Easley, SC"}, {"@type": "Place", "name": "Fountain Inn, SC"}, {"@type": "Place", "name": "Gantt, SC"}, {"@type": "Place", "name": "Gray Court, SC"}, {"@type": "Place", "name": "Greer, SC"}, {"@type": "Place", "name": "Honea Path, SC"}, {"@type": "Place", "name": "Inman, SC"}, {"@type": "Place", "name": "Judson, SC"}, {"@type": "Place", "name": "Landrum, SC"}, {"@type": "Place", "name": "Laurens, SC"}, {"@type": "Place", "name": "Liberty, SC"}, {"@type": "Place", "name": "Marietta, SC"}, {"@type": "Place", "name": "Mauldin, SC"}, {"@type": "Place", "name": "Parker, SC"}, {"@type": "Place", "name": "Pelzer, SC"}, {"@type": "Place", "name": "Pickens, SC"}, {"@type": "Place", "name": "Piedmont, SC"}, {"@type": "Place", "name": "Powdersville, SC"}, {"@type": "Place", "name": "Seneca, SC"}, {"@type": "Place", "name": "Simpsonville, SC"}, {"@type": "Place", "name": "Six Mile, SC"}, {"@type": "Place", "name": "Spartanburg, SC"}, {"@type": "Place", "name": "Taylors, SC"}, {"@type": "Place", "name": "Travelers Rest, SC"}, {"@type": "Place", "name": "Wade Hampton, SC"}, {"@type": "Place", "name": "Williamston, SC"}, {"@type": "Place", "name": "Woodruff, SC"}],
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
-    name: 'Party and event rentals in Greenville, SC',
+    name: 'Party and event rentals in Riverdale, NY',
     itemListElement: [
       { '@type': 'OfferCatalog', name: 'Tent Rentals', url: `${SITE_URL}/category/tent-rentals` },
       { '@type': 'OfferCatalog', name: 'Table & Chair Rentals', url: `${SITE_URL}/category/table-chair-rentals` },
@@ -86,21 +86,21 @@ export const metadata: Metadata = {
     apple: [{ url: '/apple-touch-icon.png?v=sc-20260921', sizes: '180x180', type: 'image/png' }],
   },
   title: {
-    default: 'Friendly Party Rental SC | Party Rentals in Greenville, SC',
+    default: 'Friendly Party Rental SC | Party Rentals in Riverdale, NY',
     template: '%s | Friendly Party Rental SC',
   },
   description: SITE_DESCRIPTION,
   keywords: [
     'Friendly Party Rental SC',
-    'party rentals Greenville SC',
+    'party rentals Riverdale NY',
     'Carolina party rental',
-    'tent rentals Greenville',
-    'bounce house rentals Greenville SC',
-    'table and chair rentals Upstate SC',
-    'wedding rentals Greenville SC',
+    'tent rentals Riverdale',
+    'bounce house rentals Riverdale NY',
+    'table and chair rentals Downstate New York',
+    'wedding rentals Riverdale NY',
   ],
   openGraph: {
-    title: 'Friendly Party Rental SC | Party Rentals in Greenville, SC',
+    title: 'Friendly Party Rental SC | Party Rentals in Riverdale, NY',
     description: SITE_DESCRIPTION,
     siteName: 'Friendly Party Rental SC',
     locale: 'en_US',

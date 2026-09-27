@@ -343,7 +343,7 @@ export default function PaymentPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
       <h1 className="text-2xl font-bold text-dark mb-3">Payment</h1>
-      <p className="text-sm text-body mb-8">Delivery only in Greenville. Warehouse pickup is not available. Our crew will collect your rentals from your event afterward.</p>
+      <p className="text-sm text-body mb-8">Delivery only in Riverdale. Warehouse pickup is not available. Our crew will collect your rentals from your event afterward.</p>
       <div className="bg-gray-50 p-6 rounded-lg mb-8 space-y-3">
         <div className="flex justify-between text-body"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
         {durationFee > 0 && <div className="flex justify-between text-body text-sm"><span>Multi-Day Rental Fee{durationTier ? ' (' + durationTier.label + ')' : ''}</span><span>{formatCurrency(durationFee)}</span></div>}

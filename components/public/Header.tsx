@@ -84,7 +84,7 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
       </li>)}
     </ul>
   }
-  const logo = <Link href="/" prefetch={false}><Image unoptimized src={LOGO_URL} alt={BUSINESS.name} width={cfg.logoLarge ? 340 : 280} height={cfg.logoLarge ? 227 : 187} className={cfg.grayscale ? 'grayscale' : ''}/></Link>
+  const logo = <Link href="/" prefetch={false} className="inline-flex items-center justify-center"><Image unoptimized priority src={LOGO_URL} alt={BUSINESS.name} width={cfg.logoLarge ? 240 : 210} height={cfg.logoLarge ? 160 : 140} className={(cfg.grayscale ? 'grayscale ' : '') + 'w-auto h-auto max-h-[140px] object-contain'}/></Link>
   if (cfg.mode === 'cover') {
     const fgClass = cfg.coverFg === 'black' ? 'text-dark' : 'text-white'
     return <header className="w-full bg-gradient-to-r from-secondary via-primary to-secondary"><div className="max-w-7xl mx-auto px-4 py-6 flex flex-col items-center gap-3"><Link href="/" prefetch={false}><Image unoptimized src={LOGO_URL} alt={BUSINESS.name} width={220} height={147}/></Link>{renderNav(fgClass, 'justify-center')}</div></header>
@@ -96,9 +96,9 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
     return <header className="w-full bg-gradient-to-r from-secondary to-primary"><div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-4">{cfg.logoSide === 'right' ? <>{navEl}{logoEl}</> : <>{logoEl}{navEl}</>}</div></header>
   }
   const navJustify = cfg.align === 'center' ? 'justify-center' : cfg.align === 'end' ? 'justify-center lg:justify-end' : cfg.align === 'start' ? 'justify-center lg:justify-start' : 'justify-center lg:justify-between'
-  return <header className="w-full bg-white border-b border-gray-200" data-sc-header="20260921">
-    {cfg.topBar && <div className="max-w-7xl mx-auto px-4 py-3"><div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-      <div className="min-w-0 text-sm text-gray-700 leading-relaxed">
+  return <header className="w-full bg-white border-b border-gray-200" data-nyc-header="20260927">
+    {cfg.topBar && <div className="max-w-7xl mx-auto px-4 py-2"><div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_220px_minmax(0,1fr)] gap-3 items-center">
+      <div className="min-w-0 text-[13px] text-gray-700 leading-relaxed">
         <p><a href={`tel:${BUSINESS.phone}`} className="font-bold text-dark hover:underline">{BUSINESS.phone}</a>{' | '}<a href={`sms:${BUSINESS.text}`} className="font-bold text-dark hover:underline">Text Us</a></p>
         <p className="break-all"><a href={BUSINESS.emailHref} className="hover:underline">{BUSINESS.email}</a></p>
         <p>{BUSINESS.address}</p><p className="text-xs text-gray-600 mt-0.5">{BUSINESS.hours}</p><p>Serving {BUSINESS.serviceArea}</p>

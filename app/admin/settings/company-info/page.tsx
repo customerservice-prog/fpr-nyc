@@ -20,7 +20,7 @@ const DEFAULT_FORM: CompanyForm = {
     email: '',
     address: '',
     city: '',
-    state: 'SC',
+    state: 'NY',
     zip: '',
     timeZone: 'America/New_York',
 }
@@ -58,7 +58,7 @@ const FIELD_GROUPS: FieldGroup[] = [
         fields: [
           { key: 'address', label: 'Street Address' },
           { key: 'city', label: 'City' },
-          { key: 'state', label: 'State', placeholder: 'SC' },
+          { key: 'state', label: 'State', placeholder: 'NY' },
           { key: 'zip', label: 'Zip Code' },
               ],
   },

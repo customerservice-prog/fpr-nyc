@@ -7,13 +7,13 @@ import Image from 'next/image'
 
 const playfair = Playfair_Display({ weight: ['600', '700'], subsets: ['latin'], display: 'swap' })
 
-export const metadata = scPageMetadata("/design-your-event","Event Layout Help in Greenville, SC","Explore event layout ideas for tents, tables and chairs. Contact our Greenville team for planning help; online Greenville order access is not yet available.")
+export const metadata = scPageMetadata("/design-your-event","Event Layout Help in Riverdale, Bronx, NY","Explore event layout ideas for tents, tables and chairs. Contact our NYC / Downstate team for planning help; online Riverdale order access is not yet available.")
 
 const features = [
-  ['01', 'Start with your event', 'Tell our Greenville team your guest count and what you are planning.'],
+  ['01', 'Start with your event', 'Tell our NYC / Downstate team your guest count and what you are planning.'],
   ['02', 'Build the layout', 'Arrange tents, tables, chairs, dance floors and other event equipment.'],
   ['03', 'See it in 3D', 'Switch from floor-plan view to a visual preview of the event you created.'],
-  ['04', 'Send us your design', 'Contact our Greenville team with your layout ideas to confirm availability and final pricing.'],
+  ['04', 'Send us your design', 'Contact our NYC / Downstate team with your layout ideas to confirm availability and final pricing.'],
 ]
 
 const equipment = [
@@ -31,10 +31,10 @@ export default function DesignYourEventPage() {
         <div>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[.18em] text-[#F4C542]">RentSketch Event Designer</div>
           <h1 className={`${playfair.className} max-w-xl text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl`}>Build Your Event. See It Before Setup Day.</h1>
-          <p className="mt-5 max-w-xl text-base leading-7 text-white/75 sm:text-lg">See how a 2D floor plan becomes a 3D event layout. Our Greenville team can help you choose equipment and plan your space; ask us about layout assistance with your order.</p>
+          <p className="mt-5 max-w-xl text-base leading-7 text-white/75 sm:text-lg">See how a 2D floor plan becomes a 3D event layout. Our NYC / Downstate team can help you choose equipment and plan your space; ask us about layout assistance with your order.</p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
             <a href="#quick-demo" className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#E07B00] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#c96d00]">Watch the Quick Demo</a>
-            <Link href="/contact_us" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/35 px-6 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-[#0B1F3A]">Get Greenville Layout Help</Link>
+            <Link href="/contact_us" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/35 px-6 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-[#0B1F3A]">Get Riverdale Layout Help</Link>
           </div>
           <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-white/65"><span>✓ Quick walkthrough</span><span>✓ No account needed</span><span>✓ Phone, tablet & desktop</span></div>
         </div>
@@ -79,7 +79,7 @@ export default function DesignYourEventPage() {
 
     <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 md:pb-20 lg:px-8">
       <div className="overflow-hidden rounded-[2rem] bg-[#0B1F3A] px-6 py-10 text-white md:px-10 lg:grid lg:grid-cols-[1fr_auto] lg:items-center lg:gap-10">
-        <div><p className="text-xs font-extrabold uppercase tracking-[.2em] text-[#F4C542]">When your layout is ready</p><h2 className={`${playfair.className} mt-2 text-3xl font-bold`}>Send it to Friendly Party Rental.</h2><p className="mt-3 max-w-2xl leading-7 text-white/70">Your layout ideas help our Greenville team understand the setup you are trying to create. We will confirm equipment, availability, site details and final pricing before the order is finalized.</p></div>
+        <div><p className="text-xs font-extrabold uppercase tracking-[.2em] text-[#F4C542]">When your layout is ready</p><h2 className={`${playfair.className} mt-2 text-3xl font-bold`}>Send it to Friendly Party Rental.</h2><p className="mt-3 max-w-2xl leading-7 text-white/70">Your layout ideas help our NYC / Downstate team understand the setup you are trying to create. We will confirm equipment, availability, site details and final pricing before the order is finalized.</p></div>
         <div className="mt-7 flex flex-col gap-3 lg:mt-0"><a href="#quick-demo" className="btn-primary inline-flex min-h-12 items-center justify-center rounded-full px-6 py-3 font-semibold">Watch the Quick Demo</a><Link href="/contact_us" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/40 px-6 py-3 text-sm font-bold text-white">Get Layout Help</Link></div>
       </div>
       <p className="mx-auto mt-5 max-w-3xl text-center text-xs leading-5 text-gray-500">The Event Designer is a planning and visualization tool. Designs and estimates are not reservations. Final equipment availability, site requirements and pricing are confirmed by Friendly Party Rental.</p>

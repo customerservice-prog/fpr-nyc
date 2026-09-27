@@ -11,7 +11,7 @@ import { feedbackMonitorStatus } from '@/lib/marketing/feedbackMonitor'
 import { feedbackHeaders } from '@/lib/marketing/feedbackToken'
 import { wrapEmail, unsubscribeHeaders } from '@/lib/marketing/message'
 
-const ORIGIN = 'https://www.fpr-nyc-production.up.railway.app'
+const ORIGIN = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || 'https://fpr-nyc-production.up.railway.app').replace(/\/$/, '')
 const DAY = 86400000
 const SCHEDULER_KEY = { category: 'marketing_scheduler', key: 'last_run' }
 

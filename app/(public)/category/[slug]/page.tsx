@@ -64,7 +64,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
     },
     {
       q: 'Do you deliver ' + categoryLower + ' near me?',
-      a: 'Yes. We serve Riverdale, Taylors, Greer, Simpsonville, Mauldin, Travelers Rest, Fountain Inn, and surrounding Downstate New York communities. Travel fees depend on distance.',
+      a: 'Yes. We serve Riverdale, Fieldston, Kingsbridge, selected Bronx neighborhoods, Yonkers, Mount Vernon, New Rochelle, Bronxville, Tuckahoe, Eastchester and Pelham. Delivery pricing is based on the configured service-area ZIP.',
     },
     {
       q: 'How far in advance should I book ' + categoryLower + '?',

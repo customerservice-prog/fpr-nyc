@@ -18,5 +18,5 @@ jobs:
       - name: Run the validated scheduler check
         env:
           MARKETING_CRON_SECRET: ${{ secrets.MARKETING_CRON_SECRET }}
-          MARKETING_SITE_ORIGIN: https://www.friendlypartyrentalsc.com
+          MARKETING_SITE_ORIGIN: https://fpr-nyc-production.up.railway.app
         run: node scripts/marketing-review-cron.mjs

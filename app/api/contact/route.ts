@@ -75,8 +75,8 @@ export async function POST(request: NextRequest) {
     try {
       await sendEmail({ to: SC_EMAIL_ADDRESS, subject: emailContent.subject, html: emailContent.html, replyTo: trimmedEmail })
       notificationSent = true
-    } catch { console.warn('Greenville inquiry saved; email notification pending configuration or retry.') }
-    return NextResponse.json({ success: true, saved: true, notificationSent, emailHref: scEmailHref('Greenville inquiry from ' + trimmedName, 'Website: friendlypartyrentalsc.com\nName: ' + trimmedName + '\nPhone: ' + trimmedPhone + '\nEvent date: ' + (eventDate || '') + '\n\n' + trimmedMessage) }, { status: notificationSent ? 200 : 202 })
+    } catch { console.warn('NYC / Downstate inquiry saved; email notification pending configuration or retry.') }
+    return NextResponse.json({ success: true, saved: true, notificationSent, emailHref: scEmailHref('NYC / Downstate inquiry from ' + trimmedName, 'Website: Friendly Party Rental NYC / Downstate\nName: ' + trimmedName + '\nPhone: ' + trimmedPhone + '\nEvent date: ' + (eventDate || '') + '\n\n' + trimmedMessage) }, { status: notificationSent ? 200 : 202 })
   } catch (error) {
     console.error('Contact form error:', error)
     return NextResponse.json({ error: 'Failed to submit' }, { status: 500 })

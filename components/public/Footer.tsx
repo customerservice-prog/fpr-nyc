@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'; import { BUSINESS } from '@/lib/utils'
 import { Facebook, Youtube } from 'lucide-react'
 
-const LOGO_URL = '/brand/friendly-party-rental-nyc-logo-v2.png'
+const LOGO_URL = '/brand/friendly-party-rental-nyc-logo-v5.png'
 
 export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string }) {
   if (footerStyle === 'none') {

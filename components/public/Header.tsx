@@ -8,7 +8,7 @@ import { Facebook, Youtube, ChevronDown } from 'lucide-react'
 import { BUSINESS, NAV_RENTALS } from '@/lib/utils'
 import HeaderSearch from './HeaderSearch'
 
-const LOGO_URL = '/brand/friendly-party-rental-nyc-logo-v2.png'
+const LOGO_URL = '/brand/friendly-party-rental-nyc-logo-v5.png'
 const defaultNavLinks = [
   { name: 'Home', href: '/' },
   { name: 'Weddings', href: '/weddings' },

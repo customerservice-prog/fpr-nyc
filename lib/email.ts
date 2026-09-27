@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
   },
 })
 
-const LOGO_URL = 'https://www.friendlypartyrentalsc.com/images/logo.png'
+const LOGO_URL = 'https://fpr-nyc-production.up.railway.app/images/logo.png'
 
 export async function sendEmail({
   to,
@@ -34,18 +34,18 @@ export async function sendEmail({
 }) {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     // Never count an unsent notification as delivered.
-    throw new Error('Greenville outgoing email is not configured (EMAIL_USER / EMAIL_PASS).')
+    throw new Error('Riverdale outgoing email is not configured (EMAIL_USER / EMAIL_PASS).')
   }
 
   try {
     const delivery = await transporter.sendMail({
       from: { name: BUSINESS.name, address: (process.env.EMAIL_FROM || process.env.EMAIL_USER || SC_EMAIL_ADDRESS).replace(/^.*<([^>]+)>.*$/, '$1').trim() },
-      to: to.toLowerCase() === 'customerservice@friendlypartyrentalsc.com' ? SC_EMAIL_ADDRESS : to,
+      to: to.toLowerCase() === 'customerservice@fpr-nyc-production.up.railway.app' ? SC_EMAIL_ADDRESS : to,
       replyTo: replyTo || SC_EMAIL_ADDRESS,
       subject: scEmailSubject(subject),
       html: scEmailHtml(html),
-      text: 'SOUTH CAROLINA - GREENVILLE | friendlypartyrentalsc.com\n\n' + (text || html.replace(/<[^>]*>/g, '')),
-      headers: { 'X-FPR-Location': 'greenville-sc', 'X-FPR-Website': 'friendlypartyrentalsc.com' },
+      text: 'SOUTH CAROLINA - GREENVILLE | fpr-nyc-production.up.railway.app\n\n' + (text || html.replace(/<[^>]*>/g, '')),
+      headers: { 'X-FPR-Location': 'greenville-sc', 'X-FPR-Website': 'fpr-nyc-production.up.railway.app' },
     })
     // SMTP acceptance is not inbox delivery, but an empty/rejected envelope is
     // definitely not a successful send. Never mark it as one.
@@ -54,8 +54,8 @@ export async function sendEmail({
     }
     return { success: true, simulated: false }
   } catch (error) {
-    console.error('Greenville email delivery failed')
-    throw new Error('Greenville email could not be delivered. Check the outgoing email configuration.')
+    console.error('Riverdale email delivery failed')
+    throw new Error('Riverdale email could not be delivered. Check the outgoing email configuration.')
   }
 }
 
@@ -245,7 +245,7 @@ export function orderConfirmationEmail(order: {
         <p style="margin-top:16px;"><strong>Total:</strong> $${order.totalAmount.toFixed(2)}</p>
         <p><strong>Deposit Paid:</strong> $${order.depositAmount.toFixed(2)}</p>
         <p><strong>Balance Due:</strong> $${order.balanceDue.toFixed(2)}</p>
-        <p style="margin-top:20px;"><a href="https://www.friendlypartyrentalsc.com/contract/${order.id}" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>
+        <p style="margin-top:20px;"><a href="https://fpr-nyc-production.up.railway.app/contract/${order.id}" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>
         ${policyFooterHtml()}
         ${emailFooter()}
       </div>
@@ -381,7 +381,7 @@ export function paymentReceiptEmail(payment: {
         <p><strong>Order Total:</strong> $${payment.totalAmount.toFixed(2)}</p>
         <p><strong>Remaining Balance:</strong> $${payment.balanceDue.toFixed(2)}</p>
         ${payment.payments && payment.payments.length ? paymentHistoryHtml(payment.payments) : ''}
-        ${payment.id ? '<p style="margin-top:20px;"><a href="https://www.friendlypartyrentalsc.com/contract/' + payment.id + '" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>' : ''}
+        ${payment.id ? '<p style="margin-top:20px;"><a href="https://fpr-nyc-production.up.railway.app/contract/' + payment.id + '" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>' : ''}
         ${policyFooterHtml()}
         ${emailFooter()}
       </div>
@@ -504,7 +504,7 @@ export function selfServiceQuoteEmail(data: {
           <tr><td style="padding:8px; font-weight:bold;">Subtotal</td><td style="padding:8px; text-align:right; font-weight:bold;">$${data.subtotal.toFixed(2)}</td></tr>
         </table>
         <p style="margin-top:16px; font-size:13px; color:#666;">Delivery fees and sales tax are calculated at checkout based on your address. This quote does not reserve your date - complete checkout to confirm your booking.</p>
-        <p style="margin-top:24px;"><a href="https://www.friendlypartyrentalsc.com/checkout">Return to checkout to complete your booking</a></p>
+        <p style="margin-top:24px;"><a href="https://fpr-nyc-production.up.railway.app/checkout">Return to checkout to complete your booking</a></p>
         ${emailFooter()}
       </div>
     `,
@@ -646,7 +646,7 @@ export function thankYouEmail(order: {
         <p>Dear ${order.customerName},</p>
         <p>Thank you for choosing ${BUSINESS.name} for your recent event. We hope everything went smoothly and that your celebration was a success.</p>
         <p><strong>Order Number:</strong> ${order.orderNumber}</p>
-        <p>If you have a moment, we would appreciate an honest Google review. Your feedback—positive or critical—helps other Greenville-area customers know what to expect and helps our local team improve.</p>
+        <p>If you have a moment, we would appreciate an honest Google review. Your feedback—positive or critical—helps other Riverdale-area customers know what to expect and helps our local team improve.</p>
         <p style="margin:24px 0;">
           <a href="${BUSINESS.googleProfile}" style="background:#1A6FD4;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:bold;">Review ${BUSINESS.name} on Google</a>
         </p>

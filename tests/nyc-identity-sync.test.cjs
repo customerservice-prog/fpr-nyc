@@ -89,7 +89,7 @@ test('legacy Syracuse ERS maintenance routes remain disabled in NYC',()=>{
   ]
   for(const file of legacyRoutes){
     const source=read(file)
-    assert.ok(source.includes('Legacy New York ERS maintenance is disabled in the Downstate New York app.'),file)
+    assert.ok(source.includes('Legacy Syracuse ERS maintenance is disabled in the NYC / Downstate app.'),file)
     assert.ok(source.includes('{ status: 410 }'),file)
     assert.ok(!source.includes('prisma.'),file+' must not mutate the NYC database')
   }

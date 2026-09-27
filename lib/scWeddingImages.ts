@@ -1,7 +1,7 @@
-// These URLs are served by the NYC location app itself.
+// These URLs are served by the Greenville app itself.
 // The exact bytes are copied from the five public NY package-image endpoints
-// during the location build by scripts/snapshot-ny-wedding-art.mjs.
-// Customer/order/payment/business data remain entirely NYC-location-owned.
+// during the SC build by scripts/snapshot-ny-wedding-art.mjs.
+// Customer/order/payment/business data remain entirely SC-owned.
 export const SC_WEDDING_IMAGES: Record<string,string> = {
   "pkg-basic": "/api/wedding-art/pkg-basic",
   "pkg-standard": "/api/wedding-art/pkg-standard",

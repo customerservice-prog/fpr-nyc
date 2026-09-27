@@ -1,23 +1,28 @@
 {
-  "name": "friendly-party-rental-nyc",
+  "name": "friendly-party-rental",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run snapshot:wedding-art && npm run test:sc-ranking && npm run test:sc-discovery && npm run test:sc-identity && next build",
     "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
     "lint": "next lint",
     "db:migrate": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "snapshot:wedding-art": "node scripts/snapshot-ny-wedding-art.mjs",
+    "test:sc-ranking": "node --test tests/sc-ranking-readiness.test.cjs",
+    "indexnow:priority": "node scripts/submit-indexnow.mjs",
+    "test:sc-discovery": "node --test tests/sc-discovery-readiness.test.cjs",
+    "test:sc-identity": "node --test tests/sc-identity-sync.test.cjs"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
-    "@prisma/client": "5.22.0",
+    "@prisma/client": "^5.10.0",
     "@stripe/react-stripe-js": "^2.8.0",
     "@stripe/stripe-js": "^3.3.0",
     "@zoom/meetingsdk": "^6.2.0",
@@ -51,7 +56,7 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "16.3.5",
     "postcss": "^8.5.23",
-    "prisma": "5.22.0",
+    "prisma": "^5.10.0",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.3"
   }

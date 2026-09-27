@@ -8,39 +8,144 @@ import GoogleAnalyticsListener from '@/components/GoogleAnalyticsListener'
 import VisitorTracker from '@/components/VisitorTracker'
 import './globals.css'
 import { safeJsonLd } from '@/lib/jsonLd'
-import { NYC_SITE_URL, NYC_BUSINESS_ID } from '@/lib/nycSeo'
-import { NYC_SERVICE_AREAS } from '@/lib/nycServiceAreas'
 
-const roboto=Roboto({weight:['300','400','500','700'],subsets:['latin'],display:'swap'})
-const INDEXABLE=process.env.PUBLIC_INDEXABLE==='true'
-const SITE_DESCRIPTION='Friendly Party Rental NYC provides party and event rentals across Riverdale, the Northwest Bronx and Lower Westchester, including tents, tables, chairs, inflatables, weddings and event equipment.'
-const LOCAL_BUSINESS_JSONLD={
- '@context':'https://schema.org','@type':'LocalBusiness','@id':NYC_BUSINESS_ID,
- name:'Friendly Party Rental NYC',legalName:'Friendly Party Rental L.L.C.',description:SITE_DESCRIPTION,
- image:NYC_SITE_URL+'/images/logo.png',telephone:'+1-315-884-1498',email:'customerservice@friendlypartyrental.com',url:NYC_SITE_URL,
- address:{'@type':'PostalAddress',addressLocality:'Riverdale',addressRegion:'NY',addressCountry:'US'},
- openingHoursSpecification:[{'@type':'OpeningHoursSpecification',dayOfWeek:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],opens:'09:00',closes:'18:00'}],
- areaServed:NYC_SERVICE_AREAS.map(a=>({'@type':'Place',name:a.name+', NY'})),
- hasOfferCatalog:{'@type':'OfferCatalog',name:'Party and event rentals in Riverdale, the Northwest Bronx and Lower Westchester',itemListElement:[
-  {'@type':'OfferCatalog',name:'Tent Rentals',url:NYC_SITE_URL+'/category/tent-rentals'},
-  {'@type':'OfferCatalog',name:'Table & Chair Rentals',url:NYC_SITE_URL+'/category/table-chair-rentals'},
-  {'@type':'OfferCatalog',name:'Bounce House & Water Slide Rentals',url:NYC_SITE_URL+'/category/bounce-house-rentals'},
-  {'@type':'OfferCatalog',name:'Wedding Rentals',url:NYC_SITE_URL+'/weddings'}
- ]},priceRange:'$$'
+const roboto = Roboto({
+  weight: ['300', '400', '500', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+})
+
+const SITE_URL = 'https://www.friendlypartyrentalsc.com'
+const GOOGLE_PROFILE_URL = 'https://www.google.com/maps?cid=14184978817653836417'
+const SITE_DESCRIPTION =
+  'Friendly Party Rental SC provides party and event rentals in Greenville, SC and surrounding Upstate South Carolina communities, including tents, tables, chairs, inflatables, weddings and event equipment.'
+
+const LOCAL_BUSINESS_JSONLD = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  '@id': 'https://www.friendlypartyrentalsc.com/#business',
+  name: 'Friendly Party Rental SC',
+  legalName: 'Friendly Party Rental L.L.C.',
+  description: SITE_DESCRIPTION,
+  image: `${SITE_URL}/images/logo.png`,
+  telephone: '+1-864-610-5324',
+  email: 'customerservice@friendlypartyrental.com',
+  url: SITE_URL,
+  hasMap: GOOGLE_PROFILE_URL,
+  sameAs: [GOOGLE_PROFILE_URL],
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Greenville',
+    addressRegion: 'SC',
+    addressCountry: 'US',
+  },
+  openingHoursSpecification: [{
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+    opens: '09:00',
+    closes: '18:00',
+  }],
+  areaServed: [{"@type": "Place", "name": "Greenville, SC"}, {"@type": "Place", "name": "Anderson, SC"}, {"@type": "Place", "name": "Belton, SC"}, {"@type": "Place", "name": "Berea, SC"}, {"@type": "Place", "name": "Boiling Springs, SC"}, {"@type": "Place", "name": "Central, SC"}, {"@type": "Place", "name": "Clemson, SC"}, {"@type": "Place", "name": "Duncan, SC"}, {"@type": "Place", "name": "Easley, SC"}, {"@type": "Place", "name": "Fountain Inn, SC"}, {"@type": "Place", "name": "Gantt, SC"}, {"@type": "Place", "name": "Gray Court, SC"}, {"@type": "Place", "name": "Greer, SC"}, {"@type": "Place", "name": "Honea Path, SC"}, {"@type": "Place", "name": "Inman, SC"}, {"@type": "Place", "name": "Judson, SC"}, {"@type": "Place", "name": "Landrum, SC"}, {"@type": "Place", "name": "Laurens, SC"}, {"@type": "Place", "name": "Liberty, SC"}, {"@type": "Place", "name": "Marietta, SC"}, {"@type": "Place", "name": "Mauldin, SC"}, {"@type": "Place", "name": "Parker, SC"}, {"@type": "Place", "name": "Pelzer, SC"}, {"@type": "Place", "name": "Pickens, SC"}, {"@type": "Place", "name": "Piedmont, SC"}, {"@type": "Place", "name": "Powdersville, SC"}, {"@type": "Place", "name": "Seneca, SC"}, {"@type": "Place", "name": "Simpsonville, SC"}, {"@type": "Place", "name": "Six Mile, SC"}, {"@type": "Place", "name": "Spartanburg, SC"}, {"@type": "Place", "name": "Taylors, SC"}, {"@type": "Place", "name": "Travelers Rest, SC"}, {"@type": "Place", "name": "Wade Hampton, SC"}, {"@type": "Place", "name": "Williamston, SC"}, {"@type": "Place", "name": "Woodruff, SC"}],
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Party and event rentals in Greenville, SC',
+    itemListElement: [
+      { '@type': 'OfferCatalog', name: 'Tent Rentals', url: `${SITE_URL}/category/tent-rentals` },
+      { '@type': 'OfferCatalog', name: 'Table & Chair Rentals', url: `${SITE_URL}/category/table-chair-rentals` },
+      { '@type': 'OfferCatalog', name: 'Bounce House & Water Slide Rentals', url: `${SITE_URL}/category/bounce-house-rentals` },
+      { '@type': 'OfferCatalog', name: 'Wedding Rentals', url: `${SITE_URL}/weddings` },
+      { '@type': 'OfferCatalog', name: 'Linen Rentals', url: `${SITE_URL}/category/linen-rentals` },
+      { '@type': 'OfferCatalog', name: 'Dance Floor & Stage Rentals', url: `${SITE_URL}/category/dance-floor-stage-rentals` },
+    ],
+  },
+  priceRange: '$',
 }
-const WEBSITE_JSONLD={'@context':'https://schema.org','@type':'WebSite','@id':NYC_SITE_URL+'/#website',url:NYC_SITE_URL,name:'Friendly Party Rental NYC',description:SITE_DESCRIPTION,publisher:{'@id':NYC_BUSINESS_ID}}
-export const metadata:Metadata={
- metadataBase:new URL(NYC_SITE_URL),applicationName:'Friendly Party Rental NYC',manifest:'/site.webmanifest',
- icons:{icon:[{url:'/favicon.ico',sizes:'any',type:'image/x-icon'}],shortcut:'/favicon.ico',apple:[{url:'/apple-touch-icon.png',sizes:'180x180',type:'image/png'}]},
- title:{default:'Friendly Party Rental NYC | Party Rentals in Riverdale & Lower Westchester',template:'%s | Friendly Party Rental NYC'},
- description:SITE_DESCRIPTION,
- keywords:['Friendly Party Rental NYC','party rentals Riverdale NY','tent rentals Riverdale','party rentals Yonkers','party rentals Lower Westchester','bounce house rentals Bronx','wedding rentals Westchester'],
- openGraph:{title:'Friendly Party Rental NYC | Party Rentals in Riverdale & Lower Westchester',description:SITE_DESCRIPTION,siteName:'Friendly Party Rental NYC',locale:'en_US',type:'website',images:[{url:NYC_SITE_URL+'/images/logo.png',alt:'Friendly Party Rental NYC'}]},
- robots:{index:INDEXABLE,follow:INDEXABLE},
- verification:{google:process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION},
+
+const WEBSITE_JSONLD = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': SITE_URL + '/#website',
+  url: SITE_URL,
+  name: 'Friendly Party Rental SC',
+  description: SITE_DESCRIPTION,
+  publisher: { '@id': SITE_URL + '/#business' },
 }
-export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="en"><head>
- <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(LOCAL_BUSINESS_JSONLD)}}/>
- <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(WEBSITE_JSONLD)}}/>
- {GOOGLE_TAG_ID&&<><Script id="ga4-init" strategy="beforeInteractive">{GOOGLE_TAG_BOOTSTRAP}</Script><Script src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`} strategy="lazyOnload"/></>}
- </head><body className={roboto.className}><GoogleAnalyticsListener/><VisitorTracker/><CartProvider>{children}<Toaster position="top-center"/></CartProvider></body></html>}
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  applicationName: 'Friendly Party Rental SC',
+  manifest: '/site.webmanifest',
+  icons: {
+    icon: [
+      { url: '/favicon.ico?v=sc-20260921', sizes: 'any', type: 'image/x-icon' },
+      { url: '/favicon-32x32.png?v=sc-20260921', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-48x48.png?v=sc-20260921', sizes: '48x48', type: 'image/png' },
+      { url: '/favicon-96x96.png?v=sc-20260921', sizes: '96x96', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico?v=sc-20260921',
+    apple: [{ url: '/apple-touch-icon.png?v=sc-20260921', sizes: '180x180', type: 'image/png' }],
+  },
+  title: {
+    default: 'Friendly Party Rental SC | Party Rentals in Greenville, SC',
+    template: '%s | Friendly Party Rental SC',
+  },
+  description: SITE_DESCRIPTION,
+  keywords: [
+    'Friendly Party Rental SC',
+    'party rentals Greenville SC',
+    'Carolina party rental',
+    'tent rentals Greenville',
+    'bounce house rentals Greenville SC',
+    'table and chair rentals Upstate SC',
+    'wedding rentals Greenville SC',
+  ],
+  openGraph: {
+    title: 'Friendly Party Rental SC | Party Rentals in Greenville, SC',
+    description: SITE_DESCRIPTION,
+    siteName: 'Friendly Party Rental SC',
+    locale: 'en_US',
+    type: 'website',
+    images: [{ url: `${SITE_URL}/images/logo.png`, width: 1731, height: 909, alt: 'Friendly Party Rental SC' }],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(LOCAL_BUSINESS_JSONLD) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(WEBSITE_JSONLD) }}
+        />
+        {GOOGLE_TAG_ID && <>
+          <Script id="ga4-init" strategy="beforeInteractive">
+            {GOOGLE_TAG_BOOTSTRAP}
+          </Script>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`}
+            strategy="lazyOnload"
+          />
+        </>}
+      </head>
+      <body className={roboto.className}>
+        <GoogleAnalyticsListener />
+        <VisitorTracker />
+        <CartProvider>
+          {children}
+          <Toaster position="top-center" />
+        </CartProvider>
+      </body>
+    </html>
+  )
+}

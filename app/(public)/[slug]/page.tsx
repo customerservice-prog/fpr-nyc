@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
-import {scPageMetadata} from '@/lib/nycSeo'
+import {nycPageMetadata} from '@/lib/nycSeo'
 
 export const dynamic = 'force-dynamic'
 
@@ -436,7 +436,7 @@ export async function generateMetadata({params}:PageProps){
  if(!page||!page.isPublished)return {title:'Page not found',robots:{index:false,follow:true}}
  const blocks=parseBlocks(page.content)
  const text=blocks.flatMap(block=>[block.text,block.headingText,block.heroSubtitle,block.ctaText]).filter(Boolean).join(' ')
- return scPageMetadata('/'+encodeURIComponent(slug),page.title,text||`${page.title} — Friendly Party Rental SC in Greenville and Upstate South Carolina.`,blocks.length>0)
+ return nycPageMetadata('/'+encodeURIComponent(slug),page.title,text||`${page.title} — Friendly Party Rental SC in Greenville and Upstate South Carolina.`,blocks.length>0)
 }
 
 export default async function CustomWebsitePage({ params }: PageProps) {

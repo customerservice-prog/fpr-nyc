@@ -5,15 +5,9 @@ const REPLACEMENTS: Array<[RegExp, string]> = [
   [/Upstate South Carolina/gi, 'Downstate New York'],
   [/Upstate SC/gi, 'Downstate New York'],
   [/South Carolina/gi, 'Downstate New York'],
-  [/Syracuse,?\s*NY/gi, 'Riverdale, NY'],
-  [/Syracuse/gi, 'Riverdale'],
-  [/Minoa,?\s*NY/gi, 'Riverdale, NY'],
-  [/Minoa/gi, 'Riverdale'],
-  [/Central New York/gi, 'Downstate New York'],
-  [/\bCNY\b/g, 'Downstate New York'],
   [/Onondaga County/gi, 'the Bronx and Lower Westchester'],
   [/Greenville County/gi, 'Lower Westchester'],
-  [/864[-.\s]?610[-.\s]?5324/g, '315-884-1498'],
+  [/864[-.\\s]?610[-.\\s]?5324/g, '315-884-1498'],
 ]
 
 export function localizeNycPublicCopy(value?: string | null): string {

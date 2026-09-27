@@ -1,9 +1,9 @@
-import { scPageMetadata } from '@/lib/nycSeo'
+import { nycPageMetadata } from '@/lib/nycSeo'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { safeJsonLd } from '@/lib/jsonLd'
 const BASE_URL='https://www.friendlypartyrentalsc.com'
-export const metadata = scPageMetadata("/graduation-rentals","Graduation Party Rentals in Greenville, SC","Plan a graduation party in Greenville or Upstate South Carolina with tent, table, chair and party equipment rentals. Check your event date.")
+export const metadata = nycPageMetadata("/graduation-rentals","Graduation Party Rentals in Greenville, SC","Plan a graduation party in Greenville or Upstate South Carolina with tent, table, chair and party equipment rentals. Check your event date.")
 export default function GraduationRentalsPage(){
  const jsonLd={'@context':'https://schema.org','@type':'CollectionPage',name:'Graduation Party Rentals',description:'Graduation party rental packages and equipment in Greenville, SC and Upstate South Carolina.',url:`${BASE_URL}/graduation-rentals`}
  return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(jsonLd)}}/><div className="max-w-5xl mx-auto px-4 py-12">

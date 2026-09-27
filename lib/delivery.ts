@@ -1,9 +1,9 @@
-// Greenville SC only. These are the existing ZIP-based pricing tiers, NOT road miles.
-// The origin is the legacy Greenville ZIP reference, not a confirmed warehouse address.
-// Do not describe these estimates as street-address or driving-distance verification.
-const WAREHOUSE_ZIP = '29601'
-const WAREHOUSE_LAT = 34.8472
-const WAREHOUSE_LON = -82.406
+// NYC Downstate delivery areas. These are service areas, not separate physical storefronts.
+// The pricing reference ZIP is 10471 (Riverdale, NY), used for ZIP-centroid distance calculation.
+// This is NOT a warehouse or storefront address; it's a pricing reference point only.
+const PRICING_REFERENCE_ZIP = '10471'
+const PRICING_REFERENCE_LAT = 40.8872
+const PRICING_REFERENCE_LON = -73.8992
 
 export class DeliveryQuoteError extends Error {
   status: number
@@ -25,7 +25,7 @@ export function normalizeDeliveryZip(value: unknown): string {
 export function requireDeliveryMethod(value: unknown): void {
   // Missing legacy values default to delivery; an explicit pickup request never does.
   if (value != null && value !== '' && value !== 'delivery') {
-    throw new DeliveryQuoteError('Our Greenville location offers delivery only. Warehouse pickup is not available. Please return to checkout and select a delivery window.')
+    throw new DeliveryQuoteError('We offer delivery only to Riverdale, the Bronx, and Lower Westchester. Warehouse pickup is not available. Please return to checkout and select a delivery window.')
   }
 }
 
@@ -54,9 +54,9 @@ export function requireMatchingDeliveryFee(value: unknown, quote: DeliveryQuote)
 
 function haversineMiles(lat: number, lon: number): number {
   const toRad = (degrees: number) => degrees * Math.PI / 180
-  const dLat = toRad(lat - WAREHOUSE_LAT)
-  const dLon = toRad(lon - WAREHOUSE_LON)
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(WAREHOUSE_LAT)) * Math.cos(toRad(lat)) * Math.sin(dLon / 2) ** 2
+  const dLat = toRad(lat - PRICING_REFERENCE_LAT)
+  const dLon = toRad(lon - PRICING_REFERENCE_LON)
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(PRICING_REFERENCE_LAT)) * Math.cos(toRad(lat)) * Math.sin(dLon / 2) ** 2
   const clamped = Math.min(1, Math.max(0, a))
   return 3958.8 * 2 * Math.atan2(Math.sqrt(clamped), Math.sqrt(1 - clamped))
 }
@@ -72,7 +72,7 @@ export async function getDeliveryQuote(value: unknown, fetcher: typeof fetch = f
   })
 
   // Same ZIP still incurs the minimum delivery fee; zero estimated miles is not free delivery.
-  if (zip === WAREHOUSE_ZIP) return result(0)
+  if (zip === PRICING_REFERENCE_ZIP) return result(0)
 
   try {
     const response = await fetcher(`https://api.zippopotam.us/us/${zip}`, {

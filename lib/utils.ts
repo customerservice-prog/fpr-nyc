@@ -71,14 +71,14 @@ export function parseAmount(value: string | number): number {
 }
 
 export const BUSINESS = {
-  name: 'Friendly Party Rental SC',
+  name: 'Friendly Party Rental NYC',
   legalName: 'Friendly Party Rental L.L.C.',
-  phone: '864-610-5324',
-  text: '864-610-5324',
+  phone: '315-884-1498',
+  text: '315-884-1498',
   email: 'customerservice@friendlypartyrental.com',
-  emailHref: 'mailto:customerservice@friendlypartyrental.com?subject=%5BSouth%20Carolina%5D%20Greenville%20rental%20inquiry',
-  address: 'Greenville, SC',
-  serviceArea: 'Greenville & Nearby Upstate SC Cities',
+  emailHref: 'mailto:customerservice@friendlypartyrental.com?subject=%5BNYC%20%2F%20Downstate%5D%20rental%20inquiry',
+  address: 'Riverdale, Bronx, NY',
+  serviceArea: 'Riverdale, the Bronx & Lower Westchester',
   hours: 'Mon–Sat: 9am–6pm',
   facebook: 'https://www.facebook.com/friendlypartyrental',
   instagram: 'https://www.instagram.com/friendlypartyrental',
@@ -86,8 +86,6 @@ export const BUSINESS = {
   yelp: '',
   tiktok: 'https://www.tiktok.com/@friendlypartyrental',
   twitter: 'https://twitter.com/friendlypartyrent',
-  mapUrl: 'https://maps.google.com/?q=Greenville+SC',
-  googleProfile: 'https://www.google.com/maps?cid=14184978817653836417',
 }
 
 export const NAV_RENTALS = [
@@ -125,7 +123,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'bounce-house-rentals',
-        name: 'Bounce House Rentals — Greenville, SC',
+        name: 'Bounce House Rentals — Downstate NY',
         slug: 'bounce-house-rentals',
         href: '/category/bounce-house-rentals',
         image: NYC_CATEGORY_IMAGES['bounce-house-rentals'],
@@ -133,7 +131,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'tent-rentals',
-        name: 'Tent Rentals — Greenville, SC',
+        name: 'Tent Rentals — Downstate NY',
         slug: 'tent-rentals',
         href: '/category/tent-rentals',
         image: NYC_CATEGORY_IMAGES['tent-rentals'],
@@ -141,7 +139,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'table-chair-rentals',
-        name: 'Table & Chair Rentals — Greenville, SC',
+        name: 'Table & Chair Rentals — Downstate NY',
         slug: 'table-chair-rentals',
         href: '/category/table-chair-rentals',
         image: NYC_CATEGORY_IMAGES['table-chair-rentals'],
@@ -149,7 +147,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'concession-machine-rentals',
-        name: 'Concession Machine Rentals — Greenville, SC',
+        name: 'Concession Machine Rentals — Downstate NY',
         slug: 'concession-machine-rentals',
         href: '/category/concession-machine-rentals',
         image: NYC_CATEGORY_IMAGES['concession-machine-rentals'],
@@ -157,7 +155,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'generator-rentals',
-        name: 'Generator Rentals — Greenville, SC',
+        name: 'Generator Rentals — Downstate NY',
         slug: 'generator-rentals',
         href: '/category/generator-rentals',
         image: NYC_CATEGORY_IMAGES['generator-rentals'],
@@ -165,7 +163,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'yard-game-rentals',
-        name: 'Yard Game Rentals — Greenville, SC',
+        name: 'Yard Game Rentals — Downstate NY',
         slug: 'yard-game-rentals',
         href: '/category/yard-game-rentals',
         image: NYC_CATEGORY_IMAGES['yard-game-rentals'],
@@ -173,7 +171,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'photobooth-rentals',
-        name: 'Photobooth Rentals — Greenville, SC',
+        name: 'Photobooth Rentals — Downstate NY',
         slug: 'photobooth-rentals',
         href: '/category/photobooth-rentals',
         image: NYC_CATEGORY_IMAGES['photobooth-rentals'],
@@ -181,7 +179,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'foam-party-machine-rentals',
-        name: 'Foam Party Machine Rentals — Greenville, SC',
+        name: 'Foam Party Machine Rentals — Downstate NY',
         slug: 'foam-party-machine-rentals',
         href: '/category/foam-party-machine-rentals',
         image: NYC_CATEGORY_IMAGES['foam-party-machine-rentals'],
@@ -189,7 +187,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'event-lighting-rentals',
-        name: 'Event Lighting Rentals — Greenville, SC',
+        name: 'Event Lighting Rentals — Downstate NY',
         slug: 'event-lighting-rentals',
         href: '/category/event-lighting-rentals',
         image: NYC_CATEGORY_IMAGES['event-lighting-rentals'],
@@ -197,7 +195,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'linen-rentals',
-        name: 'Linen & Tablecloth Rentals — Greenville, SC',
+        name: 'Linen & Tablecloth Rentals — Downstate NY',
         slug: 'linen-rentals',
         href: '/category/linen-rentals',
         image: NYC_CATEGORY_IMAGES['linen-rentals'],
@@ -205,7 +203,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'dance-floor-stage-rentals',
-        name: 'Dance Floor & Stage Rentals — Greenville, SC',
+        name: 'Dance Floor & Stage Rentals — Downstate NY',
         slug: 'dance-floor-stage-rentals',
         href: '/category/dance-floor-stage-rentals',
         image: NYC_CATEGORY_IMAGES['dance-floor-stage-rentals'],
@@ -213,7 +211,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'heater-fan-rentals',
-        name: 'Heater & Fan Rentals — Greenville, SC',
+        name: 'Heater & Fan Rentals — Downstate NY',
         slug: 'heater-fan-rentals',
         href: '/category/heater-fan-rentals',
         image: NYC_CATEGORY_IMAGES['heater-fan-rentals'],
@@ -221,7 +219,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'inflatable-movie-screen-rentals',
-        name: 'Inflatable Movie Screen Rentals — Greenville, SC',
+        name: 'Inflatable Movie Screen Rentals — Downstate NY',
         slug: 'inflatable-movie-screen-rentals',
         href: '/category/inflatable-movie-screen-rentals',
         image: NYC_CATEGORY_IMAGES['inflatable-movie-screen-rentals'],
@@ -229,7 +227,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'beverage-food-service',
-        name: 'Beverage & Food Service Rentals — Greenville, SC',
+        name: 'Beverage & Food Service Rentals — Downstate NY',
         slug: 'beverage-food-service',
         href: '/category/beverage-food-service',
         image: NYC_CATEGORY_IMAGES['beverage-food-service'],
@@ -237,7 +235,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'party-rental-packages',
-        name: 'Party Rental Packages — Greenville, SC',
+        name: 'Party Rental Packages — Downstate NY',
         slug: 'party-rental-packages',
         href: '/category/party-rental-packages',
         image: NYC_CATEGORY_IMAGES['party-rental-packages'],
@@ -253,7 +251,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
         id: 'party-rental-accessories',
-        name: 'Party Rental Accessories — Greenville, SC',
+        name: 'Party Rental Accessories — Downstate NY',
         slug: 'party-rental-accessories',
         href: '/category/party-rental-accessories',
         image: NYC_CATEGORY_IMAGES['party-rental-accessories'],
@@ -261,7 +259,7 @@ export const PUBLIC_CATEGORIES = [
   },
   {
     id: 'restroom-rentals',
-    name: 'Restroom Rentals — Greenville, SC',
+    name: 'Restroom Rentals — Downstate NY',
     slug: 'restroom-rentals',
     href: '/category/restroom-rentals',
     image: NYC_CATEGORY_IMAGES['restroom-rentals'],

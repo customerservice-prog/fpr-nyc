@@ -1,3 +1,3 @@
-import {scPageMetadata} from '@/lib/nycSeo'
-export const metadata=scPageMetadata('/schedule','Delivery Schedule','Friendly Party Rental South Carolina customer service.',false)
+import {nycPageMetadata} from '@/lib/nycSeo'
+export const metadata=nycPageMetadata('/schedule','Delivery Schedule','Friendly Party Rental South Carolina customer service.',false)
 export default function Layout({children}:{children:React.ReactNode}){return children}

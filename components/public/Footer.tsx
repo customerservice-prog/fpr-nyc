@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import Link from 'next/link'; import { BUSINESS } from '@/lib/utils'
 import { Facebook, Youtube } from 'lucide-react'
 

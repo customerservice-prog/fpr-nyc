@@ -2,9 +2,10 @@ import type { MetadataRoute } from 'next'
 import {prisma} from '@/lib/prisma'
 import {NYC_SERVICE_AREAS} from '@/lib/nycServiceAreas'
 import {NYC_LOCAL_PLANNING} from '@/lib/nycLocalPlanningResources'
-import {NYC_STATIC_SEARCH_PATHS,nycUrl,isSearchableSlug,isCmsSearchPage} from '@/lib/nycSeo'
+import {NYC_STATIC_SEARCH_PATHS,nycUrl,isSearchableSlug,isCmsSearchPage,nycIndexingEnabled} from '@/lib/nycSeo'
 export const dynamic='force-dynamic'
 export default async function sitemap():Promise<MetadataRoute.Sitemap>{
+ if(!nycIndexingEnabled()) return []
  // Do not silently publish a truncated sitemap when the database is unavailable.
  const [categories,items,pages]=await Promise.all([
   prisma.category.findMany({where:{displayToCustomer:true},select:{slug:true,updatedAt:true}}),

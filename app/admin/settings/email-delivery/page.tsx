@@ -23,7 +23,7 @@ export default async function EmailDeliveryPage() {
       <h2 className="text-lg font-bold">One inbox, unmistakable location</h2>
       <p className="mt-2 break-all">Shared inbox: {NYC_EMAIL_ADDRESS}</p>
       <p className="mt-2">Subject example: <strong>{NYC_EMAIL_TAG} Riverdale rental inquiry</strong></p>
-      <p className="mt-2">Sender label: Friendly Party Rental - New York. Messages include a SOUTH CAROLINA / GREENVILLE banner. Replies to contact notifications go to the customer.</p>
+      <p className="mt-2">Sender label: Friendly Party Rental NYC. Messages include a NYC / DOWNSTATE NEW YORK banner. Replies to contact notifications go to the customer.</p>
     </section>
     <section className="rounded-xl border bg-white p-5">
       <h2 className="text-lg font-bold">Secure sender setup</h2>

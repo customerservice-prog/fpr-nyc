@@ -750,7 +750,6 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
                     <CalendarDays size={16} />
                     {selectedDate ? formatDateShort(selectedDate) : ''}
                     {eventTimeSlot ? ` • ${eventTimeSlot}` : ''}
-                    {isPickupOrder ? ' • Customer Pickup' : ''}
                   </div>
                   <button onClick={handleChangeMethod} className="text-primary text-sm underline flex items-center gap-1">
                     <Pencil size={14} />

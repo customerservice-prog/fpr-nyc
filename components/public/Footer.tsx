@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'; import { BUSINESS } from '@/lib/utils'
 import { Facebook, Youtube } from 'lucide-react'
 
-const LOGO_URL = '/images/logo.png'
+const LOGO_URL = '/brand/friendly-party-rental-nyc-logo-v2.png'
 
 export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string }) {
   if (footerStyle === 'none') {
@@ -13,7 +13,7 @@ export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string 
     return (
       <footer className="bg-gray-100 text-gray-700 pt-8 pb-24 mt-12 text-center">
         <div className="max-w-7xl mx-auto px-4 space-y-2">
-          <Image src={LOGO_URL} alt={BUSINESS.name} width={140} height={70} className="mx-auto" />
+          <Image unoptimized src={LOGO_URL} alt={BUSINESS.name} width={140} height={70} className="mx-auto" />
           <p className="font-bold text-base">{BUSINESS.name}</p>
           <p>{BUSINESS.address}</p>
           <p className="break-words">{BUSINESS.phone} | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
@@ -29,7 +29,7 @@ export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string 
     return (
       <footer className="bg-gray-100 text-gray-700 pt-8 pb-24 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center text-sm space-y-2">
-          <Image src={LOGO_URL} alt={BUSINESS.name} width={120} height={60} className="mx-auto mb-1" />
+          <Image unoptimized src={LOGO_URL} alt={BUSINESS.name} width={120} height={60} className="mx-auto mb-1" />
           <p className="font-bold text-base">{BUSINESS.name}</p>
           <p>{BUSINESS.address}</p>
           <p className="break-words">{BUSINESS.phone} | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
@@ -56,6 +56,7 @@ export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string 
   return (
     <footer className="bg-[#1a1a1a] text-white pt-8 pb-24 mt-12">
       <div className="max-w-7xl mx-auto px-4 text-center text-sm space-y-2">
+        <Image unoptimized src={LOGO_URL} alt={BUSINESS.name} width={180} height={120} className="mx-auto mb-2" />
         <p className="font-bold text-base">{BUSINESS.name}</p>
         <p>{BUSINESS.address}</p>
         <p className="break-words">{BUSINESS.phone} | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>

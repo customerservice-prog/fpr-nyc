@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   const area = await prisma.serviceArea.create({
     data: {
       city: body.city,
-      state: body.state || 'NY',
+      state: body.state || 'SC',
       zip: body.zip,
       region: body.region,
       baseFee: parseFloat(body.baseFee) || 0,

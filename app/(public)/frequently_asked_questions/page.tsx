@@ -3,13 +3,13 @@ import Accordion from '@/components/public/Accordion'
 import type { Metadata } from 'next'
 import { safeJsonLd } from '@/lib/jsonLd'
 
-export const metadata = scPageMetadata("/frequently_asked_questions","Party Rental Questions \u2014 Greenville, SC","Find answers about Greenville party rentals, booking, delivery, setup and event preparation. Contact Friendly Party Rental SC for help with your order.")
+export const metadata = scPageMetadata("/frequently_asked_questions","Party Rental Questions \u2014 Riverdale, Bronx, NY","Find answers about Riverdale party rentals, booking, delivery, setup and event preparation. Contact Friendly Party Rental NYC for help with your order.")
 
 const faqSections = [
   {
     title: 'BOOKING & PAYMENTS',
     items: [
-      { question: 'How do I book a rental?', answer: 'Browse our catalog, select items, choose your event date, and complete checkout. You can also call 864-610-5324 for help.' },
+      { question: 'How do I book a rental?', answer: 'Browse our catalog, select items, choose your event date, and complete checkout. You can also call 315-884-1498 for help.' },
       { question: 'Do I need to pay a deposit?', answer: 'Yes. A deposit is required at booking. The balance is due before delivery.' },
       { question: 'What payment methods do you accept?', answer: 'We accept all major credit and debit cards through our secure checkout.' },
       { question: 'When is the remaining balance due?', answer: 'The balance is due before delivery. Automatic reminders are sent.' },
@@ -21,8 +21,8 @@ const faqSections = [
   {
     title: 'DELIVERY, SETUP & PICKUP',
     items: [
-      { question: 'Does the price include delivery and setup?', answer: 'Tent delivery and setup is included for most Greenville County locations. Table and chair setup is available for an additional fee.' },
-      { question: 'What areas do you serve?', answer: 'Greenville, Greer, Simpsonville, Mauldin, Taylors, Easley, Travelers Rest, Fountain Inn, Piedmont, and surrounding Upstate South Carolina.' },
+      { question: 'Does the price include delivery and setup?', answer: 'Tent delivery and setup is included for most Bronx / Lower Westchester locations. Table and chair setup is available for an additional fee.' },
+      { question: 'What areas do you serve?', answer: 'Riverdale, Greer, Simpsonville, Mauldin, Taylors, Easley, Travelers Rest, Fountain Inn, Piedmont, and surrounding Downstate New York.' },
       { question: 'When do you set up?', answer: 'Setup is coordinated in advance based on your event schedule.' },
       { question: 'Does setup time count toward my rental period?', answer: 'No.' },
       { question: 'What if my event starts early in the morning?', answer: 'Early setups are available.' },
@@ -58,8 +58,8 @@ const faqSections = [
       { question: 'Do parks have electricity for bounce houses?', answer: 'Many do not. Generator rental from $125.' },
       { question: 'What surfaces can you set up on?', answer: 'Grass, pavement, turf, gravel, concrete.' },
       { question: 'Do I need a permit for a backyard tent?', answer: 'Usually no for residential. Large tents at commercial venues may need permits.' },
-      { question: 'Can you do a free yard assessment?', answer: 'Yes. Call 864-610-5324.' },
-      { question: 'Do you serve all of Upstate SC?', answer: 'Yes, Greenville County and surrounding areas.' },
+      { question: 'Can you do a free yard assessment?', answer: 'Yes. Call 315-884-1498.' },
+      { question: 'Do you serve all of Downstate New York?', answer: 'Yes, Bronx / Lower Westchester and surrounding areas.' },
     ],
   },
 ]
@@ -88,7 +88,7 @@ export default function FAQPage() {
       />
       <h1 className="text-3xl font-bold text-dark mb-2 text-center">Frequently Asked Questions</h1>
       <p className="text-body text-center mb-10">
-        Get answers to the most common questions about party rental in Greenville, SC
+        Get answers to the most common questions about party rental in Riverdale, Bronx, NY
       </p>
 
       <div className="space-y-10">

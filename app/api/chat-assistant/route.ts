@@ -9,7 +9,7 @@ interface FaqEntry {
 }
 
 const FAQ_DATA: FaqEntry[] = [
-  { q: 'How do I book a rental?', a: 'Browse our catalog, select items, choose your event date, and complete checkout online. You can also call 864-610-5324 for help.' },
+  { q: 'How do I book a rental?', a: 'Browse our catalog, select items, choose your event date, and complete checkout online. You can also call 315-884-1498 for help.' },
   { q: 'What can I rent from you?', a: 'We carry tents, tables and chairs, linens, lighting, bounce houses and waterslides, concessions and beverage service, dance floors, generators, photo booths, yard games, heating and cooling, wedding packages, and party accessories.' },
   { q: 'What payment methods do you accept?', a: 'We accept all major credit and debit cards through our secure online checkout.' },
   { q: 'When is the remaining balance due?', a: 'The remaining balance is due 3 days before your event. Your contract must be read and signed at final payment, or delivery will not occur.' },
@@ -25,8 +25,8 @@ const FAQ_DATA: FaqEntry[] = [
   { q: 'Can I request an exact delivery time?', a: 'Yes. At checkout, check I need a guaranteed exact time for a $100 fee, then choose any 30-minute slot between 9:00 AM and 8:00 PM for both drop-off and pick-up. Otherwise you can pick a free Morning or Afternoon window.' },
   { q: 'What if I am picking up my order myself?', a: 'If you choose in-store pickup by appointment, there is no exact-time fee - just pick any 30-minute time slot between 9:00 AM and 5:00 PM, or choose Morning, Afternoon, or Evening.' },
   { q: 'Is there a last minute booking fee?', a: 'Orders placed within 72 hours of the event may incur a $49.99 last-minute fee. You will see a pop-up you must confirm before checkout so you know it applies.' },
-  { q: 'Does the price include delivery and setup?', a: 'Tent delivery and setup is included for most Greenville, SC area locations. Table and chair setup is available for an additional fee.' },
-  { q: 'What areas do you serve?', a: 'We deliver throughout the Upstate South Carolina area, including Greenville, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, Piedmont, and many nearby towns. A delivery fee based on distance may apply outside the immediate Greenville area.' },
+  { q: 'Does the price include delivery and setup?', a: 'Tent delivery and setup is included for most Riverdale, NY area locations. Table and chair setup is available for an additional fee.' },
+  { q: 'What areas do you serve?', a: 'We deliver throughout the Downstate New York area, including Riverdale, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, Piedmont, and many nearby towns. A delivery fee based on distance may apply outside the immediate Riverdale area.' },
   { q: 'When do you set up and pick up?', a: 'Setup is coordinated in advance based on your event schedule, and pickup is typically the same day or the following morning for evening events.' },
   { q: 'Does setup time count toward my rental period?', a: 'No, setup time does not count toward your rental period.' },
   { q: 'What if my event starts early in the morning?', a: 'Early setups are available - just let us know your event time when booking.' },
@@ -39,7 +39,7 @@ const FAQ_DATA: FaqEntry[] = [
   { q: 'Can you set up at parks?', a: 'Yes. Permits may be required for park setups, and the customer is responsible for obtaining them.' },
   { q: 'What surfaces can you set up on?', a: 'Frame tents, tables, and equipment can be set up on grass, pavement, turf, gravel, or concrete. Pole tents must be staked into the ground with a gas-powered hammer about 42 inches deep, so they cannot go on concrete or pavement.' },
   { q: 'Do I need a permit for a backyard tent?', a: 'Usually not for residential setups. Large tents at commercial venues may require permits.' },
-  { q: 'Can you do a free yard assessment?', a: 'Yes! Call 864-610-5324 to schedule one.' },
+  { q: 'Can you do a free yard assessment?', a: 'Yes! Call 315-884-1498 to schedule one.' },
   { q: 'Is your equipment clean and safe?', a: 'Yes - every piece is cleaned, sanitized, and inspected before and after every rental. Our commercial-grade equipment is safe for children with adult supervision recommended.' },
   { q: 'What if something breaks?', a: 'Normal wear is covered by the damage waiver. Damage from misuse may have additional associated costs.' },
   { q: 'Do you carry insurance?', a: 'Yes, we are fully insured.' },
@@ -263,7 +263,7 @@ export async function POST(request: NextRequest) {
 
   const queryTokens = new Set(tokenize(trimmed))
   if (queryTokens.size === 0) {
-    return NextResponse.json({ answer: 'I am not sure I understood that. Could you rephrase your question, or call us at 864-610-5324?' })
+    return NextResponse.json({ answer: 'I am not sure I understood that. Could you rephrase your question, or call us at 315-884-1498?' })
   }
 
   const wantsInventoryInfo = ['have', 'rent', 'available', 'availability', 'cost', 'price', 'much'].some((w) => trimmed.toLowerCase().includes(w))
@@ -301,7 +301,7 @@ export async function POST(request: NextRequest) {
   if (wantsInventoryInfo && bestItem && bestItemScore >= 2) {
     const price = '$' + bestItem.cost.toFixed(2).replace(/\.00$/, '')
     return NextResponse.json({
-      answer: 'Yes! We carry ' + bestItem.name + ' (' + bestItem.categoryName + ') starting at ' + price + '. Check availability for your date by selecting it on our booking calendar, or call 864-610-5324.',
+      answer: 'Yes! We carry ' + bestItem.name + ' (' + bestItem.categoryName + ') starting at ' + price + '. Check availability for your date by selecting it on our booking calendar, or call 315-884-1498.',
     })
   }
 
@@ -332,6 +332,6 @@ export async function POST(request: NextRequest) {
     : ''
 
   return NextResponse.json({
-    answer: "I don't have an exact answer for that yet." + suggestionText + " Call or text 864-610-5324, or visit our Contact Us page and we'll get right back to you.",
+    answer: "I don't have an exact answer for that yet." + suggestionText + " Call or text 315-884-1498, or visit our Contact Us page and we'll get right back to you.",
   })
 }

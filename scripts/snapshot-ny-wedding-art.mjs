@@ -19,7 +19,7 @@ for (const [packageId, sourceUrl] of Object.entries(SOURCES)) {
   const response = await fetch(sourceUrl, {
     redirect: 'follow',
     headers: {
-      'user-agent': 'FriendlyPartyRental-SC-Parity-Snapshot/1.0',
+      'user-agent': 'FriendlyPartyRental-NYC-Parity-Snapshot/1.0',
       'cache-control': 'no-cache',
       accept: 'image/avif,image/webp,image/png,image/jpeg,image/gif,*/*;q=0.8',
     },
@@ -41,7 +41,7 @@ await writeFile(
   JSON.stringify({
     capturedAt: new Date().toISOString(),
     referenceRepo: 'customerservice-prog/friendly-party-rental-app',
-    scope: 'Exact public NY wedding-package artwork copied byte-for-byte during the SC build. SC pricing, customers, checkout, accounts and business identity remain separate.',
+    scope: 'Exact public NY wedding-package artwork copied byte-for-byte during the NYC build. NYC pricing, customers, checkout, accounts and business identity remain separate.',
     assets,
   }, null, 2) + '\n',
 )

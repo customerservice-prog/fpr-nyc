@@ -1,103 +1,161 @@
-// Greenville SC only. These are the existing ZIP-based pricing tiers, NOT road miles.
-// The origin is the legacy Greenville ZIP reference, not a confirmed warehouse address.
-// Do not describe these estimates as street-address or driving-distance verification.
-const WAREHOUSE_ZIP = '29601'
-const WAREHOUSE_LAT = 34.8472
-const WAREHOUSE_LON = -82.406
+/**
+ * NYC Delivery: ZIP-zone-based fee lookup
+ * No warehouse, no haversine distance calculation
+ */
 
 export class DeliveryQuoteError extends Error {
-  status: number
-
-  constructor(message: string, status = 400) {
-    super(message)
-    this.name = 'DeliveryQuoteError'
-    this.status = status
+  constructor(
+    public code: number,
+    message: string
+  ) {
+    super(message);
+    this.name = 'DeliveryQuoteError';
   }
 }
 
-export function normalizeDeliveryZip(value: unknown): string {
-  if (typeof value !== 'string' || !/^\d{5}(?:-\d{4})?$/.test(value.trim())) {
-    throw new DeliveryQuoteError('Please enter a valid 5-digit ZIP code or ZIP+4.')
+/**
+ * ZIP zone fee mapping
+ * Each zone has a flat delivery fee
+ */
+const ZIP_ZONE_FEES: Record<string, number> = {
+  // Riverdale primary zone
+  '10463': 79.99,
+  '10471': 79.99,
+
+  // Northwest Bronx expansion
+  '10467': 99.99,
+  '10468': 99.99,
+  '10470': 99.99,
+
+  // Yonkers and northern Westchester
+  '10701': 119.99,
+  '10703': 119.99,
+  '10704': 119.99,
+  '10705': 119.99,
+  '10707': 119.99, // Tuckahoe
+  '10708': 119.99, // Bronxville
+  '10709': 119.99, // Eastchester
+  '10710': 119.99,
+
+  // Mount Vernon
+  '10550': 119.99,
+  '10552': 119.99,
+  '10553': 119.99,
+
+  // Pelham
+  '10803': 119.99,
+
+  // New Rochelle zone (premium distance)
+  '10801': 139.99,
+  '10804': 139.99,
+  '10805': 139.99,
+};
+
+/**
+ * Normalize and validate ZIP code (5 or 9 digit)
+ */
+export function normalizeDeliveryZip(zip: unknown): string {
+  const normalized = String(zip || '').trim().replace(/\D/g, '');
+  const match = normalized.match(/^(\d{5})(?:\d{4})?$/);
+
+  if (!match) {
+    throw new DeliveryQuoteError(
+      400,
+      `Invalid ZIP code. Please enter a valid 5-digit ZIP. For questions, call ${getTeamPhone()}.`
+    );
   }
-  return value.trim().slice(0, 5)
+
+  return match[1];
 }
 
-export function requireDeliveryMethod(value: unknown): void {
-  // Missing legacy values default to delivery; an explicit pickup request never does.
-  if (value != null && value !== '' && value !== 'delivery') {
-    throw new DeliveryQuoteError('Our Greenville location offers delivery only. Warehouse pickup is not available. Please return to checkout and select a delivery window.')
-  }
+/**
+ * Get team phone number
+ */
+export function getTeamPhone(): string {
+  return '315-884-1498';
 }
 
-export function calculateDeliveryFee(distance: number): number {
-  if (!Number.isFinite(distance) || distance < 0) {
-    throw new DeliveryQuoteError('Unable to calculate the delivery distance.', 503)
+/**
+ * Require delivery method (no pickup allowed)
+ */
+export function requireDeliveryMethod(method: unknown): 'delivery' {
+  if (method !== 'delivery') {
+    throw new DeliveryQuoteError(
+      400,
+      `Pickup is not available in our service area. We offer delivery only. Call ${getTeamPhone()} for questions.`
+    );
   }
-  if (distance <= 5) return 29.99
-  if (distance <= 15) return 49.99
-  return Math.round((89.99 + (distance - 15) * 4) * 100) / 100
+  return 'delivery';
 }
 
+/**
+ * Get delivery fee for ZIP code
+ */
+export function getDeliveryFee(zip: string): number {
+  const fee = ZIP_ZONE_FEES[zip];
+  if (fee === undefined) {
+    throw new DeliveryQuoteError(
+      400,
+      `We don't service ZIP code ${zip}. Please contact our NYC team at ${getTeamPhone()} for availability.`
+    );
+  }
+  return fee;
+}
+
+/**
+ * Delivery quote response
+ */
 export interface DeliveryQuote {
-  fee: number
-  distance: number
-  zip: string
-  isEstimate: true
-  distanceBasis: 'zip-centroid-straight-line'
+  fee: number;
+  distance: 0;
+  zip: string;
+  isEstimate: false;
+  distanceBasis: 'zip-zone';
 }
 
-export function requireMatchingDeliveryFee(value: unknown, quote: DeliveryQuote): void {
-  if (typeof value !== 'number' || !Number.isFinite(value) || Math.round(value * 100) !== Math.round(quote.fee * 100)) {
-    throw new DeliveryQuoteError('Your delivery quote needs to be refreshed. Please reload the payment page and review the updated total before continuing.', 409)
+/**
+ * Calculate delivery quote
+ */
+export function calculateDeliveryFee(zip: string): DeliveryQuote {
+  const normalized = normalizeDeliveryZip(zip);
+  const fee = getDeliveryFee(normalized);
+
+  return {
+    fee,
+    distance: 0,
+    zip: normalized,
+    isEstimate: false,
+    distanceBasis: 'zip-zone',
+  };
+}
+
+/**
+ * Get full delivery quote
+ */
+export function getDeliveryQuote(opts: {
+  zip: unknown;
+  deliveryMethod?: unknown;
+}): DeliveryQuote {
+  requireDeliveryMethod(opts.deliveryMethod || 'delivery');
+  return calculateDeliveryFee(String(opts.zip || ''));
+}
+
+/**
+ * Require matching delivery fee
+ * Validates that provided fee matches the calculated fee for the ZIP code
+ */
+export function requireMatchingDeliveryFee(
+  zip: string,
+  providedFee: number
+): void {
+  const quote = calculateDeliveryFee(zip);
+  const tolerance = 0.01; // $0.01 rounding tolerance
+
+  if (Math.abs(quote.fee - providedFee) > tolerance) {
+    throw new DeliveryQuoteError(
+      400,
+      `Delivery fee mismatch for ZIP ${zip}. Expected $${quote.fee.toFixed(2)}, got $${providedFee.toFixed(2)}. Please recalculate.`
+    );
   }
 }
 
-function haversineMiles(lat: number, lon: number): number {
-  const toRad = (degrees: number) => degrees * Math.PI / 180
-  const dLat = toRad(lat - WAREHOUSE_LAT)
-  const dLon = toRad(lon - WAREHOUSE_LON)
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(WAREHOUSE_LAT)) * Math.cos(toRad(lat)) * Math.sin(dLon / 2) ** 2
-  const clamped = Math.min(1, Math.max(0, a))
-  return 3958.8 * 2 * Math.atan2(Math.sqrt(clamped), Math.sqrt(1 - clamped))
-}
-
-export async function getDeliveryQuote(value: unknown, fetcher: typeof fetch = fetch): Promise<DeliveryQuote> {
-  const zip = normalizeDeliveryZip(value)
-  const result = (distance: number): DeliveryQuote => ({
-    fee: calculateDeliveryFee(distance),
-    distance: Math.round(distance * 10) / 10,
-    zip,
-    isEstimate: true,
-    distanceBasis: 'zip-centroid-straight-line',
-  })
-
-  // Same ZIP still incurs the minimum delivery fee; zero estimated miles is not free delivery.
-  if (zip === WAREHOUSE_ZIP) return result(0)
-
-  try {
-    const response = await fetcher(`https://api.zippopotam.us/us/${zip}`, {
-      signal: AbortSignal.timeout(8000),
-      cache: 'no-store',
-    })
-    if (response.status === 404) {
-      throw new DeliveryQuoteError('Could not locate that ZIP code. Please double-check it or contact us.')
-    }
-    if (!response.ok) throw new DeliveryQuoteError('Delivery pricing is temporarily unavailable. Please retry before paying.', 503)
-    const data = await response.json()
-    const place = data?.places?.[0]
-    const latitude = place?.latitude
-    const longitude = place?.longitude
-    if (latitude == null || longitude == null || String(latitude).trim() === '' || String(longitude).trim() === '') {
-      throw new DeliveryQuoteError('Delivery pricing is temporarily unavailable. Please retry before paying.', 503)
-    }
-    const lat = Number(latitude)
-    const lon = Number(longitude)
-    if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
-      throw new DeliveryQuoteError('Delivery pricing is temporarily unavailable. Please retry before paying.', 503)
-    }
-    return result(haversineMiles(lat, lon))
-  } catch (error) {
-    if (error instanceof DeliveryQuoteError) throw error
-    throw new DeliveryQuoteError('Delivery pricing is temporarily unavailable. Please retry before paying.', 503)
-  }
-}

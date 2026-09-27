@@ -83,7 +83,7 @@ function NewOrderPageInner() {
     phone: '',
     billingAddress: '',
     billingCity: '',
-    billingState: 'SC',
+    billingState: 'NY',
     billingZip: '',
     eventDate: '',
     dropoffSlot: '',
@@ -91,7 +91,7 @@ function NewOrderPageInner() {
     pickupSlot: '',
     eventAddress: '',
     eventCity: '',
-    eventState: 'SC',
+    eventState: 'NY',
     eventZip: '',
     deliveryType: 'delivery',
     travelFee: '0',
@@ -213,7 +213,7 @@ function NewOrderPageInner() {
       phone: c.phone || '',
       billingAddress: c.address || '',
       billingCity: c.city || '',
-      billingState: c.state || 'SC',
+      billingState: c.state || 'NY',
       billingZip: c.zip || '',
     }))
     setCustomerId(c.id)

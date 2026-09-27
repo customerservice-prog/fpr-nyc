@@ -5,8 +5,8 @@ import { getAccessToken, hasGoogleCredentials } from './google-auth'
  * Google Search Console (Search Analytics API) integration.
  *
  * Reads search-query performance for the site identified by GSC_SITE_URL.
- * For a domain property use the form "sc-domain:friendlypartyrentalsc.com";
- * for a URL-prefix property use the full "https://www.friendlypartyrentalsc.com/".
+ * For a domain property use the form "sc-domain:fpr-nyc-production.up.railway.app";
+ * for a URL-prefix property use the full "https://fpr-nyc-production.up.railway.app/".
  *
  * Requires a service-account credential (see lib/google-auth.ts) that has been
  * added as a user on the Search Console property. Returns { connected: false }
@@ -98,9 +98,9 @@ async function query(siteUrl: string, token: string, body: unknown): Promise<{ r
 
 export async function getSearchConsoleSummary(rangeDays = 28): Promise<GscSummary> {
   const configuredSite = process.env.GSC_SITE_URL
-  if (!configuredSite) return notConnected('Greenville Search Console reporting is not configured (GSC_SITE_URL is not set). This does not mean the website is absent from Google.')
+  if (!configuredSite) return notConnected('Riverdale Search Console reporting is not configured (GSC_SITE_URL is not set). This does not mean the website is absent from Google.')
   const siteUrl = normalizeScSearchProperty(configuredSite)
-  if (!siteUrl) return notConnected('Only the friendlypartyrentalsc.com domain or its HTTPS root URL-prefix properties may be used here. New York and unrelated properties are not Greenville search data.')
+  if (!siteUrl) return notConnected('Only the fpr-nyc-production.up.railway.app domain or its HTTPS root URL-prefix properties may be used here. New York and unrelated properties are not Riverdale search data.')
   if (!hasGoogleCredentials()) return notConnected('Google credentials are not configured')
 
   const token = await getAccessToken(GSC_SCOPE)

@@ -91,7 +91,7 @@ export default function DoNotRentPage() {
     const [street1, setStreet1] = useState('')
     const [unit, setUnit] = useState('')
     const [city, setCity] = useState('')
-    const [state, setState] = useState('SC')
+    const [state, setState] = useState('NY')
     const [zip, setZip] = useState('')
     const [addressScope, setAddressScope] = useState('EXACT_UNIT')
     const [includeAddress, setIncludeAddress] = useState(false)
@@ -163,7 +163,7 @@ export default function DoNotRentPage() {
         setCustName(''); setCustId(''); setIncludeCustomer(false)
         setEmail(''); setIncludeEmail(false)
         setPhone(''); setIncludePhone(false)
-        setStreet1(''); setUnit(''); setCity(''); setState('SC'); setZip('')
+        setStreet1(''); setUnit(''); setCity(''); setState('NY'); setZip('')
         setAddressScope('EXACT_UNIT'); setIncludeAddress(false)
         setCustSearch(''); setCustResults([])
   }

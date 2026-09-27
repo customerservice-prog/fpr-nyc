@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const origin = request.headers.get('origin')
     // Next's internal request URL can differ from the browser's origin behind a
     // reverse proxy. Trust the site's configured origins, not forwarded headers.
-    const allowedOrigins = new Set(['https://www.friendlypartyrentalsc.com', 'https://friendlypartyrentalsc.com'])
+    const allowedOrigins = new Set(['https://fpr-nyc-production.up.railway.app', 'https://fpr-nyc-production.up.railway.app'])
     for (const configured of [process.env.PUBLIC_BASE_URL, process.env.NEXTAUTH_URL]) {
       if (!configured) continue
       try {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const raw = await request.text()
     if (raw.length > 16000) return NextResponse.json({ error: 'Your inquiry is too long.' }, { status: 413 })
     const body = JSON.parse(raw)
-    if (typeof body?.website === 'string' && body.website.trim()) return NextResponse.json({ error: 'Please call 864-610-5324 to discuss your event.' }, { status: 400 })
+    if (typeof body?.website === 'string' && body.website.trim()) return NextResponse.json({ error: 'Please call 315-884-1498 to discuss your event.' }, { status: 400 })
     const inquiry = parsePlanningInquiry(body)
     const saved = await savePlanningInquiry(prisma, inquiry)
     if (saved.created) {
@@ -38,6 +38,6 @@ export async function POST(request: NextRequest) {
     if (error instanceof SyntaxError) return NextResponse.json({ error: 'Please check your form and try again.' }, { status: 400 })
     if (error instanceof PlanningInquiryError) return NextResponse.json({ error: error.message }, { status: error.status })
     console.error('Planning inquiry could not be saved.')
-    return NextResponse.json({ error: 'Your inquiry could not be saved. Please try again or call 864-610-5324.' }, { status: 500 })
+    return NextResponse.json({ error: 'Your inquiry could not be saved. Please try again or call 315-884-1498.' }, { status: 500 })
   }
 }

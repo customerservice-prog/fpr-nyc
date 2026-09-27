@@ -17,7 +17,7 @@ export function wrapEmail(bodyHtml: string, recipient: string, origin: string, p
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f6fb;"><tr><td align="center" style="padding:0;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;margin:0 auto;">
   <tr><td style="background-color:#0b3d91;padding:22px 24px;text-align:center;border-radius:0;">
-  <img src="${origin}/brand/friendly-party-rental-nyc-logo-v6.png" width="150" alt="Friendly Party Rental NYC" style="display:inline-block;max-width:150px;height:auto;border:0;" />
+  <img src="${origin}/brand/friendly-party-rental-nyc-logo-v7.png" width="150" alt="Friendly Party Rental NYC" style="display:inline-block;max-width:150px;height:auto;border:0;" />
   </td></tr>
   <tr><td style="height:4px;background-color:#f5a623;line-height:4px;font-size:4px;">&nbsp;</td></tr>
   <tr><td style="background-color:#ffffff;padding:12px 10px;text-align:center;border-bottom:1px solid #e5e7eb;">

@@ -7,7 +7,7 @@ import { Facebook, Youtube, ChevronDown } from 'lucide-react'
 import { BUSINESS, NAV_RENTALS } from '@/lib/utils'
 import HeaderSearch from './HeaderSearch'
 
-const LOGO_URL = '/brand/friendly-party-rental-nyc-logo-v6.png'
+const LOGO_URL = '/brand/friendly-party-rental-nyc-logo-v7.png'
 const defaultNavLinks = [
   { name: 'Home', href: '/' },
   { name: 'Weddings', href: '/weddings' },
@@ -83,7 +83,7 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
       </li>)}
     </ul>
   }
-  const logo = <Link href="/" prefetch={false} className="inline-flex items-center justify-center"><img src={LOGO_URL} alt={BUSINESS.name} width={cfg.logoLarge ? 240 : 210} height={cfg.logoLarge ? 160 : 140} className={(cfg.grayscale ? 'grayscale ' : '') + 'w-auto h-auto max-h-[140px] object-contain'}/></Link>
+  const logo = <Link href="/" prefetch={false} className="inline-flex items-center justify-center"><img src={LOGO_URL} alt={BUSINESS.name} width={cfg.logoLarge ? 270 : 225} height={cfg.logoLarge ? 180 : 150} className={(cfg.grayscale ? 'grayscale ' : '') + 'w-auto h-auto max-h-[150px] object-contain'}/></Link>
   if (cfg.mode === 'cover') {
     const fgClass = cfg.coverFg === 'black' ? 'text-dark' : 'text-white'
     return <header className="w-full bg-gradient-to-r from-secondary via-primary to-secondary"><div className="max-w-7xl mx-auto px-4 py-6 flex flex-col items-center gap-3"><Link href="/" prefetch={false}><img src={LOGO_URL} alt={BUSINESS.name} width={220} height={147}/></Link>{renderNav(fgClass, 'justify-center')}</div></header>
@@ -96,7 +96,7 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
   }
   const navJustify = cfg.align === 'center' ? 'justify-center' : cfg.align === 'end' ? 'justify-center lg:justify-end' : cfg.align === 'start' ? 'justify-center lg:justify-start' : 'justify-center lg:justify-between'
   return <header className="w-full bg-white border-b border-gray-200" data-nyc-header="20260927">
-    {cfg.topBar && <div className="max-w-7xl mx-auto px-4 py-2"><div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_220px_minmax(0,1fr)] gap-3 items-center">
+    {cfg.topBar && <div className="max-w-7xl mx-auto px-4 py-2"><div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_250px_minmax(0,1fr)] gap-3 items-center">
       <div className="min-w-0 text-[13px] text-gray-700 leading-relaxed">
         <p><a href={`tel:${BUSINESS.phone}`} className="font-bold text-dark hover:underline">{BUSINESS.phone}</a>{' | '}<a href={`sms:${BUSINESS.text}`} className="font-bold text-dark hover:underline">Text Us</a></p>
         <p className="break-all"><a href={BUSINESS.emailHref} className="hover:underline">{BUSINESS.email}</a></p>

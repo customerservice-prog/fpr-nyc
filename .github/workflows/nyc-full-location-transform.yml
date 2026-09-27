@@ -1,0 +1,60 @@
+name: NYC full-location transform
+
+on:
+  push:
+    branches:
+      - rebuild/nyc-full-location
+
+permissions:
+  contents: write
+
+jobs:
+  transform:
+    if: ${{ !contains(github.event.head_commit.message, '[nyc-transform-done]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: rebuild/nyc-full-location
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Apply NYC location transform
+        run: python3 scripts/nyc-location-transform.py
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+      - name: Guard against active SC identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -n -I -E '864[-. ]?610[-. ]?5324|friendlypartyrentalsc\.com' -- app components lib prisma scripts ':!docs/**' ':!**/*.md'; then
+            echo "Found active South Carolina phone/domain identity"
+            exit 1
+          fi
+
+      - name: Commit transformed branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "No transform changes"
+            exit 0
+          fi
+          git config user.name "NYC Location Transform"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "Localize full Friendly app for NYC [nyc-transform-done]"
+          git push origin HEAD:rebuild/nyc-full-location

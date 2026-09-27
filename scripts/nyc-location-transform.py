@@ -14,6 +14,11 @@ RENAMES = {
     "lib/scLocalPlanningResources.ts": "lib/nycLocalPlanningResources.ts",
     "components/public/ScHomeSeo.tsx": "components/public/NycHomeSeo.tsx",
     "components/public/ScServiceArea.module.css": "components/public/NycServiceArea.module.css",
+    "lib/scSearchReadiness.ts": "lib/nycSearchReadiness.ts",
+    "lib/scRentSketch.ts": "lib/nycRentSketch.ts",
+    "lib/scItemMedia.ts": "lib/nycItemMedia.ts",
+    "lib/scCategoryImages.ts": "lib/nycCategoryImages.ts",
+    "lib/scIndexNow.ts": "lib/nycIndexNow.ts",
 }
 for src, dst in RENAMES.items():
     s, d = ROOT/src, ROOT/dst
@@ -30,6 +35,19 @@ REPLACEMENTS = [
     ("@/lib/scLocalPlanningResources", "@/lib/nycLocalPlanningResources"),
     ("@/components/public/ScHomeSeo", "@/components/public/NycHomeSeo"),
     ("@/components/public/ScServiceArea.module.css", "@/components/public/NycServiceArea.module.css"),
+    ("@/lib/scSearchReadiness", "@/lib/nycSearchReadiness"),
+    ("./scSearchReadiness", "./nycSearchReadiness"),
+    ("@/lib/scRentSketch", "@/lib/nycRentSketch"),
+    ("@/lib/scItemMedia", "@/lib/nycItemMedia"),
+    ("@/lib/scCategoryImages", "@/lib/nycCategoryImages"),
+    ("@/lib/scIndexNow", "@/lib/nycIndexNow"),
+    ("SC_STATIC_SEARCH_PATHS", "NYC_STATIC_SEARCH_PATHS"),
+    ("SC_RENTSKETCH_TENANT", "NYC_RENTSKETCH_TENANT"),
+    ("SC_ITEM_MEDIA", "NYC_ITEM_MEDIA"),
+    ("scOrderAccessUrl", "nycOrderAccessUrl"),
+    ("normalizeScSearchProperty", "normalizeNycSearchProperty"),
+    ("SC_GSC_DOMAIN_PROPERTY", "NYC_GSC_DOMAIN_PROPERTY"),
+    ("SC_GSC_URL_PREFIX", "NYC_GSC_URL_PREFIX"),
     ("SC_LOCAL_PLANNING", "NYC_LOCAL_PLANNING"),
     ("ScHomeSeo", "NycHomeSeo"),
     ("ScServiceArea", "NycServiceArea"),
@@ -305,6 +323,110 @@ if env.exists():
         s += "NYC_DELIVERY_FEES_JSON={}\n"
     env.write_text(s)
 
+
+
+# Normalize NYC search/readiness exports and remove stale SC compatibility self-aliases.
+search_readiness = ROOT/"lib/nycSearchReadiness.ts"
+search_readiness.write_text("""export const NYC_GSC_PROPERTY=(process.env.NYC_GSC_PROPERTY||process.env.GSC_SITE_URL||'').trim()
+export function normalizeNycSearchProperty(value:unknown):string|null{
+  if(typeof value!=='string'||!value.trim()||!NYC_GSC_PROPERTY)return null
+  return value.trim()===NYC_GSC_PROPERTY?NYC_GSC_PROPERTY:null
+}
+const CATEGORY_SEARCH_NAMES:Record<string,string>={
+'tent-rentals':'Tent Rentals','table-chair-rentals':'Table & Chair Rentals','bounce-house-rentals':'Bounce House & Water Slide Rentals','linen-rentals':'Linen Rentals','concession-machine-rentals':'Concession Machine Rentals','beverage-food-service':'Food & Beverage Service Rentals','dance-floor-stage-rentals':'Dance Floor & Stage Rentals','event-lighting-rentals':'Event Lighting Rentals','foam-party-machine-rentals':'Foam Party Machine Rentals','generator-rentals':'Generator Rentals','heater-fan-rentals':'Heater & Fan Rentals','inflatable-movie-screen-rentals':'Inflatable Movie Screen Rentals','party-rental-accessories':'Party Rental Accessories','party-rental-packages':'Party Rental Packages','photobooth-rentals':'Photo Booth Rentals','restroom-rentals':'Restroom Rentals','yard-game-rentals':'Yard Game Rentals','weddings':'Wedding Rentals'}
+export function categorySearchName(slug:string,fallback:string):string{return CATEGORY_SEARCH_NAMES[slug]||fallback.replace(/\\s*[—–-]\\s*(?:Riverdale,?\\s*NY|NYC\\s*\\/\\s*Downstate)$/i,'').trim()}
+export const NYC_LOCAL_ENTITY_IDENTITY={name:'Friendly Party Rental NYC',phone:'315-884-1498',website:(process.env.NEXT_PUBLIC_SITE_URL||process.env.PUBLIC_BASE_URL||''),primaryMarket:'Riverdale / selected Bronx neighborhoods / Lower Westchester',businessModel:'Delivery-only service-area business; no customer warehouse pickup'} as const
+export const NYC_GSC_DOMAIN_PROPERTY=NYC_GSC_PROPERTY
+export const NYC_GSC_URL_PREFIX=''
+""")
+
+# RentSketch stays intentionally disabled until NYC has its own verified tenant/order entitlement.
+rentsketch = ROOT/"lib/nycRentSketch.ts"
+rentsketch.write_text("""// NYC customer RentSketch access is deliberately disabled until this location
+// has its own server-enforced tenant and order/paid-entitlement integration.
+export const NYC_RENTSKETCH_TENANT: string | null = null
+export const nycOrderAccessUrl: string | null = null
+""")
+
+# Search Console code must use NYC symbols and generic private configuration.
+search_console = ROOT/"lib/search-console.ts"
+if search_console.exists():
+    x=search_console.read_text()
+    x=x.replace("from './scSearchReadiness'","from './nycSearchReadiness'")
+    x=x.replace("process.env.GNYC_SITE_URL","process.env.GSC_SITE_URL || process.env.NYC_GSC_PROPERTY")
+    x=x.replace("GNYC_SITE_URL","GSC_SITE_URL")
+    x=x.replace("fpr-nyc-production.up.railway.app domain or its HTTPS root URL-prefix properties","the configured NYC Search Console property")
+    search_console.write_text(x)
+
+search_visibility = ROOT/"app/admin/settings/search-visibility/page.tsx"
+if search_visibility.exists():
+    x=search_visibility.read_text()
+    x=x.replace("normalizeScSearchProperty,SC_GSC_DOMAIN_PROPERTY,SC_GSC_URL_PREFIX","normalizeNycSearchProperty,NYC_GSC_DOMAIN_PROPERTY,NYC_GSC_URL_PREFIX")
+    x=x.replace("normalizeScSearchProperty","normalizeNycSearchProperty")
+    x=x.replace("SC_GSC_DOMAIN_PROPERTY","NYC_GSC_DOMAIN_PROPERTY").replace("SC_GSC_URL_PREFIX","NYC_GSC_URL_PREFIX")
+    x=x.replace("process.env.GNYC_SITE_URL","process.env.GSC_SITE_URL || process.env.NYC_GSC_PROPERTY")
+    x=x.replace("SC-only <code>GNYC_SITE_URL</code>","NYC <code>GSC_SITE_URL</code>")
+    x=x.replace("Use the genuine Riverdale business details and service area for a New York Google Business Profile. This page cannot verify a Business Profile or create local reviews. Do not use New York reviews or an unconfirmed street address as Riverdale evidence.","Search Console reporting is separate from any Google Business Profile. Do not create or claim a physical NYC storefront unless the business actually qualifies for one.")
+    search_visibility.write_text(x)
+
+# Sitemaps / IndexNow use NYC constants.
+for rel in ["app/sitemap.ts","lib/nycIndexNow.ts"]:
+    p=ROOT/rel
+    if p.exists():
+        x=p.read_text().replace("SC_STATIC_SEARCH_PATHS","NYC_STATIC_SEARCH_PATHS")
+        p.write_text(x)
+
+# Delivery is configured per approved NYC ZIP. Preserve the SC checkout data contract
+# without inventing a route-mile number.
+delivery = ROOT/"lib/delivery.ts"
+if delivery.exists():
+    x=delivery.read_text()
+    x=x.replace("export interface DeliveryQuote{fee:number;zip:string;isEstimate:false;distanceBasis:'configured-zip-fee'}",
+                "export interface DeliveryQuote{fee:number;zip:string;distance:number|null;isEstimate:false;distanceBasis:'configured-zip-fee'}")
+    x=x.replace("return {fee:fees[zip],zip,isEstimate:false,distanceBasis:'configured-zip-fee'}",
+                "return {fee:fees[zip],zip,distance:null,isEstimate:false,distanceBasis:'configured-zip-fee'}")
+    delivery.write_text(x)
+
+# NYC online orders/customers must default to New York, never SC.
+orders_route = ROOT/"app/api/orders/route.ts"
+if orders_route.exists():
+    x=orders_route.read_text()
+    x=x.replace("eventState || 'SC'","eventState || 'NY'")
+    orders_route.write_text(x)
+
+# Location-specific imports and copy in shared storefront components.
+for rel in [
+    "components/public/DesignYourEventCTA.tsx",
+    "components/public/DesignYourEventLauncher.tsx",
+    "components/public/StorefrontDesigner.tsx",
+    "components/public/ItemGallery.tsx",
+    "app/(public)/category/[slug]/CategoryClient.tsx",
+    "app/(public)/category/[slug]/layout.tsx",
+]:
+    p=ROOT/rel
+    if not p.exists(): continue
+    x=p.read_text()
+    x=x.replace("@/lib/scSearchReadiness","@/lib/nycSearchReadiness")
+    x=x.replace("@/lib/scRentSketch","@/lib/nycRentSketch")
+    x=x.replace("@/lib/scItemMedia","@/lib/nycItemMedia")
+    x=x.replace("SC_RENTSKETCH_TENANT","NYC_RENTSKETCH_TENANT")
+    x=x.replace("SC_ITEM_MEDIA","NYC_ITEM_MEDIA")
+    x=x.replace("scOrderAccessUrl","nycOrderAccessUrl")
+    x=x.replace("Greenville-area event","NYC / Downstate event").replace("Greenville team","NYC / Downstate team").replace("Greenville order","NYC / Downstate order")
+    x=x.replace("['Greenville','Greer','Simpsonville','Mauldin','Taylors','Easley','Travelers Rest','Fountain Inn'].map(name=>({'@type':'Place',name:name+', SC'}))",
+                "['Riverdale','Fieldston','Kingsbridge','The Bronx','Yonkers','Mount Vernon','New Rochelle','Bronxville','Tuckahoe','Eastchester','Pelham'].map(name=>({'@type':'Place',name}))")
+    p.write_text(x)
+
+# .env should describe NYC/private search settings, never SC build-time vars.
+env = ROOT/".env.example"
+if env.exists():
+    x=env.read_text()
+    x=x.replace("EMAIL_FROM=Friendly Party Rental SC <customerservice@friendlypartyrental.com>","EMAIL_FROM=Friendly Party Rental NYC <customerservice@friendlypartyrental.com>")
+    x=x.replace("NEXT_PUBLIC_SC_GA_MEASUREMENT_ID=","NEXT_PUBLIC_NYC_GA_MEASUREMENT_ID=")
+    x=x.replace("NEXT_PUBLIC_SC_GOOGLE_ADS_ID=","NEXT_PUBLIC_NYC_GOOGLE_ADS_ID=")
+    x=x.replace("NEXT_PUBLIC_SC_GOOGLE_ADS_PURCHASE_LABEL=","NEXT_PUBLIC_NYC_GOOGLE_ADS_PURCHASE_LABEL=")
+    x=x.replace("# Optional SC website tracking. Blank means off; no New York defaults.","# Optional NYC website analytics. Blank means off. Paid-ad configuration remains intentionally disabled unless explicitly added later.")
+    env.write_text(x)
 
 # Strict active-code guard: no South Carolina identity may survive the NYC app.
 bad_patterns=[r"864[-. ]?610[-. ]?5324",r"friendlypartyrentalsc\\.com",r"Friendly Party Rental SC",r"Greenville, SC",r"Greenville SC",r"Upstate South Carolina"]

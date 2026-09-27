@@ -98,9 +98,9 @@ for slug in NYC_CITY_PAGES:
     d = public_dir/f"party-rentals-{slug}-ny"
     d.mkdir(parents=True, exist_ok=True)
     (d/"page.tsx").write_text(
-        "import CityRentalGuide,{cityRentalMetadata} from '@/components/public/CityRentalGuide'\\n"
-        f'export const metadata=cityRentalMetadata("{slug}")\\n'
-        f'export default function Page(){{return <CityRentalGuide slug="{slug}"/>}}\\n'
+        "import CityRentalGuide,{cityRentalMetadata} from '@/components/public/CityRentalGuide'\n"
+        f'export const metadata=cityRentalMetadata("{slug}")\n'
+        f'export default function Page(){{return <CityRentalGuide slug="{slug}"/>}}\n'
     )
 
 for name in ["SC-BRAND-FINISHING.md","SC-FINALIZATION-20260921.md","SC-GOOGLE-READINESS-20260921.md","SC-MEDIA-EMAIL-REPAIR.md","SC-SEARCH-REPAIR-20260921.md","SC-STOREFRONT-REPAIR.md"]:

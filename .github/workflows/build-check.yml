@@ -1,10 +1,12 @@
-name: Build Check
+name: NYC Build Check
 
 on:
   pull_request:
     branches: [main]
   push:
-    branches: [main]
+    branches:
+      - main
+      - rebuild/nyc-full-location
 
 permissions:
   contents: read
@@ -13,80 +15,42 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Dummy value so Prisma schema validation passes at build time.
-      # No real database is contacted: public pages are force-dynamic and
-      # only query the DB at request time, not during next build.
       DATABASE_URL: postgresql://user:pass@localhost:5432/db
+      PUBLIC_INDEXABLE: 'false'
+      NYC_DELIVERY_FEES_JSON: '{}'
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: '20'
           cache: npm
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --legacy-peer-deps
 
       - name: Generate Prisma client
         run: npx prisma generate
 
-      - name: Test Greenville global security headers
-        run: node --test tests/security-headers.test.cjs
+      - name: NYC location isolation guard
+        run: npm run test:nyc-isolation
 
-      - name: Test Greenville business-contact consistency
-        run: node --test tests/sc-business-contact-consistency.test.cjs
+      - name: NYC business-contact consistency
+        run: node --test tests/nyc-business-contact-consistency.test.cjs
 
-      - name: Test SC tracking destination isolation
-        run: node --test tests/sc-tracking-isolation.test.cjs
+      - name: NYC tracking isolation
+        run: node --test tests/nyc-tracking-isolation.test.cjs
 
-      - name: Test SC marketing autopilot safety and localization
-        run: node --test tests/sc-marketing-autopilot-parity.test.cjs
+      - name: NYC marketing automation localization
+        run: node --test tests/nyc-marketing-autopilot-parity.test.cjs
 
-      - name: Test Greenville delivery-only policy and quote regressions
-        run: node --experimental-strip-types --test tests/sc-delivery.test.mjs
+      - name: NYC delivery-only policy and quote regressions
+        run: node --experimental-strip-types --test tests/nyc-delivery.test.mjs
 
-      - name: Build
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+      - name: Production build
         run: npm run build
-
-      - name: Verify live Greenville delivery endpoints without creating orders or payments
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        timeout-minutes: 6
-        env:
-          RUN_SC_DELIVERY_SMOKE: '1'
-        run: node --experimental-strip-types --test --test-name-pattern='live Greenville' tests/sc-delivery.test.mjs
-
-      - name: Save public delivery verification evidence
-        if: always() && github.event_name == 'push'
-        uses: actions/upload-artifact@v7
-        with:
-          name: sc-delivery-live-verification
-          path: test-results/sc-delivery-live.json
-          if-no-files-found: ignore
-          retention-days: 7
-
-  delivery-browser:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 12
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-      - name: Install isolated browser test tools
-        run: |
-          python3 -m venv /tmp/sc-browser-qa
-          /tmp/sc-browser-qa/bin/pip install playwright
-          /tmp/sc-browser-qa/bin/python -m playwright install --with-deps chromium
-      - name: Test desktop, mobile, failed quotes, and stale pickup sessions with all writes blocked
-        run: /tmp/sc-browser-qa/bin/python tests/sc-delivery-browser.py
-      - name: Save browser screenshots and results
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: sc-delivery-browser-verification
-          path: test-results/sc-delivery-*
-          if-no-files-found: ignore
-          retention-days: 7

@@ -3,7 +3,7 @@ const assert=require('node:assert/strict')
 const fs=require('node:fs')
 const read=p=>fs.readFileSync(p,'utf8')
 
-test('Riverdale marketing autopilot defaults to review and requires explicit readiness approval',()=>{
+test('NYC marketing autopilot defaults to review and requires explicit readiness approval',()=>{
   const settings=read('lib/marketing/autopilotSettings.ts')
   const route=read('app/api/admin/marketing-autopilot/route.ts')
   assert.match(settings,/mode: 'review'/)
@@ -15,16 +15,17 @@ test('Riverdale marketing autopilot defaults to review and requires explicit rea
   assert.match(route,/verifyMarketingTransport/)
 })
 
-test('Riverdale marketing uses SC origin and never a New York street address',()=>{
+test('NYC marketing uses the NYC origin and no SC or Syracuse street identity',()=>{
   const autopilot=read('lib/marketing/autopilot.ts')
   const message=read('lib/marketing/message.ts')
-  assert.match(autopilot,/https:\/\/www\.friendlypartyrentalsc\.com/)
-  assert.doesNotMatch(autopilot,/https:\/\/www\.friendlypartyrental\.com/)
+  assert.match(autopilot,/NEXT_PUBLIC_SITE_URL/)
+  assert.match(autopilot,/fpr-nyc-production\.up\.railway\.app/)
+  assert.doesNotMatch(autopilot,/friendlypartyrentalsc\.com|friendly-party-rental-greenville-sc/)
   assert.match(message,/Riverdale/)
   assert.match(message,/315-884-1498/)
-  assert.match(message,/www\.friendlypartyrentalsc\.com/)
-  assert.doesNotMatch(message,/330 Costello Parkway/)
-  assert.doesNotMatch(message,/Minoa, NY/)
+  assert.match(message,/Lower Westchester/)
+  assert.doesNotMatch(message,/South Carolina|Greenville|Upstate communities/)
+  assert.doesNotMatch(message,/330 Costello Parkway|Minoa, NY/)
 })
 
 test('unfinished checkout records are excluded from ordinary marketing',()=>{

@@ -153,7 +153,7 @@ const guides: Record<string, CategoryPlanningContent> = {
 
 export function getCategoryPlanningContent(slug: string, name: string): CategoryPlanningContent {
   if (guides[slug]) return guides[slug]
-  const cleanName = name.replace(/\s*[—–-]\s*Riverdale,?\s*SC$/i, '').trim()
+  const cleanName = name.replace(/\s*[—–-]\s*Riverdale,?\s*NY$/i, '').trim()
   return {
     title: `${cleanName} in Riverdale, NY`,
     description: `Browse ${cleanName.toLowerCase()} in Riverdale, NY from Friendly Party Rental. Check current prices, event-date availability and delivery for Downstate New York.`,

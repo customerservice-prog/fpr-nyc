@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Call auto charge endpoint
         run: |
-          curl -f -X GET https://www.friendlypartyrentalsc.com/api/cron/auto-charge -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl -f -X GET https://fpr-nyc-production.up.railway.app/api/cron/auto-charge -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

@@ -29,7 +29,7 @@ const LOCAL_BUSINESS_JSONLD = {
   name: BUSINESS.name,
   legalName: BUSINESS.legalName,
   description: SITE_DESCRIPTION,
-  image: SITE_URL + '/images/logo.png',
+  image: SITE_URL + '/brand/friendly-party-rental-nyc-logo-v2.png',
   telephone: '+1-' + BUSINESS.phone,
   email: BUSINESS.email,
   url: SITE_URL,
@@ -73,9 +73,9 @@ export const metadata: Metadata = {
   applicationName: BUSINESS.name,
   manifest: '/site.webmanifest',
   icons: {
-    icon: [{ url: '/images/logo.png?v=nyc-logo-20260927b', sizes: 'any', type: 'image/png' }],
-    shortcut: '/images/logo.png?v=nyc-logo-20260927b',
-    apple: [{ url: '/images/logo.png?v=nyc-logo-20260927b', sizes: 'any', type: 'image/png' }],
+    icon: [{ url: '/brand/friendly-party-rental-nyc-logo-v2.png?v=exact-20260927', sizes: 'any', type: 'image/png' }],
+    shortcut: '/brand/friendly-party-rental-nyc-logo-v2.png?v=exact-20260927',
+    apple: [{ url: '/brand/friendly-party-rental-nyc-logo-v2.png?v=exact-20260927', sizes: 'any', type: 'image/png' }],
   },
   title: {
     default: 'Friendly Party Rental NYC | Party Rentals in Riverdale, the Bronx & Lower Westchester',
@@ -98,7 +98,7 @@ export const metadata: Metadata = {
     siteName: BUSINESS.name,
     locale: 'en_US',
     type: 'website',
-    images: [{ url: SITE_URL + '/images/logo.png', width: 768, height: 512, alt: BUSINESS.name }],
+    images: [{ url: SITE_URL + '/brand/friendly-party-rental-nyc-logo-v2.png', width: 768, height: 512, alt: BUSINESS.name }],
   },
   robots: {
     index: INDEXABLE,

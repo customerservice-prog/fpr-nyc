@@ -52,19 +52,19 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
     'Family-owned with more than 10 years of event-rental experience',
     'Fully insured with professional delivery and setup crews',
     'Clean, professionally maintained equipment',
-    'Greenville-area delivery and event-site collection; no warehouse customer pickup',
+    'Riverdale-area delivery and event-site collection; no warehouse customer pickup',
   ]
 
   const faqs = [
     {
-      q: 'How much does it cost to rent ' + categoryLower + ' in Greenville, SC?',
+      q: 'How much does it cost to rent ' + categoryLower + ' in Riverdale, NY?',
       a: minPrice
-        ? 'Pricing starts at $' + minPrice.toFixed(2) + '/day and depends on the specific item, quantity, rental duration, delivery location, and setup requirements. Call 864-610-5324 for help with a quote.'
-        : 'Pricing depends on the specific item, quantity, rental duration, delivery location, and setup requirements. Call 864-610-5324 for help with a quote.',
+        ? 'Pricing starts at $' + minPrice.toFixed(2) + '/day and depends on the specific item, quantity, rental duration, delivery location, and setup requirements. Call 315-884-1498 for help with a quote.'
+        : 'Pricing depends on the specific item, quantity, rental duration, delivery location, and setup requirements. Call 315-884-1498 for help with a quote.',
     },
     {
       q: 'Do you deliver ' + categoryLower + ' near me?',
-      a: 'Yes. We serve Greenville, Taylors, Greer, Simpsonville, Mauldin, Travelers Rest, Fountain Inn, and surrounding Upstate South Carolina communities. Travel fees depend on distance.',
+      a: 'Yes. We serve Riverdale, Taylors, Greer, Simpsonville, Mauldin, Travelers Rest, Fountain Inn, and surrounding Downstate New York communities. Travel fees depend on distance.',
     },
     {
       q: 'How far in advance should I book ' + categoryLower + '?',
@@ -72,7 +72,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
     },
     {
       q: 'Can your team help me choose the right rentals?',
-      a: 'Yes. Call 864-610-5324 for help choosing equipment or planning a tent, table and chair layout with our Greenville team.',
+      a: 'Yes. Call 315-884-1498 for help choosing equipment or planning a tent, table and chair layout with our Riverdale team.',
     },
   ]
 
@@ -84,7 +84,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
 
   const introText = categoryDescriptionForSc(
     categoryLabel,
-    category.description || `${categoryLabel} from Friendly Party Rental SC serve Greenville, SC and surrounding Upstate South Carolina communities. Browse the current inventory below, check your event date, and contact our team if you need help choosing the right setup.`
+    category.description || `${categoryLabel} from Friendly Party Rental SC serve Riverdale, NY and surrounding Downstate New York communities. Browse the current inventory below, check your event date, and contact our team if you need help choosing the right setup.`
   )
 
   const introEl = createElement('p', { className: 'text-gray-700 mb-10 leading-relaxed' }, introText)

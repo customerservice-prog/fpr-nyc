@@ -1,14 +1,14 @@
 {
-  "name": "Friendly Party Rental - Driver App",
-  "short_name": "FPR Drivers",
-  "description": "Driver route and delivery app for Friendly Party Rental L.L.C.",
+  "name": "Friendly Party Rental NYC - Driver App",
+  "short_name": "FPR NYC Driver",
+  "description": "Driver route and delivery app for Friendly Party Rental NYC.",
   "id": "/driver",
   "start_url": "/driver",
   "scope": "/driver",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f3f4f6",
-  "theme_color": "#15803d",
+  "theme_color": "#0B1F3A",
   "icons": [
     {
       "src": "/api/driver-icon-512",

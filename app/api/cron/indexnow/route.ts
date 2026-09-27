@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { currentSearchableScUrls, submitScIndexNow } from '@/lib/scIndexNow'
+import { currentSearchableNycUrls, submitNycIndexNow } from '@/lib/nycIndexNow'
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization')
@@ -10,8 +10,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const urls = await currentSearchableScUrls()
-    const result = await submitScIndexNow(urls)
+    const urls = await currentSearchableNycUrls()
+    const result = await submitNycIndexNow(urls)
     if (!result.ok) {
       return NextResponse.json({ ...result, ok: false }, { status: 502 })
     }

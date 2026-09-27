@@ -9,4 +9,4 @@ export function categorySearchName(slug:string,fallback:string):string{return CA
 export const NYC_LOCAL_ENTITY_IDENTITY={name:'Friendly Party Rental NYC',phone:'315-884-1498',website:(process.env.NEXT_PUBLIC_SITE_URL||process.env.PUBLIC_BASE_URL||''),primaryMarket:'Riverdale / selected Bronx neighborhoods / Lower Westchester',businessModel:'Delivery-only service-area business; no customer warehouse pickup'} as const
 export const SC_GSC_DOMAIN_PROPERTY=NYC_GSC_PROPERTY
 export const SC_GSC_URL_PREFIX=''
-export const normalizeScSearchProperty=normalizeNycSearchProperty
+export const normalizeNycSearchProperty=normalizeNycSearchProperty

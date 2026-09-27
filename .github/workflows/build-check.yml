@@ -47,7 +47,7 @@ jobs:
         run: node --test tests/nyc-marketing-autopilot-parity.test.cjs
 
       - name: NYC delivery-only policy and quote regressions
-        run: node --experimental-strip-types --test tests/nyc-delivery.test.mjs
+        run: node --test tests/nyc-delivery.test.cjs
 
       - name: TypeScript check
         run: npx tsc --noEmit

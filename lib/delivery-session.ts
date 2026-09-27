@@ -1,4 +1,4 @@
-// Browser storage migration for Greenville's delivery-only storefront.
+// Browser storage migration for NYC's delivery-only storefront.
 // Crew collection from the event is still supported; only warehouse pickup is retired.
 export function migrateDeliveryOnlySession(local: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>, session: Pick<Storage, 'getItem' | 'removeItem'>): boolean {
   let checkoutWasPickup = false

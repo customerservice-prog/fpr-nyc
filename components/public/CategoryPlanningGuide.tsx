@@ -3,10 +3,10 @@ import { getCategoryPlanningContent } from '@/lib/categoryPlanningContent'
 
 export default function CategoryPlanningGuide({ slug, name }: { slug: string; name: string }) {
   const guide = getCategoryPlanningContent(slug, name)
-  return <section className="mx-auto max-w-4xl px-4 pb-12" aria-labelledby="sc-category-planning-heading">
+  return <section className="mx-auto max-w-4xl px-4 pb-12" aria-labelledby="nyc-category-planning-heading">
     <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
-      <p className="mb-2 text-xs font-bold uppercase tracking-[.18em] text-secondary">Greenville rental planning guide</p>
-      <h2 id="sc-category-planning-heading" className="text-2xl font-bold text-dark">{guide.heading}</h2>
+      <p className="mb-2 text-xs font-bold uppercase tracking-[.18em] text-secondary">Riverdale rental planning guide</p>
+      <h2 id="nyc-category-planning-heading" className="text-2xl font-bold text-dark">{guide.heading}</h2>
       <p className="mt-4 leading-7 text-body">{guide.intro}</p>
 
       <div className="mt-7 grid gap-5 md:grid-cols-3">

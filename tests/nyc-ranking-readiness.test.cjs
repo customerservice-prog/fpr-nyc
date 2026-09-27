@@ -2,7 +2,6 @@ const test=require('node:test')
 const assert=require('node:assert/strict')
 const fs=require('node:fs')
 const read=p=>fs.readFileSync(p,'utf8')
-// Ranking wave build marker: 2026-09-22
 
 test('homepage targets the core Riverdale party-rental query',()=>{
   const page=read('app/(public)/page.tsx')
@@ -52,14 +51,15 @@ test('wedding hub targets Riverdale wedding intent without indexing the package 
   assert.ok(selector.includes(',false)'))
 })
 
-test('SC entity schema exposes the real service catalog without fabricating a street address',()=>{
+test('NYC entity schema exposes the service catalog without fabricating a storefront',()=>{
   const layout=read('app/layout.tsx')
   assert.ok(layout.includes("'@type': 'LocalBusiness'"))
   assert.ok(layout.includes('hasOfferCatalog'))
   assert.ok(layout.includes("'@type': 'WebSite'"))
-  assert.ok(layout.includes("addressLocality: 'Riverdale'"))
-  assert.ok(layout.includes("addressRegion: 'SC'"))
+  assert.ok(layout.includes('NYC_SERVICE_AREAS.map'))
   assert.ok(!layout.includes('streetAddress:'))
+  assert.ok(!layout.includes('addressLocality:'))
+  assert.ok(!layout.includes("addressRegion: 'SC'"))
   for(const path of [
     '/category/tent-rentals',
     '/category/table-chair-rentals',
@@ -68,9 +68,9 @@ test('SC entity schema exposes the real service catalog without fabricating a st
   ]) assert.ok(layout.includes(path), path)
 })
 
-test('ranking wave strengthens existing authority URLs instead of adding doorway keyword routes',()=>{
-  const seo=read('lib/scSeo.ts')
-  assert.ok(seo.includes("NYC_SEARCH_REVISION = '2026-09-22-sc-search-v3'"))
+test('ranking wave strengthens existing NYC authority URLs instead of adding doorway routes',()=>{
+  const seo=read('lib/nycSeo.ts')
+  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-09-27-nyc-full-location-v1'"))
   for(const bad of [
     '/tent-rentals-greenville-sc',
     '/table-chair-rentals-greenville-sc',

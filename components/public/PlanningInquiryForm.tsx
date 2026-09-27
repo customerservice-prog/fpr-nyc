@@ -53,14 +53,14 @@ export default function PlanningInquiryForm({ initialType = '' }: { initialType?
         body: JSON.stringify({ ...payload, requestId: requestId.current }),
       })
       const result = await response.json()
-      if (!response.ok) throw new Error(result.error || 'Your inquiry could not be saved. Please call 864-610-5324.')
+      if (!response.ok) throw new Error(result.error || 'Your inquiry could not be saved. Please call 315-884-1498.')
       setReference(result.reference)
       trackEvent('generate_lead', { lead_type: 'event_planning', source: estimateSummary ? 'visual_estimator' : 'planning_form' })
-    } catch (e) { setError(e instanceof Error ? e.message : 'Please try again or call 864-610-5324.') }
+    } catch (e) { setError(e instanceof Error ? e.message : 'Please try again or call 315-884-1498.') }
     finally { inFlight.current = false; setBusy(false) }
   }
   const input = 'mt-2 block w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-3 text-base text-slate-900 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-200'
-  if (reference) return <div role="status" className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-emerald-950"><h3 className="text-xl font-bold">Your planning inquiry is saved.</h3><p className="mt-3">Our office will review your event details. This is an inquiry, not a reservation. For time-sensitive questions, call <a className="font-semibold underline" href="tel:+18646105324">864-610-5324</a>.</p><p className="mt-3 break-all text-sm">Reference: {reference}</p></div>
+  if (reference) return <div role="status" className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-emerald-950"><h3 className="text-xl font-bold">Your planning inquiry is saved.</h3><p className="mt-3">Our office will review your event details. This is an inquiry, not a reservation. For time-sensitive questions, call <a className="font-semibold underline" href="tel:+13158841498">315-884-1498</a>.</p><p className="mt-3 break-all text-sm">Reference: {reference}</p></div>
   return <form ref={formRef} onSubmit={submit} className="space-y-5" aria-label="Event planning inquiry">
     <p className="text-sm text-slate-600">Tell us what you know so far. Fields marked * are required. No payment is collected here.</p>
     {estimateSummary && <div className="rounded-xl border border-blue-200 bg-blue-50 p-4" data-attached-estimate><p className="text-sm font-bold text-blue-950">Your visual estimate is attached.</p><p className="mt-2 text-xs leading-6 text-blue-900">Your event choices and itemized estimate will be sent with this form. It is not a confirmed quote or a reservation.</p><details className="mt-3"><summary className="cursor-pointer text-xs font-semibold text-blue-900">Review the attached estimate</summary><pre className="mt-3 whitespace-pre-wrap break-words font-sans text-xs leading-6 text-slate-700">{estimateSummary}</pre></details><button type="button" disabled={busy} onClick={() => setEstimateSummary('')} className="mt-2 min-h-11 text-xs font-semibold text-blue-800 underline">Remove attached estimate</button></div>}

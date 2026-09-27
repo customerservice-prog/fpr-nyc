@@ -17,7 +17,7 @@ const playfair = Playfair_Display({
   display: 'swap',
 })
 
-export const metadata = nycPageMetadata("/weddings","Wedding Rentals in Riverdale, Bronx, NY | Tents, Chairs, Linens & Packages","Browse Riverdale wedding rentals, tents, tables, chairs, Chiavari seating, linens, lighting, dance floors and wedding packages with delivery and setup options.")
+export const metadata = nycPageMetadata("/weddings","Wedding Rentals in Riverdale, NY | Tents, Chairs, Linens & Packages","Browse Riverdale wedding rentals, tents, tables, chairs, Chiavari seating, linens, lighting, dance floors and wedding packages with delivery and setup options.")
 export const dynamic = 'force-dynamic'
 
 const faqItems = [
@@ -39,7 +39,7 @@ const faqItems = [
   },
   {
     question: 'Do you deliver wedding rentals outside Riverdale?',
-    answer: 'Yes. We serve Riverdale, Taylors, Greer, Simpsonville, Mauldin, Travelers Rest, Fountain Inn and surrounding Downstate New York communities. Travel fees depend on distance.',
+    answer: 'Yes. We serve Riverdale, selected Bronx neighborhoods, Yonkers, Mount Vernon, New Rochelle and nearby Lower Westchester communities. Delivery pricing depends on the event ZIP and current service-area configuration.',
   },
 ]
 
@@ -104,7 +104,7 @@ export default async function WeddingsPage() {
           </h1>
           <p className={`${playfair.className} italic text-primary text-lg mb-5`}>Where Elegance Meets Ease</p>
           <p className="text-white/90 max-w-2xl mx-auto mb-8 text-base md:text-lg">
-            From intimate backyard ceremonies to large Upstate receptions, choose individual rentals, a complete package, or build your layout visually before you book.
+            From intimate backyard ceremonies to larger Bronx and Lower Westchester receptions, choose individual rentals, a complete package, or build your layout visually before you book.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/category/weddings" className="btn-accent inline-block px-8 uppercase text-sm tracking-wide">Shop Wedding Rentals</Link>

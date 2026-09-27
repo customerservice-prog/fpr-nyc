@@ -7,7 +7,7 @@ import { Search, ShoppingCart, Menu, X } from 'lucide-react'
 import { useCart } from './CartContext'
 import { BUSINESS, NAV_RENTALS } from '@/lib/utils'
 
-const LOGO_URL = '/brand/friendly-party-rental-nyc-logo-v5.png'
+const LOGO_URL = '/brand/friendly-party-rental-nyc-logo-v6.png'
 
 interface SearchItem {
   id: string

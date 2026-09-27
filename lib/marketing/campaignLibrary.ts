@@ -79,9 +79,9 @@ export const CAMPAIGN_LIBRARY: CampaignDefinition[] = [
     gridCategories: ['tent-rentals', 'table-chair-rentals'],
     subject: 'Planning a Wedding? Reserve Your Rentals Early',
     altSubject: 'Your Wedding Setup Starts Here',
-    preheader: 'Tents, seating, and lighting for Upstate South Carolina weddings.',
-    headline: 'Upstate South Carolina Wedding Rentals for Your Big Day',
-    body: 'Congratulations on your engagement! From tents and elegant seating to lighting and a photo booth, we help couples across Upstate South Carolina build the setup they picture for their day - delivered, set up, and picked up for you.',
+    preheader: 'Tents, seating, and lighting for Downstate New York weddings.',
+    headline: 'Downstate New York Wedding Rentals for Your Big Day',
+    body: 'Congratulations on your engagement! From tents and elegant seating to lighting and a photo booth, we help couples across Downstate New York build the setup they picture for their day - delivered, set up, and picked up for you.',
     cta: 'Start Planning Your Wedding',
     ctaPath: '/rentals?category=weddings',
     tag: 'wedding',
@@ -465,7 +465,7 @@ export const CAMPAIGN_LIBRARY: CampaignDefinition[] = [
     altSubject: 'Rain or Shine, the Party Goes On',
     preheader: 'A tent keeps a graduation party going no matter the forecast.',
     headline: 'One Rental That Solves the Weather Question',
-    body: 'June weather in Upstate South Carolina is never a sure thing. A tent means your graduation party happens rain or shine, with room for food, gifts, and everyone who wants to stop by. Sizes range from a small canopy to a full backyard cover.',
+    body: 'June weather in Downstate New York is never a sure thing. A tent means your graduation party happens rain or shine, with room for food, gifts, and everyone who wants to stop by. Sizes range from a small canopy to a full backyard cover.',
     cta: 'Check Tent Availability',
     ctaPath: '/rentals?category=tent-rentals',
     tag: 'graduation',
@@ -1340,7 +1340,7 @@ const TAG_EYEBROW: Record<CampaignTag, string> = {
   upsell: 'ADD TO YOUR ORDER',
 }
 
-const ORIGIN = 'https://www.friendlypartyrentalsc.com'
+const ORIGIN = 'https://fpr-nyc-production.up.railway.app'
 
 function uid() {
   return Math.random().toString(36).slice(2, 10)
@@ -1397,7 +1397,7 @@ function bFooterBrand(variant: 'standard' | 'minimal' | 'corporate') {
 }
 
 function featureItemsFromCategories(cats: string[]): { title: string; text: string }[] {
-  const descriptors = ['Delivered & set up', 'Local Upstate South Carolina service', 'Flexible scheduling', 'Easy to add to an order']
+  const descriptors = ['Delivered & set up', 'Local Downstate New York service', 'Flexible scheduling', 'Easy to add to an order']
   return cats.slice(0, 3).map((slug, i) => ({ title: categoryLabel(slug), text: descriptors[i % descriptors.length] }))
 }
 
@@ -1424,7 +1424,7 @@ function buildEditorialLuxuryBlocks(c: CampaignDefinition) {
     bText(c.body, 'left'),
     bSplitrow(categoryImg(secondCategory(c)), 'What You May Need', 'A few pieces couples ask about most for this part of planning: ' + c.gridCategories.map(categoryLabel).join(', ') + '.', catUrl(secondCategory(c)), 'left'),
     bButton(c.cta, ctaUrl(c)),
-    bTrust('Trusted Across Upstate South Carolina', ['Local Greenville-area business', 'Delivery, setup, and pickup included', 'Personal planning support']),
+    bTrust('Trusted Across Downstate New York', ['Local Riverdale-area business', 'Delivery, setup, and pickup included', 'Personal planning support']),
     bFooterBrand('minimal'),
   ]
 }
@@ -1503,7 +1503,7 @@ function buildCollectionMagazineBlocks(c: CampaignDefinition) {
     bSplitrow(categoryImg(c.gridCategories[0] || c.heroCategory), categoryLabel(c.gridCategories[0] || c.heroCategory), c.body, catUrl(c.gridCategories[0] || c.heroCategory), 'left'),
     bSplitrow(categoryImg(cat2), categoryLabel(cat2), c.goal, catUrl(cat2), 'right'),
     bButton(c.cta, ctaUrl(c)),
-    bTrust('Why Friendly Party Rental', ['Local Upstate South Carolina business', 'Delivery & setup included']),
+    bTrust('Why Friendly Party Rental', ['Local Downstate New York business', 'Delivery & setup included']),
     bFooterBrand('standard'),
   ]
 }

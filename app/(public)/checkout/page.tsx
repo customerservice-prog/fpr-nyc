@@ -122,7 +122,7 @@ function getRecommendedWindow(eventStartTime: string): { start: string; end: str
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, subtotal, eventDate, eventTimeSlot, pickupTimeSlot, deliveryType: 'delivery', exactTimeRequested, schedulingDetails, durationTierId: cartDurationTierId, loaded, setEventDate, setEventTimeSlot, setPickupTimeSlot, setDeliveryType, setExactTimeRequested, setSchedulingDetails } = useCart()
+  const { items, subtotal, eventDate, eventTimeSlot, pickupTimeSlot, deliveryType: cartDeliveryType, exactTimeRequested, schedulingDetails, durationTierId: cartDurationTierId, loaded, setEventDate, setEventTimeSlot, setPickupTimeSlot, setDeliveryType, setExactTimeRequested, setSchedulingDetails } = useCart()
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<CheckoutForm>()
   const [loading, setLoading] = useState(false)
   const [sendingQuote, setSendingQuote] = useState(false)

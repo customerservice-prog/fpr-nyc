@@ -7,7 +7,7 @@ for(const value of ['sc-domain:friendlypartyrentalsc.com','https://www.friendlyp
 for(const value of [null,'','sc-domain:friendlypartyrental.com','https://www.friendlypartyrental.com/','sc-domain:rentsketch.com','http://friendlypartyrentalsc.com/','https://friendlypartyrentalsc.com.evil.test/','https://evil.test/friendlypartyrentalsc.com','https://name:pass@friendlypartyrentalsc.com/','https://friendlypartyrentalsc.com/category/','https://friendlypartyrentalsc.com/?x=1'])test('reject unrelated/malformed property: '+value,()=>assert.equal(policy.normalizeScSearchProperty(value),null))
 test('wrong property never obtains credentials or queries Google',async()=>{
  let calls=0
- const module=load('lib/search-console.ts',{'./scSearchReadiness':policy,'./google-auth':{hasGoogleCredentials(){calls++;return true},getAccessToken(){calls++;return 'fake'}}},{GSC_SITE_URL:'sc-domain:friendlypartyrental.com'})
+ const module=load('lib/search-console.ts',{'./scSearchReadiness':policy,'./google-auth':{hasGoogleCredentials(){calls++;return true},getAccessToken(){calls++;return 'fake'}}},{GNYC_SITE_URL:'sc-domain:friendlypartyrental.com'})
  const result=await module.getSearchConsoleSummary();assert.equal(result.connected,false);assert.match(result.reason,/not Greenville search data/);assert.equal(calls,0)
 })
 test('missing property is reported as unconfigured, not proof of no Google traffic',async()=>{
@@ -16,7 +16,7 @@ test('missing property is reported as unconfigured, not proof of no Google traff
 })
 test('successful mock query targets SC only with a timeout and preserves report shape',async()=>{
  const requests=[]
- const module=load('lib/search-console.ts',{'./scSearchReadiness':policy,'./google-auth':{hasGoogleCredentials:()=>true,getAccessToken:async()=> 'mock-not-secret'}},{GSC_SITE_URL:'sc-domain:friendlypartyrentalsc.com'},async(url,options)=>{requests.push({url,options});return {ok:true,json:async()=>({rows:[]})}})
+ const module=load('lib/search-console.ts',{'./scSearchReadiness':policy,'./google-auth':{hasGoogleCredentials:()=>true,getAccessToken:async()=> 'mock-not-secret'}},{GNYC_SITE_URL:'sc-domain:friendlypartyrentalsc.com'},async(url,options)=>{requests.push({url,options});return {ok:true,json:async()=>({rows:[]})}})
  const result=await module.getSearchConsoleSummary();assert.equal(result.connected,true);assert.equal(requests.length,3)
  for(const r of requests){assert.ok(r.url.includes('sc-domain%3Afriendlypartyrentalsc.com'));assert.ok(r.options.signal);assert.equal(r.options.cache,'no-store')}
 })

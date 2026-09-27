@@ -2,7 +2,7 @@ export const revalidate = 60
 
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { categoryDescriptionForSc, itemDescriptionForSc } from '@/lib/scPublicCopy'
+import { categoryDescriptionForNyc, itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 
 export async function GET(
   _request: Request,
@@ -25,10 +25,10 @@ export async function GET(
   return NextResponse.json({
     category: {
       ...category,
-      description: categoryDescriptionForSc(category.name, category.description),
+      description: categoryDescriptionForNyc(category.name, category.description),
       items: category.items.map((item) => ({
         ...item,
-        description: itemDescriptionForSc(item.name, item.description),
+        description: itemDescriptionForNyc(item.name, item.description),
       })),
     },
   })

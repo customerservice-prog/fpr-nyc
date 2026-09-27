@@ -14,7 +14,4 @@ export const NYC_SERVICE_AREAS: NycServiceArea[] = [
   {name:'Pelham',slug:'pelham',href:'/party-rentals-pelham-ny',zips:['10803']},
 ]
 export const NYC_PRIORITY_AREAS=['riverdale','yonkers','new-rochelle','mount-vernon','fieldston','kingsbridge']
-// Compatibility aliases while the fork is being renamed from the SC location layer.
-export type ScServiceArea = NycServiceArea
-export const SC_SERVICE_AREAS = NYC_SERVICE_AREAS
-export const SC_PRIORITY_AREAS = NYC_PRIORITY_AREAS
+

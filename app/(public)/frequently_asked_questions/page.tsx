@@ -1,9 +1,9 @@
-import { scPageMetadata } from '@/lib/scSeo'
+import { nycPageMetadata } from '@/lib/nycSeo'
 import Accordion from '@/components/public/Accordion'
 import type { Metadata } from 'next'
 import { safeJsonLd } from '@/lib/jsonLd'
 
-export const metadata = scPageMetadata("/frequently_asked_questions","Party Rental Questions \u2014 Riverdale, Bronx, NY","Find answers about Riverdale party rentals, booking, delivery, setup and event preparation. Contact Friendly Party Rental NYC for help with your order.")
+export const metadata = nycPageMetadata("/frequently_asked_questions","Party Rental Questions \u2014 Riverdale, Bronx, NY","Find answers about Riverdale party rentals, booking, delivery, setup and event preparation. Contact Friendly Party Rental NYC for help with your order.")
 
 const faqSections = [
   {

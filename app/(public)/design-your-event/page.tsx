@@ -1,4 +1,4 @@
-import { scPageMetadata } from '@/lib/scSeo'
+import { nycPageMetadata } from '@/lib/nycSeo'
 import StorefrontDesigner from '@/components/public/StorefrontDesigner'
 import type { Metadata } from 'next'
 import { Playfair_Display } from 'next/font/google'
@@ -7,7 +7,7 @@ import Image from 'next/image'
 
 const playfair = Playfair_Display({ weight: ['600', '700'], subsets: ['latin'], display: 'swap' })
 
-export const metadata = scPageMetadata("/design-your-event","Event Layout Help in Riverdale, Bronx, NY","Explore event layout ideas for tents, tables and chairs. Contact our NYC / Downstate team for planning help; online Riverdale order access is not yet available.")
+export const metadata = nycPageMetadata("/design-your-event","Event Layout Help in Riverdale, Bronx, NY","Explore event layout ideas for tents, tables and chairs. Contact our NYC / Downstate team for planning help; online Riverdale order access is not yet available.")
 
 const features = [
   ['01', 'Start with your event', 'Tell our NYC / Downstate team your guest count and what you are planning.'],

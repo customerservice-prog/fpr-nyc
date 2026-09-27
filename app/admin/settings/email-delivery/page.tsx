@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
-import { SC_EMAIL_ADDRESS, SC_EMAIL_TAG } from '@/lib/scEmail'
+import { NYC_EMAIL_ADDRESS, NYC_EMAIL_TAG } from '@/lib/nycEmail'
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Riverdale Email Delivery', robots: { index: false, follow: false } }
 export default async function EmailDeliveryPage() {
@@ -21,8 +21,8 @@ export default async function EmailDeliveryPage() {
     </section>
     <section className="rounded-xl border bg-white p-5">
       <h2 className="text-lg font-bold">One inbox, unmistakable location</h2>
-      <p className="mt-2 break-all">Shared inbox: {SC_EMAIL_ADDRESS}</p>
-      <p className="mt-2">Subject example: <strong>{SC_EMAIL_TAG} Riverdale rental inquiry</strong></p>
+      <p className="mt-2 break-all">Shared inbox: {NYC_EMAIL_ADDRESS}</p>
+      <p className="mt-2">Subject example: <strong>{NYC_EMAIL_TAG} Riverdale rental inquiry</strong></p>
       <p className="mt-2">Sender label: Friendly Party Rental - New York. Messages include a SOUTH CAROLINA / GREENVILLE banner. Replies to contact notifications go to the customer.</p>
     </section>
     <section className="rounded-xl border bg-white p-5">

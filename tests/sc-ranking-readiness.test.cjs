@@ -27,7 +27,7 @@ test('category pages use query-focused Greenville metadata, H1s and planning dep
   const content=read('lib/categoryPlanningContent.ts')
   assert.ok(layout.includes('getCategoryPlanningContent'))
   assert.ok(layout.includes("'@type':'Service'"))
-  assert.ok(layout.includes('SC_BUSINESS_ID'))
+  assert.ok(layout.includes('NYC_BUSINESS_ID'))
   assert.ok(page.includes('CategoryPlanningGuide'))
   assert.ok(client.includes('categorySearchName'))
   assert.ok(client.includes('in Greenville, SC'))

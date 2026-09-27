@@ -12,7 +12,7 @@ test('Greenville popular-rentals page uses the existing real booking-history eng
  assert.match(component,/Popularity does not guarantee availability/)
  assert.match(engine,/distinct qualifying SC bookings/)
  assert.match(engine,/status:\{notIn:\['canceled','cancelled','quote','draft','incomplete'\]\}/)
- assert.match(page,/scPageMetadata/)
+ assert.match(page,/nycPageMetadata/)
 })
 
 test('popular-rentals is indexable and linked from the mobile home popular section',()=>{

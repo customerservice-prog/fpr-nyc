@@ -1,9 +1,9 @@
-import { scPageMetadata } from '@/lib/scSeo'
+import { nycPageMetadata } from '@/lib/nycSeo'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { safeJsonLd } from '@/lib/jsonLd'
 const BASE_URL='https://www.fpr-nyc-production.up.railway.app'
-export const metadata = scPageMetadata("/chiavari-chair-rentals","Chiavari Chair Rentals in Riverdale, Bronx, NY","Browse Chiavari chairs for weddings and events in Riverdale and Downstate New York. Check quantities, event-date availability and delivery.")
+export const metadata = nycPageMetadata("/chiavari-chair-rentals","Chiavari Chair Rentals in Riverdale, Bronx, NY","Browse Chiavari chairs for weddings and events in Riverdale and Downstate New York. Check quantities, event-date availability and delivery.")
 export default function ChiavariChairRentalsPage(){
  const jsonLd={'@context':'https://schema.org','@type':'CollectionPage',name:'Chiavari Chair Rentals',description:'Chiavari chair rental options in Riverdale, Bronx, NY and Downstate New York.',url:`${BASE_URL}/chiavari-chair-rentals`}
  return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(jsonLd)}}/><div className="max-w-5xl mx-auto px-4 py-12">

@@ -2,10 +2,10 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getItemsWithAvailability, PUBLIC_ITEM_SELECT, withCategoryImage } from '@/lib/availability'
-import { itemDescriptionForSc } from '@/lib/scPublicCopy'
+import { itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 
 function localizeItem<T extends { name: string; description?: string | null }>(item: T): T {
-  return { ...item, description: itemDescriptionForSc(item.name, item.description) }
+  return { ...item, description: itemDescriptionForNyc(item.name, item.description) }
 }
 
 export async function GET(request: NextRequest) {

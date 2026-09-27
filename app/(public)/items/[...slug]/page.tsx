@@ -2,13 +2,13 @@ import { notFound, permanentRedirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import {scPageMetadata,scMetaText,scBreadcrumbs,SC_BUSINESS_ID,scUrl} from '@/lib/scSeo'
+import {nycPageMetadata,nycMetaText,nycBreadcrumbs,NYC_BUSINESS_ID,nycUrl} from '@/lib/nycSeo'
 import LocalDeliveryLinks from '@/components/public/LocalDeliveryLinks'
 import { safeJsonLd } from '@/lib/jsonLd'
 import ItemGallery from '@/components/public/ItemGallery'
 import SuggestedAddons from '@/components/public/SuggestedAddons'
 import { matchesTentLighting } from '@/lib/scAddonMatching'
-import { itemDescriptionForSc } from '@/lib/scPublicCopy'
+import { itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 
 export const dynamic = 'force-dynamic'
 const BASE_URL = 'https://fpr-nyc-production.up.railway.app'
@@ -45,11 +45,11 @@ async function findItem(slugParts: string[]) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
   const item = await findItem((await params).slug)
   if (!item) return { title: 'Rental not found', robots:{index:false,follow:true} }
-  const fullDescription = itemDescriptionForSc(item.name, item.description)
-  const desc = scMetaText(`Rent ${item.name} in Riverdale, NY. ${fullDescription}`)
+  const fullDescription = itemDescriptionForNyc(item.name, item.description)
+  const desc = nycMetaText(`Rent ${item.name} in Riverdale, NY. ${fullDescription}`)
   const canonical = `${BASE_URL}/items/${item.slug}`
   return {
-    ...scPageMetadata(`/items/${encodeURIComponent(item.slug!)}`, `${item.name} Rental - Riverdale, NY`, desc),
+    ...nycPageMetadata(`/items/${encodeURIComponent(item.slug!)}`, `${item.name} Rental - Riverdale, NY`, desc),
     description: desc,
     alternates: { canonical },
     openGraph: {
@@ -68,7 +68,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
   const lastRequested = (slugParts || []).join('/').split('/').pop() || ''
   if (item.slug !== (slugParts || []).join('/')) permanentRedirect(`/items/${encodeURIComponent(item.slug!)}`)
 
-  const description = itemDescriptionForSc(item.name, item.description)
+  const description = itemDescriptionForNyc(item.name, item.description)
   const relatedItems = await prisma.item.findMany({ where: { categoryId: item.categoryId, id: { not: item.id }, displayToCustomer: true }, orderBy: { name: 'asc' }, take: 4 })
   const validRelatedItems = relatedItems.filter((ri) => { const slug = typeof ri.slug === 'string' ? ri.slug.trim() : ''; return slug.length > 0 && slug.toLowerCase() !== 'null' && slug.toLowerCase() !== 'undefined' })
   let suggestedAddons = item.suggestedAddonIds && item.suggestedAddonIds.length > 0 ? await prisma.item.findMany({ where: { id: { in: item.suggestedAddonIds }, displayToCustomer: true }, select: { id: true, name: true, slug: true, description: true, cost: true, picture: true, quantity: true } }) : []
@@ -93,8 +93,8 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
       priceCurrency: 'USD',
       price: Number(item.cost).toFixed(2),
       businessFunction: 'http://purl.org/goodrelations/v1#LeaseOut',
-      seller: {'@id':SC_BUSINESS_ID},
-      url: scUrl(`/items/${encodeURIComponent(item.slug!)}`),
+      seller: {'@id':NYC_BUSINESS_ID},
+      url: nycUrl(`/items/${encodeURIComponent(item.slug!)}`),
       areaServed: 'Riverdale, NY',
     },
   }
@@ -102,7 +102,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(scBreadcrumbs([{name:"Home",path:"/"},{name:item.category.name,path:`/category/${item.category.slug}`},{name:item.name,path:`/items/${encodeURIComponent(item.slug!)}`}]))}}/>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(nycBreadcrumbs([{name:"Home",path:"/"},{name:item.category.name,path:`/category/${item.category.slug}`},{name:item.name,path:`/items/${encodeURIComponent(item.slug!)}`}]))}}/>
       <nav className="text-sm text-gray-500 mb-4"><Link href="/">Home</Link>{' / '}<Link href={`/category/${item.category.slug}`}>{item.category.name}</Link>{' / '}<span>{item.name}</span></nav>
       <div className="grid md:grid-cols-2 gap-8 items-start">
         <ItemGallery slug={item.slug} name={item.name} hasPicture={!!item.picture} additionalImages={item.additionalImages || []} />

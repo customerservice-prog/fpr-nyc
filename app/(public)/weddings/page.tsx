@@ -1,4 +1,4 @@
-import { scPageMetadata } from '@/lib/scSeo'
+import { nycPageMetadata } from '@/lib/nycSeo'
 import Link from 'next/link'
 import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 import WeddingPackageCard from '@/components/public/WeddingPackageCard'
@@ -17,7 +17,7 @@ const playfair = Playfair_Display({
   display: 'swap',
 })
 
-export const metadata = scPageMetadata("/weddings","Wedding Rentals in Riverdale, Bronx, NY | Tents, Chairs, Linens & Packages","Browse Riverdale wedding rentals, tents, tables, chairs, Chiavari seating, linens, lighting, dance floors and wedding packages with delivery and setup options.")
+export const metadata = nycPageMetadata("/weddings","Wedding Rentals in Riverdale, Bronx, NY | Tents, Chairs, Linens & Packages","Browse Riverdale wedding rentals, tents, tables, chairs, Chiavari seating, linens, lighting, dance floors and wedding packages with delivery and setup options.")
 export const dynamic = 'force-dynamic'
 
 const faqItems = [

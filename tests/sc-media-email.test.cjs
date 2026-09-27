@@ -11,26 +11,26 @@ function load(file, mocks={}, env={}) {
  return module.exports
 }
 const location=load('lib/scEmail.ts')
-const business={email:location.SC_EMAIL_ADDRESS,emailHref:location.scEmailHref(),name:'Friendly Party Rental',legalName:'Friendly Party Rental',phone:'864-610-5324',address:'Greenville, SC'}
+const business={email:location.NYC_EMAIL_ADDRESS,emailHref:location.nycEmailHref(),name:'Friendly Party Rental',legalName:'Friendly Party Rental',phone:'864-610-5324',address:'Greenville, SC'}
 const response={json(body,options={}){return {body,status:options.status||200}}}
 for(const subject of ['New contact inquiry','New order #QA-TEST','Re: [South Carolina] Inquiry','[South Carolina] Inquiry','[South Carolina] [South Carolina] Inquiry','hello\r\nBcc: invalid']) {
  test('subject tag is safe and idempotent: '+subject,()=>{
-  const labeled=location.scEmailSubject(subject)
-  assert.ok(labeled.startsWith('[South Carolina] '));assert.ok(!/[\r\n]/.test(labeled));assert.equal(location.scEmailSubject(labeled),labeled)
+  const labeled=location.nycEmailSubject(subject)
+  assert.ok(labeled.startsWith('[South Carolina] '));assert.ok(!/[\r\n]/.test(labeled));assert.equal(location.nycEmailSubject(labeled),labeled)
  })
 }
 test('email link opens shared inbox with tagged subject and intact encoded body',()=>{
- const url=new URL(location.scEmailHref('Question & date?','An example\nsecond line & text'))
+ const url=new URL(location.nycEmailHref('Question & date?','An example\nsecond line & text'))
  assert.equal(url.protocol,'mailto:');assert.equal(url.pathname,'customerservice@friendlypartyrental.com')
  assert.equal(url.searchParams.get('subject'),'[South Carolina] Question & date?');assert.equal(url.searchParams.get('body'),'An example\nsecond line & text')
 })
 for(const html of ['<p>Example notification</p>','<!doctype html><html><head><title>Test</title></head><body><p>Hello</p></body></html>']) {
  test('location banner appears once in HTML '+html.slice(0,20),()=>{
-  const branded=location.scEmailHtml(html);assert.equal(location.scEmailHtml(branded),branded);assert.ok(branded.includes('SOUTH CAROLINA'));assert.ok(branded.includes('friendlypartyrentalsc.com'))
+  const branded=location.nycEmailHtml(html);assert.equal(location.nycEmailHtml(branded),branded);assert.ok(branded.includes('SOUTH CAROLINA'));assert.ok(branded.includes('friendlypartyrentalsc.com'))
   if(html.includes('<body>')) assert.ok(branded.indexOf('data-fpr-location')>branded.indexOf('<body>'))
  })
 }
-function mailModule(sendMail,env={}) {return load('lib/email.ts',{'nodemailer':{createTransport(){return {sendMail}}},'@/lib/scEmail':location,'@/lib/utils':{BUSINESS:business,formatDateTime:()=>''}},env)}
+function mailModule(sendMail,env={}) {return load('lib/email.ts',{'nodemailer':{createTransport(){return {sendMail}}},'@/lib/nycEmail':location,'@/lib/utils':{BUSINESS:business,formatDateTime:()=>''}},env)}
 test('missing SMTP credentials never simulate a sent message',async()=>{
  let sends=0;const mail=mailModule(()=>sends++)
  await assert.rejects(mail.sendEmail({to:business.email,subject:'QA',html:'<p>QA</p>'}),/not configured/)
@@ -50,7 +50,7 @@ test('message headers, inbox, sender name and customer Reply-To identify SC',asy
 })
 function contact(send) {
  const saved=[];const sent=[]
- const route=load('app/api/contact/route.ts',{'next/server':{NextResponse:response},'@/lib/prisma':{prisma:{contactMessage:{async create(record){saved.push(record)}}}},'@/lib/scEmail':location,'@/lib/email':{contactFormEmail(){return {subject:'New contact inquiry',html:'<p>Mock inquiry</p>'}},async sendEmail(args){sent.push(args);return send(args)}}})
+ const route=load('app/api/contact/route.ts',{'next/server':{NextResponse:response},'@/lib/prisma':{prisma:{contactMessage:{async create(record){saved.push(record)}}}},'@/lib/nycEmail':location,'@/lib/email':{contactFormEmail(){return {subject:'New contact inquiry',html:'<p>Mock inquiry</p>'}},async sendEmail(args){sent.push(args);return send(args)}}})
  return {route,saved,sent}
 }
 const inquiry={name:'QA Example',email:'qa@example.invalid',phone:'202-555-0100',message:'QA mock inquiry only, not a live submission.',elapsedMs:4000}
@@ -70,7 +70,7 @@ test('public sender diagnostic contains no credentials and does not claim active
  const {route}=contact(async()=>{});const r=await route.GET();assert.equal(r.body.notificationsEnabled,false);assert.equal(r.body.email,business.email);assert.equal(Object.keys(r.body).length,3)
 })
 test('all category assets exist and five wedding previews are SC-local build snapshots',()=>{
- const categories=load('lib/scCategoryImages.ts').SC_CATEGORY_IMAGES;assert.equal(Object.keys(categories).length,19);assert.ok(categories['order-by-date'])
+ const categories=load('lib/scCategoryImages.ts').NYC_CATEGORY_IMAGES;assert.equal(Object.keys(categories).length,19);assert.ok(categories['order-by-date'])
  const weddings=load('lib/scWeddingImages.ts').SC_WEDDING_IMAGES;assert.equal(new Set(Object.values(weddings)).size,5)
  for(const file of Object.values(categories))assert.ok(fs.existsSync(path.join('public',file)),file)
  for(const url of Object.values(weddings)){assert.ok(url.startsWith('/api/wedding-art/'));assert.ok(!url.includes('friendlypartyrental.com'))}
@@ -100,7 +100,7 @@ for (const result of [{accepted:[],rejected:[]},{accepted:[],rejected:['recipien
 for (const [port,secure] of [['465',true],['587',false],['2525',false]]) {
  test('SMTP TLS mode matches submission port '+port,()=>{
   let options
-  load('lib/email.ts',{'nodemailer':{createTransport(value){options=value;return {sendMail:async()=>({accepted:[],rejected:[]})}}},'@/lib/scEmail':location,'@/lib/utils':{BUSINESS:business,formatDateTime:()=>''}}, {EMAIL_PORT:port})
+  load('lib/email.ts',{'nodemailer':{createTransport(value){options=value;return {sendMail:async()=>({accepted:[],rejected:[]})}}},'@/lib/nycEmail':location,'@/lib/utils':{BUSINESS:business,formatDateTime:()=>''}}, {EMAIL_PORT:port})
   assert.equal(options.secure,secure);assert.equal(options.requireTLS,!secure)
   assert.equal(options.connectionTimeout,10000);assert.equal(options.socketTimeout,20000)
  })

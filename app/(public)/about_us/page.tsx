@@ -1,7 +1,7 @@
-import { scPageMetadata } from '@/lib/scSeo'
+import { nycPageMetadata } from '@/lib/nycSeo'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-export const metadata = scPageMetadata("/about_us","About Friendly Party Rental NYC in Riverdale, Bronx, NY","Meet Friendly Party Rental NYC serving Riverdale and nearby Downstate New York communities with party and event equipment rentals.")
+export const metadata = nycPageMetadata("/about_us","About Friendly Party Rental NYC in Riverdale, Bronx, NY","Meet Friendly Party Rental NYC serving Riverdale and nearby Downstate New York communities with party and event equipment rentals.")
 export default function AboutPage() {
   return <div className="max-w-4xl mx-auto px-4 py-12">
     <div className="text-center mb-12"><h1 className="text-3xl font-bold text-dark mb-3">About Friendly Party Rental NYC</h1><p className="text-body text-lg">Local. Reliable. Clean, event-ready rentals for Riverdale &amp; Downstate New York.</p></div>

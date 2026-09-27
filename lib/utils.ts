@@ -1,4 +1,4 @@
-import { SC_CATEGORY_IMAGES } from '@/lib/scCategoryImages'
+import { NYC_CATEGORY_IMAGES } from '@/lib/nycCategoryImages'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { format } from 'date-fns'
@@ -120,7 +120,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Order-by-Date',
         slug: 'order-by-date',
         href: '/order-by-date',
-        image: SC_CATEGORY_IMAGES['order-by-date'],
+        image: NYC_CATEGORY_IMAGES['order-by-date'],
         count: 0,
   },
   {
@@ -128,7 +128,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Bounce House Rentals — Riverdale, NY',
         slug: 'bounce-house-rentals',
         href: '/category/bounce-house-rentals',
-        image: SC_CATEGORY_IMAGES['bounce-house-rentals'],
+        image: NYC_CATEGORY_IMAGES['bounce-house-rentals'],
         count: 15,
   },
   {
@@ -136,7 +136,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Tent Rentals — Riverdale, NY',
         slug: 'tent-rentals',
         href: '/category/tent-rentals',
-        image: SC_CATEGORY_IMAGES['tent-rentals'],
+        image: NYC_CATEGORY_IMAGES['tent-rentals'],
         count: 22,
   },
   {
@@ -144,7 +144,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Table & Chair Rentals — Riverdale, NY',
         slug: 'table-chair-rentals',
         href: '/category/table-chair-rentals',
-        image: SC_CATEGORY_IMAGES['table-chair-rentals'],
+        image: NYC_CATEGORY_IMAGES['table-chair-rentals'],
         count: 14,
   },
   {
@@ -152,7 +152,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Concession Machine Rentals — Riverdale, NY',
         slug: 'concession-machine-rentals',
         href: '/category/concession-machine-rentals',
-        image: SC_CATEGORY_IMAGES['concession-machine-rentals'],
+        image: NYC_CATEGORY_IMAGES['concession-machine-rentals'],
         count: 17,
   },
   {
@@ -160,7 +160,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Generator Rentals — Riverdale, NY',
         slug: 'generator-rentals',
         href: '/category/generator-rentals',
-        image: SC_CATEGORY_IMAGES['generator-rentals'],
+        image: NYC_CATEGORY_IMAGES['generator-rentals'],
         count: 3,
   },
   {
@@ -168,7 +168,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Yard Game Rentals — Riverdale, NY',
         slug: 'yard-game-rentals',
         href: '/category/yard-game-rentals',
-        image: SC_CATEGORY_IMAGES['yard-game-rentals'],
+        image: NYC_CATEGORY_IMAGES['yard-game-rentals'],
         count: 9,
   },
   {
@@ -176,7 +176,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Photobooth Rentals — Riverdale, NY',
         slug: 'photobooth-rentals',
         href: '/category/photobooth-rentals',
-        image: SC_CATEGORY_IMAGES['photobooth-rentals'],
+        image: NYC_CATEGORY_IMAGES['photobooth-rentals'],
         count: 5,
   },
   {
@@ -184,7 +184,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Foam Party Machine Rentals — Riverdale, NY',
         slug: 'foam-party-machine-rentals',
         href: '/category/foam-party-machine-rentals',
-        image: SC_CATEGORY_IMAGES['foam-party-machine-rentals'],
+        image: NYC_CATEGORY_IMAGES['foam-party-machine-rentals'],
         count: 1,
   },
   {
@@ -192,7 +192,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Event Lighting Rentals — Riverdale, NY',
         slug: 'event-lighting-rentals',
         href: '/category/event-lighting-rentals',
-        image: SC_CATEGORY_IMAGES['event-lighting-rentals'],
+        image: NYC_CATEGORY_IMAGES['event-lighting-rentals'],
         count: 17,
   },
   {
@@ -200,7 +200,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Linen & Tablecloth Rentals — Riverdale, NY',
         slug: 'linen-rentals',
         href: '/category/linen-rentals',
-        image: SC_CATEGORY_IMAGES['linen-rentals'],
+        image: NYC_CATEGORY_IMAGES['linen-rentals'],
         count: 36,
   },
   {
@@ -208,7 +208,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Dance Floor & Stage Rentals — Riverdale, NY',
         slug: 'dance-floor-stage-rentals',
         href: '/category/dance-floor-stage-rentals',
-        image: SC_CATEGORY_IMAGES['dance-floor-stage-rentals'],
+        image: NYC_CATEGORY_IMAGES['dance-floor-stage-rentals'],
         count: 6,
   },
   {
@@ -216,7 +216,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Heater & Fan Rentals — Riverdale, NY',
         slug: 'heater-fan-rentals',
         href: '/category/heater-fan-rentals',
-        image: SC_CATEGORY_IMAGES['heater-fan-rentals'],
+        image: NYC_CATEGORY_IMAGES['heater-fan-rentals'],
         count: 8,
   },
   {
@@ -224,7 +224,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Inflatable Movie Screen Rentals — Riverdale, NY',
         slug: 'inflatable-movie-screen-rentals',
         href: '/category/inflatable-movie-screen-rentals',
-        image: SC_CATEGORY_IMAGES['inflatable-movie-screen-rentals'],
+        image: NYC_CATEGORY_IMAGES['inflatable-movie-screen-rentals'],
         count: 2,
   },
   {
@@ -232,7 +232,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Beverage & Food Service Rentals — Riverdale, NY',
         slug: 'beverage-food-service',
         href: '/category/beverage-food-service',
-        image: SC_CATEGORY_IMAGES['beverage-food-service'],
+        image: NYC_CATEGORY_IMAGES['beverage-food-service'],
         count: 46,
   },
   {
@@ -240,7 +240,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Party Rental Packages — Riverdale, NY',
         slug: 'party-rental-packages',
         href: '/category/party-rental-packages',
-        image: SC_CATEGORY_IMAGES['party-rental-packages'],
+        image: NYC_CATEGORY_IMAGES['party-rental-packages'],
         count: 13,
   },
   {
@@ -248,7 +248,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Weddings',
         slug: 'weddings',
         href: '/category/weddings',
-        image: SC_CATEGORY_IMAGES['weddings'],
+        image: NYC_CATEGORY_IMAGES['weddings'],
         count: 23,
   },
   {
@@ -256,7 +256,7 @@ export const PUBLIC_CATEGORIES = [
         name: 'Party Rental Accessories — Riverdale, NY',
         slug: 'party-rental-accessories',
         href: '/category/party-rental-accessories',
-        image: SC_CATEGORY_IMAGES['party-rental-accessories'],
+        image: NYC_CATEGORY_IMAGES['party-rental-accessories'],
         count: 6,
   },
   {
@@ -264,7 +264,7 @@ export const PUBLIC_CATEGORIES = [
     name: 'Restroom Rentals — Riverdale, NY',
     slug: 'restroom-rentals',
     href: '/category/restroom-rentals',
-    image: SC_CATEGORY_IMAGES['restroom-rentals'],
+    image: NYC_CATEGORY_IMAGES['restroom-rentals'],
     count: 2,
   },
   ]

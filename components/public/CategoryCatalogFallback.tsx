@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import {formatCurrency} from '@/lib/utils'
-import {isSearchableSlug} from '@/lib/scSeo'
+import {isSearchableSlug} from '@/lib/nycSeo'
 
 interface CatalogItem {id:string;slug?:string|null;name:string;cost:number}
 /** Useful, public inventory while the interactive category streams or JS is unavailable.

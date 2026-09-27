@@ -1,6 +1,6 @@
 // Exact original NY artwork, copied unchanged at the owner's request.
 // Audit origin and SHA-256 are recorded in nyMediaSnapshot.json.
-export const SC_CATEGORY_IMAGES: Record<string,string> = {
+export const NYC_CATEGORY_IMAGES: Record<string,string> = {
   "order-by-date": "/images/order-by-date.png",
   "bounce-house-rentals": "/images/ny-parity/category-bounce-house-rentals.png",
   "tent-rentals": "/images/ny-parity/category-tent-rentals.png",
@@ -21,3 +21,4 @@ export const SC_CATEGORY_IMAGES: Record<string,string> = {
   "party-rental-accessories": "/images/ny-parity/category-party-rental-accessories.png",
   "restroom-rentals": "/images/ny-parity/category-restroom-rentals.jpg"
 }
+

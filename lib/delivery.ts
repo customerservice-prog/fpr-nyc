@@ -1,4 +1,4 @@
-import { NYC_SERVICE_AREAS } from '@/lib/scServiceAreas'
+import { NYC_SERVICE_AREAS } from '@/lib/nycServiceAreas'
 
 export class DeliveryQuoteError extends Error {
   status:number

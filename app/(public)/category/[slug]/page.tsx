@@ -7,7 +7,7 @@ import { PUBLIC_ITEM_SELECT } from '@/lib/availability'
 import CategoryClient from './CategoryClient'
 import CategoryPlanningGuide from '@/components/public/CategoryPlanningGuide'
 import { safeJsonLd } from '@/lib/jsonLd'
-import { categoryDescriptionForSc, itemDescriptionForSc } from '@/lib/scPublicCopy'
+import { categoryDescriptionForNyc, itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 
 export default async function CategorySlugPage(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params
@@ -27,14 +27,14 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
 
   const initialCategory = {
     name: category.name,
-    description: categoryDescriptionForSc(category.name, category.description),
+    description: categoryDescriptionForNyc(category.name, category.description),
     bookableAfter: category.bookableAfter ? category.bookableAfter.toISOString() : null,
     bookableAfterMessage: category.bookableAfterMessage == null ? null : category.bookableAfterMessage,
   }
 
   const initialItems = items.map((item) => ({
     ...item,
-    description: itemDescriptionForSc(item.name, item.description),
+    description: itemDescriptionForNyc(item.name, item.description),
     available: item.quantity,
     bookableAfter: item.bookableAfter ? item.bookableAfter.toISOString() : null,
     updatedAt: item.updatedAt ? item.updatedAt.toISOString() : null,
@@ -82,7 +82,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
     mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
   }
 
-  const introText = categoryDescriptionForSc(
+  const introText = categoryDescriptionForNyc(
     categoryLabel,
     category.description || `${categoryLabel} from Friendly Party Rental SC serve Riverdale, NY and surrounding Downstate New York communities. Browse the current inventory below, check your event date, and contact our team if you need help choosing the right setup.`
   )

@@ -1,16 +1,16 @@
 import Link from 'next/link'
 import {notFound} from 'next/navigation'
-import {SC_SERVICE_AREAS} from '@/lib/scServiceAreas'
+import {NYC_SERVICE_AREAS} from '@/lib/nycServiceAreas'
 import {SC_LOCAL_PLANNING} from '@/lib/scLocalPlanningResources'
-import {scPageMetadata,scBreadcrumbs,scUrl,SC_BUSINESS_ID} from '@/lib/scSeo'
+import {nycPageMetadata,nycBreadcrumbs,nycUrl,NYC_BUSINESS_ID} from '@/lib/nycSeo'
 import {safeJsonLd} from '@/lib/jsonLd'
 const rentals=[['Tent rentals','/category/tent-rentals'],['Tables and chairs','/category/table-chair-rentals'],['Bounce houses and inflatables','/category/bounce-house-rentals'],['Linens and tablecloths','/category/linen-rentals'],['Dance floors and stages','/category/dance-floor-stage-rentals'],['Wedding rentals','/weddings']]
-export function cityRentalMetadata(slug:string){const area=SC_SERVICE_AREAS.find(a=>a.slug===slug);if(!area)return {robots:{index:false,follow:true}};const hasLocalGuide=Boolean(SC_LOCAL_PLANNING[slug]);return scPageMetadata(area.href,`Party Rentals in ${area.name}, SC`,`Rent tents, tables, chairs and event equipment for ${area.name}, SC. Check event-date availability and delivery with the Friendly Party Rental SC Riverdale team.`,hasLocalGuide)}
+export function cityRentalMetadata(slug:string){const area=NYC_SERVICE_AREAS.find(a=>a.slug===slug);if(!area)return {robots:{index:false,follow:true}};const hasLocalGuide=Boolean(SC_LOCAL_PLANNING[slug]);return nycPageMetadata(area.href,`Party Rentals in ${area.name}, SC`,`Rent tents, tables, chairs and event equipment for ${area.name}, SC. Check event-date availability and delivery with the Friendly Party Rental SC Riverdale team.`,hasLocalGuide)}
 export default function CityRentalGuide({slug}:{slug:string}){
- const area=SC_SERVICE_AREAS.find(a=>a.slug===slug);if(!area)notFound();const resource=SC_LOCAL_PLANNING[slug]
- const schema={'@context':'https://schema.org','@type':'Service','@id':scUrl(area.href)+'#rentals',name:`Party rental delivery to ${area.name}, SC`,serviceType:'Party and event equipment rentals',url:scUrl(area.href),provider:{'@id':SC_BUSINESS_ID},areaServed:{'@type':'Place',name:area.name+', New York'}}
+ const area=NYC_SERVICE_AREAS.find(a=>a.slug===slug);if(!area)notFound();const resource=SC_LOCAL_PLANNING[slug]
+ const schema={'@context':'https://schema.org','@type':'Service','@id':nycUrl(area.href)+'#rentals',name:`Party rental delivery to ${area.name}, SC`,serviceType:'Party and event equipment rentals',url:nycUrl(area.href),provider:{'@id':NYC_BUSINESS_ID},areaServed:{'@type':'Place',name:area.name+', New York'}}
  return <article className="mx-auto max-w-4xl px-4 py-12" data-sc-city-guide={slug}>
-  <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(schema)}}/><script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(scBreadcrumbs([{name:'Home',path:'/'},{name:'New York Delivery Areas',path:'/service-area'},{name:area.name+', SC',path:area.href}]))}}/>
+  <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(schema)}}/><script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(nycBreadcrumbs([{name:'Home',path:'/'},{name:'New York Delivery Areas',path:'/service-area'},{name:area.name+', SC',path:area.href}]))}}/>
   <nav className="mb-5 text-sm text-blue-800" aria-label="Breadcrumb"><Link href="/">Home</Link> / <Link href="/service-area">Delivery areas</Link> / {area.name}, SC</nav>
   <h1 className="mb-6 text-3xl font-bold text-dark">Party Rentals in {area.name}, SC</h1>
   <p className="mb-4 leading-7 text-body">Plan your {area.name} event with rental equipment from Friendly Party Rental SC. Browse tents, tables, chairs, inflatables and event essentials, then select your date to review availability. Our Riverdale team arranges delivery to your event; this is a service-area guide, not a separate {area.name} storefront.</p>

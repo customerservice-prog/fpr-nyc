@@ -122,7 +122,7 @@ function getRecommendedWindow(eventStartTime: string): { start: string; end: str
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, subtotal, eventDate, eventTimeSlot, pickupTimeSlot, deliveryType: cartDeliveryType, exactTimeRequested, schedulingDetails, durationTierId: cartDurationTierId, loaded, setEventDate, setEventTimeSlot, setPickupTimeSlot, setDeliveryType, setExactTimeRequested, setSchedulingDetails } = useCart()
+  const { items, subtotal, eventDate, eventTimeSlot, pickupTimeSlot, deliveryType: 'delivery', exactTimeRequested, schedulingDetails, durationTierId: cartDurationTierId, loaded, setEventDate, setEventTimeSlot, setPickupTimeSlot, setDeliveryType, setExactTimeRequested, setSchedulingDetails } = useCart()
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<CheckoutForm>()
   const [loading, setLoading] = useState(false)
   const [sendingQuote, setSendingQuote] = useState(false)
@@ -161,10 +161,11 @@ export default function CheckoutPage() {
   }, [])
 
   useEffect(() => {
-    if (loaded && cartDeliveryType) {
-      setValue('deliveryType', cartDeliveryType)
+    if (loaded) {
+      if (cartDeliveryType !== 'delivery') setDeliveryType('delivery')
+      setValue('deliveryType', 'delivery')
     }
-  }, [loaded, cartDeliveryType, setValue])
+  }, [loaded, cartDeliveryType, setDeliveryType, setValue])
 
 
   useEffect(() => {
@@ -270,7 +271,7 @@ export default function CheckoutPage() {
           eventDate,
           eventTimeSlot,
           pickupTimeSlot,
-          deliveryType: cartDeliveryType,
+          deliveryType: 'delivery',
           items,
           subtotal,
         }),
@@ -291,7 +292,7 @@ export default function CheckoutPage() {
   const openScheduleEditor = () => {
     const parsedDate = eventDate ? new Date(eventDate) : null
     setEditDate(parsedDate && !isNaN(parsedDate.getTime()) ? parsedDate : null)
-    setEditMethod(cartDeliveryType === 'pickup' ? 'pickup' : 'delivery')
+    setEditMethod('delivery')
     if (hasNewScheduling) {
       setEditEventStartTime(schedulingDetails.eventStartTime || '')
       setEditEventEndTime(schedulingDetails.eventEndTime || '')
@@ -712,7 +713,7 @@ export default function CheckoutPage() {
             <span>{formatCurrency(exactTimeFee.amount)}</span>
           </div>
         ))}
-        <p className="text-xs text-gray-500 mt-2">{watch('deliveryType') === 'pickup' ? 'Sales tax is calculated on the next step. No delivery fee applies to customer pickup orders.' : 'Delivery fee and sales tax are calculated on the next step based on your address.'}</p>
+        <p className="text-xs text-gray-500 mt-2">Delivery fee and sales tax are calculated on the next step based on your event address.</p>
       </div>
 
       {hasNewScheduling ? (
@@ -750,8 +751,8 @@ export default function CheckoutPage() {
           <input type="tel" {...register('phone')} className="w-full border rounded px-3 py-2" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-dark mb-1">Event Address {watch('deliveryType') !== 'pickup' ? '*' : '(optional for pickup)'}</label>
-          <input {...register('eventAddress', { required: watch('deliveryType') !== 'pickup' })} className="w-full border rounded px-3 py-2" />
+          <label className="block text-sm font-medium text-dark mb-1">Event Address *</label>
+          <input {...register('eventAddress', { required: true })} className="w-full border rounded px-3 py-2" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>

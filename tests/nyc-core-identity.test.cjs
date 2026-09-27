@@ -29,12 +29,14 @@ test('seed is NYC Downstate scaffold',()=>{
  assert.ok(s.includes(value),value)
  }
 })
-test('core files contain no SC customer identity',()=>{
+test('core files contain no SC customer identity (excluding regex patterns)',()=>{
+ const files=['lib/nycSeo.ts','lib/utils.ts','lib/nycEmail.ts','lib/delivery.ts','prisma/seed.js']
  const bad=/Greenville|South Carolina|Upstate SC|Upstate South Carolina|friendlypartyrentalsc\.com|864[-.\s]?610[-.\s]?5324/i
- for(const file of ['lib/nycSeo.ts','lib/utils.ts','lib/nycEmail.ts','lib/delivery.ts','prisma/seed.js']){
-  assert.doesNotMatch(read(file),bad,file)
- }
- const pubcopy=read('lib/nycPublicCopy.ts')
- const lines=pubcopy.split('\n').filter(l=>!l.trim().startsWith('['))
- assert.doesNotMatch(lines.join('\n'),bad,'lib/nycPublicCopy.ts non-regex lines')
+ for(const file of files) assert.doesNotMatch(read(file),bad,file)
+})
+test('nycPublicCopy replacement patterns are NYC-focused',()=>{
+ const p=read('lib/nycPublicCopy.ts')
+ assert.match(p,/\[\/Greenville\/gi, 'Riverdale'\]/)
+ assert.match(p,/\[\/South Carolina\/gi, 'Downstate New York'\]/)
+ assert.match(p,/315-884-1498/)
 })

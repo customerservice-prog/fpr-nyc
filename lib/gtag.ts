@@ -3,18 +3,21 @@ function configuredId(value: string | undefined, format: RegExp, blockedValue: s
   return format.test(id) && id !== blockedValue ? id : ''
 }
 
-// SC must never fall back to the copied New York destinations. These public
-// values are optional and are inlined by Next.js at build time.
-export const GA_MEASUREMENT_ID = configuredId(process.env.NEXT_PUBLIC_SC_GA_MEASUREMENT_ID, /^G-[A-Z0-9]+$/, 'G-NV8CF7GT5C')
-export const AW_CONVERSION_ID = configuredId(process.env.NEXT_PUBLIC_SC_GOOGLE_ADS_ID, /^AW-\d+$/, 'AW-18374628389')
-const purchaseLabel = configuredId(process.env.NEXT_PUBLIC_SC_GOOGLE_ADS_PURCHASE_LABEL, /^[A-Za-z0-9_-]+$/, 'ig-ZCL_Q1d0cEKWo2rlE')
-export const AW_PURCHASE_DESTINATION = AW_CONVERSION_ID && purchaseLabel ? `${AW_CONVERSION_ID}/${purchaseLabel}` : ''
-export const GOOGLE_TAG_ID = GA_MEASUREMENT_ID || AW_CONVERSION_ID
+// NYC analytics is optional and must use its own GA4 destination.
+// Google Ads is intentionally disabled for this location until it is configured separately.
+export const GA_MEASUREMENT_ID = configuredId(
+  process.env.NEXT_PUBLIC_NYC_GA_MEASUREMENT_ID,
+  /^G-[A-Z0-9]+$/,
+  'G-NV8CF7GT5C',
+)
+export const AW_CONVERSION_ID = ''
+export const AW_PURCHASE_DESTINATION = ''
+export const GOOGLE_TAG_ID = GA_MEASUREMENT_ID
 export const GOOGLE_TAG_BOOTSTRAP = GOOGLE_TAG_ID ? `
   window.dataLayer = window.dataLayer || [];
   window.gtag = window.gtag || function(){window.dataLayer.push(arguments);};
   window.gtag('js', new Date());
-  ${[GA_MEASUREMENT_ID, AW_CONVERSION_ID].filter(Boolean).map(id => `window.gtag('config', ${JSON.stringify(id)});`).join('\n')}
+  window.gtag('config', ${JSON.stringify(GOOGLE_TAG_ID)});
 ` : ''
 
 type GtagEventParams = Record<string, unknown>
@@ -26,9 +29,9 @@ type GoogleTagWindow = {
 const queuedTransactions = new WeakMap<GoogleTagWindow, Set<string>>()
 
 export function trackEvent(eventName: string, params?: GtagEventParams) {
-  if (typeof window === 'undefined') return
-  const destination = eventName === 'conversion' ? AW_PURCHASE_DESTINATION : GA_MEASUREMENT_ID
-  if (!destination || (params?.send_to && params.send_to !== destination)) return
+  if (typeof window === 'undefined' || !GA_MEASUREMENT_ID) return
+  if (eventName === 'conversion') return
+  if (params?.send_to && params.send_to !== GA_MEASUREMENT_ID) return
 
   const w = window as unknown as GoogleTagWindow
   if (typeof w.gtag !== 'function') {
@@ -37,14 +40,14 @@ export function trackEvent(eventName: string, params?: GtagEventParams) {
   }
 
   const transactionId = params?.transaction_id
-  const dedupeKey = (eventName === 'purchase' || eventName === 'conversion')
+  const dedupeKey = eventName === 'purchase'
     && typeof transactionId === 'string' && transactionId.length > 0
-    ? JSON.stringify([eventName, destination, transactionId])
+    ? JSON.stringify([eventName, GA_MEASUREMENT_ID, transactionId])
     : null
   let transactions = queuedTransactions.get(w)
   if (dedupeKey && transactions?.has(dedupeKey)) return
 
-  w.gtag('event', eventName, { ...params, send_to: destination })
+  w.gtag('event', eventName, { ...params, send_to: GA_MEASUREMENT_ID })
   if (dedupeKey) {
     if (!transactions) {
       transactions = new Set<string>()

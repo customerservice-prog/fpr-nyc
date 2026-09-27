@@ -326,7 +326,7 @@ return (
 
 <div className="admin-card border-l-4 border-secondary flex flex-col sm:flex-row items-center gap-4">
 <img
-src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Fwww.friendlypartyrentalsc.com%2Fdriver"
+src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Ffpr-nyc-production.up.railway.app%2Fdriver"
 alt="Driver App QR Code"
 width={140}
 height={140}
@@ -337,7 +337,7 @@ height={140}
 Have drivers scan this QR code with their phone camera to open the driver app and install it to their home screen. Manage driver names, phone numbers, emails, vehicles, and PINs on the Manage Drivers page.
 </p>
 <div className="flex gap-3 flex-wrap">
-<a href="https://www.friendlypartyrentalsc.com/driver" target="_blank" rel="noopener noreferrer" className="text-secondary text-sm hover:underline">
+<a href="https://fpr-nyc-production.up.railway.app/driver" target="_blank" rel="noopener noreferrer" className="text-secondary text-sm hover:underline">
 Open Driver App &rarr;
 </a>
 <Link href="/admin/drivers" className="text-secondary text-sm hover:underline">

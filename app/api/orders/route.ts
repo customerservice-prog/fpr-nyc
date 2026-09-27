@@ -121,7 +121,6 @@ export async function POST(request: NextRequest) {
             eventState: eventState || null,
             eventZip: eventZip || null,
             eventDate: new Date(eventDate),
-      eventEndDate: effectiveEventEndDate(new Date(eventDate), null, rentalDayCount),
             cartSummary: JSON.stringify({
               items: (items || []).map((i: any) => ({ name: i.name, quantity: i.quantity })),
               subtotal,
@@ -241,6 +240,7 @@ export async function POST(request: NextRequest) {
       checkoutStage: 'order_created',
       checkoutLastSeenAt: new Date(),
       eventDate: new Date(eventDate),
+      eventEndDate: effectiveEventEndDate(new Date(eventDate), null, rentalDayCount),
       eventAddress: eventAddress || null,
       eventCity: eventCity || null,
       eventState: eventState || 'NY',

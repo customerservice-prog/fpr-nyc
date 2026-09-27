@@ -3,9 +3,12 @@ import path from 'node:path'
 
 const IDS = new Set(['pkg-basic','pkg-standard','pkg-premium','pkg-luxury','pkg-elite'])
 
-export function isScWeddingArtworkId(id: string) {
+export function isNycWeddingArtworkId(id: string) {
   return IDS.has(id)
 }
+
+// Backward-compatible alias for older imports while the NYC fork is finalized.
+export const isScWeddingArtworkId = isNycWeddingArtworkId
 
 export function detectWeddingArtworkContentType(bytes: Buffer) {
   if (bytes.length >= 12 && bytes.subarray(0, 8).equals(Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]))) return 'image/png'
@@ -17,9 +20,15 @@ export function detectWeddingArtworkContentType(bytes: Buffer) {
 }
 
 export async function readNycWeddingArtwork(id: string) {
-  if (!isScWeddingArtworkId(id)) return null
-  const bytes = await readFile(path.join(process.cwd(), 'public', 'images', 'ny-parity', 'weddings', id + '.bin'))
-  const contentType = detectWeddingArtworkContentType(bytes)
-  if (!contentType) throw new Error('Unsupported wedding artwork format for ' + id)
-  return { bytes, contentType }
+  if (!isNycWeddingArtworkId(id)) return null
+  try {
+    const bytes = await readFile(path.join(process.cwd(), 'public', 'images', 'ny-parity', 'weddings', id + '.bin'))
+    const contentType = detectWeddingArtworkContentType(bytes)
+    if (!contentType) throw new Error('Unsupported wedding artwork format for ' + id)
+    return { bytes, contentType }
+  } catch (error) {
+    const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : ''
+    if (code === 'ENOENT') return null
+    throw error
+  }
 }

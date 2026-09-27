@@ -55,3 +55,54 @@ test('SC public chat cannot regress to New York operational copy',()=>{
     assert.ok(!chat.includes(forbidden),forbidden+' must not appear in the Greenville customer chat')
   }
 })
+
+
+test('SC runtime defaults and legacy maintenance stay isolated from New York',()=>{
+  const order=read('app/admin/orders/new/page.tsx')
+  const single=read('app/admin/orders/new/single-page/page.tsx')
+  const restrictions=read('app/admin/do-not-rent/page.tsx')
+  const serviceArea=read('app/api/admin/service-areas/route.ts')
+  const company=read('app/admin/settings/company-info/page.tsx')
+  const seed=read('prisma/seed.js')
+  const checkout=read('app/(public)/checkout/page.tsx')
+  for(const source of [order,single]){
+    assert.ok(source.includes("billingState: 'SC'"))
+    assert.ok(source.includes("eventState: 'SC'"))
+    assert.ok(!source.includes("billingState: 'NY'"))
+    assert.ok(!source.includes("eventState: 'NY'"))
+  }
+  assert.ok(restrictions.includes("useState('SC')"))
+  assert.ok(!restrictions.includes("setState('NY')"))
+  assert.ok(serviceArea.includes("state: body.state || 'SC'"))
+  assert.ok(!serviceArea.includes("state: body.state || 'NY'"))
+  assert.ok(company.includes("placeholder: 'SC'"))
+  assert.ok(seed.includes("state: 'SC',\n          zip: area.zip"))
+  assert.ok(!seed.includes("state: 'NY',\n          zip: area.zip"))
+  assert.ok(checkout.includes("setValue('deliveryType', 'delivery')"))
+  assert.ok(checkout.includes('Delivery fee and sales tax are calculated on the next step based on your event address.'))
+  assert.ok(!checkout.includes('No delivery fee applies to customer pickup orders.'))
+
+  const legacyRoutes=[
+    'app/api/admin/backfill-ers-emails/route.ts',
+    'app/api/admin/bulk-import-ers/route.ts',
+    'app/api/admin/fix-ers-dates/route.ts',
+    'app/api/admin/reconcile-ers-dates/route.ts',
+    'app/api/admin/fix-order-numbers/route.ts',
+    'app/api/admin/fix-missing-ers-orders/route.ts',
+    'app/api/admin/fix-july-data/route.ts',
+    'app/api/admin/fix-batch3-special-cases/route.ts',
+  ]
+  for(const path of legacyRoutes){
+    const source=read(path)
+    assert.ok(source.includes('Legacy New York ERS maintenance is disabled in the South Carolina app.'),path)
+    assert.ok(source.includes('{ status: 410 }'),path)
+    assert.ok(!source.includes('prisma.'),path+' must not mutate the SC database')
+  }
+
+  const migration=read('prisma/migrations/20260927080000_sc_runtime_isolation/migration.sql')
+  assert.ok(migration.includes('UPDATE "ServiceArea"'))
+  assert.ok(migration.includes('"zip" ~ \'^29[0-9]{3}$\''))
+  assert.ok(migration.includes('UPDATE "RegisterSetup"'))
+  assert.ok(migration.includes("'Greenville, SC'"))
+  assert.ok(migration.includes('Customer and order records are intentionally not rewritten or deleted'))
+})

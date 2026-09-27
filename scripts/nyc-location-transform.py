@@ -75,7 +75,7 @@ REPLACEMENTS = [
 ]
 
 TEXT_EXTS = {".ts",".tsx",".js",".jsx",".cjs",".mjs",".json",".md",".yml",".yaml",".toml",".txt",".css"}
-SKIP_DIRS = {".git","node_modules",".next","dist"}
+SKIP_DIRS = {".git",".github","node_modules",".next","dist"}
 for p in ROOT.rglob("*"):
     if not p.is_file() or p.suffix.lower() not in TEXT_EXTS:
         continue

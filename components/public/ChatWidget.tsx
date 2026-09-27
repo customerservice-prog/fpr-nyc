@@ -19,7 +19,7 @@ const FAQ_DATA: FaqEntry[] = [
   { q: 'Do I need to pay a deposit?', a: 'Yes, a 25% deposit is required at booking to reserve your date. The remaining balance is due before delivery.' },
   { q: 'What payment methods do you accept?', a: 'We accept all major credit and debit cards through our secure online checkout.' },
   { q: 'When is the remaining balance due?', a: 'The balance is due before delivery. Automatic reminders are sent by email as your event approaches.' },
-  { q: 'Is there sales tax on my order?', a: 'Yes, New York State sales tax applies to taxable rental items and is calculated automatically at checkout.' },
+  { q: 'Is there sales tax on my order?', a: 'Applicable taxes are calculated automatically at checkout based on your order and event location.' },
   { q: 'Do you have coupons or promo codes?', a: 'Yes, if you have a coupon code you can enter it at checkout to apply your discount.' },
   { q: 'Do you offer discounts for multi-day rentals?', a: 'Yes. Renting for more than one day costs less per day than paying full price every day: 2-3 days adds about 50% to the 1-day price, 4-6 days adds about 100%, and 7+ days adds about 150%.' },
   { q: 'Can I request overnight or exact delivery times?', a: 'Yes, for an extra fee. Overnight keep is $75 (bounce houses and waterslides only), a flexible delivery window is $40, and a guaranteed exact delivery time is $100 on any delivery order - otherwise choose a free Morning or Afternoon window.' },
@@ -28,6 +28,7 @@ const FAQ_DATA: FaqEntry[] = [
   { q: 'Can I modify my order after booking?', a: 'Yes, with 48-72 hours notice.' },
   { q: 'Does the price include delivery and setup?', a: 'Tent delivery and setup is included for most Greenville, SC area locations. Table and chair setup is available for an additional fee.' },
   { q: 'What areas do you serve?', a: 'We deliver throughout the Upstate South Carolina area, including Greenville, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, Piedmont, and many nearby towns. A delivery fee based on distance may apply outside the immediate Greenville area.' },
+  { q: 'Can I pick up rentals myself?', a: 'Greenville currently operates as a delivery-only service. Customer warehouse pickup is not offered; we deliver equipment to your event location.' },
   { q: 'When do you set up and pick up?', a: 'Setup is coordinated in advance based on your event schedule, and pickup is typically the same day or the following morning for evening events.' },
   { q: 'Does setup time count toward my rental period?', a: 'No, setup time does not count toward your rental period.' },
   { q: 'What if my event starts early in the morning?', a: 'Early setups are available - just let us know your event time when booking.' },
@@ -133,7 +134,7 @@ async function findBestAnswer(userText: string): Promise<string> {
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'bot', text: "Hi! I'm the Friendly Party Rental assistant. Ask me about booking, pricing, delivery areas, or anything else about our rentals." },
+    { role: 'bot', text: "Hi! I'm the Friendly Party Rental SC assistant. Ask me about booking, pricing, delivery areas, or anything else about our rentals." },
   ])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)

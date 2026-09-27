@@ -298,19 +298,9 @@ if pkg.exists():
     s = s.replace("tests/sc-identity-sync.test.cjs", "tests/nyc-identity-sync.test.cjs")
     pkg.write_text(s)
 
-# Workflows: rename display copy and avoid hardcoded site domain for cron calls.
-wfdir = ROOT/".github/workflows"
-if wfdir.exists():
-    for p in wfdir.glob("*"):
-        if not p.is_file(): continue
-        s = p.read_text()
-        s = s.replace("Greenville", "NYC / Downstate").replace("South Carolina", "NYC / Downstate")
-        s = s.replace("https://fpr-nyc-production.up.railway.app", "${{ secrets.NYC_SITE_ORIGIN }}")
-        p.write_text(s)
-    scwf = wfdir/"sc-branding-check.yml"
-    if scwf.exists():
-        dest = wfdir/"nyc-branding-check.yml"
-        scwf.rename(dest)
+# Preserve inherited workflow files during localization. GitHub Actions tokens cannot
+# rewrite workflow files without separate workflows permission, and runtime app identity
+# is handled in application/config code instead.
 
 # .env example: no SC property/domain, keep index off by default.
 env = ROOT/".env.example"

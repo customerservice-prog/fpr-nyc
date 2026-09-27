@@ -88,7 +88,7 @@ function NewOrderPageInner() {
     billingAddress: '',
     billingCity: '',
     billingCityOther: '',
-    billingState: 'NY',
+    billingState: 'SC',
     billingZip: '',
     eventDate: '',
     dropoffSlot: '',
@@ -97,7 +97,7 @@ function NewOrderPageInner() {
     eventAddress: '',
     eventCity: '',
     eventCityOther: '',
-    eventState: 'NY',
+    eventState: 'SC',
     eventZip: '',
     deliveryType: 'delivery',
     travelFee: '0',
@@ -220,7 +220,7 @@ function NewOrderPageInner() {
       phone: c.phone || '',
       billingAddress: c.address || '',
       billingCity: c.city || '',
-      billingState: c.state || 'NY',
+      billingState: c.state || 'SC',
       billingZip: c.zip || '',
     }))
     setCustomerId(c.id)
@@ -664,7 +664,7 @@ function NewOrderPageInner() {
                 <option value="Other">Other</option>
               </select>
               <select value={form.billingState} onChange={(e) => setForm({ ...form, billingState: e.target.value })} className="border rounded px-3 py-2">
-                <option value="NY">NY</option>
+                <option value="SC">SC</option>
                 <option value="Other">Other</option>
               </select>
               <input placeholder="Zip" value={form.billingZip} onChange={(e) => setForm({ ...form, billingZip: e.target.value })} className="border rounded px-3 py-2" required={form.deliveryType === 'delivery' && sameAsBilling} />
@@ -690,7 +690,7 @@ function NewOrderPageInner() {
                     <option value="Other">Other</option>
                   </select>
                   <select value={form.eventState} onChange={(e) => setForm({ ...form, eventState: e.target.value })} className="border rounded px-3 py-2">
-                    <option value="NY">NY</option>
+                    <option value="SC">SC</option>
                     <option value="Other">Other</option>
                   </select>
                   <input placeholder="Zip" value={form.eventZip} onChange={(e) => setForm({ ...form, eventZip: e.target.value })} className="border rounded px-3 py-2" required={form.deliveryType === 'delivery' && !sameAsBilling} />

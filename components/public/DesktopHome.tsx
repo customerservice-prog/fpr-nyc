@@ -58,15 +58,15 @@ export default function DesktopHome(props: MobileHomeProps) {
     </section>
 
     <section className="mx-auto max-w-4xl px-4 py-14 text-center">
-      <h1 className="mb-6 text-3xl font-bold text-dark">{text('desktopIntroHeading','Party Rentals in Greenville, SC & Surrounding Areas')}</h1>
-      <div className="whitespace-pre-line leading-8 text-body">{text('desktopIntroBody','Friendly Party Rental provides tents, tables, chairs, inflatables, wedding rentals, event essentials, delivery, setup, and pickup throughout Greenville and nearby Upstate South Carolina communities.\n\nBrowse by category or start with your event date to see the rentals that fit your celebration.')}</div>
+      <h1 className="mb-6 text-3xl font-bold text-dark">{text('desktopIntroHeading','Party Rentals in Riverdale, NY & Surrounding Areas')}</h1>
+      <div className="whitespace-pre-line leading-8 text-body">{text('desktopIntroBody','Friendly Party Rental provides tents, tables, chairs, inflatables, wedding rentals, event essentials, delivery, setup, and pickup throughout Riverdale and nearby Downstate New York communities.\n\nBrowse by category or start with your event date to see the rentals that fit your celebration.')}</div>
       <Link href="/order-by-date" prefetch={false} className="btn-gold mt-8 inline-block">{text('desktopIntroButton','Book Your Party Rentals Online')}</Link>
     </section>
 
     <section className="bg-gray-50 py-12">
       <div className="mx-auto grid max-w-7xl grid-cols-3 gap-8 px-4">
         {[
-          [text('desktopBenefit1Heading','Local & Family-Owned'),text('desktopBenefit1Body','Friendly local service for Greenville and Upstate South Carolina events.')],
+          [text('desktopBenefit1Heading','Local & Family-Owned'),text('desktopBenefit1Body','Friendly local service for Riverdale and Downstate New York events.')],
           [text('desktopBenefit2Heading','Clean, Event-Ready Equipment'),text('desktopBenefit2Body','Rental equipment is cleaned, inspected, and prepared before delivery.')],
           [text('desktopBenefit3Heading','Delivery, Setup & Pickup'),text('desktopBenefit3Body','Our team coordinates delivery and collection so you can focus on the event.')],
         ].map(([heading,body]) => <div key={heading} className="rounded-xl bg-[#F6F4F2] p-7">
@@ -81,7 +81,7 @@ export default function DesktopHome(props: MobileHomeProps) {
     {popularItems.length > 0 && <section className="bg-[#FAFAF8] py-14">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-7 flex items-end justify-between gap-6">
-          <div><p className="text-xs font-bold uppercase tracking-[.22em] text-[#C85F00]">Booked by Greenville customers</p><h2 className="mt-2 text-3xl font-bold text-dark">{text('popularHeading','Popular Rentals')}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-body">Real booking history helps surface equipment customers choose most often. Date availability is still checked for your event.</p></div>
+          <div><p className="text-xs font-bold uppercase tracking-[.22em] text-[#C85F00]">Booked by Riverdale customers</p><h2 className="mt-2 text-3xl font-bold text-dark">{text('popularHeading','Popular Rentals')}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-body">Real booking history helps surface equipment customers choose most often. Date availability is still checked for your event.</p></div>
           <Link href="/popular-rentals" className="font-bold text-secondary underline">View popular rentals</Link>
         </div>
         <div className="grid grid-cols-4 gap-5">{popularItems.slice(0,8).map(item => <Link key={item.id} href={item.slug ? '/items/'+item.slug : '/category'} prefetch={false} className="overflow-hidden rounded-xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
@@ -127,13 +127,13 @@ export default function DesktopHome(props: MobileHomeProps) {
       <div className="mx-auto max-w-4xl px-6 text-center">
         <p className="text-xs font-bold uppercase tracking-[.24em] text-[#F4C542]">A Complete Solution</p>
         <h2 className="mt-3 text-3xl font-bold">Full-Service Event Planning</h2>
-        <p className="mx-auto mt-4 max-w-2xl leading-7 text-white/80">Talk with the Greenville team about rentals, layout, delivery, setup, and the details that need to come together for your event.</p>
+        <p className="mx-auto mt-4 max-w-2xl leading-7 text-white/80">Talk with the Riverdale team about rentals, layout, delivery, setup, and the details that need to come together for your event.</p>
         <Link href="/event-planning" prefetch={false} className="mt-7 inline-block rounded-lg bg-[#EEC400] px-7 py-3 font-bold text-[#0B1F3A]">Learn About Event Planning</Link>
       </div>
     </section>
 
     <section className="mx-auto max-w-4xl px-4 py-12">
-      <h2 className="text-2xl font-bold text-dark">Party Rentals in Greenville &amp; Upstate SC</h2>
+      <h2 className="text-2xl font-bold text-dark">Party Rentals in Riverdale &amp; Downstate New York</h2>
       {seoSection}
     </section>
   </div>

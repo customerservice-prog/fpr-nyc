@@ -25,94 +25,68 @@ const categories = [
 ]
 
 const items = [
-  { name: 'White Plastic Folding Chair', slug: 'white-plastic-folding-chair', cost: 2.5, quantity: 2000, categorySlug: 'table-chair-rentals', type: 'Regular' },
-  { name: '6ft Plastic Folding Table', slug: '6ft-plastic-folding-table', cost: 13, quantity: 70, categorySlug: 'table-chair-rentals', type: 'Regular' },
-  { name: '8ft Plastic Folding Table', slug: '8ft-plastic-folding-table', cost: 15, quantity: 50, categorySlug: 'table-chair-rentals', type: 'Regular' },
-  { name: 'White Resin Chair with Pad', slug: 'white-resin-chair-pad', cost: 4.5, quantity: 300, categorySlug: 'table-chair-rentals', type: 'Regular' },
-  { name: 'Gold Chiavari Chair', slug: 'gold-chiavari-chair', cost: 8, quantity: 200, categorySlug: 'table-chair-rentals', type: 'Regular' },
-  { name: 'White Chiavari Chair', slug: 'white-chiavari-chair', cost: 7.5, quantity: 200, categorySlug: 'table-chair-rentals', type: 'Regular' },
-  { name: '20x20 Pole Tent', slug: '20x20-pole-tent', cost: 250, quantity: 40, categorySlug: 'tent-rentals', type: 'Regular' },
-  { name: '20x30 Pole Tent', slug: '20x30-pole-tent', cost: 350, quantity: 25, categorySlug: 'tent-rentals', type: 'Regular' },
-  { name: '20x40 Pole Tent', slug: '20x40-pole-tent', cost: 450, quantity: 20, categorySlug: 'tent-rentals', type: 'Regular' },
-  { name: '40x60 Pole Tent', slug: '40x60-pole-tent', cost: 850, quantity: 8, categorySlug: 'tent-rentals', type: 'Regular' },
-  { name: '12x12 Dance Floor Section', slug: '12x12-dance-floor', cost: 175, quantity: 15, categorySlug: 'dance-floor-stage-rentals', type: 'Regular' },
-  { name: 'White Table Linen 6ft', slug: 'white-table-linen-6ft', cost: 8, quantity: 150, categorySlug: 'linen-rentals', type: 'Regular' },
-  { name: 'White Table Linen Round 60"', slug: 'white-table-linen-round-60', cost: 12, quantity: 100, categorySlug: 'linen-rentals', type: 'Regular' },
-  { name: 'Popcorn Machine', slug: 'popcorn-machine', cost: 75, quantity: 10, categorySlug: 'concession-machine-rentals', type: 'Regular' },
-  { name: 'Cotton Candy Machine', slug: 'cotton-candy-machine', cost: 65, quantity: 8, categorySlug: 'concession-machine-rentals', type: 'Regular' },
-  { name: 'Snow Cone Machine', slug: 'snow-cone-machine', cost: 55, quantity: 6, categorySlug: 'concession-machine-rentals', type: 'Regular' },
-  { name: 'Giant Jenga', slug: 'giant-jenga', cost: 45, quantity: 5, categorySlug: 'yard-game-rentals', type: 'Regular' },
-  { name: 'Cornhole Set', slug: 'cornhole-set', cost: 35, quantity: 8, categorySlug: 'yard-game-rentals', type: 'Regular' },
-  { name: 'String Lights 50ft', slug: 'string-lights-50ft', cost: 40, quantity: 20, categorySlug: 'event-lighting-rentals', type: 'Regular' },
-  { name: 'Uplighting Package (4 lights)', slug: 'uplighting-package', cost: 85, quantity: 10, categorySlug: 'event-lighting-rentals', type: 'Regular' },
-  { name: '3500W Generator', slug: '3500w-generator', cost: 125, quantity: 6, categorySlug: 'generator-rentals', type: 'Regular' },
-  { name: 'Photo Booth Package', slug: 'photo-booth-package', cost: 350, quantity: 3, categorySlug: 'photobooth-rentals', type: 'Regular' },
-  { name: 'Foam Party Machine', slug: 'foam-party-machine', cost: 275, quantity: 4, categorySlug: 'foam-party-machine-rentals', type: 'Regular' },
-  { name: 'Inflatable Movie Screen 12ft', slug: 'inflatable-movie-screen-12ft', cost: 199, quantity: 4, categorySlug: 'inflatable-movie-screen-rentals', type: 'Regular' },
-  { name: 'Bounce House - Castle', slug: 'bounce-house-castle', cost: 199, quantity: 5, categorySlug: 'bounce-house-rentals', type: 'Regular' },
-  { name: 'Water Slide 14ft', slug: 'water-slide-14ft', cost: 299, quantity: 3, categorySlug: 'bounce-house-rentals', type: 'Regular' },
-  { name: 'Combo Bounce House & Slide', slug: 'combo-bounce-house-slide', cost: 499, quantity: 3, categorySlug: 'bounce-house-rentals', type: 'Regular' },
-  { name: 'Portable Heater', slug: 'portable-heater', cost: 45, quantity: 12, categorySlug: 'heater-fan-rentals', type: 'Regular' },
-  { name: 'Industrial Fan', slug: 'industrial-fan', cost: 35, quantity: 10, categorySlug: 'heater-fan-rentals', type: 'Regular' },
-  { name: 'Stanchion with Rope', slug: 'stanchion-rope', cost: 15, quantity: 30, categorySlug: 'party-rental-accessories', type: 'Regular' },
+  { name: 'White Plastic Folding Chair', slug: 'white-plastic-folding-chair', cost: 2.5, quantity: 0, categorySlug: 'table-chair-rentals', type: 'Regular' },
+  { name: '6ft Plastic Folding Table', slug: '6ft-plastic-folding-table', cost: 13, quantity: 0, categorySlug: 'table-chair-rentals', type: 'Regular' },
+  { name: '8ft Plastic Folding Table', slug: '8ft-plastic-folding-table', cost: 15, quantity: 0, categorySlug: 'table-chair-rentals', type: 'Regular' },
+  { name: 'White Resin Chair with Pad', slug: 'white-resin-chair-pad', cost: 4.5, quantity: 0, categorySlug: 'table-chair-rentals', type: 'Regular' },
+  { name: 'Gold Chiavari Chair', slug: 'gold-chiavari-chair', cost: 8, quantity: 0, categorySlug: 'table-chair-rentals', type: 'Regular' },
+  { name: 'White Chiavari Chair', slug: 'white-chiavari-chair', cost: 7.5, quantity: 0, categorySlug: 'table-chair-rentals', type: 'Regular' },
+  { name: '20x20 Pole Tent', slug: '20x20-pole-tent', cost: 250, quantity: 0, categorySlug: 'tent-rentals', type: 'Regular' },
+  { name: '20x30 Pole Tent', slug: '20x30-pole-tent', cost: 350, quantity: 0, categorySlug: 'tent-rentals', type: 'Regular' },
+  { name: '20x40 Pole Tent', slug: '20x40-pole-tent', cost: 450, quantity: 0, categorySlug: 'tent-rentals', type: 'Regular' },
+  { name: '40x60 Pole Tent', slug: '40x60-pole-tent', cost: 850, quantity: 0, categorySlug: 'tent-rentals', type: 'Regular' },
+  { name: '12x12 Dance Floor Section', slug: '12x12-dance-floor', cost: 175, quantity: 0, categorySlug: 'dance-floor-stage-rentals', type: 'Regular' },
+  { name: 'White Table Linen 6ft', slug: 'white-table-linen-6ft', cost: 8, quantity: 0, categorySlug: 'linen-rentals', type: 'Regular' },
+  { name: 'White Table Linen Round 60"', slug: 'white-table-linen-round-60', cost: 12, quantity: 0, categorySlug: 'linen-rentals', type: 'Regular' },
+  { name: 'Popcorn Machine', slug: 'popcorn-machine', cost: 75, quantity: 0, categorySlug: 'concession-machine-rentals', type: 'Regular' },
+  { name: 'Cotton Candy Machine', slug: 'cotton-candy-machine', cost: 65, quantity: 0, categorySlug: 'concession-machine-rentals', type: 'Regular' },
+  { name: 'Snow Cone Machine', slug: 'snow-cone-machine', cost: 55, quantity: 0, categorySlug: 'concession-machine-rentals', type: 'Regular' },
+  { name: 'Giant Jenga', slug: 'giant-jenga', cost: 45, quantity: 0, categorySlug: 'yard-game-rentals', type: 'Regular' },
+  { name: 'Cornhole Set', slug: 'cornhole-set', cost: 35, quantity: 0, categorySlug: 'yard-game-rentals', type: 'Regular' },
+  { name: 'String Lights 50ft', slug: 'string-lights-50ft', cost: 40, quantity: 0, categorySlug: 'event-lighting-rentals', type: 'Regular' },
+  { name: 'Uplighting Package (4 lights)', slug: 'uplighting-package', cost: 85, quantity: 0, categorySlug: 'event-lighting-rentals', type: 'Regular' },
+  { name: '3500W Generator', slug: '3500w-generator', cost: 125, quantity: 0, categorySlug: 'generator-rentals', type: 'Regular' },
+  { name: 'Photo Booth Package', slug: 'photo-booth-package', cost: 350, quantity: 0, categorySlug: 'photobooth-rentals', type: 'Regular' },
+  { name: 'Foam Party Machine', slug: 'foam-party-machine', cost: 275, quantity: 0, categorySlug: 'foam-party-machine-rentals', type: 'Regular' },
+  { name: 'Inflatable Movie Screen 12ft', slug: 'inflatable-movie-screen-12ft', cost: 199, quantity: 0, categorySlug: 'inflatable-movie-screen-rentals', type: 'Regular' },
+  { name: 'Bounce House - Castle', slug: 'bounce-house-castle', cost: 199, quantity: 0, categorySlug: 'bounce-house-rentals', type: 'Regular' },
+  { name: 'Water Slide 14ft', slug: 'water-slide-14ft', cost: 299, quantity: 0, categorySlug: 'bounce-house-rentals', type: 'Regular' },
+  { name: 'Combo Bounce House & Slide', slug: 'combo-bounce-house-slide', cost: 499, quantity: 0, categorySlug: 'bounce-house-rentals', type: 'Regular' },
+  { name: 'Portable Heater', slug: 'portable-heater', cost: 45, quantity: 0, categorySlug: 'heater-fan-rentals', type: 'Regular' },
+  { name: 'Industrial Fan', slug: 'industrial-fan', cost: 35, quantity: 0, categorySlug: 'heater-fan-rentals', type: 'Regular' },
+  { name: 'Stanchion with Rope', slug: 'stanchion-rope', cost: 15, quantity: 0, categorySlug: 'party-rental-accessories', type: 'Regular' },
 ]
 
 const serviceAreas = [
-  { city: 'Greenville', zip: '29601', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29602', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29603', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29604', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29605', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29606', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29607', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29608', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29609', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29610', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29611', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29612', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29613', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29614', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29615', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Greenville', zip: '29616', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Taylors', zip: '29687', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Piedmont', zip: '29673', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Berea', zip: '29617', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Simpsonville', zip: '29680', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Anderson', zip: '29621', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Spartanburg', zip: '29301', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Travelers Rest', zip: '29690', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Fountain Inn', zip: '29644', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Fountain Inn', zip: '29644', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Mauldin', zip: '29662', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Duncan', zip: '29334', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Powdersville', zip: '29642', region: 'Greenville Metro', baseFee: 0 },
-  { city: 'Williamston', zip: '29697', region: 'Eastern Suburbs', baseFee: 0 },
-  { city: 'Pelzer', zip: '29669', region: 'Eastern Suburbs', baseFee: 0 },
-  { city: 'Pickens', zip: '29671', region: 'Eastern Suburbs', baseFee: 0 },
-  { city: 'Liberty', zip: '29657', region: 'Eastern Suburbs', baseFee: 0 },
-  { city: 'Seneca', zip: '29678', region: 'Eastern Suburbs', baseFee: 0 },
-  { city: 'Laurens', zip: '29360', region: 'Eastern Suburbs', baseFee: 0 },
-  { city: 'Greer', zip: '29650', region: 'Eastern Suburbs', baseFee: 0 },
-  { city: 'Easley', zip: '29640', region: 'Eastern Suburbs', baseFee: 0 },
-  { city: 'Clemson', zip: '29631', region: 'Southern & Western', baseFee: 0 },
-  { city: 'Woodruff', zip: '29388', region: 'Southern & Western', baseFee: 0 },
-  { city: 'Boiling Springs', zip: '29316', region: 'Southern & Western', baseFee: 0 },
-  { city: 'Inman', zip: '29349', region: 'Southern & Western', baseFee: 0 },
-  { city: 'Landrum', zip: '29356', region: 'Southern & Western', baseFee: 0 },
-  { city: 'Gray Court', zip: '29645', region: 'Southern & Western', baseFee: 0 },
-  { city: 'Central', zip: '29630', region: 'Southern & Western', baseFee: 0 },
-  { city: 'Six Mile', zip: '29682', region: 'Southern & Western', baseFee: 0 },
-  { city: 'Belton', zip: '29627', region: 'Southern & Western', baseFee: 0 },
-  { city: 'Honea Path', zip: '29654', region: 'Northern', baseFee: 0 },
-  { city: 'Marietta', zip: '29661', region: 'Northern', baseFee: 0 },
-  { city: 'Wade Hampton', zip: '29609', region: 'Northern', baseFee: 0 },
-  { city: 'Judson', zip: '29611', region: 'Northern', baseFee: 0 },
-  { city: 'Parker', zip: '29609', region: 'Northern', baseFee: 0 },
-  { city: 'Gantt', zip: '29605', region: 'Northern', baseFee: 0 },
+  { city: 'Riverdale', zip: '10463', region: 'NYC / Bronx', baseFee: 0 },
+  { city: 'Riverdale', zip: '10471', region: 'NYC / Bronx', baseFee: 0 },
+  { city: 'Fieldston', zip: '10471', region: 'NYC / Bronx', baseFee: 0 },
+  { city: 'Kingsbridge', zip: '10463', region: 'NYC / Bronx', baseFee: 0 },
+  { city: 'Kingsbridge', zip: '10468', region: 'NYC / Bronx', baseFee: 0 },
+  { city: 'The Bronx', zip: '10463', region: 'NYC / Bronx', baseFee: 0 },
+  { city: 'The Bronx', zip: '10468', region: 'NYC / Bronx', baseFee: 0 },
+  { city: 'The Bronx', zip: '10470', region: 'NYC / Bronx', baseFee: 0 },
+  { city: 'The Bronx', zip: '10471', region: 'NYC / Bronx', baseFee: 0 },
+  { city: 'Yonkers', zip: '10701', region: 'Lower Westchester', baseFee: 0 },
+  { city: 'Yonkers', zip: '10703', region: 'Lower Westchester', baseFee: 0 },
+  { city: 'Yonkers', zip: '10704', region: 'Lower Westchester', baseFee: 0 },
+  { city: 'Yonkers', zip: '10705', region: 'Lower Westchester', baseFee: 0 },
+  { city: 'Yonkers', zip: '10710', region: 'Lower Westchester', baseFee: 0 },
+  { city: 'Mount Vernon', zip: '10550', region: 'Lower Westchester', baseFee: 0 },
+  { city: 'Mount Vernon', zip: '10552', region: 'Lower Westchester', baseFee: 0 },
+  { city: 'Mount Vernon', zip: '10553', region: 'Lower Westchester', baseFee: 0 },
+  { city: 'New Rochelle', zip: '10801', region: 'Lower Westchester', baseFee: 0 },
+  { city: 'New Rochelle', zip: '10804', region: 'Lower Westchester', baseFee: 0 },
+  { city: 'New Rochelle', zip: '10805', region: 'Lower Westchester', baseFee: 0 },
+  { city: 'Bronxville', zip: '10708', region: 'Lower Westchester', baseFee: 0 },
+  { city: 'Tuckahoe', zip: '10707', region: 'Lower Westchester', baseFee: 0 },
+  { city: 'Eastchester', zip: '10709', region: 'Lower Westchester', baseFee: 0 },
+  { city: 'Pelham', zip: '10803', region: 'Lower Westchester', baseFee: 0 },
 ]
 
 async function main() {
-  console.log('Seeding database...')
+  console.log('Seeding Friendly Party Rental NYC database...')
+  console.warn('NYC starter inventory quantities intentionally begin at 0 until actual location stock is entered in admin.')
 
   const password = process.env.ADMIN_PASSWORD || 'Admin1234!'
   const hashedPassword = await bcrypt.hash(password, 12)
@@ -141,7 +115,7 @@ async function main() {
         slug: cat.slug,
         sortOrder: cat.sortOrder,
         displayToCustomer: cat.displayToCustomer !== false,
-        description: `${cat.name} rentals in Greenville, SC and surrounding Upstate South Carolina areas.`,
+        description: `${cat.name} rentals for Riverdale, selected Bronx neighborhoods, and Lower Westchester.`,
       },
     })
   }
@@ -161,7 +135,8 @@ async function main() {
       update: {
         name: item.name,
         cost: item.cost,
-        quantity: item.quantity,
+        quantity: 0,
+        status: 'Unavailable',
         type: item.type,
         categoryId,
       },
@@ -169,36 +144,14 @@ async function main() {
         name: item.name,
         slug: item.slug,
         cost: item.cost,
-        quantity: item.quantity,
+        quantity: 0,
+        status: 'Unavailable',
         type: item.type,
         categoryId,
         displayToCustomer: true,
-        description: `Professional ${item.name} rental for your event in Greenville, SC and Upstate South Carolina.`,
+        description: `Professional ${item.name} rental for events in Riverdale, selected Bronx neighborhoods, and Lower Westchester.`,
       },
     })
-  }
-
-  const closedDates = [
-    new Date('2026-06-26'),
-    new Date('2026-06-27'),
-    new Date('2026-06-28'),
-    new Date('2026-06-29'),
-  ]
-
-  for (const date of closedDates) {
-    const existing = await prisma.closedDate.findFirst({
-      where: {
-        date: {
-          gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-          lt: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1),
-        },
-      },
-    })
-    if (!existing) {
-      await prisma.closedDate.create({
-        data: { date, reason: 'Closed' },
-      })
-    }
   }
 
   for (const area of serviceAreas) {
@@ -209,7 +162,7 @@ async function main() {
       await prisma.serviceArea.create({
         data: {
           city: area.city,
-          state: 'SC',
+          state: 'NY',
           zip: area.zip,
           region: area.region,
           baseFee: area.baseFee,
@@ -234,23 +187,21 @@ async function main() {
     })
   }
 
-  const existingSettings = await prisma.companySettings.findFirst()
-  if (!existingSettings) {
-    await prisma.companySettings.create({
-      data: {
-        businessName: 'Friendly Party Rental SC',
-        phone: '864-610-5324',
-        email: 'customerservice@friendlypartyrental.com',
-        address: '',
-        city: 'Greenville',
-        state: 'SC',
-        zip: '29601',
-        timeZone: 'America/New_York',
-      },
-    })
+  const companyData = {
+    businessName: 'Friendly Party Rental NYC',
+    phone: '315-884-1498',
+    email: 'customerservice@friendlypartyrental.com',
+    address: '',
+    city: 'Riverdale',
+    state: 'NY',
+    zip: '10471',
+    timeZone: 'America/New_York',
   }
+  const existingSettings = await prisma.companySettings.findFirst()
+  if (existingSettings) await prisma.companySettings.update({ where: { id: existingSettings.id }, data: companyData })
+  else await prisma.companySettings.create({ data: companyData })
 
-  console.log('Seed completed successfully!')
+  console.log('NYC seed completed successfully!')
 }
 
 main()

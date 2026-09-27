@@ -116,7 +116,7 @@ export function blockHtml(b: Block, theme: VisualThemeTokens): string {
         return '<div style="text-align:center;padding:10px 0 6px;"><span style="font-family:' + theme.headingFont + ';font-size:15px;font-weight:bold;color:' + theme.headingColor + ';letter-spacing:1px;">FRIENDLY PARTY RENTAL</span></div>'
       }
       if (variant === 'editorial') {
-        return '<div style="text-align:center;padding:6px 0 18px;"><div style="font-family:' + theme.headingFont + ';font-size:14px;font-weight:normal;color:' + theme.headingColor + ';letter-spacing:3px;text-transform:uppercase;">Friendly Party Rental</div><div style="font-size:11px;color:' + theme.mutedColor + ';letter-spacing:1px;margin-top:4px;font-family:' + theme.bodyFont + ';font-style:italic;">Greenville &amp; Upstate South Carolina</div></div>'
+        return '<div style="text-align:center;padding:6px 0 18px;"><div style="font-family:' + theme.headingFont + ';font-size:14px;font-weight:normal;color:' + theme.headingColor + ';letter-spacing:3px;text-transform:uppercase;">Friendly Party Rental</div><div style="font-size:11px;color:' + theme.mutedColor + ';letter-spacing:1px;margin-top:4px;font-family:' + theme.bodyFont + ';font-style:italic;">Riverdale &amp; Downstate New York</div></div>'
       }
       return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="padding:16px 0;border-bottom:3px solid ' + theme.accent + ';">' +
         '<div style="font-family:' + theme.headingFont + ';font-size:19px;font-weight:bold;color:' + theme.headingColor + ';letter-spacing:1.5px;">FRIENDLY PARTY RENTAL</div>' +
@@ -167,7 +167,7 @@ export function blockHtml(b: Block, theme: VisualThemeTokens): string {
       return '<div style="text-align:left;font-family:' + theme.headingFont + ';font-style:italic;font-size:15px;color:' + theme.textColor + ';margin:6px 0 4px;">' + esc(b.text || '') + '</div>'
     case 'footerBrand': {
       const variant = b.variant || 'standard'
-      const contact = '864-610-5324 &nbsp;•&nbsp; friendlypartyrentalsc.com'
+      const contact = '315-884-1498 &nbsp;•&nbsp; fpr-nyc-production.up.railway.app'
       if (variant === 'minimal') {
         return '<div style="text-align:center;border-top:1px solid ' + theme.borderColor + ';padding-top:14px;margin-top:18px;font-family:' + theme.bodyFont + ';font-size:12px;color:' + theme.mutedColor + ';">' +
           'Friendly Party Rental &nbsp;•&nbsp; ' + contact + '<br/><a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Manage email preferences</a></div>'
@@ -175,12 +175,12 @@ export function blockHtml(b: Block, theme: VisualThemeTokens): string {
       if (variant === 'corporate') {
         return '<div style="text-align:center;border-top:1px solid ' + theme.borderColor + ';padding-top:16px;margin-top:20px;font-family:' + theme.bodyFont + ';font-size:12px;color:' + theme.mutedColor + ';">' +
           '<div style="font-weight:bold;color:' + theme.headingColor + ';margin-bottom:3px;">Friendly Party Rental</div>' +
-          'Tents &bull; Tables &bull; Chairs &bull; Event Rentals &mdash; Greenville / Upstate South Carolina<br/>' + contact + '<br/>' +
+          'Tents &bull; Tables &bull; Chairs &bull; Event Rentals &mdash; Riverdale / Downstate New York<br/>' + contact + '<br/>' +
           '<a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Manage preferences</a> &nbsp;|&nbsp; <a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Unsubscribe</a></div>'
       }
       return '<div style="text-align:center;border-top:1px solid ' + theme.borderColor + ';padding-top:16px;margin-top:20px;font-family:' + theme.bodyFont + ';font-size:12px;color:' + theme.mutedColor + ';">' +
         '<div style="font-weight:bold;color:' + theme.headingColor + ';margin-bottom:3px;">Friendly Party Rental</div>' +
-        'Tents &bull; Tables &bull; Chairs &bull; Event Rentals<br/>Greenville, SC &nbsp;•&nbsp; ' + contact + '<br/>' +
+        'Tents &bull; Tables &bull; Chairs &bull; Event Rentals<br/>Riverdale, NY &nbsp;•&nbsp; ' + contact + '<br/>' +
         '<a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Manage preferences</a> &nbsp;|&nbsp; <a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Unsubscribe</a></div>'
     }
     default:

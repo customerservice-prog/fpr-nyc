@@ -69,7 +69,7 @@ export function wrapEmail(bodyHtml: string, recipient: string, origin: string, p
   </td></tr>
   <tr><td style="background-color:#ffffff;padding:24px 32px;font-family:Arial,Helvetica,sans-serif;text-align:center;border-top:1px solid #e5e7eb;">
   <div style="font-size:15px;font-weight:bold;color:#1a1a1a;">Friendly Party Rental NYC</div>
-  <div style="font-size:13px;color:#6b7280;padding-top:4px;">Riverdale, NY &amp; nearby Upstate communities</div>
+  <div style="font-size:13px;color:#6b7280;padding-top:4px;">Riverdale, NY &amp; nearby Bronx and Lower Westchester communities</div>
   <div style="font-size:13px;color:#6b7280;padding-top:2px;">315-884-1498 &nbsp;&bull;&nbsp; customerservice@friendlypartyrental.com</div>
   <div style="padding-top:8px;"><a href="${origin}" style="color:#0b3d91;font-size:13px;font-weight:bold;text-decoration:none;">fpr-nyc-production.up.railway.app</a></div>
   <div style="font-size:11px;color:#6b7280;line-height:1.6;padding-top:16px;border-top:1px solid #e5e7eb;margin-top:16px;">

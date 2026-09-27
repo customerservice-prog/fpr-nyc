@@ -11,7 +11,7 @@ import { matchesTentLighting } from '@/lib/scAddonMatching'
 import { itemDescriptionForSc } from '@/lib/scPublicCopy'
 
 export const dynamic = 'force-dynamic'
-const BASE_URL = 'https://www.friendlypartyrentalsc.com'
+const BASE_URL = 'https://fpr-nyc-production.up.railway.app'
 
 function cleanSlug(raw: string) {
   let s = decodeURIComponent(raw)
@@ -46,14 +46,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const item = await findItem((await params).slug)
   if (!item) return { title: 'Rental not found', robots:{index:false,follow:true} }
   const fullDescription = itemDescriptionForSc(item.name, item.description)
-  const desc = scMetaText(`Rent ${item.name} in Greenville, SC. ${fullDescription}`)
+  const desc = scMetaText(`Rent ${item.name} in Riverdale, NY. ${fullDescription}`)
   const canonical = `${BASE_URL}/items/${item.slug}`
   return {
-    ...scPageMetadata(`/items/${encodeURIComponent(item.slug!)}`, `${item.name} Rental - Greenville, SC`, desc),
+    ...scPageMetadata(`/items/${encodeURIComponent(item.slug!)}`, `${item.name} Rental - Riverdale, NY`, desc),
     description: desc,
     alternates: { canonical },
     openGraph: {
-      title: `${item.name} Rental in Greenville, SC`,
+      title: `${item.name} Rental in Riverdale, NY`,
       description: desc,
       url: canonical,
       images: item.picture ? [{ url: `${BASE_URL}/api/item-image/${item.slug}?v=${item.updatedAt.getTime()}` }] : undefined,
@@ -95,7 +95,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
       businessFunction: 'http://purl.org/goodrelations/v1#LeaseOut',
       seller: {'@id':SC_BUSINESS_ID},
       url: scUrl(`/items/${encodeURIComponent(item.slug!)}`),
-      areaServed: 'Greenville, SC',
+      areaServed: 'Riverdale, NY',
     },
   }
 

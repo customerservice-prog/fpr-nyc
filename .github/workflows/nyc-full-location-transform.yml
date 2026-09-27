@@ -40,7 +40,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if git grep -n -I -E '864[-. ]?610[-. ]?5324|friendlypartyrentalsc\.com' -- app components lib prisma scripts ':!docs/**' ':!**/*.md'; then
+          if git grep -n -I -E '864[-. ]?610[-. ]?5324|friendlypartyrentalsc\.com' -- app components lib prisma scripts ':!docs/**' ':!**/*.md' ':!scripts/nyc-location-transform.py'; then
             echo "Found active South Carolina phone/domain identity"
             exit 1
           fi

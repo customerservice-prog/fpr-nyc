@@ -9,6 +9,7 @@ import { hasDeliverableCustomerEmail, orderReceivedEmail, ownerNotificationRecip
 import { getItemAvailability } from '@/lib/availability'
 import { evaluateRentalRestrictions } from '@/lib/rentalRestrictions'
 import { DeliveryQuoteError, getDeliveryQuote, requireDeliveryMethod, requireMatchingDeliveryFee } from '@/lib/delivery'
+import { effectiveEventEndDate } from '@/lib/orderDates'
 
 async function reserveExactTimeSlot(tx: any, date: Date, time: string, type: 'delivery' | 'pickup', defaultCapacity: number): Promise<{ ok: true } | { ok: false; reason: 'blocked' | 'full' }> {
   const dayDate = new Date(date)
@@ -29,7 +30,7 @@ async function reserveExactTimeSlot(tx: any, date: Date, time: string, type: 'de
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    // Enforce Greenville's public delivery-only policy before any database writes,
+    // Enforce NYC / Lower Westchester's public delivery-only policy before any database writes,
     // inventory reservations, email notifications, or payment creation.
     requireDeliveryMethod(body?.deliveryType)
     const {
@@ -120,6 +121,7 @@ export async function POST(request: NextRequest) {
             eventState: eventState || null,
             eventZip: eventZip || null,
             eventDate: new Date(eventDate),
+      eventEndDate: effectiveEventEndDate(new Date(eventDate), null, rentalDayCount),
             cartSummary: JSON.stringify({
               items: (items || []).map((i: any) => ({ name: i.name, quantity: i.quantity })),
               subtotal,
@@ -230,6 +232,7 @@ export async function POST(request: NextRequest) {
       ? totalAmountInput
       : Math.max(subtotal - discount, 0) + fee + tax + waiverFee + specialFee + lastMinuteFee + schedulingFeeTotal
     const totalAmount = baseTotalAmount + (Number(tipAmount) || 0)
+    const rentalDayCount = Math.max(Number(rentalDays) || 1, 1)
 
     const baseOrderData: any = {
       customerId: customer.id,
@@ -248,7 +251,7 @@ export async function POST(request: NextRequest) {
       deliveryFee: fee,
       deliveryDistance: deliveryQuote.distance,
       subtotal,
-      rentalDays: rentalDays || 1,
+      rentalDays: rentalDayCount,
       durationLabel: durationLabel || null,
       durationFee: durationFeeAmount,
       specialRequestFee: specialFee,

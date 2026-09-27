@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Call thank you endpoint
         run: |
-          curl -f -X GET https://www.friendlypartyrentalsc.com/api/cron/thank-you -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl -f -X GET https://fpr-nyc-production.up.railway.app/api/cron/thank-you -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

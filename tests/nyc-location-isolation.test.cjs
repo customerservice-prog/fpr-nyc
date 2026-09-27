@@ -39,6 +39,6 @@ test('NYC active source does not contain the SC public domain or phone', () => {
     }
     if(!/\.(?:ts|tsx|js|mjs|cjs|json)$/.test(p)) continue
     const content = fs.readFileSync(p,'utf8')
-    for(const pattern of banned) assert.doesNotMatch(content, pattern, p+' contains active SC identity')
+    for(const pattern of banned) assert.doesNotMatch(content, pattern, p+' contains active South Carolina location residue')
   }
 })

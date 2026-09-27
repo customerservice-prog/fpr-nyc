@@ -17,7 +17,7 @@ const playfair = Playfair_Display({
   display: 'swap',
 })
 
-export const metadata = scPageMetadata("/weddings","Wedding Rentals in Greenville, SC | Tents, Chairs, Linens & Packages","Browse Greenville wedding rentals, tents, tables, chairs, Chiavari seating, linens, lighting, dance floors and wedding packages with delivery and setup options.")
+export const metadata = scPageMetadata("/weddings","Wedding Rentals in Riverdale, Bronx, NY | Tents, Chairs, Linens & Packages","Browse Riverdale wedding rentals, tents, tables, chairs, Chiavari seating, linens, lighting, dance floors and wedding packages with delivery and setup options.")
 export const dynamic = 'force-dynamic'
 
 const faqItems = [
@@ -27,7 +27,7 @@ const faqItems = [
   },
   {
     question: 'Can I customize a wedding package?',
-    answer: 'Yes. We can adjust quantities and add or remove rental items to better fit your guest count, venue and style. Call 864-610-5324 or request a quote online and our team will help build the setup you need.',
+    answer: 'Yes. We can adjust quantities and add or remove rental items to better fit your guest count, venue and style. Call 315-884-1498 or request a quote online and our team will help build the setup you need.',
   },
   {
     question: 'Can I see my reception layout before I book?',
@@ -38,8 +38,8 @@ const faqItems = [
     answer: 'Popular spring, summer and fall weekends can fill quickly. Booking early gives you the best selection of tents, chairs, linens and other wedding equipment, especially for larger receptions.',
   },
   {
-    question: 'Do you deliver wedding rentals outside Greenville?',
-    answer: 'Yes. We serve Greenville, Taylors, Greer, Simpsonville, Mauldin, Travelers Rest, Fountain Inn and surrounding Upstate South Carolina communities. Travel fees depend on distance.',
+    question: 'Do you deliver wedding rentals outside Riverdale?',
+    answer: 'Yes. We serve Riverdale, Taylors, Greer, Simpsonville, Mauldin, Travelers Rest, Fountain Inn and surrounding Downstate New York communities. Travel fees depend on distance.',
   },
 ]
 
@@ -98,7 +98,7 @@ export default async function WeddingsPage() {
       <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a1a1a 0%, #14335c 55%, #1a6fd4 100%)' }}>
         <div className="absolute top-0 left-0 w-full h-1" style={{ background: 'linear-gradient(90deg, #EEC400, #E07B00, #EEC400)' }} />
         <div className="max-w-5xl mx-auto px-4 py-20 text-center">
-          <p className="text-primary uppercase tracking-[0.3em] text-xs font-bold mb-4">Greenville Wedding Rentals</p>
+          <p className="text-primary uppercase tracking-[0.3em] text-xs font-bold mb-4">Riverdale Wedding Rentals</p>
           <h1 className={`${playfair.className} text-4xl md:text-6xl font-bold text-white mb-5 drop-shadow-md`}>
             Wedding Rentals for Every Kind of &ldquo;I Do&rdquo;
           </h1>
@@ -119,7 +119,7 @@ export default async function WeddingsPage() {
             <span className="hidden md:inline text-primary">•</span>
             <span>Fully Insured</span>
             <span className="hidden md:inline text-primary">•</span>
-            <span>Serving Upstate South Carolina</span>
+            <span>Serving Downstate New York</span>
           </div>
         </div>
       </div>
@@ -167,7 +167,7 @@ export default async function WeddingsPage() {
         <div className="max-w-4xl mx-auto space-y-14 mb-16">
           <div>
             <h2 className={`${playfair.className} text-2xl font-bold text-dark mb-4 text-center`}>Full Wedding Rental Services</h2>
-            <p className="text-body mb-4">Friendly Party Rental SC provides wedding rentals throughout Greenville and Upstate South Carolina. Mix individual pieces or start with one of our packages, then customize the tent, seating, linens, lighting, ceremony décor and reception equipment around your venue and guest count. We also offer <Link href="/event-planning" className="text-secondary underline font-semibold">full-service event planning</Link> when you want help coordinating the full setup.</p>
+            <p className="text-body mb-4">Friendly Party Rental NYC provides wedding rentals throughout Riverdale and Downstate New York. Mix individual pieces or start with one of our packages, then customize the tent, seating, linens, lighting, ceremony décor and reception equipment around your venue and guest count. We also offer <Link href="/event-planning" className="text-secondary underline font-semibold">full-service event planning</Link> when you want help coordinating the full setup.</p>
           </div>
 
           <div>
@@ -183,7 +183,7 @@ export default async function WeddingsPage() {
           </div>
 
           <div>
-            <h2 className={`${playfair.className} text-xl font-bold text-dark mb-6 text-center`}>Why Greenville Couples Choose Us</h2>
+            <h2 className={`${playfair.className} text-xl font-bold text-dark mb-6 text-center`}>Why Riverdale Couples Choose Us</h2>
             <div className="grid sm:grid-cols-2 gap-5">
               {whyChooseUs.map((item) => (
                 <div key={item.label} className="flex items-center gap-4 bg-white border border-primary/20 p-5 rounded-xl shadow-sm">
@@ -199,7 +199,7 @@ export default async function WeddingsPage() {
 
         <div className="relative overflow-hidden rounded-2xl text-center py-14 px-6" style={{ background: 'linear-gradient(135deg, #1a1a1a 0%, #14335c 55%, #1a6fd4 100%)' }}>
           <p className={`${playfair.className} italic text-primary text-lg mb-2`}>Your Story, Beautifully Styled</p>
-          <h2 className={`${playfair.className} text-2xl md:text-3xl font-bold text-white mb-6`}>Ready to Plan Your Greenville Wedding?</h2>
+          <h2 className={`${playfair.className} text-2xl md:text-3xl font-bold text-white mb-6`}>Ready to Plan Your Riverdale Wedding?</h2>
           <div className="flex flex-wrap justify-center gap-3">
             <DesignYourEventCTA source="weddings_footer" label="Design My Reception" variant="outline" />
             <Link href="/contact_us" className="btn-gold inline-block px-10 uppercase text-sm tracking-wide">Request a Custom Quote</Link>

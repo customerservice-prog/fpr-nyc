@@ -15,7 +15,7 @@ Two environment variables:
 - STORAGE_DIR - absolute path to the mounted volume where files are written
   (for example /data/uploads).
 - PUBLIC_BASE_URL - the public site origin, no trailing slash
-  (for example https://www.friendlypartyrentalsc.com).
+  (for example https://www.fpr-nyc-production.up.railway.app).
 
 Uploaded files are written under STORAGE_DIR and served publicly at
 PUBLIC_BASE_URL/api/uploads/<filename>.
@@ -38,7 +38,7 @@ The mount path you choose here MUST match STORAGE_DIR in Step 2.
    - Value: /data/uploads   (must equal the volume mount path from Step 1)
 3. Add a variable:
    - Name:  PUBLIC_BASE_URL
-   - Value: https://www.friendlypartyrentalsc.com   (no trailing slash)
+   - Value: https://www.fpr-nyc-production.up.railway.app   (no trailing slash)
 4. Save. Railway will redeploy the service.
 
 ## Step 3 - Merge and deploy

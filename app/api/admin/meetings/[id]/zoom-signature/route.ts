@@ -34,6 +34,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     sdkKey: process.env.ZOOM_SDK_KEY,
     meetingNumber: meeting.zoomMeetingId,
     password: meeting.zoomPassword || '',
-    userName: 'Friendly Party Rental SC',
+    userName: 'Friendly Party Rental NYC',
   })
 }

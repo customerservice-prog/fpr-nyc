@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-// Approximate Greenville city-center point for a local visibility grid.
+// Approximate Riverdale service-area reference point for a local visibility grid.
 // It is not a warehouse/storefront coordinate and must never be presented as one.
 const CENTER={lat:34.8526,lng:-82.3940}
 type P={id:string;row:number;col:number;lat:number;lng:number;rank:number|null;competitor?:string}

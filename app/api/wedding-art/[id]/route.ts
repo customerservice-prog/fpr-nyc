@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readScWeddingArtwork } from '@/lib/scWeddingArtworkServer'
+import { readNycWeddingArtwork } from '@/lib/nycWeddingArtworkServer'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const artwork = await readScWeddingArtwork(id)
+    const artwork = await readNycWeddingArtwork(id)
     if (!artwork) return new NextResponse('Not found', { status: 404 })
     return new NextResponse(artwork.bytes, {
       headers: {

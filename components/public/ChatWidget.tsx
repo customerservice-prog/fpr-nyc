@@ -134,7 +134,7 @@ async function findBestAnswer(userText: string): Promise<string> {
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'bot', text: "Hi! I'm the Friendly Party Rental SC assistant. Ask me about booking, pricing, delivery areas, or anything else about our rentals." },
+    { role: 'bot', text: "Hi! I'm the Friendly Party Rental NYC assistant. Ask me about booking, pricing, delivery areas, or anything else about our rentals." },
   ])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)

@@ -150,7 +150,7 @@ function newBlock(type: BlockType): Block {
     case "flipCards": return { id, type, data: JSON.stringify({ card1Front: "Card 1", card1Back: "Details...", card2Front: "Card 2", card2Back: "Details...", card3Front: "Card 3", card3Back: "Details..." }) }
     case "searchBar": return { id, type, data: JSON.stringify({ placeholder: "Search rentals..." }) }
     case "contactForm": return { id, type, data: JSON.stringify({ heading: "Contact Us", buttonLabel: "Send Message" }) }
-    case "map": return { id, type, data: JSON.stringify({ address: "Greenville, SC 29601", embedUrl: "" }) }
+    case "map": return { id, type, data: JSON.stringify({ address: "", embedUrl: "" }) }
     case "articleFloat": return { id, type, data: JSON.stringify({ imageUrl: "", imageSide: "left", text: "Article text wraps around the image..." }) }
     case "store": return { id, type, data: JSON.stringify({ heading: "Browse Our Rentals", buttonLabel: "View All Rentals", buttonUrl: "/order-by-date" }) }
     case "fourCol": return { id, type, data: JSON.stringify({ col1Title: "Feature 1", col1Text: "Description", col2Title: "Feature 2", col2Text: "Description", col3Title: "Feature 3", col3Text: "Description", col4Title: "Feature 4", col4Text: "Description" }) }

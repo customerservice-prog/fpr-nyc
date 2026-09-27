@@ -38,7 +38,7 @@ export async function POST(
 	const toAddress = recipients.length > 0 ? recipients.join(', ') : order.customer.email
 	
 
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.friendlypartyrentalsc.com'
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fpr-nyc-production.up.railway.app'
         const payLink = `${origin}/pay/${order.id}`
 
     const amountDue = order.amountPaid > 0

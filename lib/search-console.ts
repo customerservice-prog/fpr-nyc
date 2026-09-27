@@ -1,10 +1,10 @@
-import { normalizeNycSearchProperty } from './scSearchReadiness'
+import { normalizeNycSearchProperty } from './nycSearchReadiness'
 import { getAccessToken, hasGoogleCredentials } from './google-auth'
 
 /**
  * Google Search Console (Search Analytics API) integration.
  *
- * Reads search-query performance for the site identified by GNYC_SITE_URL.
+ * Reads search-query performance for the site identified by GSC_SITE_URL.
  * For a domain property use the form "sc-domain:fpr-nyc-production.up.railway.app";
  * for a URL-prefix property use the full "https://fpr-nyc-production.up.railway.app/".
  *
@@ -97,10 +97,10 @@ async function query(siteUrl: string, token: string, body: unknown): Promise<{ r
 }
 
 export async function getSearchConsoleSummary(rangeDays = 28): Promise<GscSummary> {
-  const configuredSite = process.env.GNYC_SITE_URL
-  if (!configuredSite) return notConnected('Riverdale Search Console reporting is not configured (GNYC_SITE_URL is not set). This does not mean the website is absent from Google.')
+  const configuredSite = process.env.GSC_SITE_URL || process.env.NYC_GSC_PROPERTY
+  if (!configuredSite) return notConnected('Riverdale Search Console reporting is not configured (GSC_SITE_URL is not set). This does not mean the website is absent from Google.')
   const siteUrl = normalizeNycSearchProperty(configuredSite)
-  if (!siteUrl) return notConnected('Only the fpr-nyc-production.up.railway.app domain or its HTTPS root URL-prefix properties may be used here. New York and unrelated properties are not Riverdale search data.')
+  if (!siteUrl) return notConnected('Only the the configured NYC Search Console property may be used here. New York and unrelated properties are not Riverdale search data.')
   if (!hasGoogleCredentials()) return notConnected('Google credentials are not configured')
 
   const token = await getAccessToken(GSC_SCOPE)

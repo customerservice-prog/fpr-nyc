@@ -146,7 +146,7 @@ export default function PerformancePage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-xl font-bold text-dark">Marketing Performance</h2>
-          <p className="mt-1 max-w-3xl text-sm text-gray-500">Real sending, booking and revenue results from Friendly Party Rental SC marketing activity.</p>
+          <p className="mt-1 max-w-3xl text-sm text-gray-500">Real sending, booking and revenue results from Friendly Party Rental NYC marketing activity.</p>
         </div>
         <div className="flex rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
           {[7, 30, 90, 365].map((n) => (

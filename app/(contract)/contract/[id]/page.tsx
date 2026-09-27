@@ -87,7 +87,7 @@ export default function ContractPage({ params }: { params: Promise<{ id: string 
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <h1 className="text-2xl font-bold text-dark mb-4">Contract Not Found</h1>
-        <p className="text-body">This contract link is invalid. Please contact us at 864-610-5324.</p>
+        <p className="text-body">This contract link is invalid. Please contact us at 315-884-1498.</p>
       </div>
     )
   }
@@ -100,7 +100,7 @@ export default function ContractPage({ params }: { params: Promise<{ id: string 
     <div className="max-w-3xl mx-auto px-4 py-12">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-dark mb-1">Friendly Party Rental</h1>
-        <p className="text-body">Greenville, SC and surrounding Upstate South Carolina areas</p>
+        <p className="text-body">Riverdale, NY and surrounding Downstate New York areas</p>
       </div>
 
       {order.status === 'canceled' && (

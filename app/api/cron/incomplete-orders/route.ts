@@ -6,7 +6,7 @@ import { sendEmail, incompleteOrderRecaptureEmail } from '@/lib/email'
 import { BUSINESS } from '@/lib/utils'
 import { ownerNotificationRecipients } from '@/lib/orderLifecycleNotifications'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.friendlypartyrentalsc.com'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.fpr-nyc-production.up.railway.app'
 
 function resumeLink(orderId: string) {
     return SITE_URL + '/pay/' + orderId

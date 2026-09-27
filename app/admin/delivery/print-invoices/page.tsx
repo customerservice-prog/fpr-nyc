@@ -65,7 +65,7 @@ return (
 <div key={order.id} className="max-w-2xl mx-auto mb-12" style={{ pageBreakAfter: 'always' }}>
 <div className="text-center mb-6">
 <h1 className="text-2xl font-bold text-dark mb-1">Friendly Party Rental</h1>
-<p className="text-body text-sm">Greenville, SC and surrounding Upstate South Carolina areas</p>
+<p className="text-body text-sm">Riverdale, NY and surrounding Downstate New York areas</p>
 </div>
 
 <div className="bg-gray-50 p-6 rounded-lg mb-6 space-y-1">

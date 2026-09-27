@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { readScWeddingArtwork } from '@/lib/scWeddingArtworkServer'
+import { readNycWeddingArtwork } from '@/lib/nycWeddingArtworkServer'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,7 +10,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const pkg = await prisma.weddingPackage.findUnique({ where: { id }, select: { image: true } })
     if (!pkg) return new NextResponse('Not found', { status: 404 })
 
-    const exactArtwork = await readScWeddingArtwork(id)
+    const exactArtwork = await readNycWeddingArtwork(id)
     if (exactArtwork) {
       return new NextResponse(exactArtwork.bytes, {
         headers: {

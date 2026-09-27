@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
           phone: normalizedPhone,
           address: eventAddress || null,
           city: eventCity || null,
-          state: eventState || 'SC',
+          state: eventState || 'NY',
           zip: eventZip || null,
         },
       })
@@ -240,7 +240,7 @@ export async function POST(request: NextRequest) {
       eventDate: new Date(eventDate),
       eventAddress: eventAddress || null,
       eventCity: eventCity || null,
-      eventState: eventState || 'SC',
+      eventState: eventState || 'NY',
       eventZip: eventZip || null,
       eventTimeSlot: eventTimeSlot || null,
       pickupTimeSlot: pickupTimeSlot || null,

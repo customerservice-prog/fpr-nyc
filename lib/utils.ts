@@ -71,14 +71,14 @@ export function parseAmount(value: string | number): number {
 }
 
 export const BUSINESS = {
-  name: 'Friendly Party Rental SC',
+  name: 'Friendly Party Rental NYC',
   legalName: 'Friendly Party Rental L.L.C.',
   phone: '315-884-1498',
   text: '315-884-1498',
   email: 'customerservice@friendlypartyrental.com',
-  emailHref: 'mailto:customerservice@friendlypartyrental.com?subject=%5BSouth%20Carolina%5D%20Riverdale%20rental%20inquiry',
-  address: 'Riverdale, NY',
-  serviceArea: 'Riverdale & Nearby Downstate New York Cities',
+  emailHref: 'mailto:customerservice@friendlypartyrental.com?subject=%5BNYC%20%2F%20Downstate%5D%20rental%20inquiry',
+  address: '',
+  serviceArea: 'Riverdale, selected Bronx neighborhoods & Lower Westchester',
   hours: 'Mon–Sat: 9am–6pm',
   facebook: 'https://www.facebook.com/friendlypartyrental',
   instagram: 'https://www.instagram.com/friendlypartyrental',
@@ -86,8 +86,8 @@ export const BUSINESS = {
   yelp: '',
   tiktok: 'https://www.tiktok.com/@friendlypartyrental',
   twitter: 'https://twitter.com/friendlypartyrent',
-  mapUrl: 'https://maps.google.com/?q=Riverdale+SC',
-  googleProfile: 'https://www.google.com/maps?cid=14184978817653836417',
+  mapUrl: '',
+  googleProfile: '',
 }
 
 export const NAV_RENTALS = [

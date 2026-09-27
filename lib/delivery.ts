@@ -31,7 +31,7 @@ function configuredFees():Record<string,number>{
   }catch{return {}}
 }
 
-export interface DeliveryQuote{fee:number;zip:string;isEstimate:false;distanceBasis:'configured-zip-fee'}
+export interface DeliveryQuote{fee:number;zip:string;distance:number|null;isEstimate:false;distanceBasis:'configured-zip-fee'}
 
 export function requireMatchingDeliveryFee(value:unknown,quote:DeliveryQuote):void{
   if(typeof value!=='number'||!Number.isFinite(value)||Math.round(value*100)!==Math.round(quote.fee*100)){
@@ -44,5 +44,5 @@ export async function getDeliveryQuote(value:unknown):Promise<DeliveryQuote>{
   if(!approvedZips().has(zip)) throw new DeliveryQuoteError('This ZIP code is outside our current NYC / Lower Westchester delivery area. Please contact us so we can review the location.')
   const fees=configuredFees()
   if(!(zip in fees)) throw new DeliveryQuoteError('Delivery pricing for this ZIP has not been configured yet. Please contact us before checkout.',503)
-  return {fee:fees[zip],zip,isEstimate:false,distanceBasis:'configured-zip-fee'}
+  return {fee:fees[zip],zip,distance:null,isEstimate:false,distanceBasis:'configured-zip-fee'}
 }

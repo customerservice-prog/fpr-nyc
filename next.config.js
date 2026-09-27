@@ -9,8 +9,8 @@ const nextConfig = {
   images: {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 480, 576],
     remotePatterns: [
-      { protocol: 'https', hostname: 'www.friendlypartyrentalsc.com' },
-      { protocol: 'https', hostname: 'friendlypartyrentalsc.com' },
+      { protocol: 'https', hostname: 'www.fpr-nyc-production.up.railway.app' },
+      { protocol: 'https', hostname: 'fpr-nyc-production.up.railway.app' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'files.sysers.com' },
       { protocol: 'https', hostname: '315.ourers.com' },
@@ -32,7 +32,7 @@ const nextConfig = {
       "worker-src 'self' blob:",
       "object-src 'none'",
       "base-uri 'self'",
-      "form-action 'self' https://www.friendlypartyrentalsc.com https://friendlypartyrentalsc.com",
+      "form-action 'self' https://www.fpr-nyc-production.up.railway.app https://fpr-nyc-production.up.railway.app",
       "frame-ancestors 'self'",
       "upgrade-insecure-requests",
     ].join('; ')
@@ -58,7 +58,7 @@ const nextConfig = {
       {
         source: '/:path*',
         has: [{ type: 'host', value: 'friendly-party-rental-greenville-sc-production.up.railway.app' }],
-        destination: 'https://www.friendlypartyrentalsc.com/:path*',
+        destination: 'https://www.fpr-nyc-production.up.railway.app/:path*',
         permanent: true,
       },
       { source: '/index.html', destination: '/', permanent: true },

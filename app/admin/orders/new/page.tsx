@@ -69,7 +69,7 @@ const STATUS_OPTIONS = [
   { value: 'active', label: 'Active' },
 ]
 
-const LOCAL_CITIES = ["Greenville","Anderson","Belton","Berea","Boiling Springs","Central","Clemson","Duncan","Easley","Fountain Inn","Gantt","Gray Court","Greer","Honea Path","Inman","Judson","Landrum","Laurens","Liberty","Marietta","Mauldin","Parker","Pelzer","Pickens","Piedmont","Powdersville","Seneca","Simpsonville","Six Mile","Spartanburg","Taylors","Travelers Rest","Wade Hampton","Williamston","Woodruff"]
+const LOCAL_CITIES = ["Riverdale","Fieldston","Kingsbridge","Bronx","Yonkers","Mount Vernon","New Rochelle","Bronxville","Tuckahoe","Eastchester","Pelham"]
 
 type Step = 'cart' | 'customer'
 

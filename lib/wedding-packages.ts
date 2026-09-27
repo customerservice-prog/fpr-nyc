@@ -1,4 +1,4 @@
-import { SC_WEDDING_IMAGES } from '@/lib/scWeddingImages'
+import { NYC_WEDDING_IMAGES } from '@/lib/nycWeddingImages'
 import { prisma } from '@/lib/prisma'
 import { IMAGE_CACHE_BUST } from '@/lib/imageVersion'
 import { WEDDING_PACKAGES } from '@/lib/utils'
@@ -26,7 +26,7 @@ export async function getSyncedWeddingPackages() {
   return packages.map((p) => {
     const fallback = fallbackById.get(p.id)
     const liveCost = costByName.get(`Wedding Package - ${p.name}`)
-    const image = SC_WEDDING_IMAGES[p.id] || (p.image
+    const image = NYC_WEDDING_IMAGES[p.id] || (p.image
       ? `/api/wedding-package-image/${p.id}?v=${p.updatedAt ? new Date(p.updatedAt).toISOString() : IMAGE_CACHE_BUST}`
       : fallback?.image || null)
     const description = localizeNycPublicCopy(p.description) || fallback?.description || ''

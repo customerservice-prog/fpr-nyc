@@ -1,0 +1,25 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs')
+const read=path=>fs.readFileSync(path,'utf8')
+test('package JSON uses storefront presentation without modifying approved offers',()=>{
+ const api=read('app/api/wedding-packages/route.ts');assert.ok(api.includes('getSyncedWeddingPackages()'));assert.ok(!api.includes('prisma.weddingPackage.update'))
+ const image=read('app/api/wedding-package-image/[id]/route.ts');assert.ok(image.includes('readNycWeddingArtwork(id)'));assert.ok(image.includes('exact-public-NY-artwork-local-SC-snapshot'));assert.ok(!image.includes("'2026-08-23T19:15:02.017Z'"))
+})
+test('mobile wedding image banner is linked and attributed',()=>{
+ const source=read('components/public/HomeWeddingBanner.tsx');assert.ok(source.includes('data-home-section="wedding-banner"'));assert.ok(source.includes('md:hidden'));assert.ok(source.includes("NYC_WEDDING_IMAGES['pkg-premium']"));assert.ok(source.includes('object-contain'));assert.ok(source.includes('Shared Friendly Party Rental artwork'));assert.ok(source.includes('Explore Wedding Packages'))
+})
+test('email readiness is administrator-only and never exposes or requests passwords',()=>{
+ const page=read('app/admin/settings/email-delivery/page.tsx');assert.ok(page.includes('getServerSession(authOptions)'));assert.ok(page.includes("redirect('/admin/login')"));assert.ok(page.includes("role !== 'admin'"));assert.ok(page.includes('Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS)'));assert.ok(!page.includes('sendEmail('));assert.ok(!page.includes('dangerouslySetInnerHTML'))
+ assert.ok(read('app/admin/settings/page.tsx').includes("'Email Delivery':'/admin/settings/email-delivery'"))
+})
+require('./sc-exact-media.test.cjs')
+require('./sc-search.test.cjs')
+require('./sc-search-readiness.test.cjs')
+test('indexable wedding hub links all published SC wedding items without duplicated offer promises',()=>{
+ const code=read('app/(public)/weddings/layout.tsx')
+ assert.ok(code.includes("where:{displayToCustomer:true,category:{slug:'weddings',displayToCustomer:true}}"))
+ assert.ok(code.includes('isSearchableSlug(item.slug)'))
+ assert.ok(code.includes('encodeURIComponent(item.slug!)'))
+ assert.ok(code.includes('data-wedding-catalog-links="sc-search-v2"'))
+ assert.ok(!code.includes('take:'));assert.ok(!code.includes('.slice('));assert.ok(!code.includes('dangerouslySetInnerHTML'))
+ assert.ok(!code.includes('cost:'));assert.ok(!code.includes('prisma.item.update'));assert.ok(!code.includes('noindex'))
+})

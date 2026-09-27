@@ -7,7 +7,7 @@ import LocalDeliveryLinks from '@/components/public/LocalDeliveryLinks'
 import { safeJsonLd } from '@/lib/jsonLd'
 import ItemGallery from '@/components/public/ItemGallery'
 import SuggestedAddons from '@/components/public/SuggestedAddons'
-import { matchesTentLighting } from '@/lib/scAddonMatching'
+import { matchesTentLighting } from '@/lib/nycAddonMatching'
 import { itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 
 export const dynamic = 'force-dynamic'

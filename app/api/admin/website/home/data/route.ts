@@ -36,7 +36,7 @@ export async function GET() {
   const mobileCategories = mobileCategorySlugs
     .map((slug) => displayCategories.find((c) => c.slug === slug))
     .filter((c): c is (typeof PUBLIC_CATEGORIES)[number] => Boolean(c))
-    .map((c) => ({ slug: c.slug, name: c.slug === 'bounce-house-rentals' ? 'Bounce Houses & Water Slides' : c.name.replace(' — Greenville, SC', ''), href: c.href, image: categoryPictures[c.slug] || c.image }))
+    .map((c) => ({ slug: c.slug, name: c.slug === 'bounce-house-rentals' ? 'Bounce Houses & Water Slides' : c.name.replace(' — Riverdale, NY', ''), href: c.href, image: categoryPictures[c.slug] || c.image }))
 
   let popularItemsRaw: any[] = []
   try { popularItemsRaw = await getHomepagePopularItems(8) } catch { popularItemsRaw = [] }

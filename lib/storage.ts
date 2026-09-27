@@ -10,7 +10,7 @@ import path from 'path'
 // Required env vars:
 //   STORAGE_DIR        absolute path of the mounted volume, e.g. /data/uploads
 //   PUBLIC_BASE_URL    site origin used to build absolute URLs for emails,
-//                      e.g. https://www.friendlypartyrentalsc.com (no trailing slash)
+//                      e.g. https://www.fpr-nyc-production.up.railway.app (no trailing slash)
 
 const { STORAGE_DIR, PUBLIC_BASE_URL } = process.env
 

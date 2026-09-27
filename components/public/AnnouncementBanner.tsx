@@ -7,7 +7,7 @@ export default function AnnouncementBanner() {
         <PartyPopper className="w-4 h-4 md:w-5 md:h-5 text-[#F5A31B] shrink-0" />
         <span>
           <span className="text-[#F5A31B] font-extrabold">NEW LOCATION, NOW OPEN:</span>{' '}
-          Greenville, SC is booking November dates and beyond — lock in your event before spots run out!
+          Riverdale, NY is booking November dates and beyond — lock in your event before spots run out!
         </span>
       </p>
     </div>

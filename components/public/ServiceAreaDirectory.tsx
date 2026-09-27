@@ -3,7 +3,7 @@ import {useState} from 'react'
 import Link from 'next/link'
 import {MapPin,Search,X} from 'lucide-react'
 import {NYC_SERVICE_AREAS} from '@/lib/nycServiceAreas'
-import styles from './ScServiceArea.module.css'
+import styles from './NycServiceArea.module.css'
 
 export default function ServiceAreaDirectory(){
  const [query,setQuery]=useState('')

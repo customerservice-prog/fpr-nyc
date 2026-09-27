@@ -18,13 +18,13 @@ const roboto = Roboto({
 const SITE_URL = 'https://fpr-nyc-production.up.railway.app'
 const GOOGLE_PROFILE_URL = 'https://www.google.com/maps?cid=14184978817653836417'
 const SITE_DESCRIPTION =
-  'Friendly Party Rental SC provides party and event rentals in Riverdale, NY and surrounding Downstate New York communities, including tents, tables, chairs, inflatables, weddings and event equipment.'
+  'Friendly Party Rental NYC provides party and event rentals in Riverdale, NY and surrounding Downstate New York communities, including tents, tables, chairs, inflatables, weddings and event equipment.'
 
 const LOCAL_BUSINESS_JSONLD = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
   '@id': 'https://fpr-nyc-production.up.railway.app/#business',
-  name: 'Friendly Party Rental SC',
+  name: 'Friendly Party Rental NYC',
   legalName: 'Friendly Party Rental L.L.C.',
   description: SITE_DESCRIPTION,
   image: `${SITE_URL}/images/logo.png`,
@@ -66,14 +66,14 @@ const WEBSITE_JSONLD = {
   '@type': 'WebSite',
   '@id': SITE_URL + '/#website',
   url: SITE_URL,
-  name: 'Friendly Party Rental SC',
+  name: 'Friendly Party Rental NYC',
   description: SITE_DESCRIPTION,
   publisher: { '@id': SITE_URL + '/#business' },
 }
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  applicationName: 'Friendly Party Rental SC',
+  applicationName: 'Friendly Party Rental NYC',
   manifest: '/site.webmanifest',
   icons: {
     icon: [
@@ -86,12 +86,12 @@ export const metadata: Metadata = {
     apple: [{ url: '/apple-touch-icon.png?v=sc-20260921', sizes: '180x180', type: 'image/png' }],
   },
   title: {
-    default: 'Friendly Party Rental SC | Party Rentals in Riverdale, NY',
-    template: '%s | Friendly Party Rental SC',
+    default: 'Friendly Party Rental NYC | Party Rentals in Riverdale, NY',
+    template: '%s | Friendly Party Rental NYC',
   },
   description: SITE_DESCRIPTION,
   keywords: [
-    'Friendly Party Rental SC',
+    'Friendly Party Rental NYC',
     'party rentals Riverdale NY',
     'Carolina party rental',
     'tent rentals Riverdale',
@@ -100,12 +100,12 @@ export const metadata: Metadata = {
     'wedding rentals Riverdale NY',
   ],
   openGraph: {
-    title: 'Friendly Party Rental SC | Party Rentals in Riverdale, NY',
+    title: 'Friendly Party Rental NYC | Party Rentals in Riverdale, NY',
     description: SITE_DESCRIPTION,
-    siteName: 'Friendly Party Rental SC',
+    siteName: 'Friendly Party Rental NYC',
     locale: 'en_US',
     type: 'website',
-    images: [{ url: `${SITE_URL}/images/logo.png`, width: 1731, height: 909, alt: 'Friendly Party Rental SC' }],
+    images: [{ url: `${SITE_URL}/images/logo.png`, width: 1731, height: 909, alt: 'Friendly Party Rental NYC' }],
   },
   robots: {
     index: true,

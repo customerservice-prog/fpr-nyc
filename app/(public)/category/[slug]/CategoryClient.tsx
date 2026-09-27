@@ -8,7 +8,7 @@ import BookingCalendar from '@/components/public/BookingCalendar'
 import CartDrawer from '@/components/public/CartDrawer'
 import { useCart, DEFAULT_SCHEDULING_DETAILS } from '@/components/public/CartContext'
 import { formatDateShort } from '@/lib/utils'
-import { categorySearchName } from '@/lib/scSearchReadiness'
+import { categorySearchName } from '@/lib/nycSearchReadiness'
 import { ShoppingCart, CalendarDays, Pencil, Truck, MapPin } from 'lucide-react'
 
 const APPOINTMENT_SLOTS = [
@@ -857,7 +857,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
           {category?.name || slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} Delivered Throughout Riverdale, NY
         </h2>
         <p className="mb-3">
-          Friendly Party Rental SC proudly supplies {(category?.name || 'rentals').toLowerCase()} for birthdays, graduations,
+          Friendly Party Rental NYC proudly supplies {(category?.name || 'rentals').toLowerCase()} for birthdays, graduations,
           weddings, corporate events, and backyard parties across Riverdale, NY and the surrounding Downstate New York
           communities. Whether you are planning a small backyard gathering or a large wedding reception, our team
           delivers, sets up, and picks up your rental so you can focus on your event.

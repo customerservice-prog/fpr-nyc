@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { SC_RENTSKETCH_TENANT } from '@/lib/scRentSketch'
+import { NYC_RENTSKETCH_TENANT } from '@/lib/nycRentSketch'
 
 export type DesignYourEventSource = string
 
@@ -65,7 +65,7 @@ export default function DesignYourEventCTA({
     </>
   }
 
-  if (!SC_RENTSKETCH_TENANT) {
+  if (!NYC_RENTSKETCH_TENANT) {
     return <Link href={source.startsWith('design_your_event') || source === 'home_designer_section' ? '/contact_us' : '/design-your-event'} className={`${base} ${variants[variant] || variants.primary} ${className}`}>Get Greenville Layout Help</Link>
   }
 

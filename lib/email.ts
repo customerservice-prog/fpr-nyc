@@ -232,7 +232,7 @@ export function orderConfirmationEmail(order: {
   items: OrderEmailItem[]
 }, setting?: { subject?: string }) {
   return {
-    subject: setting?.subject || `Order Confirmation #${order.orderNumber} - Friendly Party Rental SC`,
+    subject: setting?.subject || `Order Confirmation #${order.orderNumber} - Friendly Party Rental NYC`,
     html: `
       <div style="font-family: Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
         ${emailHeader()}
@@ -272,7 +272,7 @@ export function quoteEmail(order: {
   payLink: string
 }) {
   return {
-    subject: `Your Quote #${order.orderNumber} - Friendly Party Rental SC`,
+    subject: `Your Quote #${order.orderNumber} - Friendly Party Rental NYC`,
     html: `
       <div style="font-family: Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
         ${emailHeader()}
@@ -314,7 +314,7 @@ export function updatedReceiptEmail(order: {
   payLink: string
 }) {
   return {
-    subject: `Updated Receipt - Order #${order.orderNumber} - Friendly Party Rental SC`,
+    subject: `Updated Receipt - Order #${order.orderNumber} - Friendly Party Rental NYC`,
     html: `
       <div style="font-family: Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
         ${emailHeader()}
@@ -366,7 +366,7 @@ export function paymentReceiptEmail(payment: {
   payments?: Array<{ amount: number; method?: string | null; createdAt: string; recordedByName?: string | null }>
 }) {
   return {
-    subject: `Payment Receipt #${payment.orderNumber} - Friendly Party Rental SC`,
+    subject: `Payment Receipt #${payment.orderNumber} - Friendly Party Rental NYC`,
     html: `
       <div style="font-family: Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
         ${emailHeader()}
@@ -399,7 +399,7 @@ export function newOrderAdminNotificationEmail(order: {
   amountPaid: number
 }) {
   return {
-    subject: `New Order #${order.orderNumber} - Payment Pending - Friendly Party Rental SC`,
+    subject: `New Order #${order.orderNumber} - Payment Pending - Friendly Party Rental NYC`,
     html: `
     <div style="font-family: Roboto, sans-serif; max-width: 600px;">
     <h2 style="color: #1A6FD4;">New Order Received</h2>
@@ -428,7 +428,7 @@ export function employmentApplicationEmail(data: {
   message?: string
 }) {
   return {
-    subject: `New Employment Application: ${data.name} - Friendly Party Rental SC`,
+    subject: `New Employment Application: ${data.name} - Friendly Party Rental NYC`,
     html: `
       <div style="font-family: Roboto, sans-serif;">
         <h2>New Employment Application</h2>
@@ -454,7 +454,7 @@ export function contactFormEmail(data: {
   message: string
 }) {
   return {
-    subject: `New Contact Form Submission from ${data.name} - Friendly Party Rental SC`,
+    subject: `New Contact Form Submission from ${data.name} - Friendly Party Rental NYC`,
     html: `
       <div style="font-family: Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
         ${emailHeader()}
@@ -519,7 +519,7 @@ export function cancellationMessageEmail(data: {
 }) {
   const messageHtml = data.message.replace(/\n/g, '<br/>')
   return {
-    subject: `Regarding Your Canceled Order #${data.orderNumber} - Friendly Party Rental SC`,
+    subject: `Regarding Your Canceled Order #${data.orderNumber} - Friendly Party Rental NYC`,
     html: `
       <div style="font-family: Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
         ${emailHeader()}

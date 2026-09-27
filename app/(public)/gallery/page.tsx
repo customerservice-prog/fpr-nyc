@@ -2,24 +2,24 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Image from 'next/image'
-import { SC_SHARED_GALLERY } from '@/lib/scSharedGallery'
+import { NYC_SHARED_GALLERY } from '@/lib/nycSharedGallery'
 
 interface GalleryImage { id: string; url: string; caption?: string | null }
 export default function GalleryPage() {
-  const [images, setImages] = useState<GalleryImage[]>(SC_SHARED_GALLERY)
+  const [images, setImages] = useState<GalleryImage[]>(NYC_SHARED_GALLERY)
   const [shared, setShared] = useState(true)
   const [loading, setLoading] = useState(false)
   const [index, setIndex] = useState(0)
   const [showThumbs, setShowThumbs] = useState(false)
   useEffect(() => {
     const controller = new AbortController()
-    const fallback = () => { setImages(SC_SHARED_GALLERY); setShared(true); setLoading(false) }
+    const fallback = () => { setImages(NYC_SHARED_GALLERY); setShared(true); setLoading(false) }
     fetch('/api/gallery', { signal: controller.signal })
       .then(async response => { if (!response.ok) throw new Error('Gallery unavailable'); return response.json() })
       .then(data => {
         const local: GalleryImage[] = Array.isArray(data.images) ? data.images : []
         setShared(local.length === 0)
-        setImages(local.length ? local : SC_SHARED_GALLERY)
+        setImages(local.length ? local : NYC_SHARED_GALLERY)
         setLoading(false)
       })
       .catch(() => { if (!controller.signal.aborted) fallback() })

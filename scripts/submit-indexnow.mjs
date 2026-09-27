@@ -1,6 +1,6 @@
 const INDEXNOW_ENDPOINT = 'https://api.indexnow.org/indexnow'
-const SITE = 'https://www.friendlypartyrentalsc.com'
-const HOST = 'www.friendlypartyrentalsc.com'
+const SITE = 'https://www.fpr-nyc-production.up.railway.app'
+const HOST = 'www.fpr-nyc-production.up.railway.app'
 const KEY = process.env.INDEXNOW_KEY || '280513066d2053b20e0a73c4926f3109'
 
 const paths = [

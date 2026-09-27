@@ -11,7 +11,7 @@ import { feedbackMonitorStatus } from '@/lib/marketing/feedbackMonitor'
 import { feedbackHeaders } from '@/lib/marketing/feedbackToken'
 import { wrapEmail, unsubscribeHeaders } from '@/lib/marketing/message'
 
-const ORIGIN = 'https://www.friendlypartyrentalsc.com'
+const ORIGIN = 'https://www.fpr-nyc-production.up.railway.app'
 const DAY = 86400000
 const SCHEDULER_KEY = { category: 'marketing_scheduler', key: 'last_run' }
 

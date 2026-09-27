@@ -1,19 +1,19 @@
 import Link from 'next/link'
 import {notFound} from 'next/navigation'
 import {NYC_SERVICE_AREAS} from '@/lib/nycServiceAreas'
-import {SC_LOCAL_PLANNING} from '@/lib/scLocalPlanningResources'
+import {NYC_LOCAL_PLANNING} from '@/lib/nycLocalPlanningResources'
 import {nycPageMetadata,nycBreadcrumbs,nycUrl,NYC_BUSINESS_ID} from '@/lib/nycSeo'
 import {safeJsonLd} from '@/lib/jsonLd'
 const rentals=[['Tent rentals','/category/tent-rentals'],['Tables and chairs','/category/table-chair-rentals'],['Bounce houses and inflatables','/category/bounce-house-rentals'],['Linens and tablecloths','/category/linen-rentals'],['Dance floors and stages','/category/dance-floor-stage-rentals'],['Wedding rentals','/weddings']]
-export function cityRentalMetadata(slug:string){const area=NYC_SERVICE_AREAS.find(a=>a.slug===slug);if(!area)return {robots:{index:false,follow:true}};const hasLocalGuide=Boolean(SC_LOCAL_PLANNING[slug]);return nycPageMetadata(area.href,`Party Rentals in ${area.name}, SC`,`Rent tents, tables, chairs and event equipment for ${area.name}, SC. Check event-date availability and delivery with the Friendly Party Rental SC Riverdale team.`,hasLocalGuide)}
+export function cityRentalMetadata(slug:string){const area=NYC_SERVICE_AREAS.find(a=>a.slug===slug);if(!area)return {robots:{index:false,follow:true}};const hasLocalGuide=Boolean(NYC_LOCAL_PLANNING[slug]);return nycPageMetadata(area.href,`Party Rentals in ${area.name}, NY`,`Rent tents, tables, chairs and event equipment for ${area.name}, NY. Check event-date availability and delivery with the Friendly Party Rental NYC NYC / Downstate team.`,hasLocalGuide)}
 export default function CityRentalGuide({slug}:{slug:string}){
- const area=NYC_SERVICE_AREAS.find(a=>a.slug===slug);if(!area)notFound();const resource=SC_LOCAL_PLANNING[slug]
- const schema={'@context':'https://schema.org','@type':'Service','@id':nycUrl(area.href)+'#rentals',name:`Party rental delivery to ${area.name}, SC`,serviceType:'Party and event equipment rentals',url:nycUrl(area.href),provider:{'@id':NYC_BUSINESS_ID},areaServed:{'@type':'Place',name:area.name+', New York'}}
- return <article className="mx-auto max-w-4xl px-4 py-12" data-sc-city-guide={slug}>
-  <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(schema)}}/><script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(nycBreadcrumbs([{name:'Home',path:'/'},{name:'New York Delivery Areas',path:'/service-area'},{name:area.name+', SC',path:area.href}]))}}/>
-  <nav className="mb-5 text-sm text-blue-800" aria-label="Breadcrumb"><Link href="/">Home</Link> / <Link href="/service-area">Delivery areas</Link> / {area.name}, SC</nav>
-  <h1 className="mb-6 text-3xl font-bold text-dark">Party Rentals in {area.name}, SC</h1>
-  <p className="mb-4 leading-7 text-body">Plan your {area.name} event with rental equipment from Friendly Party Rental SC. Browse tents, tables, chairs, inflatables and event essentials, then select your date to review availability. Our Riverdale team arranges delivery to your event; this is a service-area guide, not a separate {area.name} storefront.</p>
+ const area=NYC_SERVICE_AREAS.find(a=>a.slug===slug);if(!area)notFound();const resource=NYC_LOCAL_PLANNING[slug]
+ const schema={'@context':'https://schema.org','@type':'Service','@id':nycUrl(area.href)+'#rentals',name:`Party rental delivery to ${area.name}, NY`,serviceType:'Party and event equipment rentals',url:nycUrl(area.href),provider:{'@id':NYC_BUSINESS_ID},areaServed:{'@type':'Place',name:area.name+', New York'}}
+ return <article className="mx-auto max-w-4xl px-4 py-12" data-nyc-city-guide={slug}>
+  <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(schema)}}/><script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(nycBreadcrumbs([{name:'Home',path:'/'},{name:'New York Delivery Areas',path:'/service-area'},{name:area.name+', NY',path:area.href}]))}}/>
+  <nav className="mb-5 text-sm text-blue-800" aria-label="Breadcrumb"><Link href="/">Home</Link> / <Link href="/service-area">Delivery areas</Link> / {area.name}, NY</nav>
+  <h1 className="mb-6 text-3xl font-bold text-dark">Party Rentals in {area.name}, NY</h1>
+  <p className="mb-4 leading-7 text-body">Plan your {area.name} event with rental equipment from Friendly Party Rental NYC. Browse tents, tables, chairs, inflatables and event essentials, then select your date to review availability. Our NYC / Downstate team arranges delivery to your event; this is a service-area guide, not a separate {area.name} storefront.</p>
   <p className="mb-8 text-sm text-gray-600">Listed local ZIP codes: {area.zips.join(', ')}. Use your full event address to confirm delivery arrangements; a ZIP code alone does not confirm venue access or an exact arrival time.</p>
   <h2 className="mb-3 text-xl font-bold text-dark">Choose equipment for your {area.name} event</h2><ul className="mb-8 grid gap-3 sm:grid-cols-2">{rentals.map(([name,href])=><li key={href}><Link href={href} prefetch={false} className="block rounded-xl border p-4 font-semibold text-blue-800 hover:bg-amber-50">{name}</Link></li>)}</ul>
   {resource&&<section className="mb-8 rounded-2xl bg-amber-50 p-6"><h2 className="mb-3 text-xl font-bold">{resource.heading}</h2><p className="leading-7 text-body">{resource.body}</p><a href={resource.url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-sm text-blue-800 underline">{resource.label}</a><p className="mt-3 text-xs leading-5 text-gray-600">Independent public planning resource, checked September 21, 2026. Confirm current requirements directly with the venue or city. No venue partnership or previous event installation is implied.</p></section>}

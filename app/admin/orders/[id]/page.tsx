@@ -924,8 +924,8 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
       <div className="print-header hidden items-center justify-between border-b-2 border-gray-800 pb-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Friendly Party Rental SC</h1>
-          <p className="text-sm">Greenville, SC and surrounding Upstate South Carolina areas</p>
+          <h1 className="text-2xl font-bold">Friendly Party Rental NYC</h1>
+          <p className="text-sm">Riverdale, NY and surrounding Downstate New York areas</p>
         </div>
         <div className="text-right">
           <h2 className="text-xl font-bold">RENTAL AGREEMENT</h2>

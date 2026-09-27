@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Call pre-rental reminder endpoint
         run: |
-          curl -f -X GET https://www.friendlypartyrentalsc.com/api/cron/pre-rental-reminder -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+          curl -f -X GET https://fpr-nyc-production.up.railway.app/api/cron/pre-rental-reminder -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

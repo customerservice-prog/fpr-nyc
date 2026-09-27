@@ -1,0 +1,28 @@
+name: NYC Branding Check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  branding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://user:pass@localhost:5432/db
+      PUBLIC_INDEXABLE: 'false'
+      NYC_DELIVERY_FEES_JSON: '{}'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+      - name: Generate Prisma client
+        run: npx prisma generate
+      - name: Check NYC branding, media and shared-inbox behavior without sending email
+        run: node --test tests/nyc-brand-finishing.test.cjs tests/nyc-media-email.test.cjs tests/nyc-branding.test.cjs

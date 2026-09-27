@@ -405,7 +405,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
       )}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-dark">{category ? `${categorySearchName(slug, category.name)} in Greenville, SC` : slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) + ' in Greenville, SC'}</h1>
+          <h1 className="text-2xl font-bold text-dark">{category ? `${categorySearchName(slug, category.name)} in Riverdale, NY` : slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) + ' in Riverdale, NY'}</h1>
         </div>
         <button onClick={() => setCartOpen(true)} className="btn-primary flex items-center gap-2">
           <ShoppingCart size={20} />
@@ -672,7 +672,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
                 </>
               ) : (
                 <>
-                  <p className="text-xs text-gray-500 mb-3">Pickup location: Greenville, SC (exact address provided after booking)</p>
+                  <p className="text-xs text-gray-500 mb-3">Pickup location: Riverdale, NY (exact address provided after booking)</p>
                   <h2 className="font-bold text-dark mb-3">What time would you like to pick up your order?</h2>
                   <div className="space-y-2 mb-4">
                     {APPOINTMENT_SLOTS.map((slot) => (
@@ -854,16 +854,16 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
 
       <section className="mt-12 border-t pt-8 text-body">
         <h2 className="text-xl font-bold text-dark mb-3">
-          {category?.name || slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} Delivered Throughout Greenville, SC
+          {category?.name || slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} Delivered Throughout Riverdale, NY
         </h2>
         <p className="mb-3">
           Friendly Party Rental SC proudly supplies {(category?.name || 'rentals').toLowerCase()} for birthdays, graduations,
-          weddings, corporate events, and backyard parties across Greenville, SC and the surrounding Upstate South Carolina
+          weddings, corporate events, and backyard parties across Riverdale, NY and the surrounding Downstate New York
           communities. Whether you are planning a small backyard gathering or a large wedding reception, our team
           delivers, sets up, and picks up your rental so you can focus on your event.
         </p>
         <p>
-          We regularly deliver to Greenville, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, and
+          We regularly deliver to Riverdale, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, and
           Piedmont, SC. Don&apos;t see your town listed? Give us a call at (864) 610-5324 &mdash; we may still be able
           to deliver to you.
         </p>

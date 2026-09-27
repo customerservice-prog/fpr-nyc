@@ -17,7 +17,7 @@ export function wrapEmail(bodyHtml: string, recipient: string, origin: string, p
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f6fb;"><tr><td align="center" style="padding:0;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;margin:0 auto;">
   <tr><td style="background-color:#0b3d91;padding:22px 24px;text-align:center;border-radius:0;">
-  <img src="https://fpr-nyc-production.up.railway.app/images/logo.png" width="150" alt="Friendly Party Rental NYC" style="display:inline-block;max-width:150px;height:auto;border:0;" />
+  <img src="${origin}/images/logo.png" width="150" alt="Friendly Party Rental NYC" style="display:inline-block;max-width:150px;height:auto;border:0;" />
   </td></tr>
   <tr><td style="height:4px;background-color:#f5a623;line-height:4px;font-size:4px;">&nbsp;</td></tr>
   <tr><td style="background-color:#ffffff;padding:12px 10px;text-align:center;border-bottom:1px solid #e5e7eb;">
@@ -71,7 +71,7 @@ export function wrapEmail(bodyHtml: string, recipient: string, origin: string, p
   <div style="font-size:15px;font-weight:bold;color:#1a1a1a;">Friendly Party Rental NYC</div>
   <div style="font-size:13px;color:#6b7280;padding-top:4px;">Riverdale, NY &amp; nearby Bronx and Lower Westchester communities</div>
   <div style="font-size:13px;color:#6b7280;padding-top:2px;">315-884-1498 &nbsp;&bull;&nbsp; customerservice@friendlypartyrental.com</div>
-  <div style="padding-top:8px;"><a href="${origin}" style="color:#0b3d91;font-size:13px;font-weight:bold;text-decoration:none;">fpr-nyc-production.up.railway.app</a></div>
+  <div style="padding-top:8px;"><a href="${origin}" style="color:#0b3d91;font-size:13px;font-weight:bold;text-decoration:none;">${origin.replace(/^https?:\/\//, '')}</a></div>
   <div style="font-size:11px;color:#6b7280;line-height:1.6;padding-top:16px;border-top:1px solid #e5e7eb;margin-top:16px;">
   You are receiving this email because you are a customer of Friendly Party Rental NYC.<br />
   <a href="${unsubUrl}" style="color:#6b7280;text-decoration:underline;">Unsubscribe from marketing emails</a><br />

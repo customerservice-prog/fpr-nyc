@@ -1,8 +1,14 @@
 const INDEXNOW_ENDPOINT = 'https://api.indexnow.org/indexnow'
-const SITE = 'https://www.fpr-nyc-production.up.railway.app'
-const HOST = 'www.fpr-nyc-production.up.railway.app'
-const KEY = process.env.INDEXNOW_KEY || '280513066d2053b20e0a73c4926f3109'
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || '').replace(/\/$/, '')
+const KEY = (process.env.INDEXNOW_KEY || '').trim()
+const indexable = process.env.PUBLIC_INDEXABLE === 'true'
 
+if (!indexable || !/^https:\/\//.test(SITE) || !KEY) {
+  console.log('[indexnow] skipped: NYC public indexing is disabled or IndexNow is not configured')
+  process.exit(0)
+}
+
+const host = new URL(SITE).hostname
 const paths = [
   '/',
   '/category',
@@ -18,28 +24,27 @@ const paths = [
   '/chiavari-chair-rentals',
   '/graduation-rentals',
   '/event-planning',
-  '/event-planning/wedding-coordination',
-  '/event-planning/corporate-events',
-  '/event-planning/private-parties',
-  '/event-planning/festivals-fundraisers',
   '/design-your-event',
   '/popular-rentals',
   '/service-area',
   '/about_us',
   '/contact_us',
-  '/party-rentals-greer-sc',
-  '/party-rentals-simpsonville-sc',
-  '/party-rentals-mauldin-sc',
-  '/party-rentals-taylors-sc',
-  '/party-rentals-easley-sc',
-  '/party-rentals-travelers-rest-sc',
-  '/party-rentals-spartanburg-sc',
-  '/party-rentals-anderson-sc',
+  '/party-rentals-riverdale-ny',
+  '/party-rentals-fieldston-ny',
+  '/party-rentals-kingsbridge-ny',
+  '/party-rentals-bronx-ny',
+  '/party-rentals-yonkers-ny',
+  '/party-rentals-mount-vernon-ny',
+  '/party-rentals-new-rochelle-ny',
+  '/party-rentals-bronxville-ny',
+  '/party-rentals-tuckahoe-ny',
+  '/party-rentals-eastchester-ny',
+  '/party-rentals-pelham-ny',
 ]
 
-const urlList = [...new Set(paths.map(path => SITE + path))]
+const urlList = [...new Set(paths.map((path) => SITE + path))]
 const payload = {
-  host: HOST,
+  host,
   key: KEY,
   keyLocation: SITE + '/' + KEY + '.txt',
   urlList,
@@ -53,7 +58,7 @@ try {
     signal: AbortSignal.timeout(15000),
   })
   const body = await response.text().catch(() => '')
-  console.log('[indexnow] submitted', urlList.length, 'priority URLs:', response.status, response.statusText)
+  console.log('[indexnow] submitted', urlList.length, 'NYC priority URLs:', response.status, response.statusText)
   if (body) console.log('[indexnow] response:', body.slice(0, 500))
 } catch (error) {
   console.warn('[indexnow] best-effort submission failed:', error instanceof Error ? error.message : String(error))

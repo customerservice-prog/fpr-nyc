@@ -9,7 +9,6 @@ const nextConfig = {
   images: {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 480, 576],
     remotePatterns: [
-      { protocol: 'https', hostname: 'www.fpr-nyc-production.up.railway.app' },
       { protocol: 'https', hostname: 'fpr-nyc-production.up.railway.app' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'files.sysers.com' },
@@ -32,7 +31,7 @@ const nextConfig = {
       "worker-src 'self' blob:",
       "object-src 'none'",
       "base-uri 'self'",
-      "form-action 'self' https://www.fpr-nyc-production.up.railway.app https://fpr-nyc-production.up.railway.app",
+      "form-action 'self' https://fpr-nyc-production.up.railway.app",
       "frame-ancestors 'self'",
       "upgrade-insecure-requests",
     ].join('; ')
@@ -51,16 +50,9 @@ const nextConfig = {
     ]
   },
   async redirects() {
-    // Both hosts have existing origin-scoped carts. Do not force a host change
-    // without migrating those sessions. Public metadata and the sitemap agree
-    // on www as Google's preferred URL; alias redirects stay within the origin.
+    // Keep temporary-host redirects internal to this NYC service. Custom-domain
+    // canonicalization will be added only when the final NYC domain is connected.
     return [
-      {
-        source: '/:path*',
-        has: [{ type: 'host', value: 'friendly-party-rental-greenville-sc-production.up.railway.app' }],
-        destination: 'https://www.fpr-nyc-production.up.railway.app/:path*',
-        permanent: true,
-      },
       { source: '/index.html', destination: '/', permanent: true },
       { source: '/home', destination: '/', permanent: true },
       { source: '/view_gallery', destination: '/gallery', permanent: true },

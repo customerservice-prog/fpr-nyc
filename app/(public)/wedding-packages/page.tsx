@@ -68,7 +68,7 @@ export default async function WeddingPackagesPage({
           )}
 
           <p className="text-body text-sm mb-6">
-            Standard delivery, setup, and breakdown included. A travel fee may apply based on distance from Greenville.
+            Standard delivery, setup, and breakdown included. A travel fee may apply based on distance from Riverdale.
             Contact us to customize this package for your special day.
           </p>
 

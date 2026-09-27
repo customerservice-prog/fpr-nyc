@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 function disabled() {
   return NextResponse.json(
     {
-      error: 'Legacy New York ERS maintenance is disabled in the New York app.',
+      error: 'Legacy Syracuse ERS maintenance is disabled in the NYC / Downstate app.',
       location: 'Riverdale, NY',
     },
     { status: 410 }

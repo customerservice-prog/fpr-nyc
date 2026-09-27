@@ -44,3 +44,14 @@ test('legal authorization remains tied to Friendly Party Rental L.L.C.',()=>{
   const card=read('lib/cardAuthorization.ts')
   assert.ok(card.includes('I authorize Friendly Party Rental L.L.C.'))
 })
+
+
+test('SC public chat cannot regress to New York operational copy',()=>{
+  const chat=read('components/public/ChatWidget.tsx')
+  assert.ok(chat.includes('Friendly Party Rental SC assistant'))
+  assert.ok(chat.includes('Applicable taxes are calculated automatically at checkout based on your order and event location.'))
+  assert.ok(chat.includes('Greenville currently operates as a delivery-only service.'))
+  for(const forbidden of ['New York State sales tax','315-884-1498','Syracuse','Minoa']){
+    assert.ok(!chat.includes(forbidden),forbidden+' must not appear in the Greenville customer chat')
+  }
+})

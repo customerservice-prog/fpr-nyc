@@ -55,7 +55,7 @@ export function orderReceivedEmail(order: {
       </table>
       <p><strong>Order total:</strong> ${money(order.totalAmount)}<br>
       <strong>Required payment now:</strong> ${money(dueNow)}</p>
-      <p style="margin:24px 0"><a href="https://www.friendlypartyrentalsc.com/pay/${encodeURIComponent(order.id)}" style="background:#1A6FD4;color:#fff;padding:12px 20px;border-radius:7px;text-decoration:none;font-weight:bold">Complete Payment</a></p>
+      <p style="margin:24px 0"><a href="https://fpr-nyc-production.up.railway.app/pay/${encodeURIComponent(order.id)}" style="background:#1A6FD4;color:#fff;padding:12px 20px;border-radius:7px;text-decoration:none;font-weight:bold">Complete Payment</a></p>
       <p style="font-size:13px;color:#555">After your payment succeeds, we will automatically email your confirmed-order receipt. Keep your order number for reference.</p>
       <p>Questions? Call or text ${esc(BUSINESS.phone)} or reply to this email.</p>
     </div>`
@@ -100,7 +100,7 @@ export function ownerCancellationEmail(order: {
       <strong>Event date:</strong> ${esc(formatDate(order.eventDate))}<br>
       <strong>Paid:</strong> ${money(order.amountPaid)}<br>
       <strong>Balance shown at cancellation:</strong> ${money(order.balanceDue)}</p>
-      <p><a href="https://www.friendlypartyrentalsc.com/admin/orders/${encodeURIComponent(order.id)}">Review order in admin</a></p>
+      <p><a href="https://fpr-nyc-production.up.railway.app/admin/orders/${encodeURIComponent(order.id)}">Review order in admin</a></p>
     </div>`
   }
 }

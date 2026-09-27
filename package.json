@@ -1,22 +1,17 @@
 {
-  "name": "friendly-party-rental",
+  "name": "friendly-party-rental-nyc",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run snapshot:wedding-art && npm run test:sc-ranking && npm run test:sc-discovery && npm run test:sc-identity && next build",
+    "build": "next build",
     "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
     "lint": "next lint",
     "db:migrate": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
-    "postinstall": "prisma generate",
-    "snapshot:wedding-art": "node scripts/snapshot-ny-wedding-art.mjs",
-    "test:sc-ranking": "node --test tests/sc-ranking-readiness.test.cjs",
-    "indexnow:priority": "node scripts/submit-indexnow.mjs",
-    "test:sc-discovery": "node --test tests/sc-discovery-readiness.test.cjs",
-    "test:sc-identity": "node --test tests/sc-identity-sync.test.cjs"
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

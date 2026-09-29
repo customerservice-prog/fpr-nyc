@@ -1,0 +1,64 @@
+name: NYC category schema regression
+on:
+  push:
+    branches: [fix/nyc-category-schema-20260929]
+  pull_request:
+    branches: [production-nyc-live]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: nyc_ci
+          POSTGRES_PASSWORD: ci_disposable_only
+          POSTGRES_DB: nyc_ci
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      DATABASE_URL: postgresql://nyc_ci:ci_disposable_only@localhost:5432/nyc_ci
+      PUBLIC_INDEXABLE: 'false'
+      NYC_DELIVERY_FEES_JSON: '{}'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - name: Apply full migration history to empty isolated database
+        run: npx prisma migrate deploy
+      - name: Check full category reads and new defaults
+        run: |
+          node - <<'JS'
+          const {PrismaClient}=require('@prisma/client'),assert=require('node:assert/strict')
+          const p=new PrismaClient()
+          ;(async()=>{
+            await p.category.findMany({take:1})
+            const c=await p.category.create({data:{id:'ci-nyc-pricing-test',name:'CI only',slug:'ci-nyc-pricing-test'}})
+            assert.equal(c.pricingProfile,'standard')
+            await p.category.update({where:{id:c.id},data:{pricingProfile:'tables_tents'}})
+            console.log('Full category reads work and new records use the existing schema default')
+          })().finally(()=>p.$disconnect()).catch(e=>{console.error(e);process.exitCode=1})
+          JS
+      - name: Reapply additive repair without overwriting existing profile
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f prisma/migrations/20260929230000_add_nyc_category_pricing_profile/migration.sql
+          node - <<'JS'
+          const {PrismaClient}=require('@prisma/client'),assert=require('node:assert/strict')
+          const p=new PrismaClient()
+          ;(async()=>{
+            const c=await p.category.findUniqueOrThrow({where:{id:'ci-nyc-pricing-test'}})
+            assert.equal(c.pricingProfile,'tables_tents')
+            assert.equal(c.name,'CI only')
+            console.log('Existing profile and category data preserved; migration is repeat-safe')
+          })().finally(()=>p.$disconnect()).catch(e=>{console.error(e);process.exitCode=1})
+          JS
+      - name: NYC isolation and delivery/payment safeguards
+        run: node --test tests/nyc-location-isolation.test.cjs tests/nyc-delivery.test.cjs tests/nyc-tracking-isolation.test.cjs
+      - run: npx tsc --noEmit
+      - run: npm run build

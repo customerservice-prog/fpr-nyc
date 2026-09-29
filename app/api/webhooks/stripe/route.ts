@@ -7,7 +7,7 @@ import { constructNycWebhookEvent, describeStripeError, isNycPaymentsUnavailable
 import { livemodeMatches } from '@/lib/nycStripeGuard'
 import { claimWebhookEvent, failWebhookEvent, finishWebhookEvent, processNycStripeEvent, recordIgnoredEvent } from '@/lib/nycStripeWebhook'
 
-// NYC Stripe webhook endpoint: https://nyc.friendlypartyrental.com/api/webhooks/stripe
+// NYC Stripe webhook endpoint: https://friendlypartyrentalnyc.com/api/webhooks/stripe
 //
 // - The signature is verified against the exact raw request body with this
 //   endpoint's own signing secret (STRIPE_WEBHOOK_SECRET) before anything else.

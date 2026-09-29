@@ -56,6 +56,18 @@ export default function PaymentPage() {
   const [orderId, setOrderId] = useState<string | null>(null)
   const paymentSucceededRef = useRef(false)
   const draftSyncRef = useRef('')
+  // Server-enforced go-live state. The API refuses payments regardless; this only
+  // keeps customers from starting a checkout that cannot be paid.
+  const [paymentsAvailable, setPaymentsAvailable] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    let active = true
+    fetch('/api/payments/status', { cache: 'no-store' })
+      .then((response) => response.json())
+      .then((data) => { if (active) setPaymentsAvailable(data?.onlinePaymentsAvailable === true) })
+      .catch(() => { if (active) setPaymentsAvailable(false) })
+    return () => { active = false }
+  }, [])
 
   useEffect(() => {
     if (paymentSucceededRef.current || !loaded) return
@@ -98,7 +110,8 @@ export default function PaymentPage() {
       try {
         const zip = normalizeDeliveryZip(checkoutData.eventZip)
         const data = await fetchJson('/api/delivery-fee?zip=' + encodeURIComponent(zip))
-        if (data.error || typeof data.fee !== 'number' || !Number.isFinite(data.fee) || data.fee <= 0 || typeof data.distance !== 'number' || !Number.isFinite(data.distance) || data.distance < 0 || data.zip !== zip) {
+        const distanceOk = data.distance === null || (typeof data.distance === 'number' && Number.isFinite(data.distance) && data.distance >= 0)
+        if (data.error || typeof data.fee !== 'number' || !Number.isFinite(data.fee) || data.fee <= 0 || !distanceOk || data.zip !== zip) {
           throw new Error(data.error || 'A valid delivery quote could not be calculated. Please retry before paying.')
         }
         if (cancelled) return
@@ -263,6 +276,7 @@ export default function PaymentPage() {
   }
 
   const handleContinue = async () => {
+    if (paymentsAvailable !== true) { toast.error('Online payment is temporarily unavailable. Please call Friendly Party Rental NYC at 315-884-1498 to book.'); return }
     if (!totalsReady) { toast.error(deliveryError || pricingError || 'Please wait for your delivery quote and order pricing.'); return }
     if (isHardBlocked) { toast.error('Orders cannot be placed within 24 hours of the event date. Please call our office for last-minute availability.'); return }
     if (belowMinimum) { toast.error('Minimum order is $' + minimumOrder + ' for delivery orders'); return }
@@ -327,12 +341,8 @@ export default function PaymentPage() {
         body: JSON.stringify({ orderId: orderData.order.id, amount: amountDueToday, saveCard }),
       })
       const paymentData = await paymentRes.json()
-      if (!paymentRes.ok) throw new Error(paymentData.error || 'Payment failed')
-      if (paymentData.simulated) {
-        await confirmPayment(orderData.order.orderNumber, orderData.order.id, paymentData.paymentIntentId)
-      } else {
-        setClientSecret(paymentData.clientSecret)
-      }
+      if (!paymentRes.ok || !paymentData.clientSecret) throw new Error(paymentData.error || 'Payment failed')
+      setClientSecret(paymentData.clientSecret)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Payment failed')
     } finally {
@@ -399,8 +409,9 @@ export default function PaymentPage() {
         {belowMinimum && <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-sm text-red-700">Minimum order is {formatCurrency(minimumOrder)} for delivery orders. Please go back and add more items.</div>}
         {isHardBlocked && <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-sm text-red-700">Orders cannot be placed within 24 hours of the event date. Please call our office to check last-minute availability.</div>}
         <PaymentCardAuthorization checked={saveCard} onChange={setSaveCard} required={false} compact />
+        {paymentsAvailable === false && <div role="alert" className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-sm text-amber-900">Online payment is temporarily unavailable. Please call Friendly Party Rental NYC at <a href="tel:315-884-1498" className="underline">315-884-1498</a> to complete your booking. No card has been charged.</div>}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm text-body"><p>Payment is processed securely through Stripe.</p></div>
-        <button onClick={handleContinue} disabled={loading || !totalsReady || belowMinimum || isHardBlocked || (isLastMinuteBooking && !lastMinuteFeeAccepted) || (paymentChoice === 'custom' && parsedCustomPayAmount < depositAmount)} className="btn-primary w-full text-lg py-3">
+        <button onClick={handleContinue} disabled={loading || !totalsReady || paymentsAvailable !== true || belowMinimum || isHardBlocked || (isLastMinuteBooking && !lastMinuteFeeAccepted) || (paymentChoice === 'custom' && parsedCustomPayAmount < depositAmount)} className="btn-primary w-full text-lg py-3">
           {loading ? 'Processing...' : !totalsReady ? deliveryError || pricingError ? 'Resolve pricing to continue' : 'Calculating your total...' : `Pay ${formatCurrency(amountDueToday)}`}
         </button>
       </>}

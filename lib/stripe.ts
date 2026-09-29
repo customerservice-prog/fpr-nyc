@@ -50,7 +50,15 @@ function clientForKey(key: string): Stripe {
 }
 
 export function nycStripeConfigReport(): NycStripeConfigReport {
-  return inspectNycStripeConfig(process.env)
+  // Explicit property reads: Next.js inlines NEXT_PUBLIC_* at build time, so this
+  // reflects the exact publishable key shipped to the browser.
+  return inspectNycStripeConfig({
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+    NYC_STRIPE_ACCOUNT_ID: process.env.NYC_STRIPE_ACCOUNT_ID,
+    NYC_ONLINE_PAYMENTS_ENABLED: process.env.NYC_ONLINE_PAYMENTS_ENABLED,
+  })
 }
 
 export function nycStripeMode(): StripeMode | null {

@@ -1,0 +1,30 @@
+name: NYC approved brand and build
+on:
+  push:
+    branches: [fix/nyc-approved-branding-20260929]
+    paths: ['app/**','components/**','lib/**','public/**','tests/**','.github/workflows/nyc-approved-brand-check.yml']
+  pull_request:
+    branches: [production-nyc-live]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://user:pass@localhost:5432/db
+      PUBLIC_INDEXABLE: 'false'
+      NYC_DELIVERY_FEES_JSON: '{}'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - name: Exact image and icon regression tests
+        run: node --test tests/nyc-approved-logo.test.cjs
+      - name: Existing NYC isolation and payment-delivery safeguards
+        run: node --test tests/nyc-location-isolation.test.cjs tests/nyc-business-contact-consistency.test.cjs tests/nyc-tracking-isolation.test.cjs tests/nyc-marketing-autopilot-parity.test.cjs tests/nyc-delivery.test.cjs
+      - run: npx tsc --noEmit
+      - run: npm run build

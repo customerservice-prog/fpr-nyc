@@ -1,3 +1,26 @@
+// Exact NYC logo (single source of truth: lib/nycBrand.ts). Retired NYC logo and icon
+// files were removed from public/; their old URLs redirect here so cached pages,
+// already-sent emails, bookmarks and browsers never show an old logo.
+const NYC_LOGO_PATH = '/brand/friendly-party-rental-nyc-logo-v8.png'
+const RETIRED_NYC_LOGO_PATHS = [
+  '/brand/friendly-party-rental-nyc-logo-v2.png',
+  '/brand/friendly-party-rental-nyc-logo-v5.png',
+  '/brand/friendly-party-rental-nyc-logo-v6.png',
+  '/brand/friendly-party-rental-nyc-logo-v7.png',
+  '/images/fpr-nyc-logo-v7.png',
+  '/images/logo.png',
+  '/images/logo-icon.png',
+  '/favicon.ico',
+  '/favicon-16x16.png',
+  '/favicon-32x32.png',
+  '/favicon-48x48.png',
+  '/favicon-96x96.png',
+  '/apple-touch-icon.png',
+  '/apple-touch-icon-precomposed.png',
+  '/sc-icon-192.png',
+  '/sc-icon-512.png',
+]
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -53,6 +76,7 @@ const nextConfig = {
     // Keep temporary-host redirects internal to this NYC service. Custom-domain
     // canonicalization will be added only when the final NYC domain is connected.
     return [
+      ...RETIRED_NYC_LOGO_PATHS.map((source) => ({ source, destination: NYC_LOGO_PATH, permanent: false })),
       { source: '/index.html', destination: '/', permanent: true },
       { source: '/home', destination: '/', permanent: true },
       { source: '/view_gallery', destination: '/gallery', permanent: true },

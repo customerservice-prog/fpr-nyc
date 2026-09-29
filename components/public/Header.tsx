@@ -7,7 +7,7 @@ import { Facebook, Youtube, ChevronDown } from 'lucide-react'
 import { BUSINESS, NAV_RENTALS } from '@/lib/utils'
 import HeaderSearch from './HeaderSearch'
 
-const LOGO_URL = '/brand/friendly-party-rental-nyc-logo-v7.png'
+const LOGO_URL = '/brand/friendly-party-rental-nyc-20260929-original.png'
 const defaultNavLinks = [
   { name: 'Home', href: '/' },
   { name: 'Weddings', href: '/weddings' },
@@ -83,26 +83,26 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
       </li>)}
     </ul>
   }
-  const logo = <Link href="/" prefetch={false} className="inline-flex items-center justify-center"><img src={LOGO_URL} alt={BUSINESS.name} width={cfg.logoLarge ? 270 : 225} height={cfg.logoLarge ? 180 : 150} className={(cfg.grayscale ? 'grayscale ' : '') + 'w-auto h-auto max-h-[150px] object-contain'}/></Link>
+  const logo = <Link href="/" prefetch={false} aria-label="Friendly Party Rental NYC home" className="inline-flex w-full max-w-[320px] items-center justify-center"><img src={LOGO_URL} alt={BUSINESS.name} width={1774} height={887} loading="eager" className="block h-auto w-full object-contain" style={{maxWidth:cfg.logoLarge ? 320 : 300}}/></Link>
   if (cfg.mode === 'cover') {
     const fgClass = cfg.coverFg === 'black' ? 'text-dark' : 'text-white'
-    return <header className="w-full bg-gradient-to-r from-secondary via-primary to-secondary"><div className="max-w-7xl mx-auto px-4 py-6 flex flex-col items-center gap-3"><Link href="/" prefetch={false}><img src={LOGO_URL} alt={BUSINESS.name} width={220} height={147}/></Link>{renderNav(fgClass, 'justify-center')}</div></header>
+    return <header className="w-full bg-gradient-to-r from-secondary via-primary to-secondary"><div className="max-w-7xl mx-auto px-4 py-6 flex flex-col items-center gap-3"><Link href="/" prefetch={false}><img src={LOGO_URL} alt={BUSINESS.name} width={260} height={130} className="block h-auto max-w-full object-contain"/></Link>{renderNav(fgClass, 'justify-center')}</div></header>
   }
   if (cfg.mode === 'inline') {
     const textCls = cfg.textColor === 'black' ? 'text-dark' : 'text-white'
-    const logoEl = <Link href="/" prefetch={false}><img src={LOGO_URL} alt={BUSINESS.name} width={160} height={107}/></Link>
+    const logoEl = <Link href="/" prefetch={false}><img src={LOGO_URL} alt={BUSINESS.name} width={180} height={90} className="block h-auto max-w-full object-contain"/></Link>
     const navEl = renderNav(textCls, 'justify-start lg:justify-end')
     return <header className="w-full bg-gradient-to-r from-secondary to-primary"><div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-4">{cfg.logoSide === 'right' ? <>{navEl}{logoEl}</> : <>{logoEl}{navEl}</>}</div></header>
   }
   const navJustify = cfg.align === 'center' ? 'justify-center' : cfg.align === 'end' ? 'justify-center lg:justify-end' : cfg.align === 'start' ? 'justify-center lg:justify-start' : 'justify-center lg:justify-between'
-  return <header className="w-full bg-white border-b border-gray-200" data-nyc-header="20260927">
-    {cfg.topBar && <div className="max-w-7xl mx-auto px-4 py-2"><div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_250px_minmax(0,1fr)] gap-3 items-center">
+  return <header className="w-full bg-white border-b border-gray-200" data-nyc-header="20260929-approved">
+    {cfg.topBar && <div className="max-w-7xl mx-auto px-4 py-2"><div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_260px_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_320px_minmax(0,1fr)] gap-3 items-center">
       <div className="min-w-0 text-[13px] text-gray-700 leading-relaxed">
         <p><a href={`tel:${BUSINESS.phone}`} className="font-bold text-dark hover:underline">{BUSINESS.phone}</a>{' | '}<a href={`sms:${BUSINESS.text}`} className="font-bold text-dark hover:underline">Text Us</a></p>
         <p className="break-all"><a href={BUSINESS.emailHref} className="hover:underline">{BUSINESS.email}</a></p>
         <p>{BUSINESS.address}</p><p className="text-xs text-gray-600 mt-0.5">{BUSINESS.hours}</p><p>Serving {BUSINESS.serviceArea}</p>
       </div>
-      <div className={'min-w-0 flex justify-center' + (cfg.grayscale ? ' grayscale' : '')}>{logo}</div>
+      <div className="min-w-0 flex justify-center">{logo}</div>
       <div className="flex flex-col items-center md:items-end gap-2"><div className={'flex items-center gap-3' + (cfg.grayscale ? ' grayscale' : '')}>
         <a href={BUSINESS.facebook} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="Facebook"><Facebook size={24} fill="currentColor"/></a>
         <a href={BUSINESS.youtube} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="YouTube"><Youtube size={24}/></a>

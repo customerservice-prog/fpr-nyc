@@ -6,8 +6,9 @@ import { usePathname } from 'next/navigation'
 import { Facebook, Youtube, ChevronDown } from 'lucide-react'
 import { BUSINESS, NAV_RENTALS } from '@/lib/utils'
 import HeaderSearch from './HeaderSearch'
+import { NYC_LOGO_PATH, NYC_LOGO_WIDTH, NYC_LOGO_HEIGHT } from '@/lib/nycBrand'
 
-const LOGO_URL = '/brand/friendly-party-rental-nyc-logo-v7.png'
+const LOGO_URL = NYC_LOGO_PATH
 const defaultNavLinks = [
   { name: 'Home', href: '/' },
   { name: 'Weddings', href: '/weddings' },
@@ -83,20 +84,22 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
       </li>)}
     </ul>
   }
-  const logo = <Link href="/" prefetch={false} className="inline-flex items-center justify-center"><img src={LOGO_URL} alt={BUSINESS.name} width={cfg.logoLarge ? 270 : 225} height={cfg.logoLarge ? 180 : 150} className={(cfg.grayscale ? 'grayscale ' : '') + 'w-auto h-auto max-h-[150px] object-contain'}/></Link>
+  // The logo is the exact 2:1 artwork: the box is sized around it (full width of its
+  // column, capped) and the height follows the ratio, so it is never cropped or squashed.
+  const logo = <Link href="/" prefetch={false} className={'block w-full ' + (cfg.logoLarge ? 'max-w-[340px]' : 'max-w-[300px]')}><img src={LOGO_URL} alt={BUSINESS.name} width={NYC_LOGO_WIDTH} height={NYC_LOGO_HEIGHT} className={(cfg.grayscale ? 'grayscale ' : '') + 'block w-full h-auto'}/></Link>
   if (cfg.mode === 'cover') {
     const fgClass = cfg.coverFg === 'black' ? 'text-dark' : 'text-white'
-    return <header className="w-full bg-gradient-to-r from-secondary via-primary to-secondary"><div className="max-w-7xl mx-auto px-4 py-6 flex flex-col items-center gap-3"><Link href="/" prefetch={false}><img src={LOGO_URL} alt={BUSINESS.name} width={220} height={147}/></Link>{renderNav(fgClass, 'justify-center')}</div></header>
+    return <header className="w-full bg-gradient-to-r from-secondary via-primary to-secondary"><div className="max-w-7xl mx-auto px-4 py-6 flex flex-col items-center gap-3"><Link href="/" prefetch={false} className="block w-[240px] max-w-full"><img src={LOGO_URL} alt={BUSINESS.name} width={NYC_LOGO_WIDTH} height={NYC_LOGO_HEIGHT} className="block w-full h-auto"/></Link>{renderNav(fgClass, 'justify-center')}</div></header>
   }
   if (cfg.mode === 'inline') {
     const textCls = cfg.textColor === 'black' ? 'text-dark' : 'text-white'
-    const logoEl = <Link href="/" prefetch={false}><img src={LOGO_URL} alt={BUSINESS.name} width={160} height={107}/></Link>
+    const logoEl = <Link href="/" prefetch={false} className="block w-[200px] max-w-full shrink-0"><img src={LOGO_URL} alt={BUSINESS.name} width={NYC_LOGO_WIDTH} height={NYC_LOGO_HEIGHT} className="block w-full h-auto"/></Link>
     const navEl = renderNav(textCls, 'justify-start lg:justify-end')
     return <header className="w-full bg-gradient-to-r from-secondary to-primary"><div className="max-w-7xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-4">{cfg.logoSide === 'right' ? <>{navEl}{logoEl}</> : <>{logoEl}{navEl}</>}</div></header>
   }
   const navJustify = cfg.align === 'center' ? 'justify-center' : cfg.align === 'end' ? 'justify-center lg:justify-end' : cfg.align === 'start' ? 'justify-center lg:justify-start' : 'justify-center lg:justify-between'
   return <header className="w-full bg-white border-b border-gray-200" data-nyc-header="20260927">
-    {cfg.topBar && <div className="max-w-7xl mx-auto px-4 py-2"><div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_250px_minmax(0,1fr)] gap-3 items-center">
+    {cfg.topBar && <div className="max-w-7xl mx-auto px-4 py-2"><div className={'grid grid-cols-1 gap-3 items-center ' + (cfg.logoLarge ? 'md:grid-cols-[minmax(0,1fr)_280px_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_340px_minmax(0,1fr)]' : 'md:grid-cols-[minmax(0,1fr)_260px_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_300px_minmax(0,1fr)]')}>
       <div className="min-w-0 text-[13px] text-gray-700 leading-relaxed">
         <p><a href={`tel:${BUSINESS.phone}`} className="font-bold text-dark hover:underline">{BUSINESS.phone}</a>{' | '}<a href={`sms:${BUSINESS.text}`} className="font-bold text-dark hover:underline">Text Us</a></p>
         <p className="break-all"><a href={BUSINESS.emailHref} className="hover:underline">{BUSINESS.email}</a></p>

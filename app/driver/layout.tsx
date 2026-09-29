@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import RegisterServiceWorker from './register-sw'
 import DriverNav from '@/components/driver/DriverNav'
+import { NYC_LOGO_PATH } from '@/lib/nycBrand'
 
 export const metadata: Metadata = {
     robots:{index:false,follow:false},alternates:{canonical:null},
@@ -12,8 +13,8 @@ export const metadata: Metadata = {
           title: 'FPR Drivers',
     },
     icons: {
-        apple: '/api/driver-icon-512',
-        icon: '/api/driver-icon-512',
+        apple: NYC_LOGO_PATH,
+        icon: NYC_LOGO_PATH,
     },
 }
 

@@ -96,6 +96,7 @@ function layout(tracking) {
     '@/lib/nycServiceAreas': { NYC_SERVICE_AREAS: [
       { name:'Riverdale' }, { name:'Yonkers' }, { name:'Mount Vernon' }, { name:'New Rochelle' },
     ] },
+    '@/lib/nycBrand': load('lib/nycBrand.ts'),
     './globals.css': {},
   }, { process: { env: {} }, URL }).default({ children: 'Checkout remains available' })
 }

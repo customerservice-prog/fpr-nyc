@@ -11,16 +11,10 @@
   "theme_color": "#0B1F3A",
   "icons": [
     {
-      "src": "/api/driver-icon-512",
-      "sizes": "512x512",
+      "src": "/brand/friendly-party-rental-nyc-logo-v8.png",
+      "sizes": "1774x887",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/api/driver-icon-maskable",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ]
 }

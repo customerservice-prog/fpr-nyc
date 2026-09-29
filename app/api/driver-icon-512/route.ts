@@ -1,7 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NYC_LOGO_PATH } from '@/lib/nycBrand'
 
-export const dynamic = 'force-static'
-
-export function GET(request: NextRequest) {
-  return NextResponse.redirect(new URL('/brand/friendly-party-rental-nyc-logo-v7.png', request.url), 307)
+// Legacy driver-app icon URL kept for installs that cached the old manifest.
+// It sends them to the exact NYC logo. The Location is relative so the redirect
+// never depends on the host name seen at build time.
+export function GET() {
+  return new Response(null, {
+    status: 307,
+    headers: { Location: NYC_LOGO_PATH, 'Cache-Control': 'public, max-age=300' },
+  })
 }

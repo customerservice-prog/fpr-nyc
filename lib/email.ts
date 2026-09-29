@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer'
 import { NYC_EMAIL_ADDRESS, nycEmailSubject, nycEmailHtml } from '@/lib/nycEmail'
 import { BUSINESS, formatDateTime } from '@/lib/utils'
+import { NYC_EMAIL_LOGO_URL } from '@/lib/nycBrand'
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || 'smtp.gmail.com',
@@ -17,7 +18,7 @@ const transporter = nodemailer.createTransport({
   },
 })
 
-const LOGO_URL = 'https://fpr-nyc-production.up.railway.app/images/logo.png'
+const LOGO_URL = NYC_EMAIL_LOGO_URL
 
 export async function sendEmail({
   to,
@@ -62,7 +63,7 @@ export async function sendEmail({
 function emailHeader() {
   return `
     <div style="text-align:center; margin-bottom:20px;">
-      <img src="${LOGO_URL}" alt="${BUSINESS.name}" style="max-height:70px; max-width:320px;" />
+      <img src="${LOGO_URL}" alt="${BUSINESS.name}" width="220" height="110" style="display:block; margin:0 auto; width:220px; max-width:100%; height:auto; border:0;" />
     </div>
   `
 }

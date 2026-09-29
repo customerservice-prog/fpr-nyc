@@ -6,8 +6,9 @@ import { usePathname } from 'next/navigation'
 import { Search, ShoppingCart, Menu, X } from 'lucide-react'
 import { useCart } from './CartContext'
 import { BUSINESS, NAV_RENTALS } from '@/lib/utils'
+import { NYC_LOGO_PATH, NYC_LOGO_WIDTH, NYC_LOGO_HEIGHT, NYC_LOGO_ALT } from '@/lib/nycBrand'
 
-const LOGO_URL = '/brand/friendly-party-rental-nyc-logo-v7.png'
+const LOGO_URL = NYC_LOGO_PATH
 
 interface SearchItem {
   id: string
@@ -73,7 +74,7 @@ export default function MobileHeader() {
   return <>
     <header className="sticky top-0 z-40 bg-white border-b border-gray-200 h-[104px] flex items-center px-2">
       <button aria-label="Open menu" onClick={() => setMenuOpen(true)} className="p-3 -ml-1 flex flex-col items-center justify-center text-gray-900"><Menu size={26} strokeWidth={2.3} /><span className="text-[10px] font-semibold mt-0.5 leading-none">Menu</span></button>
-      <Link href="/" prefetch={false} className="flex-1 flex justify-center"><img src={LOGO_URL} alt="Friendly Party Rental NYC" width={145} height={97} className="w-[145px] h-auto object-contain" /></Link>
+      <Link href="/" prefetch={false} className="flex-1 min-w-0 flex justify-center px-1"><img src={LOGO_URL} alt={NYC_LOGO_ALT} width={NYC_LOGO_WIDTH} height={NYC_LOGO_HEIGHT} className="block w-full max-w-[200px] h-auto" /></Link>
       <div className="flex items-center"><button aria-label="Search" onClick={() => setSearchOpen(true)} className="p-3"><Search size={22} /></button><Link aria-label="Cart" href="/checkout" prefetch={false} className="p-3 relative"><ShoppingCart size={22} />{itemCount > 0 && <span className="absolute top-1 right-1 bg-accent text-white text-[10px] font-bold rounded-full min-w-[16px] h-[16px] px-1 flex items-center justify-center">{itemCount > 9 ? '9+' : itemCount}</span>}</Link></div>
     </header>
 

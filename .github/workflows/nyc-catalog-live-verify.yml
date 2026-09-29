@@ -1,0 +1,111 @@
+name: NYC live catalog verification
+on:
+  push:
+    branches: [fix/nyc-catalog-routing-20260929]
+    paths: [.github/workflows/nyc-catalog-live-verify.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --prefix /tmp/nyc-browser --no-save --package-lock=false playwright@1.56.1
+      - run: /tmp/nyc-browser/node_modules/.bin/playwright install --with-deps chromium
+      - name: Read-only verification of the deployed customer experience
+        run: |
+          mkdir -p /tmp/nyc-catalog-proof
+          node - <<'JS'
+          const {chromium}=require('/tmp/nyc-browser/node_modules/playwright')
+          const assert=require('node:assert/strict'),fs=require('node:fs'),crypto=require('node:crypto')
+          const base='https://friendlypartyrentalnyc.com'
+          const report={checkedAt:new Date().toISOString(),base,categories:[],itemPages:[],viewports:[]}
+          ;(async()=>{
+            const browser=await chromium.launch({headless:true})
+            const context=await browser.newContext()
+            try{
+              let categories=[]
+              for(let attempt=0;attempt<18;attempt++){
+                const res=await context.request.get(base+'/api/categories?qa='+Date.now(),{timeout:15000})
+                if(res.status()===200) categories=(await res.json()).categories||[]
+                if(categories.length>=18) break
+                await new Promise(resolve=>setTimeout(resolve,10000))
+              }
+              assert.ok(categories.length>=18,'Restored categories are not yet published')
+              report.categoryCount=categories.length
+              for(const category of categories){
+                const path='/category/'+encodeURIComponent(category.slug)
+                const res=await context.request.get(base+path,{timeout:25000})
+                const body=await res.text()
+                assert.equal(res.status(),200,path)
+                assert.ok(!body.includes('This page could not be found'),path)
+                const api=await context.request.get(base+'/api/categories/'+encodeURIComponent(category.slug),{timeout:25000})
+                assert.equal(api.status(),200,path+' API')
+                const data=await api.json()
+                assert.equal(data.category.slug,category.slug)
+                const count=data.category.items.length
+                if(!count)assert.ok(body.includes('data-nyc-catalog-state="awaiting-inventory"'),path+' honest empty state')
+                report.categories.push({slug:category.slug,status:res.status(),apiStatus:api.status(),publishedItems:count,emptyState:!count})
+              }
+              const allItemsResponse=await context.request.get(base+'/api/items?qa='+Date.now())
+              assert.equal(allItemsResponse.status(),200)
+              const items=(await allItemsResponse.json()).items||[]
+              report.publishedItemCount=items.length
+              for(const item of items.slice(0,3)){
+                const r=await context.request.get(base+'/items/'+encodeURIComponent(item.slug))
+                assert.equal(r.status(),200,item.slug)
+                report.itemPages.push({slug:item.slug,status:r.status()})
+              }
+              if(!items.length)report.inventoryNote='No NYC items are published. No fixture products, prices or stock were added to production. Item routes were tested only against an isolated test database.'
+              for(const path of ['/category/not-a-real-category','/api/categories/not-a-real-category','/items/not-a-real-item']){
+                const r=await context.request.get(base+path)
+                assert.equal(r.status(),404,path+' must remain a real 404')
+              }
+              const directory=await context.request.get(base+'/category')
+              assert.equal(directory.status(),200)
+              const directoryHtml=await directory.text()
+              assert.ok(!directoryHtml.includes('Browse Greenville rental categories'))
+              for(const category of categories)assert.ok(directoryHtml.includes('/category/'+category.slug))
+              for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844],['small-mobile',320,740]]){
+                const c=await browser.newContext({viewport:{width,height},deviceScaleFactor:1})
+                const page=await c.newPage()
+                const response=await page.goto(base+'/category/tent-rentals',{waitUntil:'networkidle',timeout:35000})
+                assert.equal(response.status(),200)
+                await page.getByRole('heading',{name:'Tent Rentals',exact:true}).waitFor()
+                const image=page.locator('header img:visible').first()
+                const logo=await image.evaluate(async img=>{await img.decode();const r=img.getBoundingClientRect();return {src:img.currentSrc,width:img.naturalWidth,height:img.naturalHeight,renderedWidth:r.width,renderedHeight:r.height}})
+                const asset=await c.request.get(logo.src)
+                logo.sha256=crypto.createHash('sha256').update(await asset.body()).digest('hex')
+                assert.equal(logo.sha256,'806f9d15f32e34154eb0b8556433ef3ab20e94f707f7019fcddafecbf748f83f','Approved logo must remain unchanged')
+                assert.ok(Math.abs(logo.renderedWidth/logo.renderedHeight-2)<0.03)
+                const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)
+                assert.equal(overflow,false,name+' overflow')
+                await page.screenshot({path:'/tmp/nyc-catalog-proof/'+name+'-tent-category.png',fullPage:true})
+                let contactVisible=null
+                if(!items.length){
+                  const call=page.getByRole('link',{name:'Call 315-884-1498',exact:true})
+                  await call.scrollIntoViewIfNeeded()
+                  contactVisible=await call.isVisible()
+                  assert.ok(contactVisible)
+                }
+                report.viewports.push({name,width,height,status:response.status(),overflow,logo,contactVisible})
+                await c.close()
+              }
+              report.success=true
+            }finally{
+              console.log(JSON.stringify(report,null,2))
+              fs.writeFileSync('/tmp/nyc-catalog-proof/report.json',JSON.stringify(report,null,2))
+              await browser.close()
+            }
+          })().catch(e=>{console.error(e);process.exitCode=1})
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nyc-catalog-live-proof
+          path: /tmp/nyc-catalog-proof
+          retention-days: 2

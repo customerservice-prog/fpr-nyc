@@ -1,0 +1,88 @@
+name: NYC custom-domain live verification
+on:
+  push:
+    branches: [fix/nyc-approved-branding-20260929]
+    paths: [.github/workflows/nyc-custom-domain-verify.yml]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --prefix /tmp/nyc-browser --no-save --package-lock=false playwright@1.56.1
+      - run: /tmp/nyc-browser/node_modules/.bin/playwright install --with-deps chromium
+      - name: Verify deployed application without submitting forms or business records
+        run: |
+          mkdir -p /tmp/nyc-final-proof
+          node - <<'JS'
+          const {chromium}=require('/tmp/nyc-browser/node_modules/playwright')
+          const fs=require('node:fs'),crypto=require('node:crypto')
+          const base='https://friendlypartyrentalnyc.com'
+          const hash='806f9d15f32e34154eb0b8556433ef3ab20e94f707f7019fcddafecbf748f83f'
+          ;(async()=>{
+            const browser=await chromium.launch({headless:true})
+            const report={checkedAt:new Date().toISOString(),base,viewports:[],endpoints:[],failures:[]}
+            const check=(ok,label)=>{if(!ok)report.failures.push(label)}
+            const summary=e=>e.message.split('\n').slice(0,2).join(' ')
+            try{
+              const requestContext=await browser.newContext()
+              let ready=false
+              for(let attempt=0;attempt<24;attempt++){
+                const response=await requestContext.request.get(base+'/category/tent-rentals',{timeout:20000}).catch(()=>null)
+                if(response&&response.status()===200){ready=true;break}
+                await new Promise(resolve=>setTimeout(resolve,10000))
+              }
+              report.catalogReady=ready;check(ready,'Tent catalog did not recover after deployment wait')
+              for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844],['small-mobile',320,740]]){
+                const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,reducedMotion:'reduce'})
+                const page=await context.newPage();const v={name,width,height};report.viewports.push(v)
+                try{
+                  const response=await page.goto(base,{waitUntil:'domcontentloaded',timeout:60000})
+                  check(response.status()===200,name+' homepage status')
+                  await page.waitForTimeout(4500)
+                  const measure=async img=>{await img.decode();const r=img.getBoundingClientRect();return {src:img.currentSrc,naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight,width:r.width,height:r.height,left:r.left,right:r.right}}
+                  const header=page.locator('header img:visible').first();v.header=await header.evaluate(measure)
+                  const h=v.header
+                  check(h.naturalWidth===1774&&h.naturalHeight===887,name+' logo dimensions')
+                  check(Math.abs(h.width/h.height-2)<0.02&&h.left>=0&&h.right<=width+1,name+' whole logo fits without distortion')
+                  const image=await context.request.get(h.src)
+                  v.imageStatus=image.status();v.imageHash=crypto.createHash('sha256').update(await image.body()).digest('hex')
+                  check(v.imageStatus===200&&v.imageHash===hash,name+' served image matches approved pixels')
+                  v.horizontalOverflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)
+                  check(!v.horizontalOverflow,name+' horizontal overflow')
+                  await page.screenshot({path:'/tmp/nyc-final-proof/'+name+'-header.png'})
+                  const footer=page.locator('footer img:visible').first();await footer.scrollIntoViewIfNeeded();v.footer=await footer.evaluate(measure)
+                  check(v.footer.naturalWidth===1774&&v.footer.naturalHeight===887&&Math.abs(v.footer.width/v.footer.height-2)<0.02,name+' footer displays complete logo')
+                  await page.screenshot({path:'/tmp/nyc-final-proof/'+name+'-footer.png'})
+                  if(width<768){await page.evaluate(()=>scrollTo(0,0));await page.getByRole('button',{name:'Open menu',exact:true}).click();await page.getByRole('button',{name:'Close menu',exact:true}).waitFor({state:'visible'});await page.keyboard.press('Escape');await page.getByRole('button',{name:'Close menu',exact:true}).waitFor({state:'hidden'});v.menu='opens and closes correctly'}
+                }catch(e){v.error=summary(e);report.failures.push(name+': '+v.error);await page.screenshot({path:'/tmp/nyc-final-proof/'+name+'-failure.png'}).catch(()=>{})}
+                await context.close()
+              }
+              for(const endpoint of ['/health','/category/tent-rentals','/category/table-chair-rentals','/admin/login','/checkout','/api/driver-icon-512','/api/driver-icon-maskable']){
+                try{const r=await requestContext.request.get(base+endpoint,{timeout:25000});const item={path:endpoint,status:r.status(),finalUrl:r.url(),contentType:r.headers()['content-type']};if(endpoint==='/health')item.body=await r.text();report.endpoints.push(item);check(r.status()===200,endpoint+' failed')}catch(e){report.endpoints.push({path:endpoint,error:summary(e)});report.failures.push(endpoint+' request failed')}
+              }
+              try{
+                const page=await requestContext.newPage()
+                await page.goto(base+'/category/tent-rentals',{waitUntil:'domcontentloaded',timeout:40000})
+                await page.waitForTimeout(3000)
+                const links=await page.locator('a[href*="/items/"]').evaluateAll(nodes=>nodes.map(n=>n.href))
+                report.catalogItemLinkCount=links.length;check(links.length>0,'Tent catalog has no visible item links')
+                const chosen=links.find(url=>url.startsWith(base+'/items/'))
+                if(chosen){const r=await page.goto(chosen,{waitUntil:'domcontentloaded',timeout:30000});report.itemPage={url:chosen,status:r.status(),title:await page.title()};check(r.status()===200,'Rental item page failed');await page.screenshot({path:'/tmp/nyc-final-proof/rental-item.png'})}
+              }catch(e){report.catalogError=summary(e);report.failures.push('Catalog browser check: '+summary(e))}
+              try{const r=await requestContext.request.get('https://www.friendlypartyrentalnyc.com/health',{timeout:15000});report.www={status:r.status(),finalUrl:r.url(),body:(await r.text()).slice(0,250)}}catch(e){report.www={error:summary(e)}}
+              await requestContext.close()
+            }finally{report.finishedAt=new Date().toISOString();console.log(JSON.stringify(report,null,2));fs.writeFileSync('/tmp/nyc-final-proof/report.json',JSON.stringify(report,null,2));await browser.close()}
+            if(report.failures.length)process.exitCode=1
+          })().catch(e=>{console.error(e);process.exitCode=1})
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nyc-custom-domain-proof
+          path: /tmp/nyc-final-proof
+          retention-days: 2

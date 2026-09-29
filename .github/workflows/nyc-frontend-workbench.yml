@@ -1,0 +1,22 @@
+name: NYC Frontend Workbench
+on:
+  push:
+    branches: [fix/nyc-approved-branding-20260929]
+    paths: [.github/workflows/nyc-frontend-workbench.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package tracked NYC source for local checks
+        run: |
+          git archive --format=tar HEAD app components lib scripts tests prisma .github package.json package-lock.json tsconfig.json next.config.js tailwind.config.js public/site.webmanifest public/driver-manifest.webmanifest | gzip > /tmp/nyc-source.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nyc-source-workbench
+          path: /tmp/nyc-source.tar.gz
+          retention-days: 1

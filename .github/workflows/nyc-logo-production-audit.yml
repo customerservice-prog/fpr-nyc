@@ -1,0 +1,44 @@
+name: NYC logo production audit
+on:
+  push:
+    branches: [fix/nyc-approved-branding-20260929]
+    paths: [.github/workflows/nyc-logo-production-audit.yml]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/db
+      - name: Read published asset without modifying production
+        run: |
+          git fetch --depth=1 origin ea85ce408c0074b5c623a25f78d86be10da33263
+          mkdir -p /tmp/nyc-logo-audit
+          git show ea85ce408c0074b5c623a25f78d86be10da33263:public/brand/friendly-party-rental-nyc-logo-v8.png > /tmp/nyc-logo-audit/production-v8.png
+          node - <<'JS'
+          const fs=require('node:fs'),crypto=require('node:crypto'),sharp=require('sharp')
+          const digest=b=>crypto.createHash('sha256').update(b).digest('hex')
+          ;(async()=>{
+            const a=fs.readFileSync('public/brand/friendly-party-rental-nyc-20260929-original.png')
+            const b=fs.readFileSync('/tmp/nyc-logo-audit/production-v8.png')
+            const ma=await sharp(a).metadata(),mb=await sharp(b).metadata()
+            const pa=await sharp(a).ensureAlpha().raw().toBuffer(),pb=await sharp(b).ensureAlpha().raw().toBuffer()
+            const result={original:{bytes:a.length,sha256:digest(a),width:ma.width,height:ma.height},production:{bytes:b.length,sha256:digest(b),width:mb.width,height:mb.height},byteIdentical:a.equals(b),pixelIdentical:pa.equals(pb)}
+            console.log(JSON.stringify(result,null,2))
+            fs.writeFileSync('/tmp/nyc-logo-audit/comparison.json',JSON.stringify(result,null,2))
+          })().catch(e=>{console.error(e);process.exitCode=1})
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nyc-logo-comparison
+          path: /tmp/nyc-logo-audit
+          retention-days: 1

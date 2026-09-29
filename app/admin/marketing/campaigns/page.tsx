@@ -11,8 +11,9 @@ import {
   designStatusLabel,
   type CampaignTag,
 } from '@/lib/marketing/campaignLibrary'
+import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
 
-const ORIGIN = 'https://www.fpr-nyc-production.up.railway.app'
+const ORIGIN = NYC_PUBLIC_ORIGIN
 
 const TAG_ORDER: CampaignTag[] = [
   'wedding', 'graduation', 'summer-family', 'fall', 'holiday-corporate',

@@ -10,17 +10,7 @@
   "background_color": "#f3f4f6",
   "theme_color": "#0B1F3A",
   "icons": [
-    {
-      "src": "/api/driver-icon-512",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/api/driver-icon-maskable",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    {"src":"/api/nyc-brand-icon-20260929/512","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"/api/nyc-brand-icon-20260929/maskable-512","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ]
 }

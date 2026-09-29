@@ -11,17 +11,10 @@ import { safeJsonLd } from '@/lib/jsonLd'
 import { BUSINESS } from '@/lib/utils'
 import { NYC_SERVICE_AREAS } from '@/lib/nycServiceAreas'
 
-const roboto = Roboto({
-  weight: ['300', '400', '500', '700'],
-  subsets: ['latin'],
-  display: 'swap',
-})
-
+const roboto = Roboto({ weight: ['300', '400', '500', '700'], subsets: ['latin'], display: 'swap' })
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://fpr-nyc-production.up.railway.app').replace(/\/$/, '')
 const INDEXABLE = process.env.PUBLIC_INDEXABLE === 'true'
-const SITE_DESCRIPTION =
-  'Friendly Party Rental NYC provides party and event rentals in Riverdale, selected Bronx neighborhoods, Yonkers, Mount Vernon, New Rochelle and nearby Lower Westchester communities.'
-
+const SITE_DESCRIPTION = 'Friendly Party Rental NYC provides party and event rentals in Riverdale, selected Bronx neighborhoods, Yonkers, Mount Vernon, New Rochelle and nearby Lower Westchester communities.'
 const LOCAL_BUSINESS_JSONLD = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
@@ -29,7 +22,7 @@ const LOCAL_BUSINESS_JSONLD = {
   name: BUSINESS.name,
   legalName: BUSINESS.legalName,
   description: SITE_DESCRIPTION,
-  image: SITE_URL + '/brand/friendly-party-rental-nyc-logo-v7.png',
+  image: SITE_URL + '/brand/friendly-party-rental-nyc-20260929-original.png',
   telephone: '+1-' + BUSINESS.phone,
   email: BUSINESS.email,
   url: SITE_URL,
@@ -39,10 +32,7 @@ const LOCAL_BUSINESS_JSONLD = {
     opens: '09:00',
     closes: '18:00',
   }],
-  areaServed: NYC_SERVICE_AREAS.map((area) => ({
-    '@type': 'Place',
-    name: area.name + ', NY',
-  })),
+  areaServed: NYC_SERVICE_AREAS.map((area) => ({ '@type': 'Place', name: area.name + ', NY' })),
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
     name: 'Party and event rentals in Riverdale, the Bronx and Lower Westchester',
@@ -57,25 +47,22 @@ const LOCAL_BUSINESS_JSONLD = {
   },
   priceRange: '$$',
 }
-
 const WEBSITE_JSONLD = {
-  '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  '@id': SITE_URL + '/#website',
-  url: SITE_URL,
-  name: BUSINESS.name,
-  description: SITE_DESCRIPTION,
+  '@context': 'https://schema.org', '@type': 'WebSite', '@id': SITE_URL + '/#website',
+  url: SITE_URL, name: BUSINESS.name, description: SITE_DESCRIPTION,
   publisher: { '@id': SITE_URL + '/#business' },
 }
-
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   applicationName: BUSINESS.name,
   manifest: '/site.webmanifest',
   icons: {
-    icon: [{ url: '/brand/friendly-party-rental-nyc-logo-v7.png?v=exact-v7-20260927', sizes: 'any', type: 'image/png' }],
-    shortcut: '/brand/friendly-party-rental-nyc-logo-v7.png?v=exact-v7-20260927',
-    apple: [{ url: '/brand/friendly-party-rental-nyc-logo-v7.png?v=exact-v7-20260927', sizes: 'any', type: 'image/png' }],
+    icon: [
+      { url: '/api/nyc-brand-icon-20260929/32', sizes: '32x32', type: 'image/png' },
+      { url: '/api/nyc-brand-icon-20260929/192', sizes: '192x192', type: 'image/png' },
+    ],
+    shortcut: '/api/nyc-brand-icon-20260929/32',
+    apple: [{ url: '/api/nyc-brand-icon-20260929/180', sizes: '180x180', type: 'image/png' }],
   },
   title: {
     default: 'Friendly Party Rental NYC | Party Rentals in Riverdale, the Bronx & Lower Westchester',
@@ -83,61 +70,33 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   keywords: [
-    'Friendly Party Rental NYC',
-    'party rentals Riverdale NY',
-    'party rentals Bronx NY',
-    'party rentals Yonkers NY',
-    'tent rentals Riverdale',
-    'bounce house rentals Riverdale NY',
-    'table and chair rentals Lower Westchester',
-    'wedding rentals Riverdale NY',
+    'Friendly Party Rental NYC', 'party rentals Riverdale NY', 'party rentals Bronx NY',
+    'party rentals Yonkers NY', 'tent rentals Riverdale', 'bounce house rentals Riverdale NY',
+    'table and chair rentals Lower Westchester', 'wedding rentals Riverdale NY',
   ],
   openGraph: {
     title: 'Friendly Party Rental NYC | Party Rentals in Riverdale, the Bronx & Lower Westchester',
-    description: SITE_DESCRIPTION,
-    siteName: BUSINESS.name,
-    locale: 'en_US',
-    type: 'website',
-    images: [{ url: SITE_URL + '/brand/friendly-party-rental-nyc-logo-v7.png', width: 768, height: 512, alt: BUSINESS.name }],
+    description: SITE_DESCRIPTION, siteName: BUSINESS.name, locale: 'en_US', type: 'website',
+    images: [{ url: SITE_URL + '/brand/friendly-party-rental-nyc-20260929-original.png', width: 1774, height: 887, alt: BUSINESS.name }],
   },
-  robots: {
-    index: INDEXABLE,
-    follow: true,
-  },
-  verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
-  },
+  robots: { index: INDEXABLE, follow: true },
+  verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION },
 }
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLd(LOCAL_BUSINESS_JSONLD) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: safeJsonLd(WEBSITE_JSONLD) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(LOCAL_BUSINESS_JSONLD) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(WEBSITE_JSONLD) }} />
         {GOOGLE_TAG_ID && <>
-          <Script id="ga4-init" strategy="beforeInteractive">
-            {GOOGLE_TAG_BOOTSTRAP}
-          </Script>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`}
-            strategy="lazyOnload"
-          />
+          <Script id="ga4-init" strategy="beforeInteractive">{GOOGLE_TAG_BOOTSTRAP}</Script>
+          <Script src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`} strategy="lazyOnload" />
         </>}
       </head>
       <body className={roboto.className}>
         <GoogleAnalyticsListener />
         <VisitorTracker />
-        <CartProvider>
-          {children}
-          <Toaster position="top-center" />
-        </CartProvider>
+        <CartProvider>{children}<Toaster position="top-center" /></CartProvider>
       </body>
     </html>
   )

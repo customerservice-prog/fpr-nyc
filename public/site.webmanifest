@@ -10,11 +10,7 @@
   "background_color": "#ffffff",
   "theme_color": "#0B1F3A",
   "icons": [
-    {
-      "src": "/brand/friendly-party-rental-nyc-logo-v7.png",
-      "sizes": "any",
-      "type": "image/png",
-      "purpose": "any"
-    }
+    {"src":"/api/nyc-brand-icon-20260929/192","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"/api/nyc-brand-icon-20260929/512","sizes":"512x512","type":"image/png","purpose":"any"}
   ]
 }

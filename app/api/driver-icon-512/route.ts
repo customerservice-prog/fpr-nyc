@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-
+import { renderNycBrandIcon } from '@/lib/nycBrandIcon'
+export const runtime = 'nodejs'
 export const dynamic = 'force-static'
-
-export function GET(request: NextRequest) {
-  return NextResponse.redirect(new URL('/brand/friendly-party-rental-nyc-logo-v7.png', request.url), 307)
+export async function GET() {
+  const bytes = await renderNycBrandIcon(512)
+  return new Response(new Uint8Array(bytes), { headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=3600' } })
 }

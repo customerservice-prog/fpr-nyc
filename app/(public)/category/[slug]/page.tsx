@@ -1,4 +1,5 @@
 import CategoryCatalogFallback from '@/components/public/CategoryCatalogFallback'
+import CategoryEmptyState from '@/components/public/CategoryEmptyState'
 import { createElement, Suspense, Fragment } from 'react'
 import LocalDeliveryLinks from '@/components/public/LocalDeliveryLinks'
 import { notFound } from 'next/navigation'
@@ -24,6 +25,10 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
   const category = results[0]
   const items = results[1]
   if (!category || !category.displayToCustomer) notFound()
+
+  // A valid category without published items is not a missing page. Do not
+  // offer date selection, invented prices or a misleading sold-out message.
+  if (items.length === 0) return createElement(CategoryEmptyState, { name: category.name })
 
   const initialCategory = {
     name: category.name,

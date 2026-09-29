@@ -1,8 +1,8 @@
-import { nycPageMetadata } from '@/lib/nycSeo'
+import { nycPageMetadata, NYC_SITE_URL } from '@/lib/nycSeo'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { safeJsonLd } from '@/lib/jsonLd'
-const BASE_URL='https://www.fpr-nyc-production.up.railway.app'
+const BASE_URL=NYC_SITE_URL
 export const metadata = nycPageMetadata("/graduation-rentals","Graduation Party Rentals in Riverdale, Bronx, NY","Plan a graduation party in Riverdale or Downstate New York with tent, table, chair and party equipment rentals. Check your event date.")
 export default function GraduationRentalsPage(){
  const jsonLd={'@context':'https://schema.org','@type':'CollectionPage',name:'Graduation Party Rentals',description:'Graduation party rental packages and equipment in Riverdale, Bronx, NY and Downstate New York.',url:`${BASE_URL}/graduation-rentals`}

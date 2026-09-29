@@ -1,0 +1,65 @@
+name: Import approved NYC logo
+on:
+  push:
+    branches: [fix/nyc-approved-branding-20260929]
+    paths: [.github/workflows/import-approved-nyc-logo.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/nyc-approved-branding-20260929
+      - name: Import exact owner-supplied PNG
+        env:
+          SOURCE_URL: 'https://sdmntprcentralus.oaiusercontent.com/files/00000000-88e8-81f5-86c9-7aa9e344dfae/raw?se=2026-09-29T22%3A25%3A07Z&sp=r&sv=2026-02-06&sr=b&scid=859b5534-f278-5603-9d5f-3cad45f380a7&skoid=a1be202a-6464-476c-a496-723317c4a4db&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-29T20%3A36%3A32Z&ske=2026-09-30T20%3A36%3A32Z&sks=b&skv=2026-02-06&sig=rTIZAI57tUd7g1UyBWqMhRpC6MGu5MFzrQ8IfXNkZik%3D'
+        run: |
+          python3 - <<'PY'
+          import os, urllib.request, hashlib, struct, zlib, json
+          from pathlib import Path
+          expected = '37bb5f00906e5b71aba2e3d63715b71f1e4b29b5b01e8e40b5f1d27719d1b253'
+          with urllib.request.urlopen(os.environ['SOURCE_URL'], timeout=60) as response:
+              data = response.read(3000000)
+          assert len(data) == 2428349, 'Wrong source byte length'
+          assert hashlib.sha256(data).hexdigest() == expected, 'Source checksum mismatch'
+          assert data[:8] == b'\x89PNG\r\n\x1a\n', 'Not a PNG'
+          offset = 8
+          image_data = bytearray()
+          saw_end = False
+          width = height = 0
+          while offset < len(data):
+              length = struct.unpack('>I', data[offset:offset+4])[0]
+              kind = data[offset+4:offset+8]
+              payload = data[offset+8:offset+8+length]
+              crc = struct.unpack('>I', data[offset+8+length:offset+12+length])[0]
+              assert zlib.crc32(kind + payload) & 0xffffffff == crc, 'PNG chunk CRC mismatch'
+              if kind == b'IHDR':
+                  width, height = struct.unpack('>II', payload[:8])
+              if kind == b'IDAT':
+                  image_data.extend(payload)
+              offset += length + 12
+              if kind == b'IEND':
+                  saw_end = True
+                  break
+          assert saw_end and offset == len(data), 'Truncated PNG'
+          assert (width, height) == (1774, 887), 'Incorrect dimensions'
+          assert zlib.decompress(image_data), 'Invalid compressed image'
+          target = Path('public/brand/friendly-party-rental-nyc-20260929-original.png')
+          target.parent.mkdir(parents=True, exist_ok=True)
+          target.write_bytes(data)
+          manifest = {'source':'Owner-uploaded ChatGPT Image Sep 29, 2026, 02_44_08 PM.png','sha256':expected,'bytes':len(data),'width':width,'height':height,'aspectRatio':2,'transformed':False}
+          target.with_suffix('.json').write_text(json.dumps(manifest, indent=2) + '\n')
+          print('Verified exact approved NYC logo:', len(data), 'bytes;', width, 'x', height, '; SHA256', expected)
+          PY
+      - name: Commit image only to isolated branding branch
+        run: |
+          git config user.name 'NYC Branding Import'
+          git config user.email 'actions@users.noreply.github.com'
+          git add public/brand/friendly-party-rental-nyc-20260929-original.png public/brand/friendly-party-rental-nyc-20260929-original.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Add exact approved September 29 NYC logo (SHA256 verified)'
+          git push origin HEAD:fix/nyc-approved-branding-20260929

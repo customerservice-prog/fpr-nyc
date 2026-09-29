@@ -231,6 +231,10 @@ model Order {
   exactPickupTime String?
   exactPickupFee Float @default(0)
   latePickupApprovalRequired Boolean @default(false)
+
+  // Which server pricing engine computed this order's totals (null = legacy/unverified
+  // browser-supplied totals, which cannot be charged online). See lib/nycCheckoutPricing.ts.
+  pricingVersion String?
 }
 
 model OrderItem {
@@ -1116,4 +1120,27 @@ runId String?
 lockedAt DateTime?
 heartbeatAt DateTime?
 updatedAt DateTime @updatedAt
+}
+
+// One row per Stripe webhook event delivered to /api/webhooks/stripe. Makes webhook
+// processing idempotent (duplicate deliveries are acknowledged without re-processing)
+// and keeps failed events visible so a payment is never silently lost. A failed row
+// is retried automatically on Stripe's next delivery attempt.
+model StripeWebhookEvent {
+  id              String    @id
+  type            String
+  livemode        Boolean
+  status          String    @default("processing") // processing | processed | ignored | rejected | failed
+  attempts        Int       @default(1)
+  paymentIntentId String?
+  orderId         String?
+  note            String?
+  lastError       String?
+  receivedAt      DateTime  @default(now())
+  processedAt     DateTime?
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status])
+  @@index([paymentIntentId])
+  @@index([orderId])
 }

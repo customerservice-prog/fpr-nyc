@@ -1,8 +1,8 @@
-import { nycPageMetadata } from '@/lib/nycSeo'
+import { nycPageMetadata, NYC_SITE_URL } from '@/lib/nycSeo'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { safeJsonLd } from '@/lib/jsonLd'
-const BASE_URL='https://www.fpr-nyc-production.up.railway.app'
+const BASE_URL=NYC_SITE_URL
 export const metadata = nycPageMetadata("/chiavari-chair-rentals","Chiavari Chair Rentals in Riverdale, Bronx, NY","Browse Chiavari chairs for weddings and events in Riverdale and Downstate New York. Check quantities, event-date availability and delivery.")
 export default function ChiavariChairRentalsPage(){
  const jsonLd={'@context':'https://schema.org','@type':'CollectionPage',name:'Chiavari Chair Rentals',description:'Chiavari chair rental options in Riverdale, Bronx, NY and Downstate New York.',url:`${BASE_URL}/chiavari-chair-rentals`}

@@ -10,6 +10,10 @@ import { getItemAvailability } from '@/lib/availability'
 import { evaluateRentalRestrictions } from '@/lib/rentalRestrictions'
 import { DeliveryQuoteError, getDeliveryQuote, requireDeliveryMethod, requireMatchingDeliveryFee } from '@/lib/delivery'
 import { effectiveEventEndDate } from '@/lib/orderDates'
+import { isNycPaymentsUnavailable, requireNycStripe } from '@/lib/stripe'
+import { NYC_PAYMENTS_UNAVAILABLE_MESSAGE } from '@/lib/nycStripeGuard'
+import { CheckoutPricingError, sameCents, validateFirstPaymentPrincipal } from '@/lib/nycCheckoutPricing'
+import { aggregateQuantities, priceNycCheckout } from '@/lib/nycCheckoutPricingServer'
 
 async function reserveExactTimeSlot(tx: any, date: Date, time: string, type: 'delivery' | 'pickup', defaultCapacity: number): Promise<{ ok: true } | { ok: false; reason: 'blocked' | 'full' }> {
   const dayDate = new Date(date)
@@ -33,6 +37,10 @@ export async function POST(request: NextRequest) {
     // Enforce NYC / Lower Westchester's public delivery-only policy before any database writes,
     // inventory reservations, email notifications, or payment creation.
     requireDeliveryMethod(body?.deliveryType)
+    // Online orders are created only to be paid immediately. If NYC online payments
+    // are not fully configured and switched on, refuse before creating anything
+    // (no customer, order, inventory hold, or "order received" email).
+    await requireNycStripe('charge')
     const {
       firstName,
       lastName,
@@ -150,19 +158,30 @@ export async function POST(request: NextRequest) {
     // Server-side inventory check: never trust client-side availability math alone.
     // This prevents overbooking/double-booking even if the cart was manipulated
     // or an order is submitted directly via the API.
-    for (const requestedItem of items) {
-      if (!requestedItem?.id) continue
-      const requestedQty = Number(requestedItem.quantity) || 0
-      if (requestedQty <= 0) continue
-      const available = await getItemAvailability(requestedItem.id, new Date(eventDate))
+    const requestedTotals = aggregateQuantities((items || []).map((item: any) => ({ id: typeof item?.id === 'string' ? item.id : '', quantity: Number(item?.quantity) || 0 })))
+    for (const [itemId, requestedQty] of requestedTotals) {
+      const requestedItem = (items || []).find((item: any) => item?.id === itemId)
+      const available = await getItemAvailability(itemId, new Date(eventDate))
       if (requestedQty > available) {
         return NextResponse.json({
           error: available > 0
-            ? 'Only ' + available + ' of "' + requestedItem.name + '" available for the selected date. Please adjust the quantity in your cart.'
-            : '"' + requestedItem.name + '" is no longer available for the selected date. Please remove it or choose another date.',
+            ? 'Only ' + available + ' of "' + requestedItem?.name + '" available for the selected date. Please adjust the quantity in your cart.'
+            : '"' + requestedItem?.name + '" is no longer available for the selected date. Please remove it or choose another date.',
         }, { status: 400 })
       }
     }
+
+    // SECURITY: recompute every price, fee, discount, tax, and the deposit on the
+    // server from the approved catalog and settings. Browser amounts are only used
+    // to detect that the customer was shown a different total.
+    const pricing = await priceNycCheckout(body)
+    if (!sameCents(totalAmountInput, pricing.grandTotal)) {
+      return NextResponse.json({
+        error: 'Your order total changed to $' + pricing.grandTotal.toFixed(2) + '. Please reload the payment page and review the updated total before paying.',
+        code: 'pricing_changed',
+      }, { status: 409 })
+    }
+    const paymentPrincipal = validateFirstPaymentPrincipal(depositAmount, pricing)
 
     // Server-side exact-time delivery/pickup capacity check: never trust
     // frontend-only availability for premium exact-time slots. Revalidates
@@ -217,21 +236,8 @@ export async function POST(request: NextRequest) {
     }
 
     const orderNumber = reusableDraft?.orderNumber || await getNextOrderNumber()
-    const fee = deliveryQuote.fee
-    const tax = taxAmount || 0
-    const discount = couponDiscount || 0
-    const waiverFee = damageWaiverFee || 0
-    const durationFeeAmount = durationFee || 0
-    const specialFee = specialRequestFee || 0
-    const lastMinuteFee = lastMinuteFeeAmount || 0
-    const exactDeliveryFeeAmount = schedulingDetails?.exactDeliveryFee || 0
-    const exactPickupFeeAmount = schedulingDetails?.exactPickupFee || 0
-    const schedulingFeeTotal = exactDeliveryFeeAmount + exactPickupFeeAmount
-    const baseTotalAmount = typeof totalAmountInput === 'number'
-      ? totalAmountInput
-      : Math.max(subtotal - discount, 0) + fee + tax + waiverFee + specialFee + lastMinuteFee + schedulingFeeTotal
-    const totalAmount = baseTotalAmount + (Number(tipAmount) || 0)
-    const rentalDayCount = Math.max(Number(rentalDays) || 1, 1)
+    const totalAmount = Math.round(pricing.totalWithTip * 100) / 100
+    const rentalDayCount = Math.max(pricing.rentalDays || 1, 1)
 
     const baseOrderData: any = {
       customerId: customer.id,
@@ -248,26 +254,27 @@ export async function POST(request: NextRequest) {
       eventTimeSlot: eventTimeSlot || null,
       pickupTimeSlot: pickupTimeSlot || null,
       deliveryType: 'delivery',
-      deliveryFee: fee,
+      deliveryFee: pricing.deliveryFee,
       deliveryDistance: deliveryQuote.distance,
-      subtotal,
+      subtotal: pricing.adjustedSubtotal,
       rentalDays: rentalDayCount,
-      durationLabel: durationLabel || null,
-      durationFee: durationFeeAmount,
-      specialRequestFee: specialFee,
-      specialRequestNames: specialRequestNames || null,
-      taxRate: taxRate || 0,
-      taxAmount: tax,
-      couponCode: couponCode || null,
-      couponDiscount: discount,
-      damageWaiver: !!damageWaiver,
-      damageWaiverFee: waiverFee,
-      lastMinuteFeeAmount: lastMinuteFee,
+      durationLabel: pricing.durationLabel,
+      durationFee: pricing.durationFee,
+      specialRequestFee: pricing.specialRequestFee,
+      specialRequestNames: pricing.specialRequestNames,
+      taxRate: pricing.taxRate,
+      taxAmount: pricing.taxAmount,
+      couponCode: pricing.couponCode,
+      couponDiscount: pricing.couponDiscount,
+      damageWaiver: pricing.damageWaiver,
+      damageWaiverFee: pricing.damageWaiverFee,
+      lastMinuteFeeAmount: pricing.lastMinuteFee,
       totalAmount,
-      depositAmount,
-      tipAmount: tipAmount || 0,
+      depositAmount: paymentPrincipal,
+      tipAmount: pricing.tipAmount,
       amountPaid: 0,
       balanceDue: totalAmount,
+      pricingVersion: pricing.version,
       notes: notes || null,
       eventStartTime: schedulingDetails?.eventStartTime || null,
       eventEndTime: schedulingDetails?.eventEndTime || null,
@@ -275,20 +282,25 @@ export async function POST(request: NextRequest) {
       deliveryWindowEnd: schedulingDetails?.deliveryWindowEnd || null,
       exactDeliveryRequested: !!schedulingDetails?.exactDeliveryRequested,
       exactDeliveryTime: schedulingDetails?.exactDeliveryTime || null,
-      exactDeliveryFee: exactDeliveryFeeAmount,
+      exactDeliveryFee: pricing.exactDeliveryFee,
       pickupType: schedulingDetails?.pickupType || 'flexible',
       pickupRequiredByTime: schedulingDetails?.pickupRequiredByTime || null,
       exactPickupTime: schedulingDetails?.exactPickupTime || null,
-      exactPickupFee: exactPickupFeeAmount,
+      exactPickupFee: pricing.exactPickupFee,
       latePickupApprovalRequired: !!schedulingDetails?.latePickupApprovalRequired,
     }
-    const itemCreates = (items || []).map((item: any) => ({
-      itemId: item.id,
-      itemName: item.name,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
-      total: item.unitPrice * item.quantity,
-    }))
+    // Line items use catalog names and prices from the server. The browser label is
+    // kept only when it is the catalog name plus a selected color option.
+    const itemCreates = pricing.lines.map((line, index) => {
+      const browserName = typeof items?.[index]?.name === 'string' ? items[index].name.trim() : ''
+      return {
+        itemId: line.itemId,
+        itemName: browserName && browserName.startsWith(line.itemName) ? browserName.slice(0, 240) : line.itemName,
+        quantity: line.quantity,
+        unitPrice: line.unitPrice,
+        total: line.total,
+      }
+    })
     const order = reusableDraft
       ? await prisma.order.update({
           where: { id: reusableDraft.id },
@@ -300,9 +312,9 @@ export async function POST(request: NextRequest) {
           include: { items: true },
         })
 
-    if (couponCode) {
+    if (pricing.couponCode) {
       await prisma.coupon.update({
-        where: { code: String(couponCode).toUpperCase() },
+        where: { code: pricing.couponCode },
         data: { usageCount: { increment: 1 } },
       }).catch(() => {})
     }
@@ -343,7 +355,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ order: { id: order.id, orderNumber: order.orderNumber } })
   } catch (error) {
-    if (error instanceof DeliveryQuoteError) {
+    if (isNycPaymentsUnavailable(error)) {
+      console.error('Order creation blocked:', error.reason)
+      return NextResponse.json({ error: NYC_PAYMENTS_UNAVAILABLE_MESSAGE, code: 'payments_unavailable' }, { status: 503 })
+    }
+    if (error instanceof DeliveryQuoteError || error instanceof CheckoutPricingError) {
       return NextResponse.json({ error: error.message }, { status: error.status })
     }
     console.error('Order creation error:', error)

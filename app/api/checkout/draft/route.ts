@@ -6,6 +6,8 @@ import { getNextOrderNumber } from '@/lib/orderNumber'
 import { evaluateRentalRestrictions } from '@/lib/rentalRestrictions'
 import { DeliveryQuoteError, getDeliveryQuote, requireDeliveryMethod } from '@/lib/delivery'
 import { effectiveEventEndDate } from '@/lib/orderDates'
+import { CheckoutPricingError, NYC_PRICING_VERSION, toCents, type CheckoutPricingResult } from '@/lib/nycCheckoutPricing'
+import { priceNycCheckout } from '@/lib/nycCheckoutPricingServer'
 
 function clean(value: unknown, max = 255) {
   return typeof value === 'string' ? value.trim().slice(0, max) : ''
@@ -59,11 +61,24 @@ export async function POST(request: NextRequest) {
           data: { firstName, lastName, email, phone, address: eventAddress, city: eventCity, state: eventState, zip: eventZip },
         })
 
-    const subtotal = Math.max(Number(body.subtotal) || 0, 0)
-    const totalAmount = Math.max(Number(body.totalAmount) || subtotal + deliveryQuote.fee, 0)
-    const depositAmount = Math.max(Number(body.depositAmount) || 0, 0)
+    // Drafts only record checkout progress. Their totals are ALWAYS computed on the
+    // server; browser-supplied amounts are never stored. If pricing cannot be computed
+    // yet (e.g. tax or deposit rules not configured) the draft is saved without
+    // server pricing and cannot be charged online.
+    let pricing: CheckoutPricingResult | null = null
+    try {
+      pricing = await priceNycCheckout(body)
+    } catch (error) {
+      if (!(error instanceof CheckoutPricingError) && !(error instanceof DeliveryQuoteError)) throw error
+    }
+    const subtotal = pricing ? pricing.adjustedSubtotal : 0
+    const totalAmount = pricing ? Math.round(pricing.totalWithTip * 100) / 100 : 0
+    const requestedPrincipal = Number(body.depositAmount)
+    const depositAmount = pricing
+      ? (Number.isFinite(requestedPrincipal) && toCents(requestedPrincipal) >= toCents(pricing.requiredDeposit) && toCents(requestedPrincipal) <= toCents(pricing.grandTotal) ? Math.round(requestedPrincipal * 100) / 100 : pricing.requiredDeposit)
+      : 0
     const stage = ['details_completed','payment_page','payment_started'].includes(body.stage) ? body.stage : 'details_completed'
-    const rentalDayCount = Math.max(Number(body.rentalDays) || 1, 1)
+    const rentalDayCount = Math.max(pricing?.rentalDays || 1, 1)
     const data: any = {
       customerId: customer.id, status: 'incomplete', source: 'online',
       checkoutStage: stage, checkoutLastSeenAt: new Date(),
@@ -72,19 +87,20 @@ export async function POST(request: NextRequest) {
       pickupTimeSlot: clean(body.pickupTimeSlot, 160) || null,
       deliveryType: 'delivery', deliveryFee: deliveryQuote.fee, deliveryDistance: deliveryQuote.distance,
       subtotal, rentalDays: rentalDayCount,
-      durationLabel: clean(body.durationLabel, 120) || null,
-      durationFee: Math.max(Number(body.durationFee) || 0, 0),
-      specialRequestFee: Math.max(Number(body.specialRequestFee) || 0, 0),
-      specialRequestNames: clean(body.specialRequestNames, 500) || null,
-      taxRate: Math.max(Number(body.taxRate) || 0, 0),
-      taxAmount: Math.max(Number(body.taxAmount) || 0, 0),
-      couponCode: clean(body.couponCode, 80) || null,
-      couponDiscount: Math.max(Number(body.couponDiscount) || 0, 0),
-      damageWaiver: !!body.damageWaiver,
-      damageWaiverFee: Math.max(Number(body.damageWaiverFee) || 0, 0),
-      lastMinuteFeeAmount: Math.max(Number(body.lastMinuteFeeAmount) || 0, 0),
+      durationLabel: pricing?.durationLabel || null,
+      durationFee: pricing?.durationFee || 0,
+      specialRequestFee: pricing?.specialRequestFee || 0,
+      specialRequestNames: pricing?.specialRequestNames || null,
+      taxRate: pricing?.taxRate || 0,
+      taxAmount: pricing?.taxAmount || 0,
+      couponCode: pricing?.couponCode || null,
+      couponDiscount: pricing?.couponDiscount || 0,
+      damageWaiver: pricing?.damageWaiver || false,
+      damageWaiverFee: pricing?.damageWaiverFee || 0,
+      lastMinuteFeeAmount: pricing?.lastMinuteFee || 0,
       totalAmount, depositAmount, amountPaid: 0, balanceDue: totalAmount,
-      tipAmount: Math.max(Number(body.tipAmount) || 0, 0),
+      tipAmount: pricing?.tipAmount || 0,
+      pricingVersion: pricing ? NYC_PRICING_VERSION : null,
       notes: clean(body.notes, 4000) || null,
       eventStartTime: clean(body.schedulingDetails?.eventStartTime, 20) || null,
       eventEndTime: clean(body.schedulingDetails?.eventEndTime, 20) || null,
@@ -92,20 +108,26 @@ export async function POST(request: NextRequest) {
       deliveryWindowEnd: clean(body.schedulingDetails?.deliveryWindowEnd, 20) || null,
       exactDeliveryRequested: !!body.schedulingDetails?.exactDeliveryRequested,
       exactDeliveryTime: clean(body.schedulingDetails?.exactDeliveryTime, 20) || null,
-      exactDeliveryFee: Math.max(Number(body.schedulingDetails?.exactDeliveryFee) || 0, 0),
+      exactDeliveryFee: pricing?.exactDeliveryFee || 0,
       pickupType: clean(body.schedulingDetails?.pickupType, 30) || 'flexible',
       pickupRequiredByTime: clean(body.schedulingDetails?.pickupRequiredByTime, 20) || null,
       exactPickupTime: clean(body.schedulingDetails?.exactPickupTime, 20) || null,
-      exactPickupFee: Math.max(Number(body.schedulingDetails?.exactPickupFee) || 0, 0),
+      exactPickupFee: pricing?.exactPickupFee || 0,
       latePickupApprovalRequired: !!body.schedulingDetails?.latePickupApprovalRequired,
       items: {
         deleteMany: {},
-        create: items.map((item: any) => ({
-          itemId: item.id, itemName: clean(item.name, 240),
-          quantity: Math.max(Math.floor(Number(item.quantity) || 1), 1),
-          unitPrice: Math.max(Number(item.unitPrice ?? item.price) || 0, 0),
-          total: Math.max(Number(item.unitPrice ?? item.price) || 0, 0) * Math.max(Math.floor(Number(item.quantity) || 1), 1),
-        })),
+        // Prices come from the server catalog. Without server pricing the lines are
+        // stored at $0 so an unpriced draft can never be charged from browser amounts.
+        create: items.map((item: any, index: number) => {
+          const line = pricing?.lines[index]
+          const quantity = Math.max(Math.floor(Number(item.quantity) || 1), 1)
+          return {
+            itemId: item.id, itemName: clean(item.name, 240),
+            quantity,
+            unitPrice: line ? line.unitPrice : 0,
+            total: line ? line.total : 0,
+          }
+        }),
       },
     }
 

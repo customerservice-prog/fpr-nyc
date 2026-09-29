@@ -1,0 +1,93 @@
+name: NYC live logo browser verification
+on:
+  push:
+    branches: [fix/nyc-approved-branding-20260929]
+    paths: [.github/workflows/nyc-live-logo-verify.yml]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --prefix /tmp/nyc-browser --no-save --package-lock=false playwright@1.56.1
+      - run: /tmp/nyc-browser/node_modules/.bin/playwright install --with-deps chromium
+      - name: Read-only live image, viewport and navigation checks
+        run: |
+          mkdir -p /tmp/nyc-verified
+          node - <<'JS'
+          const {chromium}=require('/tmp/nyc-browser/node_modules/playwright')
+          const fs=require('node:fs'),assert=require('node:assert/strict'),crypto=require('node:crypto')
+          const base='https://fpr-nyc-production.up.railway.app'
+          const expected='806f9d15f32e34154eb0b8556433ef3ab20e94f707f7019fcddafecbf748f83f'
+          ;(async()=>{
+            const browser=await chromium.launch({headless:true})
+            const report={checkedAt:new Date().toISOString(),base,viewports:[],customDomain:null}
+            try {
+              for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844],['small-mobile',320,740]]){
+                const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1})
+                const page=await context.newPage()
+                const response=await page.goto(base,{waitUntil:'domcontentloaded',timeout:60000})
+                assert.equal(response.status(),200)
+                const header=page.locator('header img:visible').first()
+                await header.waitFor({state:'visible',timeout:20000})
+                const detail=await header.evaluate(async img=>{
+                  await img.decode()
+                  const r=img.getBoundingClientRect(),style=getComputedStyle(img)
+                  return {src:img.currentSrc,width:img.naturalWidth,height:img.naturalHeight,renderedWidth:r.width,renderedHeight:r.height,left:r.left,right:r.right,objectFit:style.objectFit,overflow:document.documentElement.scrollWidth>innerWidth}
+                })
+                assert.equal(detail.width,1774)
+                assert.equal(detail.height,887)
+                assert.ok(Math.abs(detail.renderedWidth/detail.renderedHeight-2)<0.02)
+                assert.ok(detail.left>=0&&detail.right<=width+1)
+                assert.equal(detail.overflow,false)
+                const asset=await context.request.get(detail.src)
+                assert.equal(asset.status(),200)
+                assert.equal(crypto.createHash('sha256').update(await asset.body()).digest('hex'),expected)
+                await page.screenshot({path:'/tmp/nyc-verified/'+name+'-header.png'})
+                const footer=page.locator('footer img:visible').first()
+                await footer.scrollIntoViewIfNeeded()
+                const fd=await footer.evaluate(async img=>{await img.decode();const r=img.getBoundingClientRect();return {src:img.currentSrc,width:img.naturalWidth,height:img.naturalHeight,renderedWidth:r.width,renderedHeight:r.height}})
+                assert.equal(fd.width,1774);assert.equal(fd.height,887)
+                assert.ok(Math.abs(fd.renderedWidth/fd.renderedHeight-2)<0.02)
+                await page.screenshot({path:'/tmp/nyc-verified/'+name+'-footer.png'})
+                let menu='not applicable'
+                if(width<768){
+                  await page.evaluate(()=>scrollTo(0,0))
+                  const open=page.getByRole('button',{name:'Open menu',exact:true})
+                  await open.click()
+                  await page.getByRole('button',{name:'Close menu',exact:true}).waitFor({state:'visible'})
+                  await page.keyboard.press('Escape')
+                  await page.getByRole('button',{name:'Close menu',exact:true}).waitFor({state:'hidden'})
+                  menu='opened and closed with Escape'
+                }
+                report.viewports.push({name,viewport:{width,height},header:detail,footer:fd,menu})
+                await context.close()
+              }
+              const context=await browser.newContext()
+              for(const endpoint of ['/health','/category/tent-rentals','/admin/login','/api/driver-icon-512','/api/driver-icon-maskable']){
+                const r=await context.request.get(base+endpoint,{timeout:25000})
+                report[endpoint]={status:r.status(),finalUrl:r.url(),contentType:r.headers()['content-type']}
+                assert.equal(r.status(),200,endpoint)
+              }
+              try{
+                const r=await context.request.get('https://friendlypartyrentalnyc.com/health',{timeout:15000})
+                report.customDomain={status:r.status(),finalUrl:r.url(),body:(await r.text()).slice(0,300)}
+              }catch(e){report.customDomain={error:e.message.split('\n')[0]}}
+              await context.close()
+            } finally {
+              console.log(JSON.stringify(report,null,2))
+              fs.writeFileSync('/tmp/nyc-verified/report.json',JSON.stringify(report,null,2))
+              await browser.close()
+            }
+          })().catch(e=>{console.error(e);process.exitCode=1})
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nyc-live-logo-verification
+          path: /tmp/nyc-verified
+          retention-days: 2

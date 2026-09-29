@@ -18,7 +18,7 @@ const roboto = Roboto({
   display: 'swap',
 })
 
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://fpr-nyc-production.up.railway.app').replace(/\/$/, '')
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://friendlypartyrentalnyc.com').replace(/\/$/, '')
 const INDEXABLE = process.env.PUBLIC_INDEXABLE === 'true'
 const SITE_DESCRIPTION =
   'Friendly Party Rental NYC provides party and event rentals in Riverdale, selected Bronx neighborhoods, Yonkers, Mount Vernon, New Rochelle and nearby Lower Westchester communities.'

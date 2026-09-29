@@ -391,7 +391,7 @@ export default function ResponsiveEditorPage() {
           Preview your navigation, footer and store settings live. You can resize your browser on desktop to see a preview. Changes save instantly, no rebuild needed.
         </p>
         <iframe
-          src="https://www.fpr-nyc-production.up.railway.app/"
+          src="/"
           className="w-full border rounded"
           style={{ height: '600px' }}
         />

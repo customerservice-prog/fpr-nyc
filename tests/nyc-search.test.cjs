@@ -32,8 +32,11 @@ test('rentals are not marked as universally in-stock purchases',()=>{
 })
 test('canonical metadata consolidates search URLs without moving origin-scoped carts',async()=>{
  const config=require('../next.config.js'),redirects=await config.redirects(),headers=await config.headers()
- assert.equal(redirects.filter(r=>r.has?.some(h=>h.type==='host')).length,0)
- assert.ok(redirects.every(r=>r.destination.startsWith('/')&&!r.destination.startsWith('//')))
+ // Only www.friendlypartyrentalnyc.com is host-redirected (to the primary root domain);
+ // the temporary Railway host is never redirected, so its origin-scoped carts stay put.
+ const hostRedirects=redirects.filter(r=>r.has?.some(h=>h.type==='host'))
+ assert.deepEqual(hostRedirects.map(r=>[r.has[0].value,r.destination]),[['www.friendlypartyrentalnyc.com','https://friendlypartyrentalnyc.com/:path*']])
+ assert.ok(redirects.filter(r=>!r.has).every(r=>r.destination.startsWith('/')&&!r.destination.startsWith('//')))
  for(const path of ['/','/category','/order-by-date'])assert.equal(seo.nycPageMetadata(path,'Title','Description').alternates.canonical,seo.NYC_SITE_URL+path)
  for(const p of ['/checkout/:path*','/admin/:path*','/driver/:path*','/items'])assert.ok(headers.some(h=>h.source===p&&h.headers[0].value.includes('noindex')))
  const s=read('app/robots.ts');for(const p of ['/api/item-image/','/api/category-image/','/api/wedding-package-image/','/api/wedding-art/','/api/shared-gallery/'])assert.ok(s.includes(p))

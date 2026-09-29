@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
         address: order.eventAddress ? { street1: order.eventAddress, city: order.eventCity, state: order.eventState, zip: order.eventZip } : null,
       })
       if (restriction.matched) {
-        return NextResponse.json({ error: 'We are unable to complete this reservation online. Please contact our Greenville team.' }, { status: 403 })
+        return NextResponse.json({ error: 'We are unable to complete this reservation online. Please contact our NYC team.' }, { status: 403 })
       }
       const deliveryQuote = await getDeliveryQuote(order.eventZip)
       requireMatchingDeliveryFee(order.deliveryFee, deliveryQuote)
@@ -106,15 +106,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!stripe || !process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_live_xxx') {
-      await prisma.order.update({
-        where: { id: orderId },
-        data: { stripePaymentId: 'simulated_' + Date.now(), checkoutStage: 'payment_started', checkoutLastSeenAt: new Date() },
-      })
-      return NextResponse.json({
-        success: true,
-        simulated: true,
-        message: 'Payment simulated (Stripe keys not configured)',
-      })
+      return NextResponse.json(
+        { error: 'Online payment is temporarily unavailable. Please contact Friendly Party Rental NYC before paying.' },
+        { status: 503 }
+      )
     }
 
     let stripeCustomerId = order.stripeCustomerId || undefined

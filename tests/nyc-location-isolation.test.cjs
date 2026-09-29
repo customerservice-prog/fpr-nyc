@@ -24,6 +24,17 @@ test('NYC staff email settings do not claim a Greenville banner', () => {
 test('NYC app template keeps paid ads unconfigured', () => {
   const env = read('.env.example')
   assert.doesNotMatch(env, /NEXT_PUBLIC_NYC_GOOGLE_ADS_/)
+  assert.match(env, /NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_xxx/)
+  assert.doesNotMatch(env, /^STRIPE_PUBLISHABLE_KEY=/m)
+})
+
+test('NYC checkout fails closed when Stripe is not configured', () => {
+  const checkout = read('app/api/checkout/route.ts')
+  assert.match(checkout, /Online payment is temporarily unavailable/)
+  assert.match(checkout, /status: 503/)
+  assert.doesNotMatch(checkout, /simulated_/)
+  assert.doesNotMatch(checkout, /Payment simulated/)
+  assert.doesNotMatch(checkout, /Greenville team/)
 })
 
 test('NYC active source does not contain the SC public domain or phone', () => {

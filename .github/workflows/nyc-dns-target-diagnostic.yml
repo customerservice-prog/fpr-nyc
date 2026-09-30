@@ -1,0 +1,24 @@
+name: NYC working-domain DNS diagnostic
+
+on:
+  push:
+    paths:
+      - '.github/dns-target-smoke'
+
+permissions:
+  contents: read
+
+jobs:
+  dns:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve working NYC domains
+        run: |
+          echo "ROOT CNAME:"
+          dig +short CNAME friendlypartyrentalnyc.com || true
+          echo "ROOT A:"
+          dig +short A friendlypartyrentalnyc.com || true
+          echo "WWW CNAME:"
+          dig +short CNAME www.friendlypartyrentalnyc.com || true
+          echo "WWW A:"
+          dig +short A www.friendlypartyrentalnyc.com || true

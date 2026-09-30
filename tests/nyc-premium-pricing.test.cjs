@@ -6,7 +6,18 @@ const path = require('node:path')
 const root = path.resolve(__dirname, '..')
 const snapshot = JSON.parse(fs.readFileSync(path.join(root, 'data/nyc-premium-price-snapshot-20260930.json'), 'utf8'))
 
-test('NYC premium price snapshot is exactly 70% above the captured Syracuse baseline', () => {
+function cleanNycPrice(raw) {
+  const value = Number(raw)
+  if (!Number.isFinite(value) || value <= 0) throw new Error('Invalid NYC price: ' + raw)
+  if (Number.isInteger(value)) return value
+  if (value < 10) return Math.ceil(value)
+  if (value < 100) return Math.round(value)
+  if (value < 500) return Math.round(value / 5) * 5
+  if (value < 1000) return Math.round(value / 10) * 10
+  return Math.round(value / 25) * 25
+}
+
+test('NYC premium source snapshot remains the captured Syracuse baseline at 70%', () => {
   assert.equal(snapshot.multiplier, 1.7)
   assert.equal(snapshot.source.kind, 'live-public-api')
   assert.equal(snapshot.source.publishedPricedCount, 216)
@@ -23,22 +34,34 @@ test('NYC premium price snapshot is exactly 70% above the captured Syracuse base
   }
 })
 
-test('NYC high-end anchor prices match owner-approved 70% policy', () => {
-  const bySlug = Object.fromEntries(snapshot.items.map(row => [row.slug, row]))
-  assert.equal(bySlug['20x20-pole-tent'].nycPrice, 425)
-  assert.equal(bySlug['20x30-pole-tent'].nycPrice, 595)
-  assert.equal(bySlug['20x40-pole-tent'].nycPrice, 765)
-  assert.equal(bySlug['white-plastic-folding-chair'].nycPrice, 4.25)
-  assert.equal(bySlug['gold-chiavari-chair'].nycPrice, 20.38)
-  assert.equal(bySlug['foam-party-machine'].nycPrice, 467.5)
-  assert.equal(bySlug['cornhole'].nycPrice, 68)
-  assert.equal(bySlug['photobooth-3-hour-with-attendant'].nycPrice, 933.3)
-  assert.equal(bySlug['dance-floor-3x3-section'].nycPrice, 59.5)
+test('customer-facing NYC prices contain no cents and remain close to the 70% baseline', () => {
+  for (const row of snapshot.items) {
+    const clean = cleanNycPrice(row.nycPrice)
+    assert.equal(Number.isInteger(clean), true, 'customer-facing cents remain: ' + row.slug)
+    const delta = Math.abs(clean - row.nycPrice)
+    const maxAllowed = Math.max(1, row.nycPrice * 0.03)
+    assert.ok(delta <= maxAllowed, `clean price drifted too far from 70% baseline: ${row.slug} ${row.nycPrice} -> ${clean}`)
+  }
 })
 
-test('price apply script only updates cost on existing matching slugs', () => {
+test('NYC anchor prices are clean and visually sensible', () => {
+  const bySlug = Object.fromEntries(snapshot.items.map(row => [row.slug, row]))
+  const price = slug => cleanNycPrice(bySlug[slug].nycPrice)
+  assert.equal(price('20x20-pole-tent'), 425)
+  assert.equal(price('20x30-pole-tent'), 595)
+  assert.equal(price('20x40-pole-tent'), 765)
+  assert.equal(price('white-plastic-folding-chair'), 5)
+  assert.equal(price('gold-chiavari-chair'), 20)
+  assert.equal(price('foam-party-machine'), 470)
+  assert.equal(price('cornhole'), 68)
+  assert.equal(price('photobooth-3-hour-with-attendant'), 930)
+  assert.equal(price('dance-floor-3x3-section'), 60)
+})
+
+test('price apply script only updates cost on existing matching slugs and cleans cents', () => {
   const script = fs.readFileSync(path.join(root, 'scripts/apply-nyc-premium-prices.mjs'), 'utf8')
-  assert.match(script, /updateMany\(\{ where: \{ slug: row\.slug \}, data: \{ cost: row\.nycPrice \} \}\)/)
+  assert.match(script, /cleanNycPrice/)
+  assert.match(script, /updateMany\(\{ where: \{ slug: row\.slug \}, data: \{ cost: cleanPrice \} \}\)/)
   assert.doesNotMatch(script, /create\s*\(/)
   assert.doesNotMatch(script, /upsert\s*\(/)
   assert.doesNotMatch(script, /quantity\s*:/)

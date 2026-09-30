@@ -294,7 +294,8 @@ test('static rental pages publish no inherited prices', () => {
   for (const file of ['app/(public)/chiavari-chair-rentals/page.tsx', 'app/(public)/graduation-rentals/page.tsx', 'app/(public)/wedding-vendors/page.tsx']) {
     assert.doesNotMatch(read(file), /\$\d/, file)
   }
-  assert.doesNotMatch(read('app/(public)/chiavari-chair-rentals/page.tsx'), /mahogany/i)
+  // Finishes are listed without prices; the approved catalog item page shows the price for the event date.
+  assert.match(read('app/(public)/chiavari-chair-rentals/page.tsx'), /Price and availability are shown for your event date/)
 })
 
 test('wedding package prices come only from the published, priced NYC catalog item', () => {

@@ -1,0 +1,1 @@
+safe auth smoke test; IndexNow remains disabled because PUBLIC_INDEXABLE=false

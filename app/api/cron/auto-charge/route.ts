@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
+import { isAuthorizedCronRequest } from '@/lib/cronAuth'
 import { prisma } from '@/lib/prisma'
 import { describeStripeError, isNycPaymentsUnavailable, requireNycStripe } from '@/lib/stripe'
 import { sendEmail } from '@/lib/email'
@@ -19,8 +20,7 @@ import { alertOwner, recordSucceededIntent } from '@/lib/nycStripeReconcile'
 // idempotency key, and a successful charge that fails to record is reported to the
 // owner as "charged, not recorded" instead of telling the customer it failed.
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!(await isAuthorizedCronRequest(request, '.github/workflows/auto-charge-cron.yml'))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

@@ -85,10 +85,19 @@ async function main() {
     const staticPage = await noJs.newPage()
     await staticPage.goto(origin + '/frequently_asked_questions', { waitUntil: 'networkidle' })
     const firstNative = staticPage.locator('[data-nyc-customer-help="faq"] details').first()
-    await firstNative.locator('summary').click()
+    const summary = firstNative.locator('summary')
+    await summary.scrollIntoViewIfNeeded()
+    const box = await summary.boundingBox()
+    assert.ok(box)
+    // Native wheel scrolling mirrors moving content away from the fixed bottom
+    // toolbar. Do not force clicks through overlays or alter the DOM under test.
+    await staticPage.mouse.wheel(0, box.y + box.height / 2 - 422)
+    await staticPage.waitForTimeout(250)
+    await screenshot(staticPage, 'faq-no-javascript-before-click.png')
+    await summary.click()
     assert.ok(await firstNative.locator('div').isVisible(), 'answers must open with JavaScript disabled')
     await screenshot(staticPage, 'faq-no-javascript.png')
-    report.checks.push('FAQ opens and shows answer with JavaScript disabled')
+    report.checks.push('FAQ opens and shows answer with JavaScript disabled after ordinary native scrolling')
     await noJs.close()
 
     if (local) {

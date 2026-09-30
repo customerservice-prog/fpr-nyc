@@ -73,19 +73,41 @@ jobs:
           trap 'kill $APP_PID 2>/dev/null || true' EXIT
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:3000/health > /dev/null && break || sleep 2; done
           node - <<'JS'
-          const assert = require('node:assert/strict');
+          const assert=require('node:assert/strict'),http=require('node:http');
+          function request(path,host){
+            return new Promise((resolve,reject)=>{
+              const req=http.get({hostname:'127.0.0.1',port:3000,path,headers:{Host:host}},res=>{
+                let body='';res.setEncoding('utf8');res.on('data',chunk=>body+=chunk);
+                res.on('end',()=>resolve({status:res.statusCode,headers:res.headers,body,sentHost:req.getHeader('host')}));
+              });
+              req.setTimeout(15000,()=>req.destroy(new Error('Local request timeout')));req.on('error',reject);
+            });
+          }
           (async()=>{
             for(const path of ['/health','/category/tent-rentals','/category/table-chair-rentals','/admin/login']) {
-              const r=await fetch('http://127.0.0.1:3000'+path);
+              const r=await request(path,'friendlypartyrentalnyc.com');
               assert.equal(r.status,200,path);
             }
-            const redirect=await fetch('http://127.0.0.1:3000/category/tent-rentals?qa=origin&keep=1',{headers:{host:'www.friendlypartyrentalnyc.com'},redirect:'manual'});
+            const path='/category/tent-rentals?qa=origin&keep=1';
+            const redirect=await request(path,'www.friendlypartyrentalnyc.com');
+            console.log('WWW redirect response:',{status:redirect.status,location:redirect.headers.location,sentHost:redirect.sentHost});
+            assert.equal(redirect.sentHost,'www.friendlypartyrentalnyc.com');
             assert.equal(redirect.status,308);
-            assert.equal(redirect.headers.get('location'),'https://friendlypartyrentalnyc.com/category/tent-rentals?qa=origin&keep=1');
-            const status=await fetch('http://127.0.0.1:3000/api/payments/status');
-            console.log('Disabled payment readiness:', await status.text());
-            const login=await (await fetch('http://127.0.0.1:3000/admin/login')).text();
-            assert.ok(login.includes('https://friendlypartyrentalnyc.com'));
-            console.log('Local domain, page and redirect checks passed. No customer records or payments submitted.');
+            assert.equal(redirect.headers.location,'https://friendlypartyrentalnyc.com'+path);
+            const temporary=await request(path,'fpr-nyc-production.up.railway.app');
+            assert.equal(temporary.status,200);assert.equal(temporary.headers.location,undefined);
+            const status=await request('/api/payments/status','friendlypartyrentalnyc.com');
+            assert.equal(status.status,200);
+            const readiness=JSON.parse(status.body);
+            assert.equal(readiness.onlinePaymentsAvailable,false);
+            assert.equal(readiness.checks.onlinePaymentsSwitchOn,false);
+            assert.equal(readiness.checks.stripeKeysConfigured,false);
+            console.log('Disabled payment readiness:',readiness);
+            const login=await request('/admin/login','friendlypartyrentalnyc.com');
+            assert.ok(login.body.includes('https://friendlypartyrentalnyc.com'));
+            console.log('Local domain, page, redirect and disabled-payment checks passed. No customer records or payments submitted.');
           })().catch(e=>{console.error(e);process.exitCode=1});
           JS
+      - name: Diagnostics on failure
+        if: failure()
+        run: tail -100 /tmp/nyc-app.log 2>/dev/null || true

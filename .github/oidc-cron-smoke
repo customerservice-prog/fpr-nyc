@@ -1,1 +1,2 @@
 safe OIDC auth smoke test; PUBLIC_INDEXABLE remains false
+rerun after production deployment c0e8c64e

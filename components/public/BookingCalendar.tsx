@@ -49,22 +49,22 @@ export default function BookingCalendar({
   const years = Array.from({ length: 3 }, (_, i) => currentMonth.getFullYear() + i)
 
   return (
-    <div className="bg-white rounded-lg shadow-lg border border-primary/50 p-6 max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-white rounded-lg shadow-lg border border-primary/50 p-3 sm:p-6 max-w-2xl mx-auto">
+      <div className="flex items-center justify-between gap-1 mb-4 sm:mb-6">
         <button
           onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          className="p-3 hover:bg-gray-100 rounded"
+          className="shrink-0 p-2 sm:p-3 hover:bg-gray-100 rounded"
           aria-label="Previous month"
         >
-          <ChevronLeft size={28} />
+          <ChevronLeft size={24} />
         </button>
-        <div className="flex gap-2">
+        <div className="flex min-w-0 gap-1 sm:gap-2">
           <select
             value={currentMonth.getMonth()}
             onChange={(e) =>
               setCurrentMonth(new Date(currentMonth.getFullYear(), parseInt(e.target.value), 1))
             }
-            className="border rounded px-3 py-2 text-base font-medium"
+            className="min-w-0 border rounded px-2 sm:px-3 py-2 text-sm sm:text-base font-medium"
           >
             {months.map((m) => (
               <option key={m.value} value={m.value}>{m.label}</option>
@@ -75,7 +75,7 @@ export default function BookingCalendar({
             onChange={(e) =>
               setCurrentMonth(new Date(parseInt(e.target.value), currentMonth.getMonth(), 1))
             }
-            className="border rounded px-3 py-2 text-base font-medium"
+            className="min-w-0 border rounded px-2 sm:px-3 py-2 text-sm sm:text-base font-medium"
           >
             {years.map((y) => (
               <option key={y} value={y}>{y}</option>
@@ -84,22 +84,22 @@ export default function BookingCalendar({
         </div>
         <button
           onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          className="p-3 hover:bg-gray-100 rounded"
+          className="shrink-0 p-2 sm:p-3 hover:bg-gray-100 rounded"
           aria-label="Next month"
         >
-          <ChevronRight size={28} />
+          <ChevronRight size={24} />
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-2 text-center text-sm font-semibold text-body mb-3">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center text-xs sm:text-sm font-semibold text-body mb-3">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
           <div key={d} className="py-1">{d}</div>
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2">
         {paddingDays.map((i) => (
-          <div key={`pad-${i}`} className="h-16" />
+          <div key={`pad-${i}`} className="h-11 sm:h-16" />
         ))}
         {days.map((day) => {
           const isPast = isBefore(day, today)
@@ -113,7 +113,7 @@ export default function BookingCalendar({
               onClick={() => !disabled && onSelectDate(day)}
               disabled={disabled}
               title={isPast ? 'Closed (past date)' : undefined}
-              className={`h-16 rounded-lg text-lg font-medium transition-colors
+              className={`h-11 sm:h-16 rounded-lg text-base sm:text-lg font-medium transition-colors
                 ${!isSameMonth(day, currentMonth) ? 'text-gray-300' : ''}
                 ${selected ? 'bg-secondary text-white' : ''}
                 ${isPast ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : disabled ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-primary/30'}

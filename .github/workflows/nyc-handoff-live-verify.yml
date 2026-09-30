@@ -6,6 +6,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: nyc-release-live-acceptance
+  cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -33,7 +36,6 @@ jobs:
             const get=(url,options={})=>context.request.get(url,{timeout:20000,headers:{'Cache-Control':'no-cache'},...options});
             try{
               const path='/category/tent-rentals?qa=domain-release&keep=1';
-              // The deployment may still be completing. Only wait for observable public routing.
               for(let attempt=0;attempt<40;attempt++){
                 try{const r=await get(www+path,{maxRedirects:0});if(r.status()===308&&r.headers().location===base+path)break;}catch{}
                 if(attempt<39)await new Promise(resolve=>setTimeout(resolve,8000));
@@ -46,13 +48,12 @@ jobs:
               await check('Production health',async()=>{const r=await get(base+'/health');assert.equal(r.status(),200);const body=await r.json();assert.equal(body.ok,true);return body;});
               await check('Temporary Railway access is preserved',async()=>{const r=await get(temporary+'/health',{maxRedirects:0});assert.equal(r.status(),200);return {status:r.status(),url:r.url(),body:await r.json()};});
               await check('Online payments remain disabled',async()=>{const r=await get(base+'/api/payments/status');assert.equal(r.status(),200);const body=await r.json();assert.equal(body.onlinePaymentsAvailable,false);assert.equal(body.checks.onlinePaymentsSwitchOn,false);return body;});
-              await check('Actual published category and item counts',async()=>{
+              const catalogue=await check('Actual published category and item counts',async()=>{
                 const cr=await get(base+'/api/categories'),ir=await get(base+'/api/items');assert.equal(cr.status(),200);assert.equal(ir.status(),200);
                 const categories=(await cr.json()).categories,items=(await ir.json()).items;
                 assert.ok(Array.isArray(categories));assert.ok(Array.isArray(items));assert.ok(categories.length>=18);
                 return {categoryCount:categories.length,itemCount:items.length,categorySlugs:categories.map(x=>x.slug)};
               });
-              const catalogue=report.checks.find(x=>x.name==='Actual published category and item counts')?.detail;
               if(catalogue)for(const slug of catalogue.categorySlugs){await check('Category '+slug,async()=>{
                 const page=await get(base+'/category/'+encodeURIComponent(slug)),api=await get(base+'/api/categories/'+encodeURIComponent(slug));assert.equal(page.status(),200);assert.equal(api.status(),200);
                 return {pageStatus:page.status(),apiStatus:api.status()};
@@ -66,10 +67,9 @@ jobs:
               for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844],['small-mobile',320,740]]){
                 await check(name+' live browser',async()=>{
                   const c=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,ignoreHTTPSErrors:false});
-                  // Prevent all browser-triggered writes (including analytics beacons).
                   await c.route('**/*',route=>['GET','HEAD'].includes(route.request().method())?route.continue():route.abort());
                   try{
-                    const page=await c.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+                    const page=await c.newPage();page.setDefaultTimeout(12000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
                     const r=await page.goto(base,{waitUntil:'domcontentloaded',timeout:45000});assert.equal(r.status(),200);
                     const logo=page.locator('header img:visible').first();await logo.waitFor({state:'visible'});
                     const info=await logo.evaluate(async img=>{await img.decode();const r=img.getBoundingClientRect();return {src:img.currentSrc,width:img.naturalWidth,height:img.naturalHeight,renderWidth:r.width,renderHeight:r.height,left:r.left,right:r.right,viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth};});
@@ -95,7 +95,7 @@ jobs:
             }finally{
               report.finishedAt=new Date().toISOString();report.passed=report.failures.length===0;
               console.log(JSON.stringify(report,null,2));fs.writeFileSync('/tmp/nyc-release-proof/report.json',JSON.stringify(report,null,2));
-              await context.dispose();await browser.close();
+              await context.close();await browser.close();
             }
             if(report.failures.length)process.exitCode=1;
           })().catch(e=>{console.error(e);process.exitCode=1;});

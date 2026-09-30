@@ -60,7 +60,7 @@ test('NYC city pages stay out of the sitemap until unique local planning content
   assert.ok(sitemap.includes("NYC_LOCAL_PLANNING[a.slug]"))
 })
 
-test('all scheduled NYC endpoint workflows target the NYC service and require secret auth',()=>{
+test('all scheduled NYC endpoint workflows use short-lived GitHub OIDC auth',()=>{
   const workflows=[
     '.github/workflows/thank-you-cron.yml',
     '.github/workflows/balance-reminder-cron.yml',
@@ -75,11 +75,41 @@ test('all scheduled NYC endpoint workflows target the NYC service and require se
   for(const file of workflows){
     const source=read(file)
     assert.ok(source.includes('https://fpr-nyc-production.up.railway.app/api/cron/'),file)
-    assert.ok(source.includes('Authorization: Bearer ${{ secrets.CRON_SECRET }}'),file)
+    assert.ok(source.includes('id-token: write'),file)
+    assert.ok(source.includes('audience=fpr-nyc-cron'),file)
+    assert.ok(source.includes('Authorization: Bearer $OIDC_TOKEN'),file)
+    assert.doesNotMatch(source,/secrets\.CRON_SECRET/,file)
     assert.doesNotMatch(source,/friendlypartyrentalsc\.com/,file)
   }
-  const thankYouRoute=read('app/api/cron/thank-you/route.ts')
-  assert.ok(thankYouRoute.includes('authHeader !== `Bearer ${process.env.CRON_SECRET}`'))
+
+  const auth=read('lib/cronAuth.ts')
+  assert.ok(auth.includes("GITHUB_OIDC_ISSUER = 'https://token.actions.githubusercontent.com'"))
+  assert.ok(auth.includes("GITHUB_REPOSITORY = 'customerservice-prog/fpr-nyc'"))
+  assert.ok(auth.includes("GITHUB_REF = 'refs/heads/production-nyc-live'"))
+  assert.ok(auth.includes('claims.workflow_ref === expectedWorkflowRef'))
+  assert.ok(auth.includes('token === legacySecret'))
+
+  const activeRoutes={
+    'app/api/cron/thank-you/route.ts':'.github/workflows/thank-you-cron.yml',
+    'app/api/cron/pre-payment-reminders/route.ts':'.github/workflows/pre-payment-reminders-cron.yml',
+    'app/api/cron/incomplete-orders/route.ts':'.github/workflows/incomplete-orders-cron.yml',
+    'app/api/cron/auto-charge/route.ts':'.github/workflows/auto-charge-cron.yml',
+    'app/api/cron/check-replies/route.ts':'.github/workflows/check-replies-cron.yml',
+    'app/api/cron/indexnow/route.ts':'.github/workflows/indexnow-refresh-cron.yml',
+  }
+  for(const [route,workflow] of Object.entries(activeRoutes)){
+    assert.ok(read(route).includes("isAuthorizedCronRequest(request, '"+workflow+"')"),route)
+  }
+
+  for(const route of [
+    'app/api/cron/balance-reminder/route.ts',
+    'app/api/cron/pre-rental-reminder/route.ts',
+    'app/api/cron/one-year-reminder/route.ts',
+  ]){
+    const source=read(route)
+    assert.ok(source.includes('EMERGENCY KILL SWITCH - automatic sending paused by owner request'),route)
+    assert.ok(source.includes("return NextResponse.json({ disabled: true"),route)
+  }
 })
 
 test('daily IndexNow refresh uses NYC searchable URLs and safely no-ops before launch',()=>{

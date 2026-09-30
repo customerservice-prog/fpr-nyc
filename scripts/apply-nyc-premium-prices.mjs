@@ -12,12 +12,20 @@ if (!Array.isArray(snapshot.items) || snapshot.items.length === 0) throw new Err
 
 const changes = []
 for (const row of snapshot.items) {
-  const item = await prisma.item.findFirst({ where: { slug: row.slug }, select: { id: true, name: true, slug: true, cost: true, quantity: true, displayToCustomer: true } })
+  const item = await prisma.item.findFirst({
+    where: { slug: row.slug },
+    select: { id: true, name: true, slug: true, cost: true, displayToCustomer: true },
+  })
   if (!item) {
     changes.push({ slug: row.slug, status: 'missing', nycPrice: row.nycPrice })
     continue
   }
-  changes.push({ slug: row.slug, status: Number(item.cost) === Number(row.nycPrice) ? 'already-priced' : 'would-update', currentPrice: item.cost, nycPrice: row.nycPrice, quantityUntouched: item.quantity })
+  changes.push({
+    slug: row.slug,
+    status: Number(item.cost) === Number(row.nycPrice) ? 'already-priced' : 'would-update',
+    currentPrice: item.cost,
+    nycPrice: row.nycPrice,
+  })
 }
 
 console.log(JSON.stringify({ apply: APPLY, multiplier: snapshot.multiplier, source: snapshot.source, changes }, null, 2))

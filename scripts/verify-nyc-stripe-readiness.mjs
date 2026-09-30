@@ -11,10 +11,15 @@ function fail(message) {
   process.exit(1)
 }
 
-if (!/^acct_[A-Za-z0-9]+$/.test(expectedAccountId)) fail('NYC_STRIPE_ACCOUNT_ID is missing or invalid')
-if (!/^(?:sk|rk)_live_[A-Za-z0-9_]+$/.test(secretKey)) fail('STRIPE_SECRET_KEY must be a live Stripe secret or restricted key')
-if (!/^pk_live_[A-Za-z0-9_]+$/.test(publishableKey)) fail('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY must be a live publishable key')
-if (!/^whsec_[A-Za-z0-9_]+$/.test(webhookSecret)) fail('STRIPE_WEBHOOK_SECRET is missing or invalid')
+const configProblems = []
+if (!/^acct_[A-Za-z0-9]+$/.test(expectedAccountId)) configProblems.push('NYC_STRIPE_ACCOUNT_ID is missing or invalid')
+if (!/^(?:sk|rk)_live_[A-Za-z0-9_]+$/.test(secretKey)) configProblems.push('STRIPE_SECRET_KEY must start with sk_live_ or rk_live_ and contain the full live server key')
+if (!/^pk_live_[A-Za-z0-9_]+$/.test(publishableKey)) configProblems.push('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY must contain the full pk_live_ publishable key')
+if (!/^whsec_[A-Za-z0-9_]+$/.test(webhookSecret)) configProblems.push('STRIPE_WEBHOOK_SECRET must contain the full whsec_ endpoint signing secret')
+if (configProblems.length) {
+  for (const problem of configProblems) console.error('[nyc-stripe-verify] ' + problem)
+  process.exit(1)
+}
 
 const stripe = new Stripe(secretKey)
 

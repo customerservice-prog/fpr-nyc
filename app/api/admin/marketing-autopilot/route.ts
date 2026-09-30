@@ -6,6 +6,7 @@ import { getAutopilotStatus, autopilotReadiness, campaignEmail } from '@/lib/mar
 import { getAutopilotConfig, updateAutopilotConfig, revokeApproval, approvalFingerprint } from '@/lib/marketing/autopilotSettings'
 import { marketingTransportStatus, verifyMarketingTransport } from '@/lib/marketing/delivery'
 import { wrapEmail } from '@/lib/marketing/message'
+import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
 
 export async function GET(request: NextRequest) {
   const auth = await resolveRequestAuth(request)
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
       const slug = params.get('slug') || ''
       if (!(AUTO_CAMPAIGN_SLUGS as readonly string[]).includes(slug)) return NextResponse.json({ error: 'Unknown automatic campaign' }, { status: 400 })
       const email = campaignEmail(slug)
-      return NextResponse.json({ subject: email.subject, html: wrapEmail(email.html, 'preview@friendlypartyrental.com', 'https://www.fpr-nyc-production.up.railway.app', email.campaign.preheader) }, { headers: { 'Cache-Control': 'no-store' } })
+      return NextResponse.json({ subject: email.subject, html: wrapEmail(email.html, 'preview@friendlypartyrental.com', NYC_PUBLIC_ORIGIN, email.campaign.preheader) }, { headers: { 'Cache-Control': 'no-store' } })
     }
     return NextResponse.json(await getAutopilotStatus(), { headers: { 'Cache-Control': 'no-store' } })
   } catch {

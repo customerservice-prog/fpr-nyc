@@ -2,7 +2,7 @@ import { notFound, permanentRedirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import {nycPageMetadata,nycMetaText,nycBreadcrumbs,NYC_BUSINESS_ID,nycUrl} from '@/lib/nycSeo'
+import {nycPageMetadata,nycMetaText,nycBreadcrumbs,NYC_BUSINESS_ID,nycUrl,NYC_SITE_URL} from '@/lib/nycSeo'
 import LocalDeliveryLinks from '@/components/public/LocalDeliveryLinks'
 import { safeJsonLd } from '@/lib/jsonLd'
 import ItemGallery from '@/components/public/ItemGallery'
@@ -11,7 +11,8 @@ import { matchesTentLighting } from '@/lib/nycAddonMatching'
 import { itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 
 export const dynamic = 'force-dynamic'
-const BASE_URL = 'https://fpr-nyc-production.up.railway.app'
+// Canonical/Open Graph/JSON-LD origin: the NYC primary domain from NEXT_PUBLIC_SITE_URL.
+const BASE_URL = NYC_SITE_URL
 
 function cleanSlug(raw: string) {
   let s = decodeURIComponent(raw)

@@ -4,6 +4,10 @@ import { useEffect, useState, useCallback, Suspense, createElement } from 'react
 import { useSearchParams } from 'next/navigation'
 import { getCampaignBySlug, campaignToBlocks, VISUAL_THEMES } from '@/lib/marketing/campaignLibrary'
 import type { VisualStyle, VisualThemeTokens } from '@/lib/marketing/campaignLibrary'
+import { NYC_PUBLIC_ORIGIN, NYC_PUBLIC_HOST } from '@/lib/nycPublicOrigin'
+
+// Links and images in campaign emails point at the NYC primary domain.
+const ORIGIN = NYC_PUBLIC_ORIGIN
 
 const LAYOUT_STARTERS: { key: string; label: string; desc: string; slug: string }[] = [
   { key: 'editorialLuxury', label: 'Editorial Luxury', desc: 'Elegant masthead, large editorial hero, single refined call to action. Best for weddings and formal occasions.', slug: 'wedding-planning-season' },
@@ -109,29 +113,29 @@ function newBlock(type: BlockType): Block {
     case 'image':
       return { id, type, image: '', url: '', align: 'center' }
     case 'button':
-      return { id, type, text: 'Shop Now', url: 'https://fpr-nyc-production.up.railway.app/rentals', align: 'center' }
+      return { id, type, text: 'Shop Now', url: ORIGIN + '/rentals', align: 'center' }
     case 'divider':
       return { id, type }
     case 'spacer':
       return { id, type }
     case 'hero':
-      return { id, type, image: 'https://fpr-nyc-production.up.railway.app/images/wedding-backyard-elopement.jpg', url: 'https://fpr-nyc-production.up.railway.app/rentals' }
+      return { id, type, image: ORIGIN + '/images/wedding-backyard-elopement.jpg', url: ORIGIN + '/rentals' }
     case 'offer':
-      return { id, type, eyebrow: 'Limited-Time Offer', title: 'Save 15% on your next order', subtitle: 'Book by June 30th — mention code SUMMER15 on your quote.', code: 'SUMMER15', buttonText: 'Browse Rentals', url: 'https://fpr-nyc-production.up.railway.app/rentals' }
+      return { id, type, eyebrow: 'Limited-Time Offer', title: 'Save 15% on your next order', subtitle: 'Book by June 30th — mention code SUMMER15 on your quote.', code: 'SUMMER15', buttonText: 'Browse Rentals', url: ORIGIN + '/rentals' }
     case 'grid':
       return {
         id, type, title: 'Popular Rentals', subtitle: 'Tap any category to explore', columns: 2,
         cards: [
-          { image: 'https://fpr-nyc-production.up.railway.app/api/category-image/tent-rentals', caption: 'Tents & Canopies', url: 'https://fpr-nyc-production.up.railway.app/rentals' },
-          { image: 'https://fpr-nyc-production.up.railway.app/api/category-image/table-chair-rentals', caption: 'Tables & Chairs', url: 'https://fpr-nyc-production.up.railway.app/rentals' },
+          { image: ORIGIN + '/api/category-image/tent-rentals', caption: 'Tents & Canopies', url: ORIGIN + '/rentals' },
+          { image: ORIGIN + '/api/category-image/table-chair-rentals', caption: 'Tables & Chairs', url: ORIGIN + '/rentals' },
         ],
       }
     case 'badges':
       return {
         id, type, title: 'Why Friendly Party Rental NYC?',
         cards: [
-          { image: 'https://fpr-nyc-production.up.railway.app/images/badge-all-day-8-hour-rental.png', caption: '', url: '' },
-          { image: 'https://fpr-nyc-production.up.railway.app/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
+          { image: ORIGIN + '/images/badge-all-day-8-hour-rental.png', caption: '', url: '' },
+          { image: ORIGIN + '/images/badge-all-day-best-price-guarantee.png', caption: '', url: '' },
         ],
       }
     case 'masthead':
@@ -139,7 +143,7 @@ function newBlock(type: BlockType): Block {
     case 'eyebrow':
       return { id, type, text: 'SEASONAL COLLECTION' }
     case 'splitrow':
-      return { id, type, image: 'https://fpr-nyc-production.up.railway.app/api/category-image/tent-rentals', title: 'What You May Need', text: 'A short description of this section.', url: 'https://fpr-nyc-production.up.railway.app/rentals', align: 'left' }
+      return { id, type, image: ORIGIN + '/api/category-image/tent-rentals', title: 'What You May Need', text: 'A short description of this section.', url: ORIGIN + '/rentals', align: 'left' }
     case 'featureRow':
       return { id, type, title: 'Highlights', items: [{ title: 'Delivered & Set Up', text: '' }, { title: 'Local Support', text: '' }, { title: 'Flexible Scheduling', text: '' }] }
     case 'trust':
@@ -272,7 +276,7 @@ function blockHtml(b: Block, theme: VisualThemeTokens): string {
       return '<div style="text-align:left;font-family:' + theme.headingFont + ';font-style:italic;font-size:15px;color:' + theme.textColor + ';margin:6px 0 4px;">' + esc(b.text || '') + '</div>'
     case 'footerBrand': {
       const variant = b.variant || 'standard'
-      const contact = '315-884-1498 &nbsp;•&nbsp; fpr-nyc-production.up.railway.app'
+      const contact = '315-884-1498 &nbsp;•&nbsp; ' + NYC_PUBLIC_HOST
       if (variant === 'minimal') {
         return '<div style="text-align:center;border-top:1px solid ' + theme.borderColor + ';padding-top:14px;margin-top:18px;font-family:' + theme.bodyFont + ';font-size:12px;color:' + theme.mutedColor + ';">' +
           'Friendly Party Rental &nbsp;•&nbsp; ' + contact + '<br/><a href="#" style="color:' + theme.mutedColor + ';text-decoration:underline;">Manage email preferences</a></div>'
@@ -318,7 +322,6 @@ function campaignReadiness(blocks: Block[], subject: string, preheader: string):
   ]
 }
 
-const ORIGIN = 'https://fpr-nyc-production.up.railway.app'
 
 function starterBlocks(): Block[] {
   return [

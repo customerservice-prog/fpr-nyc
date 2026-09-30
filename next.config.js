@@ -32,6 +32,7 @@ const nextConfig = {
   images: {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 480, 576],
     remotePatterns: [
+      { protocol: 'https', hostname: 'friendlypartyrentalnyc.com' },
       { protocol: 'https', hostname: 'fpr-nyc-production.up.railway.app' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'files.sysers.com' },
@@ -54,7 +55,7 @@ const nextConfig = {
       "worker-src 'self' blob:",
       "object-src 'none'",
       "base-uri 'self'",
-      "form-action 'self' https://fpr-nyc-production.up.railway.app",
+      "form-action 'self' https://friendlypartyrentalnyc.com https://fpr-nyc-production.up.railway.app",
       "frame-ancestors 'self'",
       "upgrade-insecure-requests",
     ].join('; ')
@@ -100,6 +101,15 @@ const nextConfig = {
       { source: '/category/folding_chairs-_throne_chairs', destination: '/category/table-chair-rentals', permanent: true },
       { source: '/items/bounce_house__plus__waterslide_combo_package', destination: '/items/bounce-house-water-slide-combo-package', permanent: true },
       { source: '/items/flower_wall', destination: '/items/greenery-and-floral-wall-8x8', permanent: true },
+      // NYC primary domain: https://friendlypartyrentalnyc.com. Only the www host is
+      // redirected (Next.js keeps the path and query string); the temporary Railway
+      // address is never redirected, so its carts and staff sessions keep working.
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.friendlypartyrentalnyc.com' }],
+        destination: 'https://friendlypartyrentalnyc.com/:path*',
+        permanent: true,
+      },
     ]
   },
 }

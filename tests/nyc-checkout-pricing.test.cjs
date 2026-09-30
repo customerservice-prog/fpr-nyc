@@ -323,6 +323,9 @@ test('planning packages show no unapproved prices', () => {
   const estimator = read('components/public/PlanningEstimator.tsx')
   assert.match(estimator, /pkg\.amount !== null \? <>\{money\(pkg\.amount\)\}/)
   assert.match(estimator, /estimate\.planningPriced \? money\(estimate\.planningCents \/ 100\)/)
+  // An estimate with nothing priced yet shows "To be quoted", never a $0.00 total.
+  assert.match(estimator, /estimate\.subtotalCents > 0 \? money\(estimate\.subtotalCents \/ 100\) : 'To be quoted'/)
+  assert.match(estimator, /estimate\.subtotalCents > 0 \? money\(estimate\.perGuest\) : 'To be quoted'/)
 })
 
 behavior('planning estimator leaves unapproved planning prices out of every total', () => {

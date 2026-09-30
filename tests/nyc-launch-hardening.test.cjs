@@ -174,7 +174,7 @@ test('item photos are the Syracuse photos through the NYC proxy, including addit
   assert.match(gallery, /\?index=\$\{index\}/)
   assert.doesNotMatch(gallery, /Reference preview/)
   const page = read('app/(public)/items/[...slug]/page.tsx')
-  assert.match(page, /picture: addon\.picture \? `\/api\/item-image\/\$\{encodeURIComponent\(addon\.slug\)\}` : null/)
+  assert.match(page, /picture: addon\.picture \? nycItemImagePath\(addon\.slug\) : null/)
   assert.match(page, /itemDescriptionForNyc\(addon\.name, addon\.description, Number\(addon\.cost\)\)/)
 })
 
@@ -215,4 +215,58 @@ test('"email me this quote" cannot relay arbitrary email or prices', () => {
   assert.match(read('app/api/admin/orders/[id]/send-quote/route.ts'), /catch \(sendError\)/)
   assert.match(read('app/api/admin/orders/[id]/send-cancellation/route.ts'), /catch \(sendError\)/)
   assert.match(read('lib/payments.ts'), /image:nycItemImage\(i\.item\)/)
+})
+
+behavior('public item URLs never show a Syracuse place suffix but still reach the mirrored slug', () => {
+  const { nycItemUrlSlug, nycItemPath, nycItemImagePath, storedItemSlugCandidates, pickStoredItem } = loadTs('lib/nycItemPath.ts')
+  const stored = 'graduation-party-package-small-seats-64-syracuse-ny'
+  assert.equal(nycItemUrlSlug(stored), 'graduation-party-package-small-seats-64')
+  assert.equal(nycItemPath(stored), '/items/graduation-party-package-small-seats-64')
+  assert.equal(nycItemImagePath(stored), '/api/item-image/graduation-party-package-small-seats-64')
+  assert.equal(nycItemImagePath('30-x-60-pole-tent', 0), '/api/item-image/30-x-60-pole-tent?index=0')
+  assert.equal(nycItemPath('20x20-pole-tent'), '/items/20x20-pole-tent')
+  assert.equal(nycItemUrlSlug('syracuse-ny'), 'syracuse-ny', 'a slug is never shortened to nothing')
+  assert.deepEqual(storedItemSlugCandidates(stored), [stored], 'the full stored slug resolves only to itself')
+  assert.equal(storedItemSlugCandidates('graduation-party-package-small-seats-64')[1], stored)
+  const rows = [{ slug: stored, id: 'b' }, { slug: 'graduation-party-package-small-seats-64', id: 'a' }]
+  assert.equal(pickStoredItem('graduation-party-package-small-seats-64', rows).id, 'a', 'an exact slug always wins')
+  assert.equal(pickStoredItem('graduation-party-package-small-seats-64', rows.slice(0, 1)).id, 'b')
+  assert.equal(pickStoredItem('missing', rows), null)
+  const { rentalItemHref } = loadTs('lib/nycRentalSearch.ts')
+  assert.equal(rentalItemHref({ slug: stored }), '/items/graduation-party-package-small-seats-64', 'header search links use the same short URL')
+  assert.equal(rentalItemHref({ slug: '20x20-pole-tent' }), '/items/20x20-pole-tent')
+
+  const page = read('app/(public)/items/[...slug]/page.tsx')
+  assert.match(page, /storedItemSlugCandidates\(safeSegment\)/)
+  assert.match(page, /permanentRedirect\(itemPath\)/)
+  assert.doesNotMatch(page, /\/items\/\$\{item\.slug\}|\/api\/item-image\/\$\{item\.slug\}/)
+  assert.match(read('app/api/item-image/[slug]/route.ts'), /pickStoredItem\(slug, rows\)/)
+  for (const file of ['components/public/ItemCard.tsx', 'components/public/SuggestedAddons.tsx', 'components/public/MobileHome.tsx', 'components/public/DesktopHome.tsx', 'components/public/PopularRentalsShared.tsx', 'components/public/CategoryCatalogFallback.tsx', 'components/public/PlanningEstimator.tsx', 'app/sitemap.ts', 'lib/nycIndexNow.ts', 'app/(public)/weddings/page.tsx', 'app/(public)/weddings/layout.tsx']) {
+    const source = read(file)
+    assert.match(source, /nycItemPath\(/, file + ' links items through nycItemPath')
+    assert.doesNotMatch(source, /['"`]\/items\/['"`]?\s*\+|`\/items\/\$\{/, file + ' builds no raw item URLs')
+  }
+})
+
+test('multi-day pricing uses the Syracuse duration tiers without overwriting admin edits', () => {
+  const sql = read('prisma/migrations/20260930210000_nyc_duration_tiers_from_syracuse/migration.sql')
+  assert.match(sql, /WHERE NOT EXISTS \(SELECT 1 FROM "PricingTier"\)/, 'inserted only when NYC has no tiers')
+  for (const row of ["'1 Day', 1, 1::integer, 0::double precision", "'2 Days', 2, 2, 60", "'7 Days (1 Week)', 7, 7, 200", "'2 Weeks', 8, 14, 400", "'29+ Days (Long-Term)', 29, NULL, 800"]) {
+    assert.ok(sql.includes(row), row)
+  }
+  assert.doesNotMatch(sql, /DELETE|UPDATE "PricingTier"/)
+})
+
+behavior('a 2-day NYC rental adds the 60% duration tier to the rental subtotal only', () => {
+  const { computeNycCheckoutPricing } = loadTs('lib/nycCheckoutPricing.ts')
+  const tiers = [{ id: 'd1', label: '1 Day', minDays: 1, maxDays: 1, percent: 0 }, { id: 'd2', label: '2 Days', minDays: 2, maxDays: 2, percent: 60 }]
+  const base = config({ tiers })
+  const one = computeNycCheckoutPricing({ items: [{ id: 'tent', quantity: 1 }, { id: 'chair', quantity: 40 }], eventDate: '2026-11-20' }, base)
+  const two = computeNycCheckoutPricing({ items: [{ id: 'tent', quantity: 1 }, { id: 'chair', quantity: 40 }], eventDate: '2026-11-20', durationTierId: 'd2' }, base)
+  assert.equal(one.durationFee, 0)
+  assert.equal(one.rentalDays, 1)
+  assert.equal(two.durationFee, Math.round(one.cartSubtotal * 60) / 100)
+  assert.equal(two.rentalDays, 2)
+  assert.equal(two.durationLabel, '2 Days')
+  assert.equal(two.deliveryFee, one.deliveryFee, 'delivery is not multiplied by the rental length')
 })

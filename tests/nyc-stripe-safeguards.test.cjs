@@ -91,7 +91,7 @@ test('Every PaymentIntent is created with server metadata and an idempotency key
     const keyInline = /idempotencyKey: nycIdempotencyKey\(/.test(create.slice(0, 1600))
     const keyVariable = /\{ idempotencyKey \}\)/.test(create.slice(0, 1600)) && /const idempotencyKey = nycIdempotencyKey\(/.test(code)
     assert.ok(keyInline || keyVariable, file + ' must send a Stripe idempotency key')
-    assert.match(create.slice(0, 600), /payment_method_types: \['card'\]/, file)
+    assert.doesNotMatch(create.slice(0, 900), /payment_method_types\s*:/, file + ' should use Stripe dynamic payment methods')
   }
   const refund = read('app/api/admin/orders/[id]/refund/route.ts')
   assert.match(refund, /location: NYC_LOCATION/)

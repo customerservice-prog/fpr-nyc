@@ -264,6 +264,7 @@ test('parity report flags every kind of drift', () => {
 
 test('Railway pre-deploy entry point runs every step in order and stops at the first failure', () => {
   assert.deepEqual(PREDEPLOY_STEPS.map(([, args]) => args.join(' ')), [
+    'scripts/verify-nyc-stripe-readiness.mjs',
     'scripts/sync-nyc-catalog-from-syracuse.mjs --apply',
     'scripts/apply-nyc-premium-prices.mjs --apply',
     'scripts/sync-nyc-quantities-from-syracuse.mjs --apply',
@@ -272,9 +273,9 @@ test('Railway pre-deploy entry point runs every step in order and stops at the f
   ])
   const ran = []
   assert.equal(runPredeploy(PREDEPLOY_STEPS, (command, args) => { ran.push(args[0]); return { status: 0 } }), 0)
-  assert.equal(ran.length, 5)
+  assert.equal(ran.length, 6)
   const partial = []
   assert.equal(runPredeploy(PREDEPLOY_STEPS, (command, args) => { partial.push(args[0]); return { status: partial.length === 2 ? 4 : 0 } }), 4)
-  assert.deepEqual(partial, ['scripts/sync-nyc-catalog-from-syracuse.mjs', 'scripts/apply-nyc-premium-prices.mjs'])
+  assert.deepEqual(partial, ['scripts/verify-nyc-stripe-readiness.mjs', 'scripts/sync-nyc-catalog-from-syracuse.mjs'])
   assert.equal(runPredeploy(PREDEPLOY_STEPS, () => ({ status: null, error: new Error('spawn ENOENT') })), 1)
 })

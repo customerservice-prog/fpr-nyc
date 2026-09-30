@@ -79,7 +79,6 @@ export async function GET(request: NextRequest) {
         currency: 'usd',
         customer: order.stripeCustomerId as string,
         payment_method: order.savedPaymentMethodId as string,
-        payment_method_types: ['card'],
         off_session: true,
         confirm: true,
         description: 'Friendly Party Rental NYC order ' + order.orderNumber + ' - autopay balance',

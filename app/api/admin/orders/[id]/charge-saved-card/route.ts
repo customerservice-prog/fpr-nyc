@@ -53,7 +53,6 @@ export async function POST(
       currency: 'usd',
       customer: order.stripeCustomerId,
       payment_method: order.savedPaymentMethodId,
-      payment_method_types: ['card'],
       off_session: true,
       confirm: true,
       description: 'Friendly Party Rental NYC order ' + order.orderNumber + ' - additional charge',

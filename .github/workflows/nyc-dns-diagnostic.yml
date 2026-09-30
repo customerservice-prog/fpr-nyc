@@ -1,0 +1,22 @@
+name: NYC DNS diagnostic
+
+on:
+  push:
+    paths:
+      - '.github/dns-smoke-test'
+
+permissions:
+  contents: read
+
+jobs:
+  dns:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check NYC DNS and HTTPS
+        run: |
+          echo "CNAME:"
+          dig +short CNAME nyc.friendlypartyrental.com || true
+          echo "A:"
+          dig +short A nyc.friendlypartyrental.com || true
+          echo "HTTPS:"
+          curl -sS -o /dev/null -w "%{http_code} %{url_effective}\n" -L --max-time 20 https://nyc.friendlypartyrental.com/ || true

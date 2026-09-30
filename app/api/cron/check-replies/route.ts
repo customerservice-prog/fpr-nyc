@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
+import { isAuthorizedCronRequest } from '@/lib/cronAuth'
 import { prisma } from '@/lib/prisma'
 import * as tls from 'tls'
 
@@ -70,11 +71,9 @@ async function hasRepliedSince(socket: tls.TLSSocket, email: string, since: Date
 }
 
 export async function GET(request: NextRequest) {
-      const authHeader = request.headers.get('authorization')
-      const cronSecret = process.env.CRON_SECRET
-      if (!cronSecret || authHeader !== 'Bearer ' + cronSecret) {
-              return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-      }
+  if (!(await isAuthorizedCronRequest(request, '.github/workflows/check-replies-cron.yml'))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
           return NextResponse.json({ skipped: true, reason: 'Email not configured' })

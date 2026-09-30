@@ -18,8 +18,9 @@ test('NYC marketing autopilot defaults to review and requires explicit readiness
 test('NYC marketing uses the NYC origin and no SC or Syracuse street identity',()=>{
   const autopilot=read('lib/marketing/autopilot.ts')
   const message=read('lib/marketing/message.ts')
-  assert.match(autopilot,/NEXT_PUBLIC_SITE_URL/)
-  assert.match(autopilot,/fpr-nyc-production\.up\.railway\.app/)
+  // Links use the NYC primary origin (NEXT_PUBLIC_SITE_URL, else friendlypartyrentalnyc.com).
+  assert.match(autopilot,/const ORIGIN = NYC_PUBLIC_ORIGIN/)
+  assert.match(read('lib/nycPublicOrigin.ts'),/NEXT_PUBLIC_SITE_URL \|\| NYC_PRIMARY_ORIGIN/)
   assert.doesNotMatch(autopilot,/friendlypartyrentalsc\.com|friendly-party-rental-greenville-sc/)
   assert.match(message,/Riverdale/)
   assert.match(message,/315-884-1498/)

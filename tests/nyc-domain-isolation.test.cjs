@@ -32,8 +32,10 @@ test('legacy NYC deployment documentation does not fall back to Syracuse',()=>{
 })
 
 test('shared media is labeled and NYC RentSketch access stays disabled',()=>{
+  // Another location's reviews are never shown on the NYC site (hidden until NYC reviews exist).
   const reviews=fs.readFileSync('components/public/ReviewCarousel.tsx','utf8')
-  assert.ok(reviews.includes('Reviews from Our New York Customers'))
+  assert.ok(!reviews.includes('friendlypartyrental.com'))
+  assert.match(reviews,/if \(!reviews\.length\) return null/)
   const media=fs.readFileSync('lib/nyMediaSnapshot.json','utf8')
   assert.ok(media.includes('friendlypartyrental.com'))
   // Test the actual NYC module, not the removed SC source it was forked from.

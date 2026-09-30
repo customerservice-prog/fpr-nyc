@@ -22,7 +22,7 @@ test('SC draft funnel advances through payment and verified completion',()=>{
   assert.match(payment,/stage: 'payment_page'/)
   assert.match(payment,/removeItem\('checkout_draft_key'\)/)
   assert.match(checkout,/order\.status === 'incomplete'/)
-  assert.match(checkout,/getItemAvailability/)
+  assert.match(checkout,/findInventoryShortfalls/)
   assert.match(checkout,/evaluateRentalRestrictions/)
   assert.match(checkout,/requireMatchingDeliveryFee/)
   assert.match(payments,/checkoutStage: 'completed'/)

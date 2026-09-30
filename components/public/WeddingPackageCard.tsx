@@ -1,10 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { formatCurrency } from '@/lib/utils'
-import { Playfair_Display } from 'next/font/google'
-
-const playfair = Playfair_Display({ subsets: ['latin'], weight: ['600', '700'], display: 'swap' })
-
 interface WeddingPackageCardProps {
   id: string
   name: string
@@ -59,7 +55,7 @@ export default function WeddingPackageCard({
         {packageNumber && !signature && (
           <p className="text-xs text-primary font-bold uppercase tracking-[0.2em] mb-2">Package {packageNumber}</p>
         )}
-        <h3 className={`${playfair.className} text-2xl font-bold text-dark mb-1`}>{name}</h3>
+        <h3 className={`font-serif text-2xl font-bold text-dark mb-1`}>{name}</h3>
         <p className="text-3xl font-bold text-secondary mb-1">{price !== null && price > 0 ? formatCurrency(price) : 'Price on request'}</p>
         <p className="text-body text-sm mb-4">Up to {guests} guests</p>
         <div className="h-px bg-primary/30 mb-4" />

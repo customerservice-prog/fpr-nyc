@@ -1,13 +1,13 @@
 import { prisma } from './prisma'
 import { startOfDay, endOfDay } from 'date-fns'
 import type { Prisma } from '@prisma/client'
+import { holdsStockWhere } from './nycInventory'
 
 // Quote-status orders normally don't count against availability (so stale/abandoned
 // staff quotes don't lock up inventory forever). However, EVERY online checkout also
 // sits in 'quote' status from order creation until payment is confirmed. To close the
 // double-booking gap we still count quote-status orders created within this window as
 // reserved (in-progress checkouts), while older truly-abandoned quotes fall out.
-const RECENT_QUOTE_WINDOW_MS = 2 * 60 * 60 * 1000 // 2 hours
 
 // Minimal field set returned to the public storefront. Crucially this trims the
 // category relation down to the few fields the UI actually uses (name/slug/pricingProfile),
@@ -55,6 +55,17 @@ export function withCategoryImage<T extends { category: { slug: string } | null 
   }
 }
 
+function activeOrdersCoveringDay(dayStart: Date, dayEnd: Date): Prisma.OrderWhereInput {
+  return {
+    status: { notIn: ['canceled', 'cancelled', 'draft', 'incomplete'] },
+    eventDate: { lte: dayEnd },
+    AND: [
+      holdsStockWhere(),
+      { OR: [{ eventEndDate: { gte: dayStart } }, { eventEndDate: null, eventDate: { gte: dayStart } }] },
+    ],
+  }
+}
+
 export async function getItemAvailability(itemId: string, date: Date): Promise<number> {
   const item = await prisma.item.findUnique({ where: { id: itemId } })
   if (!item) return 0
@@ -69,17 +80,10 @@ const closedDate = await prisma.closedDate.findFirst({
 })
   if (closedDate) return 0
 
-const recentQuoteCutoff = new Date(Date.now() - RECENT_QUOTE_WINDOW_MS)
-
+// Every order whose rental period covers this day holds stock (multi-day rentals
+// block each day through their end date).
 const orders = await prisma.order.findMany({
-  where: {
-    eventDate: { gte: dayStart, lte: dayEnd },
-    status: { notIn: ['canceled', 'cancelled', 'draft', 'incomplete'] },
-    OR: [
-      { status: { not: 'quote' } },
-      { status: 'quote', createdAt: { gte: recentQuoteCutoff } },
-      ],
-  },
+  where: activeOrdersCoveringDay(dayStart, dayEnd),
   include: { items: { where: { itemId } } },
 })
 
@@ -119,18 +123,10 @@ if (closedDate) {
 // Batch: pull ALL relevant order lines for this day in ONE query instead of
 // running 3 queries per item (the previous N+1 pattern). Then tally booked
 // quantities per item in memory.
-const recentQuoteCutoff = new Date(Date.now() - RECENT_QUOTE_WINDOW_MS)
-  const orderItems = await prisma.orderItem.findMany({
+const orderItems = await prisma.orderItem.findMany({
     where: {
       itemId: { not: null },
-      order: {
-        eventDate: { gte: dayStart, lte: dayEnd },
-        status: { notIn: ['canceled', 'cancelled', 'draft', 'incomplete'] },
-        OR: [
-          { status: { not: 'quote' } },
-          { status: 'quote', createdAt: { gte: recentQuoteCutoff } },
-          ],
-      },
+      order: activeOrdersCoveringDay(dayStart, dayEnd),
     },
     select: { itemId: true, quantity: true },
   })

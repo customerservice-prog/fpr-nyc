@@ -1,7 +1,8 @@
 import { NYC_SERVICE_AREA_SUMMARY } from './nycServiceAreas'
+import { NYC_PUBLIC_ORIGIN } from './nycPublicOrigin'
 
 export const PLANNING_PHONE = '315-884-1498'
-export const PLANNING_ORIGIN = 'https://fpr-nyc-production.up.railway.app'
+export const PLANNING_ORIGIN = NYC_PUBLIC_ORIGIN
 export const PLANNING_HELP = ['Rentals', 'Event design / layout', 'Vendor coordination', 'Day-of coordination', 'Full planning', 'Not sure yet'] as const
 export const planningServices = [
   {

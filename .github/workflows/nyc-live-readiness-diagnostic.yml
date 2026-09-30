@@ -1,0 +1,21 @@
+name: NYC live readiness diagnostic
+
+on:
+  push:
+    paths:
+      - '.github/live-readiness-smoke'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read live readiness
+        run: |
+          echo "PAYMENTS:"
+          curl -fsS https://friendlypartyrentalnyc.com/api/payments/status
+          echo
+          echo "CONTACT:"
+          curl -fsS https://friendlypartyrentalnyc.com/api/contact

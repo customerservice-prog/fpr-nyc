@@ -64,8 +64,9 @@ interface CartContextType {
   exactTimeRequested: boolean
   schedulingDetails: SchedulingDetails
   addItem: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void
-  removeItem: (id: string) => void
-  updateQuantity: (id: string, quantity: number) => void
+  /** Removes one cart line: an item + selected color (colors of one item are separate lines). */
+  removeItem: (id: string, selectedColor?: string) => void
+  updateQuantity: (id: string, quantity: number, selectedColor?: string) => void
   clearCart: () => void
   setEventDate: (date: string) => void
   setDurationTierId: (id: string | null) => void
@@ -80,6 +81,16 @@ interface CartContextType {
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
+
+/** One cart line = one item id + one selected color (no color = ''). */
+export function sameCartLine(line: Pick<CartItem, 'id' | 'selectedColor'>, id: string, selectedColor?: string) {
+  return line.id === id && (line.selectedColor || '') === (selectedColor || '')
+}
+
+/** Combined quantity of every color of one item already in the cart. */
+export function cartQuantityForItem(items: Pick<CartItem, 'id' | 'quantity'>[], id: string) {
+  return items.filter((i) => i.id === id).reduce((sum, i) => sum + i.quantity, 0)
+}
 
 const CART_KEY = 'fpr_cart'
 const DATE_KEY = 'fpr_event_date'
@@ -176,27 +187,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(SCHEDULING_KEY, JSON.stringify(schedulingDetails))
   }, [schedulingDetails, loaded])
 
+  // Colors of the same item are separate cart lines but share ONE stock count, so the
+  // combined quantity of every color never exceeds the item's available quantity.
   const addItem = useCallback((item: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
     setItems((prev) => {
-      const existing = prev.find((i) => i.id === item.id && i.selectedColor === item.selectedColor)
+      const otherColors = prev
+        .filter((i) => i.id === item.id && !sameCartLine(i, item.id, item.selectedColor))
+        .reduce((sum, i) => sum + i.quantity, 0)
+      const cap = Math.max(0, item.maxQuantity - otherColors)
+      const existing = prev.find((i) => sameCartLine(i, item.id, item.selectedColor))
       if (existing) {
-        const newQty = Math.min(existing.quantity + (item.quantity || 1), item.maxQuantity)
-        return prev.map((i) => (i.id === item.id && i.selectedColor === item.selectedColor ? { ...i, quantity: newQty } : i))
+        const newQty = Math.min(existing.quantity + (item.quantity || 1), cap)
+        return prev.map((i) => (sameCartLine(i, item.id, item.selectedColor) ? { ...i, quantity: newQty } : i))
       }
-      return [...prev, { ...item, quantity: item.quantity || 1 }]
+      const quantity = Math.min(item.quantity || 1, cap)
+      if (quantity <= 0) return prev
+      return [...prev, { ...item, quantity }]
     })
   }, [])
 
-  const removeItem = useCallback((id: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== id))
+  const removeItem = useCallback((id: string, selectedColor?: string) => {
+    setItems((prev) => prev.filter((i) => !sameCartLine(i, id, selectedColor)))
   }, [])
 
-  const updateQuantity = useCallback((id: string, quantity: number) => {
+  const updateQuantity = useCallback((id: string, quantity: number, selectedColor?: string) => {
     if (quantity <= 0) {
-      setItems((prev) => prev.filter((i) => i.id !== id))
+      setItems((prev) => prev.filter((i) => !sameCartLine(i, id, selectedColor)))
       return
     }
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, quantity: Math.min(quantity, i.maxQuantity) } : i)))
+    setItems((prev) => {
+      const otherColors = prev
+        .filter((i) => i.id === id && !sameCartLine(i, id, selectedColor))
+        .reduce((sum, i) => sum + i.quantity, 0)
+      return prev.map((i) => (sameCartLine(i, id, selectedColor)
+        ? { ...i, quantity: Math.max(1, Math.min(quantity, i.maxQuantity - otherColors)) }
+        : i))
+    })
   }, [])
 
   const clearCart = useCallback(() => {

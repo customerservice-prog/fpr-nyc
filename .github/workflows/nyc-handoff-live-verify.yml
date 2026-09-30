@@ -1,0 +1,108 @@
+name: NYC release live acceptance
+on:
+  push:
+    branches: [verify/nyc-release-handoff-20260930]
+    paths: [.github/workflows/nyc-handoff-live-verify.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --prefix /tmp/nyc-browser --no-save --package-lock=false playwright@1.56.1
+      - run: /tmp/nyc-browser/node_modules/.bin/playwright install --with-deps chromium
+      - name: Verify live NYC domain, catalog, and disabled payments without submitting records
+        run: |
+          mkdir -p /tmp/nyc-release-proof
+          node - <<'JS'
+          const {chromium}=require('/tmp/nyc-browser/node_modules/playwright');
+          const fs=require('node:fs'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+          const base='https://friendlypartyrentalnyc.com',www='https://www.friendlypartyrentalnyc.com';
+          const temporary='https://fpr-nyc-production.up.railway.app';
+          const expectedLogo='806f9d15f32e34154eb0b8556433ef3ab20e94f707f7019fcddafecbf748f83f';
+          const report={startedAt:new Date().toISOString(),base,checks:[],failures:[],viewports:[],notes:['GET/HEAD only. No login, form submissions, orders, charges, refunds, or email sends.']};
+          async function check(name,fn){try{const detail=await fn();report.checks.push({name,passed:true,detail});return detail;}catch(e){report.failures.push({name,error:e.message});return null;}}
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const context=await browser.newContext({ignoreHTTPSErrors:false});
+            const get=(url,options={})=>context.request.get(url,{timeout:20000,headers:{'Cache-Control':'no-cache'},...options});
+            try{
+              const path='/category/tent-rentals?qa=domain-release&keep=1';
+              // The deployment may still be completing. Only wait for observable public routing.
+              for(let attempt=0;attempt<40;attempt++){
+                try{const r=await get(www+path,{maxRedirects:0});if(r.status()===308&&r.headers().location===base+path)break;}catch{}
+                if(attempt<39)await new Promise(resolve=>setTimeout(resolve,8000));
+              }
+              await check('WWW HTTPS redirects to root and preserves path/query',async()=>{
+                const r=await get(www+path,{maxRedirects:0});assert.equal(r.status(),308);assert.equal(r.headers().location,base+path);
+                const destination=await get(www+path);assert.equal(destination.status(),200);assert.equal(destination.url(),base+path);
+                return {status:r.status(),location:r.headers().location,finalStatus:destination.status(),tlsValidated:true};
+              });
+              await check('Production health',async()=>{const r=await get(base+'/health');assert.equal(r.status(),200);const body=await r.json();assert.equal(body.ok,true);return body;});
+              await check('Temporary Railway access is preserved',async()=>{const r=await get(temporary+'/health',{maxRedirects:0});assert.equal(r.status(),200);return {status:r.status(),url:r.url(),body:await r.json()};});
+              await check('Online payments remain disabled',async()=>{const r=await get(base+'/api/payments/status');assert.equal(r.status(),200);const body=await r.json();assert.equal(body.onlinePaymentsAvailable,false);assert.equal(body.checks.onlinePaymentsSwitchOn,false);return body;});
+              await check('Actual published category and item counts',async()=>{
+                const cr=await get(base+'/api/categories'),ir=await get(base+'/api/items');assert.equal(cr.status(),200);assert.equal(ir.status(),200);
+                const categories=(await cr.json()).categories,items=(await ir.json()).items;
+                assert.ok(Array.isArray(categories));assert.ok(Array.isArray(items));assert.ok(categories.length>=18);
+                return {categoryCount:categories.length,itemCount:items.length,categorySlugs:categories.map(x=>x.slug)};
+              });
+              const catalogue=report.checks.find(x=>x.name==='Actual published category and item counts')?.detail;
+              if(catalogue)for(const slug of catalogue.categorySlugs){await check('Category '+slug,async()=>{
+                const page=await get(base+'/category/'+encodeURIComponent(slug)),api=await get(base+'/api/categories/'+encodeURIComponent(slug));assert.equal(page.status(),200);assert.equal(api.status(),200);
+                return {pageStatus:page.status(),apiStatus:api.status()};
+              });}
+              for(const endpoint of ['/api/pricing-tiers','/api/special-request-fees','/api/tax-rate','/api/deposit-rule']){
+                await check('Pricing configuration '+endpoint,async()=>{const r=await get(base+endpoint);assert.ok([200,503].includes(r.status()));return {status:r.status(),body:await r.json()};});
+              }
+              await check('Public indexing remains off',async()=>{const r=await get(base+'/robots.txt');assert.equal(r.status(),200);const body=await r.text();assert.match(body,/Disallow: \/(?:\r?\n|$)/);return {status:r.status(),body};});
+              await check('NextAuth provider URLs use the primary domain',async()=>{const r=await get(base+'/api/auth/providers');assert.equal(r.status(),200);const data=await r.json();assert.ok(Object.keys(data).length>0);for(const p of Object.values(data)){assert.ok(p.signinUrl.startsWith(base+'/'));assert.ok(p.callbackUrl.startsWith(base+'/'));}return data;});
+              await check('Staging payment readiness (read only)',async()=>{const r=await get('https://fpr-nyc-staging.up.railway.app/api/payments/status');assert.equal(r.status(),200);const body=await r.json();assert.equal(body.onlinePaymentsAvailable,false);return body;});
+              for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844],['small-mobile',320,740]]){
+                await check(name+' live browser',async()=>{
+                  const c=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,ignoreHTTPSErrors:false});
+                  // Prevent all browser-triggered writes (including analytics beacons).
+                  await c.route('**/*',route=>['GET','HEAD'].includes(route.request().method())?route.continue():route.abort());
+                  try{
+                    const page=await c.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+                    const r=await page.goto(base,{waitUntil:'domcontentloaded',timeout:45000});assert.equal(r.status(),200);
+                    const logo=page.locator('header img:visible').first();await logo.waitFor({state:'visible'});
+                    const info=await logo.evaluate(async img=>{await img.decode();const r=img.getBoundingClientRect();return {src:img.currentSrc,width:img.naturalWidth,height:img.naturalHeight,renderWidth:r.width,renderHeight:r.height,left:r.left,right:r.right,viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth};});
+                    assert.equal(info.width,1774);assert.equal(info.height,887);assert.ok(Math.abs(info.renderWidth/info.renderHeight-2)<0.02);assert.ok(info.scrollWidth<=width+1);
+                    const asset=await get(info.src);assert.equal(crypto.createHash('sha256').update(await asset.body()).digest('hex'),expectedLogo);
+                    const canonical=await page.locator('link[rel="canonical"]').getAttribute('href');assert.ok(canonical.startsWith(base));
+                    await page.screenshot({path:'/tmp/nyc-release-proof/'+name+'-home.png'});
+                    if(width<768){await page.getByRole('button',{name:'Open menu',exact:true}).click();await page.getByRole('button',{name:'Close menu',exact:true}).waitFor({state:'visible'});await page.keyboard.press('Escape');await page.getByRole('button',{name:'Close menu',exact:true}).waitFor({state:'hidden'});}
+                    const pages=[];
+                    for(const path of ['/category/tent-rentals','/category/table-chair-rentals','/admin/login','/checkout']){
+                      const response=await page.goto(base+path,{waitUntil:'domcontentloaded',timeout:45000});assert.equal(response.status(),200,path);assert.ok(page.url().startsWith(base+'/'));
+                      const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1);assert.equal(overflow,false,path);
+                      const og=await page.locator('meta[property="og:url"]').first().getAttribute('content').catch(()=>null);
+                      if(og)assert.ok(og.startsWith(base),path+' Open Graph origin');
+                      pages.push({path,status:response.status(),url:page.url(),ogUrl:og,overflow});
+                      if(path==='/category/tent-rentals')await page.screenshot({path:'/tmp/nyc-release-proof/'+name+'-tents.png'});
+                    }
+                    assert.equal(errors.length,0,errors.join('; '));
+                    const detail={name,viewport:{width,height},logo:info,canonical,pages,consoleErrors:errors};report.viewports.push(detail);return detail;
+                  }finally{await c.close();}
+                });
+              }
+            }finally{
+              report.finishedAt=new Date().toISOString();report.passed=report.failures.length===0;
+              console.log(JSON.stringify(report,null,2));fs.writeFileSync('/tmp/nyc-release-proof/report.json',JSON.stringify(report,null,2));
+              await context.dispose();await browser.close();
+            }
+            if(report.failures.length)process.exitCode=1;
+          })().catch(e=>{console.error(e);process.exitCode=1;});
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nyc-release-live-proof
+          path: /tmp/nyc-release-proof
+          retention-days: 3

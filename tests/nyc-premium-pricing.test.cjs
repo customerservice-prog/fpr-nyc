@@ -28,6 +28,7 @@ test('NYC premium source snapshot remains the captured Syracuse baseline at 70%'
     assert.ok(row.slug)
     assert.ok(row.syracusePrice > 0)
     assert.equal(Math.round(row.syracusePrice * 1.7 * 100), Math.round(row.nycPrice * 100), row.slug)
+    assert.ok(!Object.prototype.hasOwnProperty.call(row, 'quantity'), 'NYC snapshot must never copy Syracuse quantities')
     const packageText = `${row.name} ${row.slug} ${row.categorySlug || ''}`.toLowerCase()
     assert.equal(packageText.includes('package'), false, 'package accidentally included: ' + row.slug)
   }
@@ -63,6 +64,7 @@ test('price apply script only updates cost on existing matching slugs and cleans
   assert.match(script, /updateMany\(\{ where: \{ slug: row\.slug \}, data: \{ cost: cleanPrice \} \}\)/)
   assert.doesNotMatch(script, /create\s*\(/)
   assert.doesNotMatch(script, /upsert\s*\(/)
+  assert.doesNotMatch(script, /quantity\s*:/)
   assert.match(script, /Dry run only/)
 })
 
@@ -76,20 +78,12 @@ test('all package prices remain excluded and unchanged by the NYC premium snapsh
   for (const row of snapshot.items) assert.equal(excludedSlugs.has(row.slug), false)
 })
 
-
-test('NYC inventory quantity sync mirrors Syracuse exactly without touching prices', () => {
-  const script = fs.readFileSync(path.join(root, 'scripts/sync-nyc-quantities-from-syracuse.mjs'), 'utf8')
-  assert.match(script, /https:\/\/www\.friendlypartyrental\.com\/api\/items/)
-  assert.match(script, /data: \{ quantity: row\.quantity \}/)
-  assert.match(script, /nyc\.quantity === source\.quantity/)
-  assert.match(script, /missingInNyc\.length > 0/)
-  assert.match(script, /Prices were not changed/)
-  assert.doesNotMatch(script, /cost\s*:/)
-  assert.doesNotMatch(script, /create\s*\(/)
-  assert.doesNotMatch(script, /upsert\s*\(/)
-})
-
-test('quantity sync includes packages because only package prices are protected', () => {
-  const script = fs.readFileSync(path.join(root, 'scripts/sync-nyc-quantities-from-syracuse.mjs'), 'utf8')
-  assert.doesNotMatch(script, /package.*exclude|exclude.*package/i)
+test('NYC keeps its own stock: nothing copies Syracuse inventory quantities (owner decision 2026-09-30)', () => {
+  assert.equal(fs.existsSync(path.join(root, 'scripts/sync-nyc-quantities-from-syracuse.mjs')), false)
+  for (const name of fs.readdirSync(path.join(root, 'scripts'))) {
+    const source = fs.readFileSync(path.join(root, 'scripts', name), 'utf8')
+    const readsSyracuse = /friendlypartyrental\.com\/api\/items/.test(source)
+    const writesQuantity = /data:\s*\{[^}]*quantity\s*:/.test(source)
+    assert.ok(!(readsSyracuse && writesQuantity), name + ' must not copy Syracuse quantities into NYC')
+  }
 })

@@ -6,10 +6,15 @@ import { localizeNycPublicCopy } from '@/lib/nycPublicCopy'
 
 const fallbackById = new Map(WEDDING_PACKAGES.map((pkg) => [pkg.id, pkg]))
 
-// Greenville keeps its own WeddingPackage rows and inventory prices. The five
-// canonical package visuals are intentionally locked to the exact public NY
-// artwork copied into the SC deployment at build time. No NY customer, order,
-// payment, account, or runtime storefront data is used here.
+// The five canonical package visuals are locked to the shared public Friendly
+// Party Rental artwork. No other location's customer, order, payment, account,
+// or runtime storefront data is used here.
+//
+// Prices: a package price is shown only from its published, priced NYC catalog
+// item ("Wedding Package - <name>", the item checkout sells). WeddingPackage.price
+// and the WEDDING_PACKAGES fallback hold prices copied from another location's
+// storefront, so they are never shown on their own: price is null ("Price on
+// request") until the owner approves and publishes the NYC catalog item.
 export async function getSyncedWeddingPackages() {
   const packages = await prisma.weddingPackage.findMany({
     where: { isActive: true },
@@ -18,14 +23,18 @@ export async function getSyncedWeddingPackages() {
 
   const items = await prisma.item.findMany({
     where: { name: { in: packages.map((p) => `Wedding Package - ${p.name}`) } },
-    select: { name: true, cost: true },
+    select: { name: true, cost: true, displayToCustomer: true, status: true },
   })
 
-  const costByName = new Map(items.map((i) => [i.name, i.cost]))
+  const approvedCostByName = new Map<string, number>()
+  for (const item of items) {
+    const cost = Number(item.cost)
+    if (item.displayToCustomer && item.status === 'Available' && Number.isFinite(cost) && cost > 0) approvedCostByName.set(item.name, cost)
+  }
 
   return packages.map((p) => {
     const fallback = fallbackById.get(p.id)
-    const liveCost = costByName.get(`Wedding Package - ${p.name}`)
+    const approvedPrice = approvedCostByName.get(`Wedding Package - ${p.name}`)
     const image = NYC_WEDDING_IMAGES[p.id] || (p.image
       ? `/api/wedding-package-image/${p.id}?v=${p.updatedAt ? new Date(p.updatedAt).toISOString() : IMAGE_CACHE_BUST}`
       : fallback?.image || null)
@@ -37,7 +46,7 @@ export async function getSyncedWeddingPackages() {
       image,
       description,
       items: packageItems,
-      price: liveCost !== undefined && liveCost !== null ? liveCost : p.price,
+      price: approvedPrice ?? null,
     }
   })
 }

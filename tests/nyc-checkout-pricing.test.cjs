@@ -204,3 +204,138 @@ test('server-priced online orders are never re-priced by the simplified quote se
   assert.ok(guard > 0, 'online orders are refused')
   assert.ok(guard < route.indexOf('prisma.$transaction'), 'the refusal happens before any write')
 })
+
+// ---------------------------------------------------------------------------
+// Storefront: no South Carolina residue and no unapproved inherited prices
+// ---------------------------------------------------------------------------
+
+const SC_PLACES = /Greenville|\bGreer\b|Simpsonville|Mauldin|Easley|Travelers Rest|Spartanburg|\bAnderson\b|Piedmont|Taylors|Fountain Inn|South Carolina|, SC\b|\bSC<\/strong>/
+const SC_PHONE_OR_ZIP = /\(?864\)?[-. ]?\d{3}[-. ]?\d{4}|\b29[0-9]{3}\b/
+const CUSTOMER_FACING = [
+  'app/(public)/category/[slug]/CategoryClient.tsx',
+  'app/not-found.tsx',
+  'app/(public)/not-found.tsx',
+  'app/(public)/chiavari-chair-rentals/page.tsx',
+  'app/(public)/graduation-rentals/page.tsx',
+  'app/(public)/wedding-vendors/page.tsx',
+  'app/(public)/weddings/page.tsx',
+  'app/(public)/wedding-packages/page.tsx',
+  'app/(public)/category/layout.tsx',
+  'app/(public)/order-by-date/layout.tsx',
+  'app/(public)/[slug]/page.tsx',
+  'app/(public)/service-area/page.tsx',
+  'app/api/wedding-packages/route.ts',
+  'app/api/employment/route.ts',
+  'app/api/admin/generate-item-descriptions/route.ts',
+  'app/admin/website/page.tsx',
+  'components/public/ChatWidget.tsx',
+  'components/public/ServiceAreaDirectory.tsx',
+  'components/public/DeliveryFeeChecker.tsx',
+  'components/public/PlanningPage.tsx',
+  'components/public/HomeWeddingBanner.tsx',
+  'components/public/DesignYourEventCTA.tsx',
+  'components/public/ReviewCarousel.tsx',
+  'lib/eventPlanning.ts',
+  'lib/planningInquiry.ts',
+]
+
+test('customer-facing NYC pages, emails and tools name no South Carolina places, phone numbers or ZIP codes', () => {
+  for (const file of CUSTOMER_FACING) {
+    const source = read(file).replace(/^\s*(\/\/|\*|\/\*).*$/gm, '')
+    assert.doesNotMatch(source, SC_PLACES, file)
+    assert.doesNotMatch(source, SC_PHONE_OR_ZIP, file)
+  }
+  assert.match(read('lib/planningInquiry.ts'), /\[NYC EVENT PLANNING INQUIRY\]/)
+  assert.match(read('app/api/employment/route.ts'), /'NYC employment application - '/)
+})
+
+test('the shared delivery-area summary names every approved NYC service area', () => {
+  const source = read('lib/nycServiceAreas.ts')
+  const summary = /NYC_SERVICE_AREA_SUMMARY='([^']+)'/.exec(source)
+  assert.ok(summary, 'NYC_SERVICE_AREA_SUMMARY is defined')
+  const names = Array.from(source.matchAll(/\{name:'([^']+)'/g), match => match[1]).filter(name => name !== 'The Bronx')
+  assert.ok(names.length >= 10)
+  for (const name of names) assert.ok(summary[1].includes(name), name)
+  assert.match(summary[1], /Bronx/)
+  for (const file of ['app/(public)/category/[slug]/CategoryClient.tsx', 'components/public/ChatWidget.tsx', 'components/public/PlanningPage.tsx', 'lib/eventPlanning.ts']) {
+    assert.match(read(file), /NYC_SERVICE_AREA_SUMMARY/, file)
+  }
+})
+
+test('online and staff orders default the event state to New York', () => {
+  const checkout = read('app/(public)/checkout/page.tsx')
+  assert.match(checkout, /register\('eventState'[^\n]*defaultValue="NY"/)
+  assert.doesNotMatch(checkout, /defaultValue="SC"/)
+  assert.match(read('app/api/admin/orders/route.ts'), /eventState: body\.eventState \|\| 'NY'/)
+  const staff = read('app/admin/orders/new/page.tsx')
+  assert.doesNotMatch(staff, /<option value="SC">/)
+  assert.equal((staff.match(/<option value="NY">NY<\/option>/g) || []).length, 2)
+})
+
+test('the chat widget fallback quotes no inherited prices, deposit or multi-day formula', () => {
+  const widget = read('components/public/ChatWidget.tsx')
+  const faq = widget.slice(widget.indexOf('const FAQ_DATA'), widget.indexOf('const QUICK_QUESTIONS'))
+  assert.ok(faq.length > 1000)
+  assert.doesNotMatch(faq, /\\?\$\d/)
+  assert.doesNotMatch(faq, /\d+%/)
+  assert.match(widget, /item\.cost <= 0\) return null/)
+})
+
+test('static rental pages publish no inherited prices', () => {
+  for (const file of ['app/(public)/chiavari-chair-rentals/page.tsx', 'app/(public)/graduation-rentals/page.tsx', 'app/(public)/wedding-vendors/page.tsx']) {
+    assert.doesNotMatch(read(file), /\$\d/, file)
+  }
+  assert.doesNotMatch(read('app/(public)/chiavari-chair-rentals/page.tsx'), /mahogany/i)
+})
+
+test('wedding package prices come only from the published, priced NYC catalog item', () => {
+  const lib = read('lib/wedding-packages.ts')
+  assert.match(lib, /price: approvedPrice \?\? null/)
+  assert.doesNotMatch(lib, /: p\.price|fallback\?\.price|liveCost/)
+  assert.match(lib, /item\.displayToCustomer && item\.status === 'Available' && Number\.isFinite\(cost\) && cost > 0/)
+  assert.match(read('components/public/WeddingPackageCard.tsx'), /price: number \| null/)
+  assert.match(read('components/public/WeddingPackageCard.tsx'), /'Price on request'/)
+  const detail = read('app/(public)/wedding-packages/page.tsx')
+  assert.doesNotMatch(detail, /formatCurrency\((pkg|p)\.price\)\}/)
+  assert.equal((detail.match(/'Price on request'/g) || []).length, 2)
+  for (const file of ['app/(public)/wedding-packages/page.tsx', 'app/(public)/weddings/page.tsx']) {
+    assert.doesNotMatch(read(file), /travel fee may apply based on distance/i, file)
+  }
+  assert.match(read('app/(public)/weddings/page.tsx'), /displayToCustomer: true, picture: \{ not: null \}, cost: \{ gt: 0 \}/)
+})
+
+test('planning packages show no unapproved prices', () => {
+  const planning = read('lib/eventPlanning.ts')
+  assert.match(planning, /export const PLANNING_PRICES_APPROVED: boolean = false/)
+  const packages = read('components/public/PlanningPackages.tsx')
+  assert.match(packages, /planningPackagePriceLabel\(pkg\)/)
+  assert.match(packages, /planningPackageItems\(pkg\)/)
+  assert.doesNotMatch(packages, /\{pkg\.price\}|\$85/)
+  const estimator = read('components/public/PlanningEstimator.tsx')
+  assert.match(estimator, /pkg\.amount !== null \? <>\{money\(pkg\.amount\)\}/)
+  assert.match(estimator, /estimate\.planningPriced \? money\(estimate\.planningCents \/ 100\)/)
+})
+
+behavior('planning estimator leaves unapproved planning prices out of every total', () => {
+  const planning = loadTs('lib/eventPlanning.ts')
+  const estimator = loadTs('lib/planningEstimator.ts')
+  assert.equal(planning.PLANNING_PRICES_APPROVED, false)
+  assert.equal(estimator.EXTRA_PLANNING_RATE, null)
+  for (const pkg of estimator.estimatePackages) {
+    assert.equal(pkg.amount, null, pkg.name)
+    assert.ok(!pkg.items.some(item => /\$/.test(item)), pkg.name)
+    assert.equal(planning.planningPackagePriceLabel(pkg), 'Quoted individually')
+  }
+  const details = { ...estimator.initialEstimate('Wedding'), packageNumber: 3, onsiteHours: 14, extraPrepHours: 2, zip: '10471' }
+  const item = { id: 'chair', name: 'Chair', slug: 'chair', cost: 4, category: 'Chairs', categorySlug: 'chairs', image: '', available: null }
+  const result = estimator.calculateEstimate(details, [item], { chair: 10 }, 75)
+  assert.equal(result.planningPriced, false)
+  assert.equal(result.planningCents, 0)
+  assert.equal(result.extraCents, 0)
+  assert.equal(result.custom, true)
+  assert.equal(result.subtotalCents, 4000 + 7500)
+  const summary = estimator.estimateInquiry(details, result).summary
+  assert.match(summary, /Published planning base: Quote required\. Additional planning time: Quote required\./)
+  assert.doesNotMatch(summary, /\$1,|\$2,|\$3,|\$5,|\$85/)
+  for (const faq of planning.planningFaqs) assert.doesNotMatch(faq.answer, /\$\d/, faq.question)
+})

@@ -48,7 +48,7 @@ export default async function WeddingPackagesPage({
             </span>
           )}
           <h1 className="text-3xl font-bold text-dark mb-2">{pkg.name}</h1>
-          <p className="text-4xl font-bold text-secondary mb-2">{formatCurrency(pkg.price)}</p>
+          <p className="text-4xl font-bold text-secondary mb-2">{pkg.price !== null ? formatCurrency(pkg.price) : 'Price on request'}</p>
           <p className="text-body mb-6">Up to {pkg.guests} guests</p>
 
           <h2 className="font-bold text-dark mb-4">Package Includes:</h2>
@@ -68,8 +68,8 @@ export default async function WeddingPackagesPage({
           )}
 
           <p className="text-body text-sm mb-6">
-            Standard delivery, setup, and breakdown included. A travel fee may apply based on distance from Riverdale.
-            Contact us to customize this package for your special day.
+            Delivery is charged by ZIP code and shown at checkout. Package pricing, setup details and availability are
+            confirmed before booking. Contact us to customize this package for your special day.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -94,7 +94,7 @@ export default async function WeddingPackagesPage({
               )}
               <div className="p-4">
                 <h3 className="font-bold text-dark">{p.name}</h3>
-                <p className="text-secondary font-bold">{formatCurrency(p.price)}</p>
+                <p className="text-secondary font-bold">{p.price !== null ? formatCurrency(p.price) : 'Price on request'}</p>
               </div>
             </Link>
           ))}

@@ -8,7 +8,7 @@ import {NYC_PRIORITY_AREAS,NYC_SERVICE_AREAS} from '@/lib/nycServiceAreas'
 import {safeJsonLd} from '@/lib/jsonLd'
 import styles from '@/components/public/NycServiceArea.module.css'
 
-export const metadata=nycPageMetadata('/service-area','Party Rental Delivery Areas & Fee Checker — Riverdale, Bronx, NY','Check your delivery fee and explore Friendly Party Rental service areas across Riverdale and 34 nearby Downstate New York communities.')
+export const metadata=nycPageMetadata('/service-area','Party Rental Delivery Areas & Fee Checker — Riverdale, Bronx, NY','Check your delivery fee and explore Friendly Party Rental NYC delivery areas across Riverdale, selected Bronx neighborhoods and Lower Westchester.')
 
 export default function ServiceAreaPage(){
  const schema={'@context':'https://schema.org','@type':'Service','@id':nycUrl('/service-area')+'#delivery',name:'Party rental delivery in Riverdale and Downstate New York',serviceType:'Party and event equipment rental delivery',provider:{'@id':NYC_BUSINESS_ID},areaServed:NYC_SERVICE_AREAS.map(a=>({'@type':'Place',name:a.name+', New York'})),url:nycUrl('/service-area')}

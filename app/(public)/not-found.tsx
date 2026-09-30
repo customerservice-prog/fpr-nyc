@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { PUBLIC_CATEGORIES } from '@/lib/utils'
+import { BUSINESS, PUBLIC_CATEGORIES } from '@/lib/utils'
 
 export default function NotFound() {
   return (
@@ -24,7 +24,7 @@ export default function NotFound() {
         Or <Link href="/items" className="font-semibold underline">browse our full rental catalog</Link>.
       </p>
       <a href="tel:+13158841498" className="btn-primary inline-block">
-        Call (864) 610-5324
+        Call {BUSINESS.phone}
       </a>
     </div>
   )

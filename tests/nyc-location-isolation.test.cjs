@@ -42,7 +42,7 @@ test('NYC checkout fails closed when Stripe is not configured', () => {
 
 test('NYC active source does not contain the SC public domain or phone', () => {
   const roots = ['app','components','lib','prisma']
-  const banned = [/friendlypartyrentalsc\.com/i, /864[-. ]?610[-. ]?5324/]
+  const banned = [/friendlypartyrentalsc\.com/i, /\(?864\)?[-. ]?610[-. ]?5324/]
   const stack = roots.filter(fs.existsSync)
   while(stack.length){
     const p = stack.pop()

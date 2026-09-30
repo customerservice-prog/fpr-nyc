@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
 
     for (const item of missing) {
       const categoryName = item.category?.name || 'party rental'
-      const description = `Rent the ${item.name} in Riverdale, NY from Friendly Party Rental NYC. This ${categoryName.toLowerCase()} item is perfect for weddings, birthdays, graduations, and other special events. Starting at $${item.cost.toFixed(2)}/day. Serving Greenville and the surrounding Downstate New York area — reserve yours online today!`
+      // No price in the text: descriptions must not repeat (or go stale against) the approved catalog price.
+      const description = `Rent the ${item.name} in Riverdale, NY from Friendly Party Rental NYC. This ${categoryName.toLowerCase()} item is perfect for weddings, birthdays, graduations, and other special events. Check your event date for current pricing and availability. Serving Riverdale, selected Bronx neighborhoods and Lower Westchester.`
       await prisma.item.update({
         where: { id: item.id },
         data: { description },

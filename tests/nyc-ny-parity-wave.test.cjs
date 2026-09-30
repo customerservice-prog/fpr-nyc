@@ -24,7 +24,7 @@ test('visual estimator uses SC contact and no NY planning footer',()=>{
 test('planning inquiry capture is persistent and SC-labelled',()=>{
   const inquiry=read('lib/planningInquiry.ts')
   const route=read('app/api/event-planning/route.ts')
-  assert.ok(inquiry.includes('[SC EVENT PLANNING INQUIRY]'))
+  assert.ok(inquiry.includes('[NYC EVENT PLANNING INQUIRY]'))
   assert.ok(inquiry.includes('Riverdale / Downstate New York'))
   assert.ok(route.includes('https://www.fpr-nyc-production.up.railway.app'))
   assert.ok(route.includes('customerservice@friendlypartyrental.com'))

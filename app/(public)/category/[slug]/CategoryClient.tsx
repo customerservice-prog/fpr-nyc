@@ -7,7 +7,8 @@ import ItemCard from '@/components/public/ItemCard'
 import BookingCalendar from '@/components/public/BookingCalendar'
 import CartDrawer from '@/components/public/CartDrawer'
 import { useCart, DEFAULT_SCHEDULING_DETAILS } from '@/components/public/CartContext'
-import { formatCurrency, formatDateShort } from '@/lib/utils'
+import { BUSINESS, formatCurrency, formatDateShort } from '@/lib/utils'
+import { NYC_SERVICE_AREA_SUMMARY } from '@/lib/nycServiceAreas'
 import { useCheckoutPolicy } from '@/components/public/useCheckoutPolicy'
 import { exactPickupFeeForPolicy, isLateExactPickupTime } from '@/lib/nycCheckoutPolicy'
 import { categorySearchName } from '@/lib/nycSearchReadiness'
@@ -864,9 +865,8 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
           delivers, sets up, and picks up your rental so you can focus on your event.
         </p>
         <p>
-          We regularly deliver to Riverdale, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, and
-          Piedmont, SC. Don&apos;t see your town listed? Give us a call at (864) 610-5324 &mdash; we may still be able
-          to deliver to you.
+          We deliver to {NYC_SERVICE_AREA_SUMMARY}. Don&apos;t see your town listed? Give us a call at {BUSINESS.phone}
+          &mdash; we can review your location.
         </p>
       </section>
       <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />

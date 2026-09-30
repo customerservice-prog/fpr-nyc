@@ -3,7 +3,7 @@ import Header from '@/components/public/Header'
 import MobileHeader from '@/components/public/MobileHeader'
 import Footer from '@/components/public/Footer'
 import MobileBottomNav from '@/components/public/MobileBottomNav'
-import { PUBLIC_CATEGORIES } from '@/lib/utils'
+import { BUSINESS, PUBLIC_CATEGORIES } from '@/lib/utils'
 
 export default function NotFound() {
   return (
@@ -36,7 +36,7 @@ export default function NotFound() {
               Back to Home
             </Link>
             <a href="tel:+13158841498" className="btn-outline inline-block px-6 py-3">
-              Call (864) 610-5324
+              Call {BUSINESS.phone}
             </a>
           </div>
         </div>

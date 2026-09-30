@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { formatDate, formatCurrency, formatDateTime } from '@/lib/utils'
+import { formatTaxRatePercent } from '@/lib/nycSalesTax'
 
 interface ContractOrder {
   id: string
@@ -175,7 +176,7 @@ export default function ContractPage({ params }: { params: Promise<{ id: string 
             )}
             {order.taxAmount > 0 && (
               <tr className="border-b">
-                <td className="py-1">Tax ({Math.round(order.taxRate)}%)</td>
+                <td className="py-1">Tax ({formatTaxRatePercent(order.taxRate)})</td>
                 <td className="py-1 text-right">${order.taxAmount.toFixed(2)}</td>
               </tr>
             )}

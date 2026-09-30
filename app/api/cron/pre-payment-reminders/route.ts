@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
+import { isAuthorizedCronRequest } from '@/lib/cronAuth'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, prePaymentReminderEmail } from '@/lib/email'
 
@@ -9,8 +10,7 @@ import { sendEmail, prePaymentReminderEmail } from '@/lib/email'
 // Only sends if the "Pre-Pay Letter" automatic message is enabled in admin settings,
 // and skips any order that has the per-order prePayReminderDisabled override set.
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-    if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!(await isAuthorizedCronRequest(request, '.github/workflows/pre-payment-reminders-cron.yml'))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

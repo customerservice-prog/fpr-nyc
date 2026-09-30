@@ -1,6 +1,9 @@
 name: IndexNow Live Catalog Refresh
 
 on:
+  push:
+    paths:
+      - '.github/cron-smoke-test'
   schedule:
     - cron: '25 14 * * *'
   workflow_dispatch: {}

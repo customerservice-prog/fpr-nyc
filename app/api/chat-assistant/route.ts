@@ -39,7 +39,7 @@ const FAQ_DATA: FaqEntry[] = [
   { q: 'Do I need a permit for a backyard tent?', a: 'Usually not for residential setups. Large tents at commercial venues may require permits.' },
   { q: 'Can you do a free yard assessment?', a: 'Yes! Call 315-884-1498 to schedule one.' },
   { q: 'Is your equipment clean and safe?', a: 'Yes - every piece is cleaned, sanitized, and inspected before and after every rental. Our commercial-grade equipment is safe for children with adult supervision recommended.' },
-  { q: 'What if something breaks?', a: 'Normal wear is covered by the damage waiver. Damage from misuse may have additional associated costs.' },
+  { q: 'What if something breaks?', a: 'Normal wear is expected and not charged. Damage from misuse may have additional associated costs; ask our team about damage responsibility when you book.' },
   { q: 'Do you carry insurance?', a: 'Yes, we are fully insured.' },
   { q: 'How much does a bounce house cost?', a: 'Current bounce house and waterslide prices are listed on each item in our Bounce House & Waterslide Rentals category. Choose your event date to see what is available.' },
   { q: 'Do bounce houses need power?', a: 'Yes, constant air supply is needed - a 20-amp outlet within 100 feet is required. We also rent generators for locations without power.' },

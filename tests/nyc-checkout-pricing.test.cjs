@@ -189,6 +189,8 @@ test('NYC emails and the chat assistant carry NYC identity and approved prices o
   for (const inherited of [/Greer|Simpsonville|Mauldin|Easley|Travelers Rest|Spartanburg|Anderson|Piedmont/, /\$199|\$125|\$100 fee|\$49\.99/, /10% damage waiver applies/, /in-store pickup/, /\?\? (75|40|100)\)/]) {
     assert.doesNotMatch(chat, inherited)
   }
+  // The static FAQ must not promise a damage waiver: whether one is offered comes from the approved policy.
+  assert.doesNotMatch(chat, /covered by the damage waiver/)
   assert.match(chat, /getNycCheckoutPolicy\(\)\.policy/)
   assert.match(chat, /NYC_SALES_TAX_JURISDICTIONS/)
 })
@@ -260,6 +262,13 @@ test('the shared delivery-area summary names every approved NYC service area', (
   for (const file of ['app/(public)/category/[slug]/CategoryClient.tsx', 'components/public/ChatWidget.tsx', 'components/public/PlanningPage.tsx', 'lib/eventPlanning.ts']) {
     assert.match(read(file), /NYC_SERVICE_AREA_SUMMARY/, file)
   }
+})
+
+test('checkout shows the approved minimum order before payment (the server still enforces it)', () => {
+  const checkout = read('app/(public)/checkout/page.tsx')
+  assert.match(checkout, /const minimumOrderSubtotal = approvedPolicy\?\.minimumOrderSubtotal \?\? 0/)
+  assert.match(checkout, /\{belowMinimum && \(/)
+  assert.match(read('lib/nycCheckoutPricing.ts'), /'below_minimum'/)
 })
 
 test('online and staff orders default the event state to New York', () => {

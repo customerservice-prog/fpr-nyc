@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { useCart, DEFAULT_SCHEDULING_DETAILS } from '@/components/public/CartContext'
-import { formatCurrency, calculateReturnDateInfo, formatDateShort } from '@/lib/utils'
+import { BUSINESS, formatCurrency, calculateReturnDateInfo, formatDateShort } from '@/lib/utils'
 import { trackEvent } from '@/lib/gtag'
 import BookingCalendar from '@/components/public/BookingCalendar'
 import { Pencil } from 'lucide-react'
@@ -142,6 +142,10 @@ export default function CheckoutPage() {
   const exactDeliveryFee = approvedPolicy?.exactDeliveryFee ?? null
   const exactPickupOffered = approvedPolicy?.exactPickupFee != null
   const damageWaiverPercent = approvedPolicy?.damageWaiverPercent ?? null
+  // Advisory notice for the server's minimum (rentals before fees, discounts and tax). The payment page's
+  // server quote is the authority, so a stale cart price never blocks checkout here.
+  const minimumOrderSubtotal = approvedPolicy?.minimumOrderSubtotal ?? 0
+  const belowMinimum = approvedPolicy !== null && minimumOrderSubtotal > 0 && subtotal < minimumOrderSubtotal
   const editExactPickupTimeOptions = EXACT_PICKUP_TIME_OPTIONS.filter((opt) => approvedPolicy?.lateExactPickupFee != null || !isLateExactPickupTime(opt.value))
   const editExactPickupFee = exactPickupFeeForPolicy(approvedPolicy, editExactPickupTime)
 
@@ -696,6 +700,12 @@ export default function CheckoutPage() {
           <span>Subtotal</span>
           <span>{formatCurrency(subtotal)}</span>
         </div>
+        {belowMinimum && (
+          <p role="alert" className="mt-2 rounded bg-amber-50 p-2 text-sm text-amber-900">
+            Online delivery orders have a {formatCurrency(minimumOrderSubtotal)} minimum in rentals before fees and tax.
+            Add {formatCurrency(minimumOrderSubtotal - subtotal)} more, or call {BUSINESS.phone} to discuss your event.
+          </p>
+        )}
         {durationAmount > 0 && (
           <div className="flex justify-between text-body text-sm">
             <span>Multi-Day Rental Fee ({selectedTier?.label})</span>

@@ -20,6 +20,107 @@ function cleanNycPrice(raw){
 const premium=new Map(snapshot.items.map(r=>[r.slug,cleanNycPrice(r.nycPrice)]))
 const packages=new Map(snapshot.packageExclusion.excluded.map(r=>[r.slug,Number(r.syracusePrice)]))
 
+function syncCustomerFacingPriceInDescription(description, price, isPackage){
+  if(typeof description!=='string'||!description.trim()) return description??null
+  // Package prices intentionally stay at Syracuse values, so their copied descriptions remain valid.
+  if(isPackage) return description
+  const display = '
+const res=await fetch(SOURCE,{headers:{Accept:'application/json','User-Agent':'Friendly-Party-Rental-NYC-catalog-sync/1.0'},cache:'no-store'})
+if(!res.ok) throw new Error('Syracuse catalog HTTP '+res.status)
+const payload=await res.json()
+if(!payload||!Array.isArray(payload.items)||payload.items.length===0) throw new Error('Syracuse catalog empty')
+const sourceItems=payload.items
+const slugs=new Set()
+for(const item of sourceItems){
+  if(!item?.slug||slugs.has(item.slug)) throw new Error('Missing/duplicate Syracuse slug '+item?.slug)
+  slugs.add(item.slug)
+  if(!Number.isInteger(Number(item.quantity))||Number(item.quantity)<0) throw new Error('Invalid quantity '+item.slug)
+  if(!item.category?.slug) throw new Error('Missing category '+item.slug)
+  if(!premium.has(item.slug)&&!packages.has(item.slug)) throw new Error('No approved NYC price rule for '+item.slug)
+}
+
+const categoryRows=new Map()
+for(const item of sourceItems){
+  const c=item.category
+  if(!categoryRows.has(c.slug)) categoryRows.set(c.slug,{slug:c.slug,name:c.name||c.slug,pricingProfile:c.pricingProfile||'standard'})
+}
+
+console.log(JSON.stringify({apply:APPLY,sourceItemCount:sourceItems.length,categoryCount:categoryRows.size,nonPackageCount:premium.size,packageCount:packages.size},null,2))
+if(!APPLY){ console.log('Dry run only'); await prisma.$disconnect(); process.exit(0) }
+
+for(const c of categoryRows.values()){
+  await prisma.category.upsert({
+    where:{slug:c.slug},
+    update:{name:c.name,pricingProfile:c.pricingProfile},
+    create:{
+      name:c.name,slug:c.slug,pricingProfile:c.pricingProfile,displayToCustomer:true,
+      description:`${c.name} rentals from Friendly Party Rental NYC.`,
+      picture:`https://www.friendlypartyrental.com/api/category-image/${encodeURIComponent(c.slug)}`
+    }
+  })
+}
+const categories=Object.fromEntries((await prisma.category.findMany()).map(c=>[c.slug,c.id]))
+
+for(const s of sourceItems){
+  const isPackage=packages.has(s.slug)
+  const price=isPackage?packages.get(s.slug):premium.get(s.slug)
+  const data={
+    name:s.name,
+    description:syncCustomerFacingPriceInDescription(s.description,price,isPackage),
+    type:s.type||'Regular',
+    cost:price,
+    quantity:Number(s.quantity),
+    displayToCustomer:s.displayToCustomer!==false,
+    scheduleProfile:s.scheduleProfile??null,
+    categoryId:categories[s.category.slug],
+    status:s.status||'Available',
+    bookableAfter:s.bookableAfter?new Date(s.bookableAfter):null,
+    bookableAfterMessage:s.bookableAfterMessage??null,
+    specialDisplayName:s.specialDisplayName??null,
+    setupArea:s.setupArea??null,
+    attendants:Number.isInteger(Number(s.attendants))?Number(s.attendants):null,
+    ageGroup:s.ageGroup??null,
+    colorOptions:Array.isArray(s.colorOptions)?s.colorOptions:[],
+    taxable:s.taxable!==false,
+    setupFee:s.setupFee==null?null:Number(s.setupFee),
+    suggestedAddonIds:Array.isArray(s.suggestedAddonIds)?s.suggestedAddonIds:[],
+  }
+  const existing=await prisma.item.findUnique({where:{slug:s.slug},select:{id:true,picture:true}})
+  if(existing){
+    await prisma.item.update({where:{slug:s.slug},data})
+  }else{
+    await prisma.item.create({data:{...data,slug:s.slug,picture:`https://www.friendlypartyrental.com/api/item-image/${encodeURIComponent(s.slug)}`}})
+  }
+}
+
+const nyc=await prisma.item.findMany({where:{slug:{in:[...slugs]}},select:{slug:true,cost:true,quantity:true,description:true,displayToCustomer:true}})
+const by=new Map(nyc.map(x=>[x.slug,x]))
+const missing=[],quantityMismatches=[],priceMismatches=[],descriptionPriceMismatches=[]
+for(const s of sourceItems){
+  const row=by.get(s.slug)
+  if(!row){missing.push(s.slug);continue}
+  if(row.quantity!==Number(s.quantity)) quantityMismatches.push({slug:s.slug,nyc:row.quantity,syracuse:Number(s.quantity)})
+  const isPackage=packages.has(s.slug)
+  const expected=isPackage?packages.get(s.slug):premium.get(s.slug)
+  if(Number(row.cost)!==Number(expected)) priceMismatches.push({slug:s.slug,nyc:row.cost,expected})
+  if(!isPackage && typeof row.description==='string'){
+    const stale=row.description.match(/Starting at\s+\$([0-9,]+(?:\.\d{1,2})?)\/day/i)
+    if(stale){
+      const advertised=Number(stale[1].replace(/,/g,''))
+      if(Math.abs(advertised-Number(expected))>0.001) descriptionPriceMismatches.push({slug:s.slug,advertised,expected})
+    }
+  }
+}
+if(missing.length||quantityMismatches.length||priceMismatches.length||descriptionPriceMismatches.length) throw new Error(JSON.stringify({missing,quantityMismatches,priceMismatches,descriptionPriceMismatches}))
+const publicCount=nyc.filter(x=>x.displayToCustomer).length
+console.log(JSON.stringify({synced:nyc.length,publicCount,missingCount:0,quantityMismatchCount:0,priceMismatchCount:0,descriptionPriceMismatchCount:0},null,2))
+await prisma.$disconnect()
+ + Number(price).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
+  // Syracuse descriptions commonly contain "Starting at $X.XX/day". Replace only that explicit
+  // sales-price phrase so dimensions, quantities, years and unrelated dollar amounts remain untouched.
+  return description.replace(/Starting at\s+\$[0-9,]+(?:\.\d{1,2})?\/day/gi, 'Starting at ' + display + '/day')
+}
+
 const res=await fetch(SOURCE,{headers:{Accept:'application/json','User-Agent':'Friendly-Party-Rental-NYC-catalog-sync/1.0'},cache:'no-store'})
 if(!res.ok) throw new Error('Syracuse catalog HTTP '+res.status)
 const payload=await res.json()

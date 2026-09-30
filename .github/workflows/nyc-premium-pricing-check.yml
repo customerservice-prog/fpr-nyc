@@ -1,0 +1,22 @@
+name: NYC premium pricing 70 percent
+on:
+  push:
+    branches: [nyc-premium-pricing-70pct-20260930]
+    paths:
+      - 'data/nyc-premium-price-snapshot-20260930.json'
+      - 'scripts/apply-nyc-premium-prices.mjs'
+      - 'tests/nyc-premium-pricing.test.cjs'
+      - '.github/workflows/nyc-premium-pricing-check.yml'
+  pull_request:
+    branches: [nyc-checkout-pricing-20260930]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test tests/nyc-premium-pricing.test.cjs

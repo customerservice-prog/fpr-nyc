@@ -1,8 +1,8 @@
 name: Incomplete Orders Follow-up
 
+# Launch safety hold: manual-only until inbound reply monitoring (EMAIL_PASS)
+# and the NYC transactional email delivery test are both verified.
 on:
-  schedule:
-    - cron: '*/15 * * * *'
   workflow_dispatch: {}
 
 permissions:

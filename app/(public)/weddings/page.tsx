@@ -9,15 +9,6 @@ import { formatCurrency } from '@/lib/utils'
 import { prisma } from '@/lib/prisma'
 import type { Metadata } from 'next'
 import { IMAGE_CACHE_BUST } from '@/lib/imageVersion'
-import { Playfair_Display } from 'next/font/google'
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['600', '700'],
-  style: ['normal', 'italic'],
-  display: 'swap',
-})
-
 export const metadata = nycPageMetadata("/weddings","Wedding Rentals in Riverdale, NY | Tents, Chairs, Linens & Packages","Browse Riverdale wedding rentals, tents, tables, chairs, Chiavari seating, linens, lighting, dance floors and wedding packages with delivery and setup options.")
 export const dynamic = 'force-dynamic'
 
@@ -100,10 +91,10 @@ export default async function WeddingsPage() {
         <div className="absolute top-0 left-0 w-full h-1" style={{ background: 'linear-gradient(90deg, #EEC400, #E07B00, #EEC400)' }} />
         <div className="max-w-5xl mx-auto px-4 py-20 text-center">
           <p className="text-primary uppercase tracking-[0.3em] text-xs font-bold mb-4">Riverdale Wedding Rentals</p>
-          <h1 className={`${playfair.className} text-4xl md:text-6xl font-bold text-white mb-5 drop-shadow-md`}>
+          <h1 className={`font-serif text-4xl md:text-6xl font-bold text-white mb-5 drop-shadow-md`}>
             Wedding Rentals for Every Kind of &ldquo;I Do&rdquo;
           </h1>
-          <p className={`${playfair.className} italic text-primary text-lg mb-5`}>Where Elegance Meets Ease</p>
+          <p className={`font-serif italic text-primary text-lg mb-5`}>Where Elegance Meets Ease</p>
           <p className="text-white/90 max-w-2xl mx-auto mb-8 text-base md:text-lg">
             From intimate backyard ceremonies to larger Bronx and Lower Westchester receptions, choose individual rentals, a complete package, or build your layout visually before you book.
           </p>
@@ -130,7 +121,7 @@ export default async function WeddingsPage() {
           <div className="mb-16">
             <div className="text-center mb-8">
               <p className="text-secondary uppercase tracking-[0.3em] text-xs font-bold mb-3">Details That Delight</p>
-              <h2 className={`${playfair.className} text-2xl md:text-3xl font-bold text-dark mb-2`}>Shop Wedding Rentals</h2>
+              <h2 className={`font-serif text-2xl md:text-3xl font-bold text-dark mb-2`}>Shop Wedding Rentals</h2>
               <p className="text-body italic">Browse individual pieces to build your own wedding look, or choose a package below.</p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8">
@@ -154,7 +145,7 @@ export default async function WeddingsPage() {
 
         <div id="packages" className="text-center mb-4">
           <p className="text-secondary uppercase tracking-[0.3em] text-xs font-bold mb-3">Curated Collections</p>
-          <h2 className={`${playfair.className} text-3xl md:text-4xl font-bold text-dark mb-3`}>Our Wedding Rental Packages</h2>
+          <h2 className={`font-serif text-3xl md:text-4xl font-bold text-dark mb-3`}>Our Wedding Rental Packages</h2>
           <p className="text-body">Delivery is charged by ZIP code and shown at checkout. Package pricing and setup details are confirmed before booking.</p>
         </div>
         <SectionDivider />
@@ -167,12 +158,12 @@ export default async function WeddingsPage() {
 
         <div className="max-w-4xl mx-auto space-y-14 mb-16">
           <div>
-            <h2 className={`${playfair.className} text-2xl font-bold text-dark mb-4 text-center`}>Full Wedding Rental Services</h2>
+            <h2 className={`font-serif text-2xl font-bold text-dark mb-4 text-center`}>Full Wedding Rental Services</h2>
             <p className="text-body mb-4">Friendly Party Rental NYC provides wedding rentals throughout Riverdale and Downstate New York. Mix individual pieces or start with one of our packages, then customize the tent, seating, linens, lighting, ceremony décor and reception equipment around your venue and guest count. We also offer <Link href="/event-planning" className="text-secondary underline font-semibold">full-service event planning</Link> when you want help coordinating the full setup.</p>
           </div>
 
           <div>
-            <h2 className={`${playfair.className} text-xl font-bold text-dark mb-6 text-center`}>What We Offer</h2>
+            <h2 className={`font-serif text-xl font-bold text-dark mb-6 text-center`}>What We Offer</h2>
             <div className="grid md:grid-cols-3 gap-5">
               {whatWeOffer.map((item) => (
                 <Link key={item.label} href={item.href} className="bg-white border border-primary/20 p-6 rounded-xl text-center font-medium text-dark shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block">
@@ -184,7 +175,7 @@ export default async function WeddingsPage() {
           </div>
 
           <div>
-            <h2 className={`${playfair.className} text-xl font-bold text-dark mb-6 text-center`}>Why Riverdale Couples Choose Us</h2>
+            <h2 className={`font-serif text-xl font-bold text-dark mb-6 text-center`}>Why Riverdale Couples Choose Us</h2>
             <div className="grid sm:grid-cols-2 gap-5">
               {whyChooseUs.map((item) => (
                 <div key={item.label} className="flex items-center gap-4 bg-white border border-primary/20 p-5 rounded-xl shadow-sm">
@@ -195,12 +186,12 @@ export default async function WeddingsPage() {
             </div>
           </div>
 
-          <div><h2 className={`${playfair.className} text-xl font-bold text-dark mb-6 text-center`}>Wedding Rental FAQ</h2><Accordion items={faqItems} /></div>
+          <div><h2 className={`font-serif text-xl font-bold text-dark mb-6 text-center`}>Wedding Rental FAQ</h2><Accordion items={faqItems} /></div>
         </div>
 
         <div className="relative overflow-hidden rounded-2xl text-center py-14 px-6" style={{ background: 'linear-gradient(135deg, #1a1a1a 0%, #14335c 55%, #1a6fd4 100%)' }}>
-          <p className={`${playfair.className} italic text-primary text-lg mb-2`}>Your Story, Beautifully Styled</p>
-          <h2 className={`${playfair.className} text-2xl md:text-3xl font-bold text-white mb-6`}>Ready to Plan Your Riverdale Wedding?</h2>
+          <p className={`font-serif italic text-primary text-lg mb-2`}>Your Story, Beautifully Styled</p>
+          <h2 className={`font-serif text-2xl md:text-3xl font-bold text-white mb-6`}>Ready to Plan Your Riverdale Wedding?</h2>
           <div className="flex flex-wrap justify-center gap-3">
             <DesignYourEventCTA source="weddings_footer" label="Design My Reception" variant="outline" />
             <Link href="/contact_us" className="btn-gold inline-block px-10 uppercase text-sm tracking-wide">Request a Custom Quote</Link>

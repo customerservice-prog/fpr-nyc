@@ -1,0 +1,63 @@
+name: NYC catalog mirror check
+on:
+  push:
+    branches: [nyc-launch-completion-20260930]
+  pull_request:
+    branches: [production-nyc-live]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: nyc_ci
+          POSTGRES_PASSWORD: ci_disposable_only
+          POSTGRES_DB: nyc_ci
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      DATABASE_URL: postgresql://nyc_ci:ci_disposable_only@localhost:5432/nyc_ci
+      # CI only: the scripts read a local stand-in for the public Syracuse API.
+      NYC_CATALOG_SOURCE_ORIGIN: http://127.0.0.1:4010
+      NYC_CATALOG_SYNC_STRICT: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - name: Catalog rules, sync engine and checkout pricing unit tests
+        run: node --test tests/nyc-catalog-sync.test.mjs tests/nyc-premium-pricing.test.cjs tests/nyc-checkout-pricing.test.cjs tests/nyc-stripe-safeguards.test.cjs tests/nyc-launch-hardening.test.cjs
+      - name: Apply the full migration history to an empty disposable database
+        run: npx prisma migrate deploy
+      - name: Identity cleanup migration is repeat-safe
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -f prisma/migrations/20260930190000_nyc_identity_copy_cleanup/migration.sql
+      - name: Start the mock Syracuse catalog
+        run: |
+          node tests/fixtures/mock-syracuse-server.mjs 4010 > mock.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4010/api/items >/dev/null && break; sleep 1; done
+      - name: Run the Railway pre-deploy entry point (first run)
+        run: node scripts/nyc-predeploy.mjs
+      - name: Database matches Syracuse exactly
+        run: node tests/nyc-catalog-sync-db-check.mjs --snapshot first-run.json
+      - name: Run the pre-deploy entry point again (must change nothing)
+        run: node scripts/nyc-predeploy.mjs
+      - name: Second run was a no-op
+        run: node tests/nyc-catalog-sync-db-check.mjs --compare first-run.json
+      - name: Syracuse unreachable never blocks a deploy or changes NYC
+        env:
+          NYC_CATALOG_SOURCE_ORIGIN: http://127.0.0.1:4999
+          NYC_CATALOG_SYNC_STRICT: 'false'
+        run: |
+          node scripts/sync-nyc-catalog-from-syracuse.mjs --apply
+          node scripts/apply-nyc-premium-prices.mjs --apply
+          node scripts/sync-nyc-quantities-from-syracuse.mjs --apply
+          node tests/nyc-catalog-sync-db-check.mjs --compare first-run.json
+      - name: Mock server log (on failure)
+        if: failure()
+        run: cat mock.log || true

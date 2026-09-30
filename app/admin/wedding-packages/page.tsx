@@ -162,6 +162,7 @@ function EditForm({ form, setForm, onSave, onCancel }: any) {
       <div>
         <label className="block text-sm font-medium text-dark mb-1">Price</label>
         <input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="w-full border rounded px-3 py-2" />
+        <p className="mt-1 text-xs text-gray-500">Internal reference only. Customers see a package price only from its published catalog item named &quot;Wedding Package - {form.name || 'name'}&quot; with a price above $0; otherwise the storefront shows &quot;Price on request&quot;.</p>
       </div>
       <div>
         <label className="block text-sm font-medium text-dark mb-1">Guests</label>

@@ -5,10 +5,13 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { useCart, DEFAULT_SCHEDULING_DETAILS } from '@/components/public/CartContext'
-import { formatCurrency, calculateReturnDateInfo, formatDateShort } from '@/lib/utils'
+import { BUSINESS, formatCurrency, calculateReturnDateInfo, formatDateShort } from '@/lib/utils'
 import { trackEvent } from '@/lib/gtag'
 import BookingCalendar from '@/components/public/BookingCalendar'
 import { Pencil } from 'lucide-react'
+import { useCheckoutPolicy } from '@/components/public/useCheckoutPolicy'
+import { exactPickupFeeForPolicy, isLateExactPickupTime } from '@/lib/nycCheckoutPolicy'
+import { formatTaxRatePercent } from '@/lib/nycSalesTax'
 
 interface CheckoutForm {
   firstName: string
@@ -70,8 +73,6 @@ const APPOINTMENT_SLOTS = [
   { value: 'specific', label: 'Specific Time' },
 ]
 
-const EXACT_DELIVERY_FEE = 50
-
 function timeToMinutes(t: string): number {
   if (!t) return -1
   const parts = t.split(':')
@@ -96,13 +97,6 @@ const EVENT_TIME_OPTIONS = buildTimeOptions(7 * 60, 23 * 60 + 30)
 const EXACT_DELIVERY_TIME_OPTIONS_FULL = buildTimeOptions(8 * 60, 18 * 60)
 const EXACT_PICKUP_TIME_OPTIONS = buildTimeOptions(12 * 60, 23 * 60 + 30)
 const APPOINTMENT_TIME_OPTIONS = buildTimeOptions(9 * 60, 17 * 60)
-
-function getExactPickupFee(time: string): number {
-  const mins = timeToMinutes(time)
-  if (mins < 0) return 50
-  if (mins >= 22 * 60 && mins <= 23 * 60 + 30) return 75
-  return 50
-}
 
 function getValidDeliveryWindows(eventStartTime: string): { start: string; end: string; label: string }[] {
   const eventMins = timeToMinutes(eventStartTime)
@@ -142,6 +136,18 @@ export default function CheckoutPage() {
   const [editExactPickupTime, setEditExactPickupTime] = useState('')
   const [editAppointmentSlot, setEditAppointmentSlot] = useState('')
   const [editAppointmentSpecificTime, setEditAppointmentSpecificTime] = useState('')
+  // Optional fees are offered only when the owner-approved checkout policy includes them.
+  const checkoutPolicy = useCheckoutPolicy()
+  const approvedPolicy = checkoutPolicy?.policy ?? null
+  const exactDeliveryFee = approvedPolicy?.exactDeliveryFee ?? null
+  const exactPickupOffered = approvedPolicy?.exactPickupFee != null
+  const damageWaiverPercent = approvedPolicy?.damageWaiverPercent ?? null
+  // Advisory notice for the server's minimum (rentals before fees, discounts and tax). The payment page's
+  // server quote is the authority, so a stale cart price never blocks checkout here.
+  const minimumOrderSubtotal = approvedPolicy?.minimumOrderSubtotal ?? 0
+  const belowMinimum = approvedPolicy !== null && minimumOrderSubtotal > 0 && subtotal < minimumOrderSubtotal
+  const editExactPickupTimeOptions = EXACT_PICKUP_TIME_OPTIONS.filter((opt) => approvedPolicy?.lateExactPickupFee != null || !isLateExactPickupTime(opt.value))
+  const editExactPickupFee = exactPickupFeeForPolicy(approvedPolicy, editExactPickupTime)
 
   useEffect(() => {
     fetch('/api/pricing-tiers')
@@ -331,6 +337,14 @@ export default function CheckoutPage() {
       toast.error('Please choose an event date')
       return
     }
+    if (editMethod === 'delivery' && editWantsExactDelivery && (exactDeliveryFee === null || !editExactDeliveryTime)) {
+      toast.error('Please choose an exact delivery time, or a delivery window')
+      return
+    }
+    if (editMethod === 'delivery' && editPickupType === 'exact' && (editExactPickupFee === null || !editExactPickupTime)) {
+      toast.error('Please choose an available exact pickup time, or a flexible pickup')
+      return
+    }
     setEventDate(formatDateShort(editDate))
     if (editMethod === 'delivery') {
       const deliveryLabel = editWantsExactDelivery ? 'Exact Time: ' + fmtT(editExactDeliveryTime) : (editDeliveryWindow?.label || '')
@@ -353,11 +367,11 @@ export default function CheckoutPage() {
         deliveryWindowEnd: editWantsExactDelivery ? null : (editDeliveryWindow?.end || null),
         exactDeliveryRequested: editWantsExactDelivery,
         exactDeliveryTime: editWantsExactDelivery ? editExactDeliveryTime : null,
-        exactDeliveryFee: editWantsExactDelivery ? EXACT_DELIVERY_FEE : 0,
+        exactDeliveryFee: editWantsExactDelivery ? (exactDeliveryFee ?? 0) : 0,
         pickupType: editPickupType,
         pickupRequiredByTime: editPickupType === 'requiredBy' ? editPickupRequiredByTime : null,
         exactPickupTime: editPickupType === 'exact' ? editExactPickupTime : null,
-        exactPickupFee: editPickupType === 'exact' ? getExactPickupFee(editExactPickupTime) : 0,
+        exactPickupFee: editPickupType === 'exact' ? (editExactPickupFee ?? 0) : 0,
         latePickupApprovalRequired: false,
       })
     } else {
@@ -452,7 +466,7 @@ export default function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => setEditMethod('delivery')}
-                className={`flex-1 rounded px-3 py-2 text-sm font-medium border ${'$'}{editMethod === 'delivery' ? 'border-primary bg-primary/10 text-dark' : 'border-gray-200 text-body'}`}
+                className={`flex-1 rounded px-3 py-2 text-sm font-medium border ${editMethod === 'delivery' ? 'border-primary bg-primary/10 text-dark' : 'border-gray-200 text-body'}`}
               >
                 Delivery to My Event
               </button>
@@ -499,7 +513,7 @@ export default function CheckoutPage() {
                       return (
                         <label
                           key={w.start}
-                          className={`flex items-start gap-2 border rounded p-3 cursor-pointer text-sm ${'$'}{isSelected ? 'border-primary bg-primary/5' : 'border-gray-200'}`}
+                          className={`flex items-start gap-2 border rounded p-3 cursor-pointer text-sm ${isSelected ? 'border-primary bg-primary/5' : 'border-gray-200'}`}
                         >
                           <input
                             type="radio"
@@ -525,7 +539,7 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                <div className="mb-4 border-t pt-3">
+                {exactDeliveryFee !== null && <div className="mb-4 border-t pt-3">
                   <label className="flex items-start gap-2 text-sm text-body cursor-pointer">
                     <input
                       type="checkbox"
@@ -534,7 +548,7 @@ export default function CheckoutPage() {
                       className="mt-1"
                     />
                     <span>
-                      <span className="font-medium text-dark">{`Need us there at a specific time? Priority Exact-Time Delivery +$${EXACT_DELIVERY_FEE}`}</span>
+                      <span className="font-medium text-dark">Need us there at a specific time? Priority Exact-Time Delivery +{formatCurrency(exactDeliveryFee)}</span>
                     </span>
                   </label>
                   {editWantsExactDelivery && (
@@ -549,11 +563,11 @@ export default function CheckoutPage() {
                       ))}
                     </select>
                   )}
-                </div>
+                </div>}
 
                 <h3 className="font-bold text-dark mb-2 text-sm">Pickup</h3>
                 <div className="space-y-2 mb-4">
-                  <label className={`flex items-start gap-2 border rounded p-3 cursor-pointer text-sm ${'$'}{editPickupType === 'flexible' ? 'border-primary bg-primary/5' : 'border-gray-200'}`}>
+                  <label className={`flex items-start gap-2 border rounded p-3 cursor-pointer text-sm ${editPickupType === 'flexible' ? 'border-primary bg-primary/5' : 'border-gray-200'}`}>
                     <input
                       type="radio"
                       name="editPickupType"
@@ -567,7 +581,7 @@ export default function CheckoutPage() {
                     </span>
                   </label>
 
-                  <label className={`flex items-start gap-2 border rounded p-3 cursor-pointer text-sm ${'$'}{editPickupType === 'requiredBy' ? 'border-primary bg-primary/5' : 'border-gray-200'}`}>
+                  <label className={`flex items-start gap-2 border rounded p-3 cursor-pointer text-sm ${editPickupType === 'requiredBy' ? 'border-primary bg-primary/5' : 'border-gray-200'}`}>
                     <input
                       type="radio"
                       name="editPickupType"
@@ -593,7 +607,7 @@ export default function CheckoutPage() {
                     </select>
                   )}
 
-                  <label className={`flex items-start gap-2 border rounded p-3 cursor-pointer text-sm ${'$'}{editPickupType === 'exact' ? 'border-primary bg-primary/5' : 'border-gray-200'}`}>
+                  {exactPickupOffered && <label className={`flex items-start gap-2 border rounded p-3 cursor-pointer text-sm ${editPickupType === 'exact' ? 'border-primary bg-primary/5' : 'border-gray-200'}`}>
                     <input
                       type="radio"
                       name="editPickupType"
@@ -604,8 +618,8 @@ export default function CheckoutPage() {
                     <span>
                       <span className="font-medium text-dark">Guaranteed Exact Pickup Time</span>
                     </span>
-                  </label>
-                  {editPickupType === 'exact' && (
+                  </label>}
+                  {exactPickupOffered && editPickupType === 'exact' && (
                     <>
                       <select
                         value={editExactPickupTime}
@@ -613,12 +627,12 @@ export default function CheckoutPage() {
                         className="w-full border rounded px-3 py-2"
                       >
                         <option value="">Select a time</option>
-                        {EXACT_PICKUP_TIME_OPTIONS.map((opt) => (
+                        {editExactPickupTimeOptions.map((opt) => (
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                       </select>
-                      {editExactPickupTime && (
-                        <p className="text-xs text-gray-600">{`Exact pickup fee: $${getExactPickupFee(editExactPickupTime)}`}</p>
+                      {editExactPickupTime && editExactPickupFee !== null && (
+                        <p className="text-xs text-gray-600">Exact pickup fee: {formatCurrency(editExactPickupFee)}</p>
                       )}
                     </>
                   )}
@@ -686,6 +700,12 @@ export default function CheckoutPage() {
           <span>Subtotal</span>
           <span>{formatCurrency(subtotal)}</span>
         </div>
+        {belowMinimum && (
+          <p role="alert" className="mt-2 rounded bg-amber-50 p-2 text-sm text-amber-900">
+            Online delivery orders have a {formatCurrency(minimumOrderSubtotal)} minimum in rentals before fees and tax.
+            Add {formatCurrency(minimumOrderSubtotal - subtotal)} more, or call {BUSINESS.phone} to discuss your event.
+          </p>
+        )}
         {durationAmount > 0 && (
           <div className="flex justify-between text-body text-sm">
             <span>Multi-Day Rental Fee ({selectedTier?.label})</span>
@@ -761,7 +781,7 @@ export default function CheckoutPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-dark mb-1">State {watch('deliveryType') !== 'pickup' ? '*' : ''}</label>
-            <input {...register('eventState', { required: watch('deliveryType') !== 'pickup' })} defaultValue="SC" className="w-full border rounded px-3 py-2" /></div>
+            <input {...register('eventState', { required: watch('deliveryType') !== 'pickup' })} defaultValue="NY" className="w-full border rounded px-3 py-2" /></div>
           <div>
             <label className="block text-sm font-medium text-dark mb-1">Zip {watch('deliveryType') !== 'pickup' ? '*' : ''}</label>
             <input {...register('eventZip', { required: watch('deliveryType') !== 'pickup' })} className="w-full border rounded px-3 py-2" />
@@ -808,12 +828,12 @@ export default function CheckoutPage() {
           <label className="block text-sm font-medium text-dark mb-1">Coupon Code</label>
           <input {...register('couponCode')} placeholder="Optional" className="w-full border rounded px-3 py-2" />
         </div>
-        <div className="flex items-start gap-2 bg-gray-50 p-3 rounded">
+        {damageWaiverPercent !== null && <div className="flex items-start gap-2 bg-gray-50 p-3 rounded">
           <input type="checkbox" id="damageWaiver" {...register('damageWaiver')} className="mt-1" />
           <label htmlFor="damageWaiver" className="text-sm text-body">
-            <span className="font-medium text-dark">Add Damage Waiver (10% of subtotal)</span> - covers accidental damage to rental equipment during your event, excluding intentional damage or theft.
+            <span className="font-medium text-dark">Add Damage Waiver ({formatTaxRatePercent(damageWaiverPercent)} of rental subtotal)</span> - covers accidental damage to rental equipment during your event, excluding intentional damage or theft.
           </label>
-        </div>
+        </div>}
         <div>
           <label className="block text-sm font-medium text-dark mb-1">Notes</label>
           <textarea {...register('notes')} rows={3} className="w-full border rounded px-3 py-2" />

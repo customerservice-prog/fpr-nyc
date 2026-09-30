@@ -22,7 +22,7 @@ test('SC draft funnel advances through payment and verified completion',()=>{
   assert.match(payment,/stage: 'payment_page'/)
   assert.match(payment,/removeItem\('checkout_draft_key'\)/)
   assert.match(checkout,/order\.status === 'incomplete'/)
-  assert.match(checkout,/getItemAvailability/)
+  assert.match(checkout,/findInventoryShortfalls/)
   assert.match(checkout,/evaluateRentalRestrictions/)
   assert.match(checkout,/requireMatchingDeliveryFee/)
   assert.match(payments,/checkoutStage: 'completed'/)
@@ -49,8 +49,9 @@ test('SC lifecycle messages use Riverdale URLs and cancellation transition is au
   assert.match(admin,/Promise\.allSettled/)
 })
 
-test('SC admin displays checkout funnel and uses SC state defaults',()=>{
+test('NYC admin displays checkout funnel and uses New York state defaults',()=>{
   assert.match(read('app/api/admin/orders/route.ts'),/checkoutStage: true/)
   assert.match(read('app/admin/orders/page.tsx'),/Status \/ Funnel/)
-  assert.doesNotMatch(read('app/api/admin/orders/route.ts'),/eventState: body\.eventState \|\| 'NY'/)
+  assert.match(read('app/api/admin/orders/route.ts'),/eventState: body\.eventState \|\| 'NY'/)
+  assert.doesNotMatch(read('app/api/admin/orders/route.ts'),/\|\| 'SC'/)
 })

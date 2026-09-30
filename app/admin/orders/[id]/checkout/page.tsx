@@ -101,10 +101,7 @@ export default function AdminCheckoutPage({ params }: { params: Promise<{ id: st
         body: JSON.stringify({ orderId: id, amount: amt, tipAmount: tipAmountCalc }),
       })
       const data = await res.json()
-      if (data.simulated) {
-        toast.success('Payment simulated (Stripe not configured)')
-        setDone(true)
-      } else if (data.clientSecret) {
+      if (data.clientSecret) {
         setClientSecret(data.clientSecret)
       } else {
         toast.error(data.error || 'Could not start checkout')
@@ -130,6 +127,9 @@ export default function AdminCheckoutPage({ params }: { params: Promise<{ id: st
       const data = await res.json()
       if (data.success) {
         toast.success('Payment processed successfully')
+        setDone(true)
+      } else if (data.pending) {
+        toast.success('Payment is processing. It will be recorded automatically when Stripe confirms it.')
         setDone(true)
       } else {
         toast.error(data.error || 'Could not confirm payment')

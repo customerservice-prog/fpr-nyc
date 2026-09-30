@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@prisma/client'
 import { PLANNING_HELP, planningServices } from './eventPlanning'
+import { NYC_PUBLIC_ORIGIN } from './nycPublicOrigin'
 
 export class PlanningInquiryError extends Error {
   constructor(message: string, public status = 400) { super(message) }
@@ -40,7 +41,7 @@ export function parsePlanningInquiry(body: unknown, now = new Date()) {
   const help = data.help ?? []
   if (!Array.isArray(help) || help.length > PLANNING_HELP.length || help.some(v => typeof v !== 'string' || !(PLANNING_HELP as readonly string[]).includes(v))) throw new PlanningInquiryError('Please choose the help you need.')
   const message = [
-    '[SC EVENT PLANNING INQUIRY]', 'Event type: ' + eventType,
+    '[NYC EVENT PLANNING INQUIRY]', 'Event type: ' + eventType,
     'Guest count: ' + (guestCount ?? 'Undecided'), 'Venue / city: ' + location,
     'Venue status: ' + venueStatus, 'Help needed: ' + ([...new Set(help)].join(', ') || 'Not sure yet'),
     '', 'Event details / existing order:', text('message', 4000) || 'No additional details provided.',
@@ -69,6 +70,6 @@ export async function savePlanningInquiry(db: PrismaClient, inquiry: PlanningInq
 export function planningInquiryEmail(inquiry: PlanningInquiry) {
   const escape = (value: string) => value.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!))
   const lines = [inquiry.name, inquiry.email, inquiry.phone, 'Date: ' + (inquiry.eventDate?.toISOString().slice(0,10) || 'Undecided'), '', inquiry.message, '', 'Reference: ' + inquiry.id]
-  return { subject: '[SC EVENT PLANNING] ' + inquiry.eventType + ' — ' + inquiry.name,
-    html: '<h2>New Riverdale / Downstate New York planning inquiry</h2><p>' + lines.map(escape).join('<br/>') + '</p><p><a href="https://fpr-nyc-production.up.railway.app/admin/planning-inquiries">Review planning inquiries</a></p>', text: lines.join('\n') }
+  return { subject: '[NYC EVENT PLANNING] ' + inquiry.eventType + ' — ' + inquiry.name,
+    html: '<h2>New Riverdale / Downstate New York planning inquiry</h2><p>' + lines.map(escape).join('<br/>') + '</p><p><a href="' + NYC_PUBLIC_ORIGIN + '/admin/planning-inquiries">Review planning inquiries</a></p>', text: lines.join('\n') }
 }

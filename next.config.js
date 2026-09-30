@@ -1,3 +1,26 @@
+// Exact NYC logo (single source of truth: lib/nycBrand.ts). Retired NYC logo and icon
+// files were removed from public/; their old URLs redirect here so cached pages,
+// already-sent emails, bookmarks and browsers never show an old logo.
+const NYC_LOGO_PATH = '/brand/friendly-party-rental-nyc-logo-v8.png'
+const RETIRED_NYC_LOGO_PATHS = [
+  '/brand/friendly-party-rental-nyc-logo-v2.png',
+  '/brand/friendly-party-rental-nyc-logo-v5.png',
+  '/brand/friendly-party-rental-nyc-logo-v6.png',
+  '/brand/friendly-party-rental-nyc-logo-v7.png',
+  '/images/fpr-nyc-logo-v7.png',
+  '/images/logo.png',
+  '/images/logo-icon.png',
+  '/favicon.ico',
+  '/favicon-16x16.png',
+  '/favicon-32x32.png',
+  '/favicon-48x48.png',
+  '/favicon-96x96.png',
+  '/apple-touch-icon.png',
+  '/apple-touch-icon-precomposed.png',
+  '/sc-icon-192.png',
+  '/sc-icon-512.png',
+]
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -9,6 +32,7 @@ const nextConfig = {
   images: {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 480, 576],
     remotePatterns: [
+      { protocol: 'https', hostname: 'friendlypartyrentalnyc.com' },
       { protocol: 'https', hostname: 'fpr-nyc-production.up.railway.app' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'files.sysers.com' },
@@ -31,7 +55,7 @@ const nextConfig = {
       "worker-src 'self' blob:",
       "object-src 'none'",
       "base-uri 'self'",
-      "form-action 'self' https://fpr-nyc-production.up.railway.app",
+      "form-action 'self' https://friendlypartyrentalnyc.com https://fpr-nyc-production.up.railway.app",
       "frame-ancestors 'self'",
       "upgrade-insecure-requests",
     ].join('; ')
@@ -46,6 +70,9 @@ const nextConfig = {
     const privatePaths=['/admin/:path*','/driver/:path*','/checkout/:path*','/pay/:path*','/pay-now','/contract/:path*','/schedule/:path*','/unsubscribe','/items']
     return [
       { source: '/:path*', headers: globalHeaders },
+      // The Railway service address stays usable for staff but is never indexed;
+      // canonical URLs always point at https://friendlypartyrentalnyc.com.
+      { source: '/:path*', has: [{ type: 'host', value: 'fpr-nyc-production.up.railway.app' }], headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] },
       ...privatePaths.map(source=>({source,headers:[{key:'X-Robots-Tag',value:'noindex, follow'}]})),
     ]
   },
@@ -53,6 +80,7 @@ const nextConfig = {
     // Keep temporary-host redirects internal to this NYC service. Custom-domain
     // canonicalization will be added only when the final NYC domain is connected.
     return [
+      ...RETIRED_NYC_LOGO_PATHS.map((source) => ({ source, destination: NYC_LOGO_PATH, permanent: false })),
       { source: '/index.html', destination: '/', permanent: true },
       { source: '/home', destination: '/', permanent: true },
       { source: '/view_gallery', destination: '/gallery', permanent: true },
@@ -76,6 +104,23 @@ const nextConfig = {
       { source: '/category/folding_chairs-_throne_chairs', destination: '/category/table-chair-rentals', permanent: true },
       { source: '/items/bounce_house__plus__waterslide_combo_package', destination: '/items/bounce-house-water-slide-combo-package', permanent: true },
       { source: '/items/flower_wall', destination: '/items/greenery-and-floral-wall-8x8', permanent: true },
+      // NYC primary domain: https://friendlypartyrentalnyc.com. Only the www host is
+      // redirected (Next.js keeps the path and query string); the temporary Railway
+      // address is never redirected, so its carts and staff sessions keep working.
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.friendlypartyrentalnyc.com' }],
+        destination: 'https://friendlypartyrentalnyc.com/:path*',
+        permanent: true,
+      },
+      // Retired NYC subdomain of the Syracuse domain: once its DNS points at this
+      // service, every request lands on the NYC primary domain (path kept).
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'nyc.friendlypartyrental.com' }],
+        destination: 'https://friendlypartyrentalnyc.com/:path*',
+        permanent: true,
+      },
     ]
   },
 }

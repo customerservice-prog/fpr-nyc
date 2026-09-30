@@ -1,0 +1,113 @@
+name: NYC catalog repair tests
+on:
+  push:
+    branches: [fix/nyc-catalog-routing-20260929]
+    paths:
+      - '.github/workflows/nyc-catalog-repair-test.yml'
+      - 'app/**'
+      - 'components/**'
+      - 'prisma/**'
+      - 'tests/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: isolated_catalog_test
+          POSTGRES_DB: nyc_catalog_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d nyc_catalog_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:isolated_catalog_test@127.0.0.1:5432/nyc_catalog_test
+      NEXTAUTH_SECRET: isolated-catalog-ci-only-not-a-live-secret
+      NEXTAUTH_URL: http://localhost:3010
+      NEXT_PUBLIC_SITE_URL: http://localhost:3010
+      PUBLIC_INDEXABLE: 'false'
+      PORT: '3010'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npx prisma migrate deploy
+      - name: Check complete catalog and prepare isolated preservation fixtures
+        run: |
+          node - <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs')
+          const {PrismaClient}=require('@prisma/client'),p=new PrismaClient()
+          ;(async()=>{
+            assert.equal(new URL(process.env.DATABASE_URL).hostname,'127.0.0.1')
+            assert.equal(await p.category.count({where:{displayToCustomer:true}}),18)
+            assert.equal(await p.item.count(),0)
+            const hidden=await p.category.update({where:{slug:'table-chair-rentals'},data:{name:'Existing category name',displayToCustomer:false,pricingProfile:'custom-profile',scheduleProfile:'keep-schedule',picture:'/existing-image.png'}})
+            const tent=await p.category.findUniqueOrThrow({where:{slug:'tent-rentals'}})
+            const item=await p.item.create({data:{name:'Isolated CI chair',slug:'nyc-catalog-ci-fixture',cost:123.45,quantity:7,categoryId:tent.id,internalNotes:'private CI fixture'}})
+            fs.writeFileSync('/tmp/nyc-preservation.json',JSON.stringify({hidden,item}))
+            console.log('Fresh database has all 18 expected categories and no invented inventory.')
+          })().catch(e=>{console.error(e);process.exitCode=1}).finally(()=>p.$disconnect())
+          JS
+      - name: Reapply bootstrap to prove it preserves existing values
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f prisma/migrations/20260929234500_restore_nyc_catalog_categories/migration.sql
+          node - <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs')
+          const {PrismaClient}=require('@prisma/client'),p=new PrismaClient()
+          ;(async()=>{
+            const before=JSON.parse(fs.readFileSync('/tmp/nyc-preservation.json','utf8'))
+            const hidden=await p.category.findUnique({where:{slug:'table-chair-rentals'}})
+            const item=await p.item.findUnique({where:{slug:'nyc-catalog-ci-fixture'}})
+            assert.deepEqual(JSON.parse(JSON.stringify({hidden,item})),before)
+            assert.equal(await p.category.count(),18)
+            assert.equal(await p.item.count(),1)
+            console.log('Reapplication preserves hidden state, name, image, pricing profile, item price and stock exactly.')
+          })().catch(e=>{console.error(e);process.exitCode=1}).finally(()=>p.$disconnect())
+          JS
+      - run: node --test tests/nyc-catalog-routing.test.cjs tests/nyc-location-isolation.test.cjs tests/nyc-delivery.test.cjs
+      - run: npx tsc --noEmit
+      - run: npm run build
+      - name: Verify real category and item responses against isolated database
+        run: |
+          npm run start > /tmp/nyc-local.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            curl -fsS http://localhost:3010/health >/dev/null && break || sleep 2
+          done
+          node - <<'JS'
+          const assert=require('node:assert/strict')
+          ;(async()=>{
+            const host='http://localhost:3010'
+            for(const [path,status,contains] of [
+              ['/category',200,'Browse All Rentals'],
+              ['/category/tent-rentals',200,'Isolated CI chair'],
+              ['/category/weddings',200,'No items are currently listed online'],
+              ['/category/table-chair-rentals',404,null],
+              ['/category/not-a-real-category',404,null],
+              ['/api/categories/table-chair-rentals',404,null],
+              ['/items/nyc-catalog-ci-fixture',200,'Isolated CI chair'],
+              ['/items/not-a-real-item',404,null]
+            ]){
+              const response=await fetch(host+path),body=await response.text()
+              assert.equal(response.status,status,path)
+              if(contains)assert.ok(body.includes(contains),path)
+              console.log(path,status,'PASS')
+            }
+            const api=await fetch(host+'/api/categories/tent-rentals'),data=await api.json()
+            assert.equal(data.category.items[0].cost,123.45)
+            assert.equal(data.category.items[0].quantity,7)
+            assert.equal(data.category.items[0].internalNotes,undefined)
+            const cats=await(await fetch(host+'/api/categories')).json()
+            assert.equal(cats.categories.length,17)
+            console.log('Public APIs preserve prices and stock and do not expose hidden category/internal item notes.')
+          })().catch(e=>{console.error(e);process.exitCode=1})
+          JS

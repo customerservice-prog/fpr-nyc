@@ -49,7 +49,12 @@ export async function POST(
     message,
   })
 
-  await sendEmail({ to: email, subject: emailContent.subject, html: emailContent.html })
+  try {
+    await sendEmail({ to: email, subject: emailContent.subject, html: emailContent.html })
+  } catch (sendError) {
+    console.error('Cancellation email could not be sent:', sendError instanceof Error ? sendError.message : 'unknown error')
+    return NextResponse.json({ error: 'The cancellation email could not be sent because outgoing email is not configured or was rejected. Please contact the customer by phone.' }, { status: 503 })
+  }
 
   try {
     const companySettings = await prisma.companySettings.findFirst()

@@ -24,6 +24,10 @@ export default function ConfirmationPage() {
           body: JSON.stringify({ stripePaymentId: proof.stripePaymentId }),
         })
         const data = await response.json()
+        if (response.status === 202 && data.pending) {
+          if (active) setMessage('Your payment is processing with your bank. We will email your receipt as soon as it completes. Please do not pay again.')
+          return
+        }
         if (!response.ok || !data.receipt || data.receipt.orderId !== proof.orderId || data.receipt.status !== 'succeeded') {
           throw new Error('Receipt could not be verified')
         }

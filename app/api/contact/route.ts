@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, contactFormEmail } from '@/lib/email'
 import { NYC_EMAIL_ADDRESS, nycEmailHref } from '@/lib/nycEmail'
+import { NYC_PUBLIC_HOST } from '@/lib/nycPublicOrigin'
 
 export async function GET() {
  return NextResponse.json({ email: NYC_EMAIL_ADDRESS, emailHref: nycEmailHref(), notificationsEnabled: !!(process.env.EMAIL_USER && process.env.EMAIL_PASS) }, { headers: { 'Cache-Control': 'no-store' } })
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
       await sendEmail({ to: NYC_EMAIL_ADDRESS, subject: emailContent.subject, html: emailContent.html, replyTo: trimmedEmail })
       notificationSent = true
     } catch { console.warn('Riverdale inquiry saved; email notification pending configuration or retry.') }
-    return NextResponse.json({ success: true, saved: true, notificationSent, emailHref: nycEmailHref('Riverdale inquiry from ' + trimmedName, 'Website: fpr-nyc-production.up.railway.app\nName: ' + trimmedName + '\nPhone: ' + trimmedPhone + '\nEvent date: ' + (eventDate || '') + '\n\n' + trimmedMessage) }, { status: notificationSent ? 200 : 202 })
+    return NextResponse.json({ success: true, saved: true, notificationSent, emailHref: nycEmailHref('Riverdale inquiry from ' + trimmedName, 'Website: ' + NYC_PUBLIC_HOST + '\nName: ' + trimmedName + '\nPhone: ' + trimmedPhone + '\nEvent date: ' + (eventDate || '') + '\n\n' + trimmedMessage) }, { status: notificationSent ? 200 : 202 })
   } catch (error) {
     console.error('Contact form error:', error)
     return NextResponse.json({ error: 'Failed to submit' }, { status: 500 })

@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-// Approximate Riverdale service-area reference point for a local visibility grid.
+// Approximate Riverdale service-area reference point for a local visibility grid
+// (Riverdale, Bronx neighborhood coordinates, 40.894 N 73.913 W, per Wikipedia).
 // It is not a warehouse/storefront coordinate and must never be presented as one.
-const CENTER={lat:34.8526,lng:-82.3940}
+const CENTER={lat:40.894,lng:-73.913}
 type P={id:string;row:number;col:number;lat:number;lng:number;rank:number|null;competitor?:string}
 
 async function allowed(){return Boolean((await getServerSession(authOptions))?.user)}

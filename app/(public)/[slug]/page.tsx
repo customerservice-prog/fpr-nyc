@@ -436,7 +436,7 @@ export async function generateMetadata({params}:PageProps){
  if(!page||!page.isPublished)return {title:'Page not found',robots:{index:false,follow:true}}
  const blocks=parseBlocks(page.content)
  const text=blocks.flatMap(block=>[block.text,block.headingText,block.heroSubtitle,block.ctaText]).filter(Boolean).join(' ')
- return nycPageMetadata('/'+encodeURIComponent(slug),page.title,text||`${page.title} — Friendly Party Rental NYC in Greenville and Downstate New York.`,blocks.length>0)
+ return nycPageMetadata('/'+encodeURIComponent(slug),page.title,text||`${page.title} — Friendly Party Rental NYC in Riverdale and Downstate New York.`,blocks.length>0)
 }
 
 export default async function CustomWebsitePage({ params }: PageProps) {

@@ -1,0 +1,113 @@
+name: NYC domain release verification
+on:
+  push:
+    branches: [nyc-domain-friendlypartyrentalnyc]
+    paths:
+      - '.github/workflows/nyc-domain-release-check.yml'
+      - '.env.example'
+      - 'next.config.js'
+      - 'Dockerfile'
+      - 'tests/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: nyc_ci
+          POSTGRES_PASSWORD: isolated_ci_only
+          POSTGRES_DB: nyc_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nyc_ci -d nyc_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://nyc_ci:isolated_ci_only@localhost:5432/nyc_ci
+      NEXTAUTH_SECRET: disposable-local-ci-only-not-a-live-secret
+      NEXTAUTH_URL: https://friendlypartyrentalnyc.com
+      NEXT_PUBLIC_SITE_URL: https://friendlypartyrentalnyc.com
+      PUBLIC_BASE_URL: https://friendlypartyrentalnyc.com
+      PUBLIC_INDEXABLE: 'false'
+      NYC_ONLINE_PAYMENTS_ENABLED: 'false'
+      NYC_DELIVERY_FEES_JSON: '{}'
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Test merge without changing any remote branch
+        run: |
+          git config user.name 'NYC isolated verification'
+          git config user.email 'ci@example.invalid'
+          git fetch origin production-nyc-live
+          echo "Production SHA: $(git rev-parse origin/production-nyc-live)"
+          if ! git merge --no-commit --no-ff origin/production-nyc-live; then
+            echo 'Conflicting paths:'
+            git diff --name-only --diff-filter=U
+            git diff --diff-filter=U
+            exit 1
+          fi
+          git diff --check
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - name: Apply migrations to disposable CI database only
+        run: npx prisma migrate deploy
+      - name: Domain, catalog and delivery regression checks
+        run: node --test tests/nyc-domain-isolation.test.cjs tests/nyc-search.test.cjs tests/nyc-tracking-isolation.test.cjs tests/nyc-catalog-routing.test.cjs tests/nyc-delivery.test.cjs
+      - run: npx tsc --noEmit
+      - name: Production build including payment safeguards
+        run: npm run build
+      - name: Verify origin redirect and disabled payments on local app
+        run: |
+          npx next start -H 127.0.0.1 -p 3000 > /tmp/nyc-app.log 2>&1 &
+          APP_PID=$!
+          trap 'kill $APP_PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:3000/health > /dev/null && break || sleep 2; done
+          node - <<'JS'
+          const assert=require('node:assert/strict'),http=require('node:http');
+          function request(path,host){
+            return new Promise((resolve,reject)=>{
+              const req=http.get({hostname:'127.0.0.1',port:3000,path,headers:{Host:host}},res=>{
+                let body='';res.setEncoding('utf8');res.on('data',chunk=>body+=chunk);
+                res.on('end',()=>resolve({status:res.statusCode,headers:res.headers,body,sentHost:req.getHeader('host')}));
+              });
+              req.setTimeout(15000,()=>req.destroy(new Error('Local request timeout')));req.on('error',reject);
+            });
+          }
+          (async()=>{
+            for(const path of ['/health','/category/tent-rentals','/category/table-chair-rentals','/admin/login']) {
+              const r=await request(path,'friendlypartyrentalnyc.com');
+              assert.equal(r.status,200,path);
+            }
+            const path='/category/tent-rentals?qa=origin&keep=1';
+            const redirect=await request(path,'www.friendlypartyrentalnyc.com');
+            console.log('WWW redirect response:',{status:redirect.status,location:redirect.headers.location,sentHost:redirect.sentHost});
+            assert.equal(redirect.sentHost,'www.friendlypartyrentalnyc.com');
+            assert.equal(redirect.status,308);
+            assert.equal(redirect.headers.location,'https://friendlypartyrentalnyc.com'+path);
+            const temporary=await request(path,'fpr-nyc-production.up.railway.app');
+            assert.equal(temporary.status,200);assert.equal(temporary.headers.location,undefined);
+            const status=await request('/api/payments/status','friendlypartyrentalnyc.com');
+            assert.equal(status.status,200);
+            const readiness=JSON.parse(status.body);
+            assert.equal(readiness.onlinePaymentsAvailable,false);
+            assert.equal(readiness.checks.onlinePaymentsSwitchOn,false);
+            assert.equal(readiness.checks.stripeKeysConfigured,false);
+            console.log('Disabled payment readiness:',readiness);
+            const login=await request('/admin/login','friendlypartyrentalnyc.com');
+            assert.ok(login.body.includes('https://friendlypartyrentalnyc.com'));
+            console.log('Local domain, page, redirect and disabled-payment checks passed. No customer records or payments submitted.');
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          JS
+      - name: Diagnostics on failure
+        if: failure()
+        run: tail -100 /tmp/nyc-app.log 2>/dev/null || true

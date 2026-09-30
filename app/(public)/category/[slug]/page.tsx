@@ -1,4 +1,5 @@
 import CategoryCatalogFallback from '@/components/public/CategoryCatalogFallback'
+import CategoryEmptyState from '@/components/public/CategoryEmptyState'
 import { createElement, Suspense, Fragment } from 'react'
 import LocalDeliveryLinks from '@/components/public/LocalDeliveryLinks'
 import { notFound } from 'next/navigation'
@@ -25,6 +26,10 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
   const items = results[1]
   if (!category || !category.displayToCustomer) notFound()
 
+  // A valid category without published items is not a missing page. Do not
+  // offer date selection, invented prices or a misleading sold-out message.
+  if (items.length === 0) return createElement(CategoryEmptyState, { name: category.name })
+
   const initialCategory = {
     name: category.name,
     description: categoryDescriptionForNyc(category.name, category.description),
@@ -34,7 +39,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
 
   const initialItems = items.map((item) => ({
     ...item,
-    description: itemDescriptionForNyc(item.name, item.description),
+    description: itemDescriptionForNyc(item.name, item.description, Number(item.cost)),
     available: item.quantity,
     bookableAfter: item.bookableAfter ? item.bookableAfter.toISOString() : null,
     updatedAt: item.updatedAt ? item.updatedAt.toISOString() : null,

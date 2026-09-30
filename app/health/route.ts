@@ -8,7 +8,7 @@ export function GET() {
       ok: true,
       service: 'Friendly Party Rental NYC',
       location: 'NYC / Downstate New York',
-      revision: 'nyc-full-location-logo-v2',
+      revision: 'nyc-full-location-logo-v8',
     },
     { status: 200, headers: { 'Cache-Control': 'no-store' } },
   )

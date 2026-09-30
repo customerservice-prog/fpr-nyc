@@ -1,0 +1,61 @@
+name: NYC schema drift check
+on:
+  push:
+    branches: [fix/nyc-schema-drift-20260929]
+  pull_request:
+    branches: [production-nyc-live]
+permissions:
+  contents: read
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: nyc_ci
+          POSTGRES_PASSWORD: ci_disposable_only
+          POSTGRES_DB: nyc_ci
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      DATABASE_URL: postgresql://nyc_ci:ci_disposable_only@localhost:5432/nyc_ci
+      PUBLIC_INDEXABLE: 'false'
+      NYC_DELIVERY_FEES_JSON: '{}'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - name: Apply full migration history to an empty disposable database
+        run: npx prisma migrate deploy
+      - name: Re-apply the schema repair (must be repeat-safe)
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -f prisma/migrations/20260929235000_repair_nyc_schema_drift/migration.sql
+      - name: Every table, column, unique index and foreign key in schema.prisma exists
+        run: |
+          npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --script > drift.sql
+          echo "Remaining differences (column defaults and extra indexes are tolerated):"
+          cat drift.sql
+          if grep -Eq 'CREATE TABLE|ADD COLUMN|ADD CONSTRAINT|CREATE (UNIQUE )?INDEX|SET DATA TYPE|SET NOT NULL|DROP NOT NULL' drift.sql; then
+            echo "::error::Database created by the migrations does not match prisma/schema.prisma"
+            exit 1
+          fi
+      - name: Full reads of the repaired models work
+        run: |
+          node - <<'JS'
+          const {PrismaClient}=require('@prisma/client')
+          const p=new PrismaClient()
+          ;(async()=>{
+            await p.order.findMany({take:1})
+            await p.driver.findMany({take:1})
+            await p.employmentApplication.findMany({take:1})
+            await p.raincheck.findMany({take:1})
+            await p.pricingTier.findMany({take:1})
+            await p.specialRequestFee.findMany({take:1})
+            await p.category.findMany({take:1})
+            console.log('Full reads of Order, Driver, EmploymentApplication, Raincheck, PricingTier, SpecialRequestFee and Category work')
+          })().finally(()=>p.$disconnect()).catch(e=>{console.error(e);process.exitCode=1})
+          JS

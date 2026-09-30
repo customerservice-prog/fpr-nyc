@@ -10,8 +10,9 @@ import { marketingTransportStatus, sendMarketingEmail } from '@/lib/marketing/de
 import { feedbackMonitorStatus } from '@/lib/marketing/feedbackMonitor'
 import { feedbackHeaders } from '@/lib/marketing/feedbackToken'
 import { wrapEmail, unsubscribeHeaders } from '@/lib/marketing/message'
+import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
 
-const ORIGIN = (process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_BASE_URL || 'https://fpr-nyc-production.up.railway.app').replace(/\/$/, '')
+const ORIGIN = NYC_PUBLIC_ORIGIN
 const DAY = 86400000
 const SCHEDULER_KEY = { category: 'marketing_scheduler', key: 'last_run' }
 

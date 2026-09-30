@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, FormEvent } from 'react'
 import { MessageCircle, X, Send } from 'lucide-react'
+import { NYC_SERVICE_AREA_SUMMARY } from '@/lib/nycServiceAreas'
 
 interface FaqEntry {
   q: string
@@ -16,18 +17,18 @@ interface ChatMessage {
 const FAQ_DATA: FaqEntry[] = [
   { q: 'How do I book a rental?', a: 'Browse our catalog, select items, choose your event date, and complete checkout online. You can also call 315-884-1498 for help.' },
   { q: 'What can I rent from you?', a: 'We carry tents, tables and chairs, linens, lighting, bounce houses and waterslides, concessions and beverage service, dance floors, generators, photo booths, yard games, heating and cooling, and full wedding and party packages.' },
-  { q: 'Do I need to pay a deposit?', a: 'Yes, a 25% deposit is required at booking to reserve your date. The remaining balance is due before delivery.' },
+  { q: 'Do I need to pay a deposit?', a: 'Any deposit due at booking is shown at checkout before you pay. Call 315-884-1498 with questions.' },
   { q: 'What payment methods do you accept?', a: 'We accept all major credit and debit cards through our secure online checkout.' },
   { q: 'When is the remaining balance due?', a: 'The balance is due before delivery. Automatic reminders are sent by email as your event approaches.' },
   { q: 'Is there sales tax on my order?', a: 'Applicable taxes are calculated automatically at checkout based on your order and event location.' },
   { q: 'Do you have coupons or promo codes?', a: 'Yes, if you have a coupon code you can enter it at checkout to apply your discount.' },
-  { q: 'Do you offer discounts for multi-day rentals?', a: 'Yes. Renting for more than one day costs less per day than paying full price every day: 2-3 days adds about 50% to the 1-day price, 4-6 days adds about 100%, and 7+ days adds about 150%.' },
-  { q: 'Can I request overnight or exact delivery times?', a: 'Yes, for an extra fee. Overnight keep is $75 (bounce houses and waterslides only), a flexible delivery window is $40, and a guaranteed exact delivery time is $100 on any delivery order - otherwise choose a free Morning or Afternoon window.' },
+  { q: 'Do you offer discounts for multi-day rentals?', a: 'Multi-day pricing, when it is offered online, is shown at checkout. Call 315-884-1498 for a multi-day quote.' },
+  { q: 'Can I request overnight or exact delivery times?', a: 'The delivery and pickup time options available online, and any fee for them, are shown when you schedule your event. Call 315-884-1498 for other timing requests.' },
   { q: 'What if I need to cancel or reschedule?', a: 'Deposits are non-refundable, but rainchecks are valid for one year.' },
   { q: 'How far in advance should I book?', a: 'As early as possible. Summer weekends often book 4-8 weeks out.' },
   { q: 'Can I modify my order after booking?', a: 'Yes, with 48-72 hours notice.' },
-  { q: 'Does the price include delivery and setup?', a: 'Tent delivery and setup is included for most Riverdale, NY area locations. Table and chair setup is available for an additional fee.' },
-  { q: 'What areas do you serve?', a: 'We deliver throughout the Downstate New York area, including Riverdale, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, Piedmont, and many nearby towns. A delivery fee based on distance may apply outside the immediate Riverdale area.' },
+  { q: 'Does the price include delivery and setup?', a: 'Delivery is charged per order based on your delivery ZIP code, and the exact delivery fee and sales tax are shown at checkout before you pay. Setup requirements for tents and inflatables are confirmed with our team before booking.' },
+  { q: 'What areas do you serve?', a: 'We deliver to ' + NYC_SERVICE_AREA_SUMMARY + '. The delivery fee for your ZIP code is shown at checkout.' },
   { q: 'Can I pick up rentals myself?', a: 'Riverdale currently operates as a delivery-only service. Customer warehouse pickup is not offered; we deliver equipment to your event location.' },
   { q: 'When do you set up and pick up?', a: 'Setup is coordinated in advance based on your event schedule, and pickup is typically the same day or the following morning for evening events.' },
   { q: 'Does setup time count toward my rental period?', a: 'No, setup time does not count toward your rental period.' },
@@ -35,8 +36,8 @@ const FAQ_DATA: FaqEntry[] = [
   { q: 'Is your equipment clean and safe?', a: 'Yes - every piece is cleaned, sanitized, and inspected before and after every rental. Our commercial-grade equipment is safe for children with adult supervision recommended.' },
   { q: 'What if something breaks?', a: 'Normal wear is covered. Damage from misuse may have associated costs.' },
   { q: 'Do you carry insurance?', a: 'Yes, we are fully insured.' },
-  { q: 'How much does a bounce house cost?', a: 'Bounce houses start at \$199/day. Waterslides range from \$250-\$499, and combo units start at \$500.' },
-  { q: 'Do bounce houses need power?', a: 'Yes, constant air supply is needed - a 20-amp outlet within 100 feet is required. We also rent generators starting at \$125 for locations without power.' },
+  { q: 'How much does a bounce house cost?', a: 'Current bounce house and waterslide prices are listed on each item in our Bounce House & Waterslide Rentals category. Choose your event date to see what is available.' },
+  { q: 'Do bounce houses need power?', a: 'Yes, constant air supply is needed - a 20-amp outlet within 100 feet is required. We also rent generators for locations without power.' },
   { q: 'Do water slides need a water hookup?', a: 'Yes, a standard garden hose connection is needed.' },
   { q: 'Can bounce houses be set up indoors?', a: 'Yes, as long as the space has a minimum 14-16 ft ceiling height.' },
   { q: 'What happens if it rains?', a: 'Light rain is generally okay, but heavy rain, lightning, or high winds require shutting down inflatables for safety.' },
@@ -85,7 +86,8 @@ async function findItemAnswer(userText: string, userTokens: Set<string>): Promis
     const data = await res.json()
     const items: LookupItem[] = Array.isArray(data) ? data : data.items || []
     const item = items[0]
-    if (!item || typeof item.cost !== 'number') return null
+    // A $0 or missing price means the item is not priced for NYC yet: never quote it.
+    if (!item || typeof item.cost !== 'number' || !Number.isFinite(item.cost) || item.cost <= 0) return null
     const price = '$' + item.cost.toFixed(2).replace(/\.00$/, '')
     const categoryPart = item.category?.name ? ` (${item.category.name})` : ''
     return `Yes! We carry ${item.name}${categoryPart} starting at ${price}. Check availability for your date on our booking calendar, or call 315-884-1498.`

@@ -1,0 +1,94 @@
+name: NYC search and mobile integration
+on:
+  push:
+    branches: [fix/nyc-search-mobile-integration-20260930]
+  pull_request:
+    branches: [production-nyc-live]
+    paths:
+      - 'components/public/HeaderSearch.tsx'
+      - 'components/public/MobileHeader.tsx'
+      - 'lib/nycModal.ts'
+      - 'lib/nycRentalSearch.ts'
+      - 'lib/useRentalSearch.ts'
+      - 'tests/nyc-search*'
+      - '.github/workflows/nyc-search-mobile.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: nyc-search-mobile-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: nyc_ci
+          POSTGRES_PASSWORD: isolated_ci_only
+          POSTGRES_DB: nyc_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U nyc_ci -d nyc_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://nyc_ci:isolated_ci_only@localhost:5432/nyc_ci
+      NEXTAUTH_SECRET: disposable-local-ci-only-not-a-live-secret
+      NEXTAUTH_URL: https://friendlypartyrentalnyc.com
+      NEXT_PUBLIC_SITE_URL: https://friendlypartyrentalnyc.com
+      PUBLIC_BASE_URL: https://friendlypartyrentalnyc.com
+      PUBLIC_INDEXABLE: 'false'
+      NYC_ONLINE_PAYMENTS_ENABLED: 'false'
+      NYC_DELIVERY_FEES_JSON: '{}'
+      NEXT_TELEMETRY_DISABLED: '1'
+      NODE_PATH: /tmp/nyc-browser/node_modules
+      NYC_QA_OUTPUT: /tmp/nyc-search-proof
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify latest NYC integration without changing remote branches
+        run: |
+          test "${{ github.repository }}" = 'customerservice-prog/fpr-nyc'
+          git config user.name 'NYC isolated verification'
+          git config user.email 'ci@example.invalid'
+          git fetch origin production-nyc-live
+          git merge --no-commit --no-ff origin/production-nyc-live
+          git diff --check
+          node -e "if(new URL(process.env.DATABASE_URL).hostname!=='localhost')process.exit(1)"
+          mkdir -p /tmp/nyc-search-proof
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - name: Apply migrations only to disposable Postgres
+        run: npx prisma migrate deploy
+      - name: Search, domain, isolation, catalog and delivery tests
+        run: node --test tests/nyc-search-request.test.cjs tests/nyc-domain-isolation.test.cjs tests/nyc-search.test.cjs tests/nyc-tracking-isolation.test.cjs tests/nyc-catalog-routing.test.cjs tests/nyc-delivery.test.cjs | tee /tmp/nyc-search-proof/unit-tests.log
+      - run: npx tsc --noEmit
+      - name: Full production build with existing payment safeguards
+        run: npm run build > /tmp/nyc-search-proof/build.log 2>&1 || { tail -100 /tmp/nyc-search-proof/build.log; exit 1; }
+      - run: npm install --prefix /tmp/nyc-browser --no-save --package-lock=false playwright@1.56.1
+      - run: /tmp/nyc-browser/node_modules/.bin/playwright install --with-deps chromium
+      - name: Real React header integration with browser-only fixtures
+        run: |
+          npx next start -H 127.0.0.1 -p 3000 > /tmp/nyc-search-proof/app.log 2>&1 &
+          APP_PID=$!
+          trap 'kill $APP_PID 2>/dev/null || true' EXIT
+          READY=false
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/health >/dev/null; then READY=true; break; fi
+            sleep 2
+          done
+          test "$READY" = true
+          node tests/nyc-search-ui.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nyc-search-mobile-integration-proof
+          path: /tmp/nyc-search-proof
+          retention-days: 7

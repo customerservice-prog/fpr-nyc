@@ -3,8 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { NYC_LOGO_PATH, NYC_LOGO_WIDTH, NYC_LOGO_HEIGHT } from '@/lib/nycBrand'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
+import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
 import {
   Home,
   Settings,
@@ -56,13 +58,13 @@ export default function AdminNav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 h-20" style={{ backgroundColor: '#2d6a2d', borderBottom: '3px solid #4CAF50' }}>
       <div className="flex items-center gap-4">
-        <Link href="https://www.fpr-nyc-production.up.railway.app" target="_blank" rel="noopener noreferrer">
+        <Link href={NYC_PUBLIC_ORIGIN} target="_blank" rel="noopener noreferrer" className="block rounded-md bg-white p-1">
           <Image
-            src="/images/logo.png"
+            src={NYC_LOGO_PATH}
             alt="Friendly Party Rental NYC"
-            width={140}
-            height={48}
-            className="h-12 w-auto object-contain"
+            width={NYC_LOGO_WIDTH}
+            height={NYC_LOGO_HEIGHT}
+            className="block h-14 w-auto"
             unoptimized
           />
         </Link>

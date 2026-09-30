@@ -96,6 +96,7 @@ function layout(tracking) {
     '@/lib/nycServiceAreas': { NYC_SERVICE_AREAS: [
       { name:'Riverdale' }, { name:'Yonkers' }, { name:'Mount Vernon' }, { name:'New Rochelle' },
     ] },
+    '@/lib/nycBrand': load('lib/nycBrand.ts'),
     './globals.css': {},
   }, { process: { env: {} }, URL }).default({ children: 'Checkout remains available' })
 }
@@ -127,7 +128,7 @@ test('NYC config never redirects the SC Railway service into NYC', () => {
   for (const header of ['Content-Security-Policy','Strict-Transport-Security','X-Content-Type-Options','Referrer-Policy','X-Frame-Options','Cross-Origin-Opener-Policy']) {
     assert.match(source, new RegExp(header))
   }
-  assert.match(source, /form-action 'self' https:\/\/fpr-nyc-production\.up\.railway\.app/)
+  assert.match(source, /form-action 'self' https:\/\/friendlypartyrentalnyc\.com https:\/\/fpr-nyc-production\.up\.railway\.app/)
   assert.doesNotMatch(source, /friendly-party-rental-greenville-sc-production\.up\.railway\.app/)
   assert.doesNotMatch(source, /friendlypartyrentalsc\.com/)
   assert.match(source, /X-Robots-Tag/)

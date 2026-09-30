@@ -43,8 +43,8 @@ export default function GalleryPage() {
   return <div className="max-w-6xl mx-auto px-4 py-8" data-sc-gallery="20260921-oriented">
     <h1 className="text-3xl font-bold text-center mb-1">Gallery</h1>
     <div className="mx-auto mb-3 h-1 w-24 rounded-full bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-300"/>
-    <p className="text-center text-body mb-2">{shared ? 'Shared Brand Gallery & Event Inspiration' : 'Real Events, Real Setups, Real Smiles'}</p>
-    <p className="mx-auto max-w-3xl text-center text-body mb-6">{shared ? 'From Friendly Party Rental’s New York website. These are shared photos and design inspiration, not Riverdale event photos. Equipment and availability may differ by location.' : 'Browse photos from birthdays, weddings, graduations and events shared by our NYC / Downstate team.'}</p>
+    <p className="text-center text-body mb-2">{shared ? 'Event Setup Inspiration' : 'Real Events, Real Setups, Real Smiles'}</p>
+    <p className="mx-auto max-w-3xl text-center text-body mb-6">{shared ? 'Friendly Party Rental setups for design inspiration. Not every photo is from a Riverdale event; check each rental page for current NYC availability.' : 'Browse photos from birthdays, weddings, graduations and events shared by our NYC / Downstate team.'}</p>
     <div className="rounded-3xl bg-gradient-to-br from-amber-600 via-yellow-500 to-amber-800 p-[6px] shadow-xl">
       <div className="rounded-[1.4rem] bg-[#f5efe0] p-2 sm:p-4">
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-[#101820] md:aspect-[16/9]">

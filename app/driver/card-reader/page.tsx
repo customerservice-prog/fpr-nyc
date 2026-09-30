@@ -61,9 +61,7 @@ export default function DriverCardReaderPage() {
         body: JSON.stringify({ orderId: selected.id, amount: amt }),
       })
       const data = await res.json()
-      if (data.simulated) {
-        setDone(true)
-      } else if (data.clientSecret) {
+      if (data.clientSecret) {
         setClientSecret(data.clientSecret)
       } else {
         setError(data.error || 'Could not start payment')
@@ -83,7 +81,7 @@ export default function DriverCardReaderPage() {
         body: JSON.stringify({ amount: Number(amount), stripePaymentId: paymentIntentId, sendReceipt: true }),
       })
       const data = await res.json()
-      if (data.success) {
+      if (data.success || data.pending) {
         setDone(true)
       } else {
         setError(data.error || 'Could not confirm payment')

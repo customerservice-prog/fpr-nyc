@@ -54,6 +54,16 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
   const [addQuery, setAddQuery] = useState('')
   const [addResults, setAddResults] = useState<{ id: string; name: string; cost: number }[]>([])
   const [savingItems, setSavingItems] = useState(false)
+  const [paymentsAvailable, setPaymentsAvailable] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    let active = true
+    fetch('/api/payments/status', { cache: 'no-store' })
+      .then((response) => response.json())
+      .then((data) => { if (active) setPaymentsAvailable(data?.onlinePaymentsAvailable === true) })
+      .catch(() => { if (active) setPaymentsAvailable(false) })
+    return () => { active = false }
+  }, [])
 
   useEffect(() => {
     fetch(`/api/orders/${id}/public`)
@@ -177,12 +187,20 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
     })
     if (!response.ok) throw new Error('Your payment result needs verification. Please contact us before paying again.')
     const result = await response.json()
-    if (result.receipt?.orderId === id && result.receipt.status === 'succeeded') setReceipt(result.receipt)
+    if (result.pending) {
+      toast.success('Your payment is processing. We will email your receipt when it completes.')
+    } else if (result.receipt?.orderId === id && result.receipt.status === 'succeeded') {
+      setReceipt(result.receipt)
+    }
     setPaid(true)
   }
 
   const handlePay = async () => {
     if (!order) return
+    if (paymentsAvailable !== true) {
+      toast.error('Online payment is temporarily unavailable. Please call us at 315-884-1498.')
+      return
+    }
     if (amountDue <= 0) {
       toast.error('Please enter an amount greater than $0.')
       return
@@ -195,13 +213,8 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
         body: JSON.stringify({ orderId: order.id, amount: amountDue, tipAmount, saveCard }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Payment failed')
-
-      if (data.simulated) {
-        await confirmPayment(data.paymentIntentId)
-      } else {
-        setClientSecret(data.clientSecret)
-      }
+      if (!res.ok || !data.clientSecret) throw new Error(data.error || 'Payment failed')
+      setClientSecret(data.clientSecret)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Payment failed')
     } finally {
@@ -434,12 +447,17 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
       {!clientSecret && (
         <>
           <PaymentCardAuthorization checked={saveCard} onChange={setSaveCard} required={false} compact />
+          {paymentsAvailable === false && (
+            <div role="alert" className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-sm text-amber-900">
+              Online payment is temporarily unavailable. Please call Friendly Party Rental NYC at <a href="tel:315-884-1498" className="underline">315-884-1498</a>. No card has been charged.
+            </div>
+          )}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm text-body">
             <p>Payment is processed securely through Stripe.</p>
           </div>
           <button
             onClick={handlePay}
-            disabled={loading || amountDue <= 0}
+            disabled={loading || paymentsAvailable !== true || amountDue <= 0}
             className="btn-primary w-full text-lg py-3"
           >
             {loading ? 'Processing...' : `Pay ${formatCurrency(amountDue)}`}

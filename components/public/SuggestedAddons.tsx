@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useCart } from './CartContext'
+import { nycItemPath } from '@/lib/nycItemPath'
 import toast from 'react-hot-toast'
 
 export interface SuggestedAddon {
@@ -46,7 +47,7 @@ export default function SuggestedAddons({ addons }: { addons: SuggestedAddon[] }
             key={addon.id}
             className="group flex flex-col rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:border-amber-200"
           >
-            <Link href={`/items/${addon.slug}`} prefetch={false} className="block aspect-[4/3] w-full overflow-hidden rounded-t-2xl bg-amber-50">
+            <Link href={nycItemPath(addon.slug)} prefetch={false} className="block aspect-[4/3] w-full overflow-hidden rounded-t-2xl bg-amber-50">
               {addon.picture ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -61,7 +62,7 @@ export default function SuggestedAddons({ addons }: { addons: SuggestedAddon[] }
               )}
             </Link>
             <div className="flex flex-1 flex-col p-4">
-              <Link href={`/items/${addon.slug}`} prefetch={false} className="font-semibold text-gray-900 hover:text-amber-600">
+              <Link href={nycItemPath(addon.slug)} prefetch={false} className="font-semibold text-gray-900 hover:text-amber-600">
                 {addon.name}
               </Link>
               {addon.description && (
@@ -71,7 +72,7 @@ export default function SuggestedAddons({ addons }: { addons: SuggestedAddon[] }
                 <span className="text-base font-bold text-amber-700">${addon.cost.toFixed(2)}</span>
                 <button
                   type="button"
-                  onClick={() => { window.location.assign('/items/' + encodeURIComponent(addon.slug)) }}
+                  onClick={() => { window.location.assign(nycItemPath(addon.slug)) }}
                   className="shrink-0 whitespace-nowrap rounded-full bg-amber-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-amber-600 hover:shadow-md"
                 >
                   View Add-on

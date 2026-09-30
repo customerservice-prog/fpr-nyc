@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
                       console.error('Employment application email error:', emailError)
             }
 
-      return NextResponse.json({ success: true, saved: true, notificationSent, emailHref: nycEmailHref('Greenville employment application - ' + name) }, { status: notificationSent ? 200 : 202 })
+      return NextResponse.json({ success: true, saved: true, notificationSent, emailHref: nycEmailHref('NYC employment application - ' + name) }, { status: notificationSent ? 200 : 202 })
     } catch (error) {
           console.error('Employment application error:', error)
           return NextResponse.json({ error: 'Failed to submit' }, { status: 500 })

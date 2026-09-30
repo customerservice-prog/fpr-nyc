@@ -14,4 +14,6 @@ export const NYC_SERVICE_AREAS: NycServiceArea[] = [
   {name:'Pelham',slug:'pelham',href:'/party-rentals-pelham-ny',zips:['10803']},
 ]
 export const NYC_PRIORITY_AREAS=['riverdale','yonkers','new-rochelle','mount-vernon','fieldston','kingsbridge']
+/** Customer-facing summary of the delivery areas above (tests keep it in sync with NYC_SERVICE_AREAS). */
+export const NYC_SERVICE_AREA_SUMMARY='Riverdale, Fieldston, Kingsbridge and other selected Bronx neighborhoods, plus Yonkers, Mount Vernon, New Rochelle, Bronxville, Tuckahoe, Eastchester and Pelham in Lower Westchester'
 

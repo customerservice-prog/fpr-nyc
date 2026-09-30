@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { formatCurrency } from '@/lib/utils'
+import { formatTaxRatePercent } from '@/lib/nycSalesTax'
 
 interface QuoteItemInput {
 itemName: string
@@ -23,7 +24,7 @@ interface QuoteResult {
 items: QuoteResultItem[]
 unmatched: string[]
 subtotal: number
-taxRate: number
+taxRate: number | null
 taxAmount: number
 total: number
 }
@@ -280,7 +281,7 @@ status: 'quote',
 eventDate,
 eventTimeSlot: eventTime || undefined,
 subtotal: quote.subtotal,
-taxRate: quote.taxRate,
+taxRate: quote.taxRate ?? 0,
 taxAmount: quote.taxAmount,
 totalAmount: quote.total,
 balanceDue: quote.total,
@@ -497,7 +498,7 @@ Remove
 <span>{formatCurrency(quote.subtotal)}</span>
 </div>
 <div className="flex justify-between text-sm text-body">
-<span>Tax ({quote.taxRate}%)</span>
+<span>{quote.taxRate === null ? 'Tax (not set: add the delivery address tax in the order)' : 'Tax (' + formatTaxRatePercent(quote.taxRate) + ')'}</span>
 <span>{formatCurrency(quote.taxAmount)}</span>
 </div>
 <div className="flex justify-between font-bold text-dark mt-1">

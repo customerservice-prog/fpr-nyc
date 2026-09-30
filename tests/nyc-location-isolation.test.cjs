@@ -30,7 +30,10 @@ test('NYC app template keeps paid ads unconfigured', () => {
 
 test('NYC checkout fails closed when Stripe is not configured', () => {
   const checkout = read('app/api/checkout/route.ts')
-  assert.match(checkout, /Online payment is temporarily unavailable/)
+  const guard = read('lib/nycStripeGuard.ts')
+  assert.match(guard, /Online payment is temporarily unavailable/)
+  assert.match(checkout, /NYC_PAYMENTS_UNAVAILABLE_MESSAGE/)
+  assert.match(checkout, /await requireNycStripe\('charge'\)/)
   assert.match(checkout, /status: 503/)
   assert.doesNotMatch(checkout, /simulated_/)
   assert.doesNotMatch(checkout, /Payment simulated/)
@@ -39,7 +42,7 @@ test('NYC checkout fails closed when Stripe is not configured', () => {
 
 test('NYC active source does not contain the SC public domain or phone', () => {
   const roots = ['app','components','lib','prisma']
-  const banned = [/friendlypartyrentalsc\.com/i, /864[-. ]?610[-. ]?5324/]
+  const banned = [/friendlypartyrentalsc\.com/i, /\(?864\)?[-. ]?610[-. ]?5324/]
   const stack = roots.filter(fs.existsSync)
   while(stack.length){
     const p = stack.pop()

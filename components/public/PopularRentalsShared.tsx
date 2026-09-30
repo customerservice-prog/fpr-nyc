@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { nycItemPath } from '@/lib/nycItemPath'
 import { getHomepagePopularItems } from '@/lib/homepageMerchandising'
 
 export default async function PopularRentalsShared() {
@@ -19,7 +20,7 @@ export default async function PopularRentalsShared() {
       <Link href="/order-by-date" prefetch={false} className="btn-primary inline-flex min-h-12 items-center justify-center px-5 py-3 text-sm font-bold">Check My Event Date</Link>
     </div>
     {items.length ? <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-      {items.map(item => <Link key={item.id} href={'/items/'+item.slug} prefetch={false} className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+      {items.map(item => <Link key={item.id} href={nycItemPath(item.slug)} prefetch={false} className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
         <div className="aspect-square overflow-hidden bg-gray-50">
           <img src={item.picture || '/images/order-by-date.png'} alt={item.specialDisplayName || item.name} className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]" loading="lazy"/>
         </div>

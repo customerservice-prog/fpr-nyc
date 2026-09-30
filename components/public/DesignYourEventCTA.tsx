@@ -66,7 +66,7 @@ export default function DesignYourEventCTA({
   }
 
   if (!NYC_RENTSKETCH_TENANT) {
-    return <Link href={source.startsWith('design_your_event') || source === 'home_designer_section' ? '/contact_us' : '/design-your-event'} className={`${base} ${variants[variant] || variants.primary} ${className}`}>Get Greenville Layout Help</Link>
+    return <Link href={source.startsWith('design_your_event') || source === 'home_designer_section' ? '/contact_us' : '/design-your-event'} className={`${base} ${variants[variant] || variants.primary} ${className}`}>Get Riverdale Layout Help</Link>
   }
 
   if (source === 'mobile_home') {

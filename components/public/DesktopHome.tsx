@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { nycItemPath } from '@/lib/nycItemPath'
 import { CalendarCheck, LayoutGrid, MousePointerClick, Truck } from 'lucide-react'
 import HeroSection from './HeroSection'
 import HomeYouTube from './HomeYouTube'
@@ -84,7 +85,7 @@ export default function DesktopHome(props: MobileHomeProps) {
           <div><p className="text-xs font-bold uppercase tracking-[.22em] text-[#C85F00]">Booked by Riverdale customers</p><h2 className="mt-2 text-3xl font-bold text-dark">{text('popularHeading','Popular Rentals')}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-body">Real booking history helps surface equipment customers choose most often. Date availability is still checked for your event.</p></div>
           <Link href="/popular-rentals" className="font-bold text-secondary underline">View popular rentals</Link>
         </div>
-        <div className="grid grid-cols-4 gap-5">{popularItems.slice(0,8).map(item => <Link key={item.id} href={item.slug ? '/items/'+item.slug : '/category'} prefetch={false} className="overflow-hidden rounded-xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+        <div className="grid grid-cols-4 gap-5">{popularItems.slice(0,8).map(item => <Link key={item.id} href={item.slug ? nycItemPath(item.slug) : '/category'} prefetch={false} className="overflow-hidden rounded-xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
           <div className="relative aspect-[4/3] bg-white">{item.picture ? <Image src={item.picture} alt={item.name} fill sizes="25vw" className="object-contain p-3" /> : <div className="absolute inset-0 grid place-items-center text-sm text-gray-400">Photo coming soon</div>}</div>
           <div className="p-4"><h3 className="line-clamp-2 font-bold text-dark">{item.name}</h3><p className="mt-2 font-bold text-secondary">{formatCurrency(item.cost)}</p></div>
         </Link>)}</div>
@@ -117,7 +118,7 @@ export default function DesktopHome(props: MobileHomeProps) {
     {packages.length > 0 && <section id="packages" className="bg-white py-14">
       <div className="mx-auto max-w-7xl px-4">
         <h2 className="text-center text-3xl font-bold text-dark">{text('desktopPackagesHeading','Wedding Rental Packages')}</h2>
-        <p className="mx-auto mb-9 mt-3 max-w-2xl text-center text-body">Compare each package’s listed equipment and services. Travel fees and tax are separate.</p>
+        <p className="mx-auto mb-9 mt-3 max-w-2xl text-center text-body">Compare each package’s listed equipment and services. Delivery fees and tax are separate.</p>
         <div className="grid grid-cols-3 gap-6">{packages.map((pkg,index) => <WeddingPackageCard key={pkg.id} {...pkg} items={pkg.items || []} image={pkg.image || undefined} packageNumber={index+1} />)}</div>
         <div className="mt-8 text-center"><Link href="/weddings" className="btn-primary inline-block">View All Wedding Packages</Link></div>
       </div>

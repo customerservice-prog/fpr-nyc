@@ -5,6 +5,7 @@ import {authOptions} from '@/lib/auth'
 import {getSearchConsoleSummary} from '@/lib/search-console'
 import {normalizeNycSearchProperty,NYC_GSC_DOMAIN_PROPERTY,NYC_GSC_URL_PREFIX} from '@/lib/nycSearchReadiness'
 import {NYC_SERVICE_AREAS} from '@/lib/nycServiceAreas'
+import {NYC_PUBLIC_ORIGIN} from '@/lib/nycPublicOrigin'
 export const dynamic='force-dynamic'
 export const metadata={title:'Riverdale Google Search Visibility',robots:{index:false,follow:false}}
 export default async function SearchVisibilityPage(){
@@ -37,7 +38,7 @@ export default async function SearchVisibilityPage(){
     </section>
     <section className="rounded-xl border p-5">
       <h2 className="text-lg font-bold">Submit and check public pages</h2>
-      <p className="mt-2 break-all">Sitemap: <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="underline text-blue-700">https://fpr-nyc-production.up.railway.app/sitemap.xml</a></p>
+      <p className="mt-2 break-all">Sitemap: <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="underline text-blue-700">{NYC_PUBLIC_ORIGIN + '/sitemap.xml'}</a></p>
       <p className="mt-3">After ownership is verified, submit this sitemap in Search Console and inspect the homepage, key rental categories and nearby-area guides. A sitemap request is not a guarantee of indexing.</p>
       <div className="mt-3 flex flex-wrap gap-4"><a href={'https://search.google.com/search-console/sitemaps?resource_id='+resource} target="_blank" rel="noopener noreferrer" className="underline text-blue-700">Open Google Sitemaps</a><Link href="/service-area" className="underline text-blue-700">Review {NYC_SERVICE_AREAS.length} listed communities</Link><Link href="/category" className="underline text-blue-700">Public rental categories</Link></div>
     </section>

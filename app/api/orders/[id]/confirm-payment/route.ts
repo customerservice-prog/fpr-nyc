@@ -2,65 +2,63 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { stripe } from '@/lib/stripe'
-import { finalizePayment } from '@/lib/payments'
+import { describeStripeError, isNycPaymentsUnavailable, requireNycStripe } from '@/lib/stripe'
 import { buildPaymentReceipt } from '@/lib/paymentReceipt'
+import { PaymentAssociationError, loadOrderForIntent, recordSucceededIntent } from '@/lib/nycStripeReconcile'
+
+// Records a customer's payment only after the server re-reads the PaymentIntent
+// from the NYC Stripe account and confirms it succeeded for THIS order. Reaching a
+// confirmation page never marks an order paid by itself, and there is no simulated
+// payment path. Amount, tip, and saved-card details come from Stripe/metadata,
+// never from the browser.
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { amount, tipAmount, stripePaymentId, saveCard, sendReceipt } = await request.json()
-    let paidAmount = Number(amount) || 0
-    let verifiedIntent: any = null
-    let savedPaymentMethodId: string | null = null
-    let stripeCustomerId: string | null = null
+    const { id } = await params
+    const body = await request.json().catch(() => ({}))
+    const stripePaymentId = typeof body?.stripePaymentId === 'string' ? body.stripePaymentId.trim() : ''
+    if (!/^pi_[A-Za-z0-9]+$/.test(stripePaymentId)) {
+      return NextResponse.json({ error: 'Payment could not be verified' }, { status: 400 })
+    }
 
-    const order = await prisma.order.findUnique({ where: { id: (await params).id } })
+    const order = await prisma.order.findUnique({ where: { id } })
     if (!order) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 
-    if (stripePaymentId && stripePaymentId.startsWith('simulated_')) {
-      // Local/dev fallback only. Simulated payments are never advertising conversion evidence.
-      if (!paidAmount) return NextResponse.json({ error: 'Simulated payment amount is required' }, { status: 400 })
-    } else if (stripePaymentId && stripe) {
-      const intent = await stripe.paymentIntents.retrieve(stripePaymentId)
-      if (intent.status !== 'succeeded') {
-        return NextResponse.json({ error: 'Payment has not completed yet' }, { status: 409 })
-      }
-      if (intent.metadata?.orderId !== order.id) {
-        return NextResponse.json({ error: 'Payment does not match this order' }, { status: 400 })
-      }
-      if (!Number.isSafeInteger(intent.amount_received) || intent.amount_received <= 0) {
-        return NextResponse.json({ error: 'Payment amount could not be verified' }, { status: 400 })
-      }
-      paidAmount = intent.amount_received / 100
-      verifiedIntent = intent
-      if (saveCard) {
-        savedPaymentMethodId = typeof intent.payment_method === 'string' ? intent.payment_method : (intent.payment_method?.id || null)
-        stripeCustomerId = typeof intent.customer === 'string' ? intent.customer : (intent.customer?.id || order.stripeCustomerId || null)
-      }
-    } else {
-      return NextResponse.json({ error: 'Payment could not be verified' }, { status: 400 })
+    const stripe = await requireNycStripe('reconcile')
+    const intent = await stripe.paymentIntents.retrieve(stripePaymentId)
+    const { order: linkedOrder } = await loadOrderForIntent(intent)
+    if (linkedOrder.id !== order.id) {
+      return NextResponse.json({ error: 'Payment does not match this order' }, { status: 400 })
     }
 
-    const updated = await finalizePayment({
-      orderId: order.id,
-      tipAmount: Number(tipAmount) || 0,
-      amount: paidAmount,
-      stripePaymentId: stripePaymentId || null,
-      sendReceipt: sendReceipt !== false,
-      ...(savedPaymentMethodId ? { savedPaymentMethodId } : {}),
-      ...(stripeCustomerId ? { stripeCustomerId } : {}),
-      ...(saveCard ? { autopayEnabled: true } : {}),
-    })
+    if (intent.status === 'processing') {
+      return NextResponse.json({ pending: true, message: 'Your payment is processing. We will email your receipt as soon as it completes.' }, { status: 202 })
+    }
+    if (intent.status !== 'succeeded') {
+      return NextResponse.json({ error: 'Payment has not completed yet' }, { status: 409 })
+    }
 
-    const receipt = verifiedIntent ? buildPaymentReceipt(verifiedIntent, updated as any) : null
+    const updated = await recordSucceededIntent(intent, { sendReceipt: body?.sendReceipt !== false })
+    const receipt = buildPaymentReceipt(intent, updated as any)
     return NextResponse.json({ success: true, order: updated, receipt })
   } catch (error) {
-    console.error('Confirm payment error:', error)
+    if (error instanceof PaymentAssociationError) {
+      console.error('[confirm-payment] Payment/order mismatch:', error.reason)
+      return NextResponse.json({ error: 'Payment does not match this order' }, { status: 400 })
+    }
+    if (isNycPaymentsUnavailable(error)) {
+      console.error('[confirm-payment] Stripe unavailable:', error.reason)
+      return NextResponse.json({ error: 'Payment verification is temporarily unavailable. Please contact us before paying again.' }, { status: 503 })
+    }
+    if ((error as { code?: string })?.code === 'resource_missing') {
+      return NextResponse.json({ error: 'Payment could not be verified' }, { status: 400 })
+    }
+    console.error('[confirm-payment] Failed to record payment:', describeStripeError(error))
     return NextResponse.json({ error: 'Failed to record payment' }, { status: 500 })
   }
 }

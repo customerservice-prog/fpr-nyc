@@ -1,0 +1,123 @@
+name: NYC checkout pricing check
+on:
+  push:
+    branches: [nyc-checkout-pricing-20260930]
+  pull_request:
+    branches: [production-nyc-live]
+permissions:
+  contents: read
+concurrency:
+  group: nyc-checkout-pricing-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  pricing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: nyc_ci
+          POSTGRES_PASSWORD: ci_disposable_only
+          POSTGRES_DB: nyc_ci
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      # Disposable CI database and CI-only values. No production data, keys or emails.
+      DATABASE_URL: postgresql://nyc_ci:ci_disposable_only@localhost:5432/nyc_ci
+      PUBLIC_INDEXABLE: 'false'
+      NYC_DELIVERY_FEES_JSON: '{}'
+      NEXT_PUBLIC_SITE_URL: https://friendlypartyrentalnyc.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - name: Apply the full migration history to an empty disposable database
+        run: npx prisma migrate deploy
+      - name: Pricing, sales tax, payment safeguard and delivery regressions
+        run: node --test tests/nyc-stripe-safeguards.test.cjs tests/nyc-checkout-pricing.test.cjs tests/nyc-delivery.test.cjs tests/nyc-location-isolation.test.cjs tests/nyc-tracking-isolation.test.cjs
+      - name: TypeScript check
+        run: npx tsc --noEmit
+      - name: Production build
+        run: npm run build
+      - name: End-to-end pricing APIs against the built app (CI-only data and fees)
+        env:
+          PORT: '3100'
+          # CI-only test values. They are not NYC prices and never leave this job.
+          NYC_DELIVERY_FEES_JSON: '{"10471":80,"10550":95,"10708":90}'
+          NYC_CHECKOUT_POLICY_JSON: '{"minimumOrderSubtotal":150,"damageWaiverPercent":null,"lastMinuteFee":null,"exactDeliveryFee":null,"exactPickupFee":null,"lateExactPickupFee":null,"approvedOn":"2000-01-01"}'
+        run: |
+          node - <<'JS'
+          const {PrismaClient}=require('@prisma/client')
+          const p=new PrismaClient()
+          ;(async()=>{
+            const tent=await p.category.findUnique({where:{slug:'tent-rentals'}})
+            if(!tent)throw new Error('restored NYC categories missing')
+            const item=(id,name,cost,extra={})=>p.item.upsert({where:{id},update:{},create:{id,name,slug:id,cost,quantity:50,status:'Available',displayToCustomer:true,categoryId:tent.id,...extra}})
+            await item('ci-tent','CI TEST Tent',300)
+            await item('ci-chair','CI TEST Chair',2.5)
+            await item('ci-hidden','CI TEST Hidden',10,{displayToCustomer:false})
+            await item('ci-unpriced','CI TEST Unpriced',0)
+            await p.depositRule.create({data:{id:'ci-deposit',type:'percentage',amount:25,isActive:true}})
+            console.log('CI-only catalog rows created')
+          })().finally(()=>p.$disconnect()).catch(e=>{console.error(e);process.exit(1)})
+          JS
+          npx next start -H 127.0.0.1 -p 3100 > next.log 2>&1 &
+          for i in $(seq 1 60); do curl -fsS http://127.0.0.1:3100/health >/dev/null 2>&1 && break; sleep 2; done
+          node - <<'JS'
+          const assert=require('node:assert/strict')
+          const base='http://127.0.0.1:3100'
+          const day=24*3600*1000
+          const date=days=>new Date(Date.now()+days*day).toISOString().slice(0,10)
+          const get=async path=>{const r=await fetch(base+path,{cache:'no-store'});return {status:r.status,body:await r.json()}}
+          const quote=async body=>{const r=await fetch(base+'/api/checkout/quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({deliveryType:'delivery',eventDate:date(20),eventZip:'10471',items:[{id:'ci-tent',quantity:1},{id:'ci-chair',quantity:40}],...body})});return {status:r.status,body:await r.json()}}
+          ;(async()=>{
+            const policy=await get('/api/checkout-policy')
+            assert.equal(policy.body.configured,true);assert.equal(policy.body.policy.minimumOrderSubtotal,150);assert.equal(policy.body.policy.damageWaiverPercent,null)
+            const bronxRate=await get('/api/tax-rate?zip=10471');assert.equal(bronxRate.body.rate.rate,8.875);assert.equal(bronxRate.body.rate.reportingCode,'8081')
+            const mvRate=await get('/api/tax-rate?zip=10550');assert.equal(mvRate.body.rate.rate,8.375);assert.equal(mvRate.body.rate.reportingCode,'5521')
+            const mixed=await get('/api/tax-rate?zip=10708');assert.equal(mixed.body.rate,null);assert.equal(mixed.body.status,'needs_address_review')
+            const outside=await get('/api/tax-rate?zip=10001');assert.equal(outside.body.rate,null);assert.equal(outside.body.status,'unknown_zip')
+            const bronx=await quote({})
+            assert.equal(bronx.status,200,JSON.stringify(bronx.body))
+            // 400 rentals + 80 delivery = 480 taxable; 8.875% = 42.60; total 522.60; 25% deposit = 130.65
+            assert.equal(bronx.body.pricing.cartSubtotal,400);assert.equal(bronx.body.pricing.deliveryFee,80)
+            assert.equal(bronx.body.pricing.taxAmount,42.6);assert.equal(Math.round(bronx.body.pricing.grandTotal*100),52260)
+            assert.equal(bronx.body.pricing.requiredDeposit,130.65);assert.equal(bronx.body.pricing.taxJurisdiction.reportingCode,'8081')
+            const mountVernon=await quote({eventZip:'10550'})
+            // 400 + 95 = 495; 8.375% = 41.46; total 536.46
+            assert.equal(mountVernon.status,200);assert.equal(mountVernon.body.pricing.taxAmount,41.46);assert.equal(Math.round(mountVernon.body.pricing.grandTotal*100),53646)
+            const cases=[
+              [{eventZip:'10708'},409,'tax_address_review'],
+              [{eventZip:'10463'},503,'delivery_quote'],
+              [{eventZip:'10001'},400,'delivery_quote'],
+              [{damageWaiver:true},400,'damage_waiver_not_offered'],
+              [{schedulingDetails:{eventStartTime:'14:00',exactDeliveryRequested:true,exactDeliveryTime:'10:00',pickupType:'flexible'}},400,'exact_delivery_not_offered'],
+              [{schedulingDetails:{eventStartTime:'14:00',pickupType:'exact',exactPickupTime:'19:00'}},400,'exact_pickup_not_offered'],
+              [{eventDate:date(2)},400,'last_minute_not_offered'],
+              [{items:[{id:'ci-chair',quantity:10}]},400,'below_minimum'],
+              [{items:[{id:'ci-hidden',quantity:20}]},409,'item_unavailable'],
+              [{items:[{id:'ci-unpriced',quantity:1},{id:'ci-tent',quantity:1}]},409,'item_unavailable'],
+              [{items:[{id:'ci-tent',quantity:1.5}]},400,'cart_invalid'],
+              [{deliveryType:'pickup'},400,'delivery_quote'],
+            ]
+            for(const [body,status,code] of cases){const r=await quote(body);assert.equal(r.status,status,JSON.stringify(body)+' '+JSON.stringify(r.body));assert.equal(r.body.code,code,JSON.stringify(body));assert.equal(r.body.pricing,undefined)}
+            const status=await get('/api/payments/status')
+            assert.equal(status.body.onlinePaymentsAvailable,false);assert.equal(status.body.onlineCheckoutAvailable,false)
+            assert.equal(status.body.checks.checkoutPolicyConfigured,true);assert.equal(status.body.checks.deliveryFeesConfigured,true);assert.equal(status.body.checks.taxRateConfigured,true)
+            assert.equal(status.body.checks.stripeKeysConfigured,false);assert.equal(status.body.checks.onlinePaymentsSwitchOn,false)
+            const order=await fetch(base+'/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({deliveryType:'delivery',firstName:'CI',lastName:'Only',email:'ci@example.invalid',eventDate:date(20),eventAddress:'1 CI Test Way',eventCity:'Bronx',eventZip:'10471',items:[{id:'ci-tent',quantity:1}],deliveryFee:80,totalAmount:1,depositAmount:1})})
+            assert.equal(order.status,503,'orders are refused before anything is written while payments are off')
+            const chat=async message=>(await (await fetch(base+'/api/chat-assistant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})})).json()).answer
+            assert.match(await chat('Is there sales tax on my order?'),/8\.875%/)
+            assert.match(await chat('Do you charge a damage waiver?'),/not offered online/)
+            assert.doesNotMatch(await chat('What areas do you serve?'),/Greer|Spartanburg|Simpsonville/)
+            console.log('End-to-end pricing checks passed')
+          })().catch(e=>{console.error(e);process.exit(1)})
+          JS
+      - name: App log (on failure)
+        if: failure()
+        run: tail -n 200 next.log || true

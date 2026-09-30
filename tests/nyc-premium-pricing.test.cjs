@@ -29,7 +29,7 @@ test('NYC high-end anchor prices match owner-approved 70% policy', () => {
   assert.equal(bySlug['20x30-pole-tent'].nycPrice, 595)
   assert.equal(bySlug['20x40-pole-tent'].nycPrice, 765)
   assert.equal(bySlug['white-plastic-folding-chair'].nycPrice, 4.25)
-  assert.equal(bySlug['gold-chiavari-chair'].nycPrice, 13.6)
+  assert.equal(bySlug['gold-chiavari-chair'].nycPrice, 20.38)
   assert.equal(bySlug['foam-party-machine'].nycPrice, 467.5)
   assert.equal(bySlug['cornhole'].nycPrice, 68)
   assert.equal(bySlug['photobooth-3-hour-with-attendant'].nycPrice, 933.3)

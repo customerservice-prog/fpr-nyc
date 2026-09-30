@@ -7,7 +7,9 @@ import ItemCard from '@/components/public/ItemCard'
 import BookingCalendar from '@/components/public/BookingCalendar'
 import CartDrawer from '@/components/public/CartDrawer'
 import { useCart, DEFAULT_SCHEDULING_DETAILS } from '@/components/public/CartContext'
-import { formatDateShort } from '@/lib/utils'
+import { formatCurrency, formatDateShort } from '@/lib/utils'
+import { useCheckoutPolicy } from '@/components/public/useCheckoutPolicy'
+import { exactPickupFeeForPolicy, isLateExactPickupTime } from '@/lib/nycCheckoutPolicy'
 import { categorySearchName } from '@/lib/nycSearchReadiness'
 import { ShoppingCart, CalendarDays, Pencil, Truck, MapPin } from 'lucide-react'
 
@@ -33,7 +35,6 @@ const APPOINTMENT_TIME_OPTIONS: { value: string; label: string }[] = (() => {
   return options
 })()
 
-const EXACT_DELIVERY_FEE = 50
 const DEFAULT_SETUP_BUFFER_MINUTES = 120
 
 const DELIVERY_WINDOWS: { start: string; end: string; label: string }[] = [
@@ -78,13 +79,6 @@ function buildTimeOptions(startMins: number, endMins: number): { value: string; 
 const EVENT_TIME_OPTIONS = buildTimeOptions(7 * 60, 23 * 60 + 30)
 const EXACT_DELIVERY_TIME_OPTIONS_FULL = buildTimeOptions(8 * 60, 18 * 60)
 const EXACT_PICKUP_TIME_OPTIONS = buildTimeOptions(12 * 60, 23 * 60 + 30)
-
-function getExactPickupFee(time: string): number {
-  const mins = timeToMinutes(time)
-  if (mins < 0) return 50
-  if (mins < 22 * 60) return 50
-  return 75
-}
 
 function getValidDeliveryWindows(eventStartTime: string): { start: string; end: string; label: string }[] {
   const eventMins = timeToMinutes(eventStartTime)
@@ -162,6 +156,13 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
   const [wantsExactDelivery, setWantsExactDelivery] = useState(false)
   const [exactDeliveryTime, setExactDeliveryTime] = useState('')
   const [pickupType, setPickupTypeLocal] = useState<'flexible' | 'requiredBy' | 'exact'>('flexible')
+  // Exact-time options and their fees come only from the owner-approved checkout policy.
+  const checkoutPolicy = useCheckoutPolicy()
+  const approvedPolicy = checkoutPolicy?.policy ?? null
+  const exactDeliveryFee = approvedPolicy?.exactDeliveryFee ?? null
+  const exactPickupOffered = approvedPolicy?.exactPickupFee != null
+  const exactPickupTimeOptions = EXACT_PICKUP_TIME_OPTIONS.filter((opt) => approvedPolicy?.lateExactPickupFee != null || !isLateExactPickupTime(opt.value))
+  const selectedExactPickupFee = exactPickupFeeForPolicy(approvedPolicy, exactPickupTime)
   const [pickupRequiredByTime, setPickupRequiredByTime] = useState('')
   const [exactPickupTime, setExactPickupTime] = useState('')
   const [appointmentSlot, setAppointmentSlot] = useState('')
@@ -316,11 +317,11 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
         deliveryWindowEnd: wantsExactDelivery ? null : (deliveryWindow?.end || null),
         exactDeliveryRequested: wantsExactDelivery,
         exactDeliveryTime: wantsExactDelivery ? exactDeliveryTime : null,
-        exactDeliveryFee: wantsExactDelivery ? EXACT_DELIVERY_FEE : 0,
+        exactDeliveryFee: wantsExactDelivery ? (exactDeliveryFee ?? 0) : 0,
         pickupType,
         pickupRequiredByTime: pickupType === 'requiredBy' ? pickupRequiredByTime : null,
         exactPickupTime: pickupType === 'exact' ? exactPickupTime : null,
-        exactPickupFee: pickupType === 'exact' ? getExactPickupFee(exactPickupTime) : 0,
+        exactPickupFee: pickupType === 'exact' ? (selectedExactPickupFee ?? 0) : 0,
         latePickupApprovalRequired: false,
       })
     } else {
@@ -358,8 +359,8 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
     ? (
         !!eventStartTime &&
         !!eventEndTime &&
-        (wantsExactDelivery ? !!exactDeliveryTime : !!deliveryWindow) &&
-        (pickupType === 'flexible' || (pickupType === 'requiredBy' ? !!pickupRequiredByTime : !!exactPickupTime))
+        (wantsExactDelivery ? exactDeliveryFee !== null && !!exactDeliveryTime : !!deliveryWindow) &&
+        (pickupType === 'flexible' || (pickupType === 'requiredBy' ? !!pickupRequiredByTime : selectedExactPickupFee !== null && !!exactPickupTime))
       )
     : !!appointmentSlot && (appointmentSlot !== 'specific' || !!appointmentSpecificTime)
 
@@ -562,7 +563,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
                     </div>
                   )}
 
-                  <div className="mb-4 border-t pt-3">
+                  {exactDeliveryFee !== null && <div className="mb-4 border-t pt-3">
                     <label className="flex items-start gap-2 text-sm text-body cursor-pointer">
                       <input
                         type="checkbox"
@@ -571,7 +572,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
                         className="mt-1"
                       />
                       <span>
-                        <span className="font-medium text-dark">Need us there at a specific time? Priority Exact-Time Delivery +${EXACT_DELIVERY_FEE}</span>
+                        <span className="font-medium text-dark">Need us there at a specific time? Priority Exact-Time Delivery +{formatCurrency(exactDeliveryFee)}</span>
                         <br />
                         <span className="text-xs text-gray-500">Choose this option only if your venue or event requires our crew to arrive at a specific time.</span>
                       </span>
@@ -588,7 +589,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
                         ))}
                       </select>
                     )}
-                  </div>
+                  </div>}
 
                   <h2 className="font-bold text-dark mb-3">Choose Your Pickup</h2>
                   <div className="space-y-2 mb-4">
@@ -637,7 +638,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
                       </select>
                     )}
 
-                    <label className={`flex items-start gap-2 border rounded p-3 cursor-pointer text-sm ${pickupType === 'exact' ? 'border-primary bg-primary/5' : 'border-gray-200'}`}>
+                    {exactPickupOffered && approvedPolicy && <label className={`flex items-start gap-2 border rounded p-3 cursor-pointer text-sm ${pickupType === 'exact' ? 'border-primary bg-primary/5' : 'border-gray-200'}`}>
                       <input
                         type="radio"
                         name="pickupType"
@@ -648,10 +649,10 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
                       <span>
                         <span className="font-medium text-dark">Guaranteed Exact Pickup Time</span>
                         <br />
-                        <span className="text-xs text-gray-500">We'll pick up at the exact time you choose. Fee is $50 for times before 10pm, $75 for times between 10pm and 11:30pm.</span>
+                        <span className="text-xs text-gray-500">We'll pick up at the exact time you choose. Fee is {formatCurrency(approvedPolicy.exactPickupFee ?? 0)}{approvedPolicy.lateExactPickupFee !== null ? ' for times before 10pm, ' + formatCurrency(approvedPolicy.lateExactPickupFee) + ' for times between 10pm and 11:30pm' : ' (times up to 9:30pm)'}.</span>
                       </span>
-                    </label>
-                    {pickupType === 'exact' && (
+                    </label>}
+                    {exactPickupOffered && pickupType === 'exact' && (
                       <>
                         <select
                           value={exactPickupTime}
@@ -659,12 +660,12 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
                           className="w-full border rounded px-3 py-2"
                         >
                           <option value="">Select a time</option>
-                          {EXACT_PICKUP_TIME_OPTIONS.map((opt) => (
+                          {exactPickupTimeOptions.map((opt) => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                           ))}
                         </select>
-                        {exactPickupTime && (
-                          <p className="text-xs text-gray-600">Exact pickup fee: ${getExactPickupFee(exactPickupTime)}</p>
+                        {exactPickupTime && selectedExactPickupFee !== null && (
+                          <p className="text-xs text-gray-600">Exact pickup fee: {formatCurrency(selectedExactPickupFee)}</p>
                         )}
                       </>
                     )}

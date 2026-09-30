@@ -117,7 +117,7 @@ export default function DesktopHome(props: MobileHomeProps) {
     {packages.length > 0 && <section id="packages" className="bg-white py-14">
       <div className="mx-auto max-w-7xl px-4">
         <h2 className="text-center text-3xl font-bold text-dark">{text('desktopPackagesHeading','Wedding Rental Packages')}</h2>
-        <p className="mx-auto mb-9 mt-3 max-w-2xl text-center text-body">Compare each package’s listed equipment and services. Travel fees and tax are separate.</p>
+        <p className="mx-auto mb-9 mt-3 max-w-2xl text-center text-body">Compare each package’s listed equipment and services. Delivery fees and tax are separate.</p>
         <div className="grid grid-cols-3 gap-6">{packages.map((pkg,index) => <WeddingPackageCard key={pkg.id} {...pkg} items={pkg.items || []} image={pkg.image || undefined} packageNumber={index+1} />)}</div>
         <div className="mt-8 text-center"><Link href="/weddings" className="btn-primary inline-block">View All Wedding Packages</Link></div>
       </div>

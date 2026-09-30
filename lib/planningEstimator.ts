@@ -1,8 +1,9 @@
-import { planningPackages, planningServices } from './eventPlanning'
+import { PLANNING_EXTRA_HOURLY_RATE, PLANNING_PRICES_APPROVED, planningPackageItems, planningPackages, planningServices } from './eventPlanning'
 
 export const ESTIMATE_STORAGE_KEY = 'fpr-planning-estimate-v1'
 export const ESTIMATE_EVENT = 'fpr:planning-estimate'
-export const EXTRA_PLANNING_RATE = 85
+/** Hourly rate for additional planning time, or null while NYC planning prices are not approved. */
+export const EXTRA_PLANNING_RATE: number | null = PLANNING_PRICES_APPROVED ? PLANNING_EXTRA_HOURLY_RATE : null
 export const MAX_RENTAL_SELECTIONS = 24
 export const MAX_RENTAL_QUANTITY = 9999
 export type PlanningProgress = 'ready' | 'mostly' | 'some' | 'starting'
@@ -38,7 +39,10 @@ function includedHours(number: number): number {
   return parent ? includedHours(parent.number) : 0
 }
 export const estimatePackages = planningPackages.map(pkg => ({
-  ...pkg, amount: Number(pkg.price.replace(/[^\d.]/g, '')), hours: includedHours(pkg.number),
+  ...pkg, items: planningPackageItems(pkg),
+  // Only an approved NYC planning price is ever shown or added to an estimate.
+  amount: PLANNING_PRICES_APPROVED ? Number(pkg.price.replace(/[^\d.]/g, '')) : null as number | null,
+  hours: includedHours(pkg.number),
   caption: [
     'Your plans, handled on the day.', 'Coordination with a styling hand.',
     'Bring every moving part together.', 'A partner for the details still ahead.',
@@ -96,8 +100,10 @@ export function calculateEstimate(details: EstimateDetails, items: EstimateItem[
   const pkg = estimatePackages.find(p => p.number === d.packageNumber) || null
   const extraOnsiteHours = pkg ? Math.max(0, d.onsiteHours - pkg.hours) : 0
   const extraHours = pkg ? extraOnsiteHours + d.extraPrepHours : 0
-  const planningCents = pkg ? Math.round(pkg.amount * 100) : 0
-  const extraCents = extraHours * EXTRA_PLANNING_RATE * 100
+  // Planning is priced only from approved amounts; otherwise it is quoted and left out of the subtotal.
+  const planningPriced = !!pkg && pkg.amount !== null && Number.isFinite(pkg.amount) && pkg.amount > 0 && EXTRA_PLANNING_RATE !== null
+  const planningCents = planningPriced && pkg && pkg.amount !== null ? Math.round(pkg.amount * 100) : 0
+  const extraCents = planningPriced && EXTRA_PLANNING_RATE !== null ? extraHours * EXTRA_PLANNING_RATE * 100 : 0
   const chosen = sanitizeSelections(selections)
   const lines: EstimateLine[] = []
   const unpriced: string[] = []
@@ -112,7 +118,7 @@ export function calculateEstimate(details: EstimateDetails, items: EstimateItem[
   const rentalCents = lines.reduce((sum, line) => sum + line.cents, 0)
   const deliveryCents = deliveryFee !== null && Number.isFinite(deliveryFee) && deliveryFee >= 0 && deliveryFee <= 1000000 ? Math.round(deliveryFee * 100) : null
   const subtotalCents = planningCents + extraCents + rentalCents + (deliveryCents ?? 0)
-  return { pkg, extraOnsiteHours, extraHours, planningCents, extraCents, lines, rentalCents, deliveryCents, subtotalCents, perGuest: subtotalCents / 100 / d.guests, unpriced, unavailable, custom: !pkg || !!pkg.startingAt, tableCount: Math.ceil(d.guests / d.seatsPerTable) }
+  return { pkg, planningPriced, extraOnsiteHours, extraHours, planningCents, extraCents, lines, rentalCents, deliveryCents, subtotalCents, perGuest: subtotalCents / 100 / d.guests, unpriced, unavailable, custom: !pkg || !!pkg.startingAt || !planningPriced, tableCount: Math.ceil(d.guests / d.seatsPerTable) }
 }
 export function estimateInquiry(details: EstimateDetails, result: ReturnType<typeof calculateEstimate>): InquiryEstimate {
   const d = sanitizeEstimate(details)
@@ -121,9 +127,9 @@ export function estimateInquiry(details: EstimateDetails, result: ReturnType<typ
     'VISUAL EVENT ESTIMATE — NOT A BOOKING OR FINAL QUOTE',
     `Event: ${d.eventType}; ${d.guests} guests; ${d.setting}; ${d.eventDate || 'date undecided'}.`,
     `Progress: ${progress}. Styling help: ${d.styling ? 'requested; scope and price to confirm' : 'not requested'}.`,
-    `Planning: ${result.pkg?.name || 'Custom consultation'}${result.pkg?.startingAt ? ' (starting price)' : ''}.`,
+    `Planning: ${result.pkg?.name || 'Custom consultation'}${result.planningPriced && result.pkg?.startingAt ? ' (starting price)' : ''}.`,
     `Requested on-site coverage: ${d.onsiteHours} hours. Extra preparation: ${d.extraPrepHours} hours.`,
-    `Published planning base: ${result.pkg ? money(result.planningCents / 100) : 'Custom quote required'}. Additional planning time: ${result.pkg ? money(result.extraCents / 100) : 'Quote required'}.`,
+    `Published planning base: ${result.planningPriced ? money(result.planningCents / 100) : 'Quote required'}. Additional planning time: ${result.planningPriced ? money(result.extraCents / 100) : 'Quote required'}.`,
     `Seating assumption: ${d.seatsPerTable} guests per table; confirm actual table capacity.`,
   ].join('\n')
   const footer = [

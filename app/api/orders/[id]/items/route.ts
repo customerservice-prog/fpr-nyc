@@ -33,6 +33,17 @@ export async function POST(
     )
   }
 
+  // Online orders were priced by the NYC server pricing (delivery ZIP tax jurisdiction,
+  // approved fees and deposit). This simplified item recalculation cannot reproduce
+  // that, so an online order is never re-priced here; the customer starts a new
+  // checkout or calls the office.
+  if (order.source === 'online') {
+    return NextResponse.json(
+      { error: 'Items on an online order cannot be changed here. Please start a new checkout or call 315-884-1498.' },
+      { status: 403 }
+    )
+  }
+
   if (order.items.some((i) => !i.itemId)) {
     return NextResponse.json(
       { error: 'This quote cannot be edited online. Please call 315-884-1498 to make changes.' },

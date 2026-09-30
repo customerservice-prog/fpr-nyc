@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { RefObject, MouseEvent as ReactMouseEvent } from 'react'
 import MobileHome from '@/components/public/MobileHome'
+import { NYC_SERVICE_AREA_SUMMARY } from '@/lib/nycServiceAreas'
 
 type HeroDraft = {
     mobileImageUrl: string | null
@@ -83,7 +84,7 @@ const CONTENT_LABELS: Record<string, string> = {
 const SEO_SECTION = (
     <section className="max-w-4xl mx-auto px-4 py-8 space-y-6 text-sm text-body">
         <p>Friendly Party Rental NYC provides reliable and affordable party rentals in Riverdale, NY and surrounding Downstate New York communities.</p>
-        <p>Serving Riverdale, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, Piedmont, and surrounding Downstate New York areas.</p>
+        <p>Serving {NYC_SERVICE_AREA_SUMMARY}.</p>
     </section>
   )
   

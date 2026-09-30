@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
       pickupTimeSlot: body.pickupTimeSlot || null,
       eventAddress: body.eventAddress,
       eventCity: body.eventCity,
-      eventState: body.eventState || 'SC',
+      eventState: body.eventState || 'NY',
       eventZip: body.eventZip,
       deliveryType: body.deliveryType || 'delivery',
       subtotal: body.subtotal,

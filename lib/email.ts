@@ -2,6 +2,11 @@ import nodemailer from 'nodemailer'
 import { NYC_EMAIL_ADDRESS, nycEmailSubject, nycEmailHtml } from '@/lib/nycEmail'
 import { BUSINESS, formatDateTime } from '@/lib/utils'
 import { NYC_EMAIL_LOGO_URL } from '@/lib/nycBrand'
+import { NYC_PUBLIC_HOST } from '@/lib/nycPublicOrigin'
+import { formatTaxRatePercent } from '@/lib/nycSalesTax'
+
+// Host shown in the plain-text part and the X-FPR-Website header of every NYC email.
+const NYC_EMAIL_SITE_HOST = NYC_PUBLIC_HOST
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || 'smtp.gmail.com',
@@ -45,8 +50,8 @@ export async function sendEmail({
       replyTo: replyTo || NYC_EMAIL_ADDRESS,
       subject: nycEmailSubject(subject),
       html: nycEmailHtml(html),
-      text: 'SOUTH CAROLINA - GREENVILLE | fpr-nyc-production.up.railway.app\n\n' + (text || html.replace(/<[^>]*>/g, '')),
-      headers: { 'X-FPR-Location': 'greenville-sc', 'X-FPR-Website': 'fpr-nyc-production.up.railway.app' },
+      text: 'NYC / DOWNSTATE NEW YORK | ' + NYC_EMAIL_SITE_HOST + '\n\n' + (text || html.replace(/<[^>]*>/g, '')),
+      headers: { 'X-FPR-Location': 'nyc-downstate', 'X-FPR-Website': NYC_EMAIL_SITE_HOST },
     })
     // SMTP acceptance is not inbox delivery, but an empty/rejected envelope is
     // definitely not a successful send. Never mark it as one.
@@ -176,7 +181,7 @@ function feeBreakdownHtml(fees: {
   if (typeof fees.subtotal === 'number' && fees.subtotal > 0) addRow('Subtotal', fees.subtotal)
   if (fees.damageWaiver && (fees.damageWaiverFee || 0) > 0) addRow('Damage Waiver', fees.damageWaiverFee || 0)
   if ((fees.deliveryFee || 0) > 0) addRow(fees.deliveryDistance ? 'Travel Fee (' + fees.deliveryDistance + ' mi)' : 'Travel Fee', fees.deliveryFee || 0)
-  if ((fees.taxAmount || 0) > 0) addRow(fees.taxRate ? 'Tax (' + Math.round(fees.taxRate) + '%)' : 'Tax', fees.taxAmount || 0)
+  if ((fees.taxAmount || 0) > 0) addRow(fees.taxRate ? 'Tax (' + formatTaxRatePercent(fees.taxRate) + ')' : 'Tax', fees.taxAmount || 0)
   if (!rows.length) return ''
   return (
     '<table cellpadding="0" cellspacing="0" style="width:100%; margin-top:12px; border:1px solid #ddd; border-radius:6px; border-collapse:collapse;">' +

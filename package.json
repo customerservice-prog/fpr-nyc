@@ -18,7 +18,7 @@
     "test:nyc-discovery": "node --test tests/nyc-discovery-readiness.test.cjs",
     "test:nyc-identity": "node --test tests/nyc-identity-sync.test.cjs",
     "test:nyc-isolation": "node --test tests/nyc-location-isolation.test.cjs",
-    "test:nyc-payments": "node --test tests/nyc-stripe-safeguards.test.cjs"
+    "test:nyc-payments": "node --test tests/nyc-stripe-safeguards.test.cjs tests/nyc-checkout-pricing.test.cjs"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

@@ -664,7 +664,7 @@ function NewOrderPageInner() {
                 <option value="Other">Other</option>
               </select>
               <select value={form.billingState} onChange={(e) => setForm({ ...form, billingState: e.target.value })} className="border rounded px-3 py-2">
-                <option value="SC">SC</option>
+                <option value="NY">NY</option>
                 <option value="Other">Other</option>
               </select>
               <input placeholder="Zip" value={form.billingZip} onChange={(e) => setForm({ ...form, billingZip: e.target.value })} className="border rounded px-3 py-2" required={form.deliveryType === 'delivery' && sameAsBilling} />
@@ -690,7 +690,7 @@ function NewOrderPageInner() {
                     <option value="Other">Other</option>
                   </select>
                   <select value={form.eventState} onChange={(e) => setForm({ ...form, eventState: e.target.value })} className="border rounded px-3 py-2">
-                    <option value="SC">SC</option>
+                    <option value="NY">NY</option>
                     <option value="Other">Other</option>
                   </select>
                   <input placeholder="Zip" value={form.eventZip} onChange={(e) => setForm({ ...form, eventZip: e.target.value })} className="border rounded px-3 py-2" required={form.deliveryType === 'delivery' && !sameAsBilling} />

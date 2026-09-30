@@ -23,7 +23,7 @@ export const dynamic = 'force-dynamic'
 const faqItems = [
   {
     question: 'What is included in wedding rental packages?',
-    answer: 'Our packages combine the core rentals needed for the guest count shown. Exact inclusions vary by package and can include tents, tables, chairs, linens, lighting, dance floor pieces, cocktail tables and other event equipment. Standard delivery, setup and breakdown are included; a travel fee may apply based on distance.',
+    answer: 'Our packages combine the core rentals needed for the guest count shown. Exact inclusions vary by package and can include tents, tables, chairs, linens, lighting, dance floor pieces, cocktail tables and other event equipment. Delivery is charged by ZIP code and shown at checkout; setup details are confirmed before booking.',
   },
   {
     question: 'Can I customize a wedding package?',
@@ -81,7 +81,7 @@ export default async function WeddingsPage() {
   let decorItems: { id: string; name: string; slug: string; cost: number }[] = []
   try {
     const rawItems = await prisma.item.findMany({
-      where: { category: { slug: 'weddings' }, displayToCustomer: true, picture: { not: null } },
+      where: { category: { slug: 'weddings' }, displayToCustomer: true, picture: { not: null }, cost: { gt: 0 } },
       select: { id: true, name: true, slug: true, cost: true },
       orderBy: { name: 'asc' },
     })
@@ -154,7 +154,7 @@ export default async function WeddingsPage() {
         <div id="packages" className="text-center mb-4">
           <p className="text-secondary uppercase tracking-[0.3em] text-xs font-bold mb-3">Curated Collections</p>
           <h2 className={`${playfair.className} text-3xl md:text-4xl font-bold text-dark mb-3`}>Our Wedding Rental Packages</h2>
-          <p className="text-body">Package prices include standard delivery, setup and breakdown. A travel fee may apply based on distance.</p>
+          <p className="text-body">Delivery is charged by ZIP code and shown at checkout. Package pricing and setup details are confirmed before booking.</p>
         </div>
         <SectionDivider />
 

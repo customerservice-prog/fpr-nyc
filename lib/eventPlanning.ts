@@ -1,3 +1,5 @@
+import { NYC_SERVICE_AREA_SUMMARY } from './nycServiceAreas'
+
 export const PLANNING_PHONE = '315-884-1498'
 export const PLANNING_ORIGIN = 'https://fpr-nyc-production.up.railway.app'
 export const PLANNING_HELP = ['Rentals', 'Event design / layout', 'Vendor coordination', 'Day-of coordination', 'Full planning', 'Not sure yet'] as const
@@ -55,6 +57,18 @@ export const planningServices = [
     checklist: ['Organizer, date or dates, and proposed location', 'Attendance estimate and site / activity map', 'Vendors, volunteers, operating hours and help needed'],
   },
 ] as const
+/**
+ * The planning package prices and the hourly rate below were copied from the South Carolina
+ * site (Sept 22, 2026) and have not been approved for NYC. While this is false the NYC
+ * storefront shows the packages and what they include, but no dollar amounts: planning is
+ * quoted individually and the estimator leaves it out of the known-charge subtotal.
+ * Set it to true only after the owner approves NYC planning prices (update the amounts first).
+ */
+export const PLANNING_PRICES_APPROVED: boolean = false
+/** Reference hourly rate for additional planning time (see PLANNING_PRICES_APPROVED). */
+export const PLANNING_EXTRA_HOURLY_RATE = 85
+const EXTRA_TIME_ITEM = /^Additional time billed at /
+
 export const planningPackages = [
   {
     number: 1,
@@ -122,11 +136,20 @@ export const planningPackages = [
     ],
   },
 ]
+/** Package price as shown to customers: only an approved NYC price, otherwise a quote. */
+export function planningPackagePriceLabel(pkg: { price: string }): string {
+  return PLANNING_PRICES_APPROVED ? pkg.price : 'Quoted individually'
+}
+/** Package inclusions as shown to customers (the unapproved hourly rate line is left out). */
+export function planningPackageItems(pkg: { items: readonly string[] }): string[] {
+  return PLANNING_PRICES_APPROVED ? [...pkg.items] : pkg.items.filter(item => !EXTRA_TIME_ITEM.test(item))
+}
+
 export const planningFaqs = [
   { question: 'Can I add planning to an existing rental order?', answer: 'Yes. Include your order number in the inquiry or call 315-884-1498. We will review your existing rentals and discuss any additional planning services, subject to availability.' },
   { question: 'Do you plan more than weddings?', answer: 'Yes. We discuss corporate events, private celebrations, festivals and fundraisers as well as weddings. Events that do not fit a published package are scoped individually.' },
   { question: 'Are rentals and delivery included in the planning price?', answer: 'The package details below describe planning and coordination services. Your written quote must confirm the rental equipment, delivery, setup, pickup, travel fees and taxes that apply to your event. Do not assume that an item or service not listed is included.' },
-  { question: 'What happens if my event runs longer than the package hours?', answer: 'The published planning packages list their included meetings and on-site hours. Additional time is billed at $85 per hour. Discuss extra time with the team when confirming your scope.' },
-  { question: 'Where do you provide event planning?', answer: 'We serve Riverdale and Downstate New York, including Greer, Simpsonville, Mauldin, Taylors, Easley, Travelers Rest, Fountain Inn, Spartanburg, Anderson and Piedmont. Share your location so we can confirm service availability and any travel fees.' },
+  { question: 'What happens if my event runs longer than the package hours?', answer: PLANNING_PRICES_APPROVED ? 'The published planning packages list their included meetings and on-site hours. Additional time is billed at $' + PLANNING_EXTRA_HOURLY_RATE + ' per hour. Discuss extra time with the team when confirming your scope.' : 'The planning packages list their included meetings and on-site hours. Additional time is quoted with your planning scope. Discuss extra time with the team when confirming your scope.' },
+  { question: 'Where do you provide event planning?', answer: 'We serve ' + NYC_SERVICE_AREA_SUMMARY + '. Share your location so we can confirm service availability and any delivery fees.' },
   { question: 'Does sending an inquiry reserve my event date?', answer: 'No. An inquiry starts a conversation and does not reserve equipment, staffing or a date. Your quote and booking agreement confirm availability, scope and payment requirements.' },
 ]

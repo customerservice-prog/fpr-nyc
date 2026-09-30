@@ -47,7 +47,7 @@ export default function CardPaymentForm({ amount, onSuccess }: CardPaymentFormPr
         disabled={!stripe || submitting}
         className="btn-primary w-full text-lg py-3"
       >
-        {submitting ? 'Processing...' : `Pay Deposit ${formatCurrency(amount)}`}
+        {submitting ? 'Processing...' : `Pay ${formatCurrency(amount)}`}
       </button>
     </form>
   )

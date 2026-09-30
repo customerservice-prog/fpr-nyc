@@ -2,6 +2,9 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getNycCheckoutPolicy } from '@/lib/nycCheckoutPricingServer'
+import { NYC_SALES_TAX_JURISDICTIONS, formatTaxRatePercent } from '@/lib/nycSalesTax'
+import { BUSINESS } from '@/lib/utils'
 
 interface FaqEntry {
   q: string
@@ -14,19 +17,14 @@ const FAQ_DATA: FaqEntry[] = [
   { q: 'What payment methods do you accept?', a: 'We accept all major credit and debit cards through our secure online checkout.' },
   { q: 'When is the remaining balance due?', a: 'The remaining balance is due 3 days before your event. Your contract must be read and signed at final payment, or delivery will not occur.' },
   { q: 'Do you have coupons or promo codes?', a: 'Yes, if you have a coupon code you can enter it at checkout to apply your discount.' },
-  { q: 'Do you offer discounts for multi-day rentals?', a: 'Yes. Renting for more than one day costs less per day than paying full price every day: 2-3 days adds about 50% to the 1-day price, 4-6 days adds about 100%, and 7+ days adds about 150%.' },
   { q: 'What is your cancellation policy? What if I need to cancel or reschedule my order?', a: 'Deposits are non-refundable, but rainchecks are valid for one year. There is no additional cancellation fee beyond the non-refundable deposit.' },
-  { q: 'How far in advance should I book?', a: 'As early as possible. Summer weekends often book 4-8 weeks out. Orders must be placed at least 3 days before the event date.' },
   { q: 'Can I modify my order after booking?', a: 'Yes, with 48-72 hours notice.' },
   { q: 'Do I need to sign a contract?', a: 'Yes. Your contract must be read and signed at final payment. If payment is not received and the contract is not signed, delivery will not occur.' },
   { q: 'What if items in my quote get reserved by someone else?', a: 'If items in your quote were already reserved for another event before you complete checkout, please call our office and we will help you find available substitute items.' },
-  { q: 'Do you charge a damage waiver?', a: 'Yes, a 10% damage waiver applies to all items. It covers accidental damage to our equipment while in your possession, but does not cover intentional damage or theft.' },
-  { q: 'What time will my delivery arrive?', a: 'Unless you pay for a guaranteed exact time, deliveries are scheduled within a free Morning or Afternoon window and arrive in the order our trucks fall in line on their route that day.' },
-  { q: 'Can I request an exact delivery time?', a: 'Yes. At checkout, check I need a guaranteed exact time for a $100 fee, then choose any 30-minute slot between 9:00 AM and 8:00 PM for both drop-off and pick-up. Otherwise you can pick a free Morning or Afternoon window.' },
-  { q: 'What if I am picking up my order myself?', a: 'If you choose in-store pickup by appointment, there is no exact-time fee - just pick any 30-minute time slot between 9:00 AM and 5:00 PM, or choose Morning, Afternoon, or Evening.' },
-  { q: 'Is there a last minute booking fee?', a: 'Orders placed within 72 hours of the event may incur a $49.99 last-minute fee. You will see a pop-up you must confirm before checkout so you know it applies.' },
-  { q: 'Does the price include delivery and setup?', a: 'Tent delivery and setup is included for most Riverdale, NY area locations. Table and chair setup is available for an additional fee.' },
-  { q: 'What areas do you serve?', a: 'We deliver throughout the Downstate New York area, including Riverdale, Greer, Simpsonville, Mauldin, Easley, Travelers Rest, Spartanburg, Anderson, Piedmont, and many nearby towns. A delivery fee based on distance may apply outside the immediate Riverdale area.' },
+  { q: 'What time will my delivery arrive?', a: 'Deliveries are scheduled within the delivery window you choose at checkout and arrive in the order our trucks reach each stop on their route that day.' },
+  { q: 'What if I am picking up my order myself?', a: 'Friendly Party Rental NYC is delivery only. Warehouse pickup is not available; our crew delivers your rentals and collects them after your event.' },
+  { q: 'Does the price include delivery and setup?', a: 'Delivery is charged per order based on your delivery ZIP code, and the exact delivery fee and sales tax are shown at checkout before you pay. Setup requirements for tents and inflatables are confirmed with our team before booking.' },
+  { q: 'What areas do you serve?', a: 'We deliver to Riverdale, Fieldston, Kingsbridge and nearby Bronx neighborhoods, plus Yonkers, Mount Vernon, New Rochelle, Bronxville, Tuckahoe, Eastchester and Pelham in Lower Westchester. The delivery fee for your ZIP code is shown at checkout.' },
   { q: 'When do you set up and pick up?', a: 'Setup is coordinated in advance based on your event schedule, and pickup is typically the same day or the following morning for evening events.' },
   { q: 'Does setup time count toward my rental period?', a: 'No, setup time does not count toward your rental period.' },
   { q: 'What if my event starts early in the morning?', a: 'Early setups are available - just let us know your event time when booking.' },
@@ -41,15 +39,15 @@ const FAQ_DATA: FaqEntry[] = [
   { q: 'Do I need a permit for a backyard tent?', a: 'Usually not for residential setups. Large tents at commercial venues may require permits.' },
   { q: 'Can you do a free yard assessment?', a: 'Yes! Call 315-884-1498 to schedule one.' },
   { q: 'Is your equipment clean and safe?', a: 'Yes - every piece is cleaned, sanitized, and inspected before and after every rental. Our commercial-grade equipment is safe for children with adult supervision recommended.' },
-  { q: 'What if something breaks?', a: 'Normal wear is covered by the damage waiver. Damage from misuse may have additional associated costs.' },
+  { q: 'What if something breaks?', a: 'Normal wear is expected and not charged. Damage from misuse may have additional associated costs; ask our team about damage responsibility when you book.' },
   { q: 'Do you carry insurance?', a: 'Yes, we are fully insured.' },
-  { q: 'How much does a bounce house cost?', a: 'Bounce houses start at $199/day. Waterslides range from $250-$499, and combo units start at $500.' },
-  { q: 'Do bounce houses need power?', a: 'Yes, constant air supply is needed - a 20-amp outlet within 100 feet is required. We also rent generators starting at $125 for locations without power.' },
+  { q: 'How much does a bounce house cost?', a: 'Current bounce house and waterslide prices are listed on each item in our Bounce House & Waterslide Rentals category. Choose your event date to see what is available.' },
+  { q: 'Do bounce houses need power?', a: 'Yes, constant air supply is needed - a 20-amp outlet within 100 feet is required. We also rent generators for locations without power.' },
   { q: 'Do water slides need a water hookup?', a: 'Yes, a standard garden hose connection is needed.' },
   { q: 'Do you have wedding packages?', a: 'Yes! We offer full wedding and party packages that bundle tents, tables, chairs, linens, lighting, and more - see our Weddings page for details.' },
   { q: 'Do you rent linens?', a: 'Yes, we carry a variety of linens to match your event colors and style.' },
   { q: 'Do you rent lighting?', a: 'Yes, we offer event lighting rentals to help set the mood for your party.' },
-  { q: 'Do you rent generators?', a: 'Yes, generators start at $125 and are useful for locations without easy power access.' },
+  { q: 'Do you rent generators?', a: 'Yes, we rent generators for locations without easy power access. Current prices are listed in our Generator Rentals category.' },
   { q: 'Do you rent photo booths?', a: 'Yes, we offer photobooth rentals for weddings and parties.' },
   { q: 'Do you rent concession machines?', a: 'Yes, we carry concession machines and beverage and food service equipment like popcorn, cotton candy, and snow cone machines.' },
   { q: 'Do you rent yard games?', a: 'Yes, we carry a variety of yard games for parties and events.' },
@@ -230,33 +228,59 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ answer: smallTalk })
   }
 
-  const [categories, items, depositRule, taxRate, fees] = await Promise.all([
+  const [categories, items, depositRule, tiers, fees] = await Promise.all([
     prisma.category.findMany({ where: { displayToCustomer: true }, orderBy: { sortOrder: 'asc' }, select: { name: true, slug: true, description: true } }).catch(() => []),
-    prisma.item.findMany({ where: { displayToCustomer: true }, select: { name: true, cost: true, category: { select: { name: true } } } }).catch(() => []),
+    prisma.item.findMany({ where: { displayToCustomer: true, status: 'Available', cost: { gt: 0 } }, select: { name: true, cost: true, category: { select: { name: true } } } }).catch(() => []),
     prisma.depositRule.findFirst({ where: { isActive: true } }).catch(() => null),
-    prisma.taxRate.findFirst({ where: { isActive: true } }).catch(() => null),
-    prisma.specialRequestFee.findMany({ where: { isActive: true } }).catch(() => []),
+    prisma.pricingTier.findMany({ orderBy: { sortOrder: 'asc' } }).catch(() => []),
+    prisma.specialRequestFee.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }).catch(() => []),
   ])
+  // Every price-related answer comes from approved settings. Nothing is guessed:
+  // when a value is not configured the answer says so and points to the office.
+  const policy = getNycCheckoutPolicy().policy
+  const money = (value: number) => '$' + value.toFixed(2).replace(/\.00$/, '')
+  const callUs = 'Call or text ' + BUSINESS.phone + '.'
 
   const depositText = depositRule
     ? (depositRule.type === 'percentage'
       ? 'Yes, a ' + depositRule.amount + '% deposit is required at booking to reserve your date. The remaining balance is due before delivery.'
-      : 'Yes, a $' + depositRule.amount + ' deposit is required at booking to reserve your date. The remaining balance is due before delivery.')
-    : 'Yes, a deposit is required at booking to reserve your date. The remaining balance is due before delivery.'
+      : 'Yes, a ' + money(depositRule.amount) + ' deposit is required at booking to reserve your date. The remaining balance is due before delivery.')
+    : 'A deposit is required to reserve your date. Our team will confirm the amount when you book. ' + callUs
 
-  const taxText = taxRate
-    ? 'Yes, sales tax of ' + taxRate.rate + '% applies to taxable rental items and is calculated automatically at checkout.'
-    : 'Yes, sales tax applies to taxable rental items and is calculated automatically at checkout.'
+  const rates = Object.values(NYC_SALES_TAX_JURISDICTIONS)
+  const taxText = 'Yes. New York sales tax is based on your delivery address and is calculated at checkout: '
+    + rates.map((j) => j.name + ' ' + formatTaxRatePercent(j.ratePercent)).join(', ') + '.'
 
-  const overnightFee = fees.find((f) => f.name.toLowerCase().includes('overnight'))
-  const flexFee = fees.find((f) => f.name.toLowerCase().includes('flexible'))
-  const exactFee = fees.find((f) => f.name.toLowerCase().includes('exact'))
-  const feesText = 'Overnight keep is $' + (overnightFee?.amount ?? 75) + ' (bounce houses and waterslides only), a flexible delivery window is $' + (flexFee?.amount ?? 40) + ', and a guaranteed exact delivery time is $' + (exactFee?.amount ?? 100) + ' on any delivery order.'
+  const exactParts: string[] = []
+  if (policy?.exactDeliveryFee != null) exactParts.push('a guaranteed exact delivery time is ' + money(policy.exactDeliveryFee))
+  if (policy?.exactPickupFee != null) exactParts.push('a guaranteed exact pickup time is ' + money(policy.exactPickupFee) + (policy.lateExactPickupFee != null ? ' (' + money(policy.lateExactPickupFee) + ' from 10pm to 11:30pm)' : ''))
+  const exactText = exactParts.length
+    ? 'Yes: ' + exactParts.join(', and ') + '. Choose it when you pick your delivery schedule.'
+    : 'Guaranteed exact delivery and pickup times are not booked online. Choose a delivery window at checkout, or ' + callUs.charAt(0).toLowerCase() + callUs.slice(1)
+  const extraFeesText = fees.length
+    ? ' Optional services: ' + fees.map((fee) => fee.name + ' ' + money(fee.amount)).join(', ') + '.'
+    : ''
+
+  const damageWaiverText = policy?.damageWaiverPercent != null
+    ? 'An optional damage waiver is available at checkout for ' + formatTaxRatePercent(policy.damageWaiverPercent) + ' of the rental subtotal. It covers accidental damage to our equipment while in your possession, but not intentional damage or theft.'
+    : 'A damage waiver is not offered online. Please ask our team about damage responsibility when you book. ' + callUs
+
+  const lastMinuteText = policy?.lastMinuteFee != null
+    ? 'Online orders must be placed at least 24 hours before your event. Events less than 72 hours away have a ' + money(policy.lastMinuteFee) + ' last-minute booking fee, which you confirm before paying.'
+    : 'Online orders must be placed at least 72 hours before your event. For events sooner than that, ' + callUs.charAt(0).toLowerCase() + callUs.slice(1)
+
+  const tiersText = tiers.length > 1
+    ? 'Yes. Longer rentals are priced by rental length at checkout: ' + tiers.map((tier) => tier.label + (tier.percent ? ' (+' + tier.percent + '% of the 1-day price)' : '')).join(', ') + '.'
+    : 'Online orders are priced for a single event day. For multi-day rentals, ' + callUs.charAt(0).toLowerCase() + callUs.slice(1)
 
   const dynamicFaq: { q: string; a: string }[] = [
     { q: 'Do I need to pay a deposit?', a: depositText },
     { q: 'Is there sales tax on my order?', a: taxText },
-    { q: 'Can I request overnight or exact delivery times?', a: feesText },
+    { q: 'Can I request overnight or exact delivery times?', a: exactText + extraFeesText },
+    { q: 'Can I request an exact delivery time?', a: exactText },
+    { q: 'Do you charge a damage waiver?', a: damageWaiverText },
+    { q: 'Is there a last minute booking fee? How far in advance should I book?', a: 'As early as possible - summer weekends often book weeks ahead. ' + lastMinuteText },
+    { q: 'Do you offer discounts for multi-day rentals?', a: tiersText },
   ]
 
   const allFaq = [...dynamicFaq, ...FAQ_DATA]

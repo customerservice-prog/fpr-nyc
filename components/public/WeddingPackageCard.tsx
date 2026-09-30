@@ -8,7 +8,8 @@ const playfair = Playfair_Display({ subsets: ['latin'], weight: ['600', '700'], 
 interface WeddingPackageCardProps {
   id: string
   name: string
-  price: number
+  /** Approved NYC price, or null when the package is priced on request. */
+  price: number | null
   guests: number
   items: string[]
   popular?: boolean
@@ -59,7 +60,7 @@ export default function WeddingPackageCard({
           <p className="text-xs text-primary font-bold uppercase tracking-[0.2em] mb-2">Package {packageNumber}</p>
         )}
         <h3 className={`${playfair.className} text-2xl font-bold text-dark mb-1`}>{name}</h3>
-        <p className="text-3xl font-bold text-secondary mb-1">{formatCurrency(price)}</p>
+        <p className="text-3xl font-bold text-secondary mb-1">{price !== null && price > 0 ? formatCurrency(price) : 'Price on request'}</p>
         <p className="text-body text-sm mb-4">Up to {guests} guests</p>
         <div className="h-px bg-primary/30 mb-4" />
         <ul className="space-y-2 mb-6">

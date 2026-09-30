@@ -1,5 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { getDeliveryQuote } from '@/lib/delivery'
+import { BUSINESS } from '@/lib/utils'
+import { parseNycCheckoutPolicy, type ParsedCheckoutPolicy } from '@/lib/nycCheckoutPolicy'
+import { resolveNycSalesTax } from '@/lib/nycSalesTax'
 import {
   computeNycCheckoutPricing,
   normalizeCouponCode,
@@ -9,7 +12,11 @@ import {
   type PricingCatalogItem,
 } from '@/lib/nycCheckoutPricing'
 
-/** Active sales-tax rate (percent) or null when none is configured. Never falls back to a guessed rate. */
+/**
+ * Legacy single tax-rate row from Admin > Settings > Tax Rate. Online checkout does
+ * NOT use it (sales tax is resolved per delivery ZIP in lib/nycSalesTax.ts); it is
+ * only the default for staff-created orders. Never falls back to a guessed rate.
+ */
 export async function getActiveTaxRatePercent(): Promise<number | null> {
   const row = await prisma.taxRate.findFirst({ where: { isActive: true }, orderBy: { createdAt: 'desc' } })
   const rate = row ? Number(row.rate) : NaN
@@ -20,6 +27,11 @@ export async function getActiveDepositRule(): Promise<{ type: string; amount: nu
   const row = await prisma.depositRule.findFirst({ where: { isActive: true }, orderBy: { createdAt: 'desc' } })
   if (!row || !Number.isFinite(Number(row.amount)) || Number(row.amount) < 0) return null
   return { type: row.type, amount: Number(row.amount) }
+}
+
+/** Owner-approved checkout policy from NYC_CHECKOUT_POLICY_JSON (null policy = online checkout blocked). */
+export function getNycCheckoutPolicy(): ParsedCheckoutPolicy {
+  return parseNycCheckoutPolicy(process.env.NYC_CHECKOUT_POLICY_JSON)
 }
 
 function asStringArray(value: unknown): string[] {
@@ -50,8 +62,9 @@ export function pricingRequestFromCheckoutBody(body: any): CheckoutPricingReques
 
 /**
  * Recomputes the full NYC checkout price on the server from the approved catalog,
- * pricing tiers, special-request fees, coupon, tax rate, deposit rule, and the
- * server ZIP delivery quote. Throws DeliveryQuoteError or CheckoutPricingError.
+ * pricing tiers, special-request fees, coupon, the delivery ZIP's sales-tax
+ * jurisdiction, deposit rule, owner-approved checkout policy and the server ZIP
+ * delivery quote. Throws DeliveryQuoteError or CheckoutPricingError.
  */
 export async function priceNycCheckout(body: any, now: Date = new Date()): Promise<CheckoutPricingResult> {
   const request = pricingRequestFromCheckoutBody(body)
@@ -59,7 +72,7 @@ export async function priceNycCheckout(body: any, now: Date = new Date()): Promi
   const ids = Array.from(new Set(request.items.map(item => item.id).filter(Boolean)))
   const couponCode = normalizeCouponCode(request.couponCode)
 
-  const [catalog, tiers, fees, coupon, taxRatePercent, depositRule] = await Promise.all([
+  const [catalog, tiers, fees, coupon, depositRule] = await Promise.all([
     prisma.item.findMany({
       where: { id: { in: ids } },
       select: { id: true, name: true, cost: true, displayToCustomer: true, status: true, bookableAfter: true },
@@ -67,7 +80,6 @@ export async function priceNycCheckout(body: any, now: Date = new Date()): Promi
     prisma.pricingTier.findMany({ orderBy: { sortOrder: 'asc' } }),
     prisma.specialRequestFee.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
     couponCode ? prisma.coupon.findUnique({ where: { code: couponCode } }) : Promise.resolve(null),
-    getActiveTaxRatePercent(),
     getActiveDepositRule(),
   ])
 
@@ -87,9 +99,11 @@ export async function priceNycCheckout(body: any, now: Date = new Date()): Promi
     tiers: tiers.map(tier => ({ id: tier.id, label: tier.label, minDays: tier.minDays, maxDays: tier.maxDays, percent: Number(tier.percent) })),
     specialRequestFees: fees.map(fee => ({ id: fee.id, name: fee.name, amount: Number(fee.amount) })),
     coupon: coupon ? { code: coupon.code, discountType: coupon.discountType, discountAmount: Number(coupon.discountAmount), isActive: coupon.isActive, expiresAt: coupon.expiresAt } : null,
-    taxRatePercent,
+    salesTax: resolveNycSalesTax(quote.zip),
     depositRule,
     deliveryFee: quote.fee,
+    policy: getNycCheckoutPolicy().policy,
+    phone: BUSINESS.phone,
     now,
   }
   return computeNycCheckoutPricing(request, config)

@@ -1,61 +1,25 @@
 import { nycPageMetadata } from '@/lib/nycSeo'
 import Link from 'next/link'
+import { NYC_SERVICE_AREA_SUMMARY } from '@/lib/nycServiceAreas'
+import { BUSINESS } from '@/lib/utils'
 import type { Metadata } from 'next'
 
-export const metadata = nycPageMetadata("/wedding-vendors","Downstate New York Wedding Vendor Guide","Explore wedding vendor resources for Riverdale and Downstate New York while planning your rental equipment, celebration and event services.")
+export const metadata = nycPageMetadata("/wedding-vendors","Downstate New York Wedding Vendor Suggestions","Ask Friendly Party Rental NYC for wedding vendor suggestions in Riverdale, the Bronx and Lower Westchester while planning your rental equipment.")
 
 export default function WeddingVendorsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-dark mb-6 text-center">Local Vendors We Recommend</h1>
+      <h1 className="text-3xl font-bold text-dark mb-6 text-center">Wedding Vendor Suggestions</h1>
       <p className="text-body mb-6">
-        Planning a wedding takes more than tents and tables. While Friendly Party Rental
-        handles your rentals, decor, and event equipment, we are often asked for
-        recommendations on other parts of the day. Here are a few local Downstate New York
-        vendors we are happy to point our couples toward. We do not have formal
-        partnerships with these businesses, they are simply local vendors whose work
-        we respect. We would recommend contacting a couple of options in each category to
-        compare pricing and availability for your date.
+        Planning a wedding takes more than tents and tables. Friendly Party Rental NYC handles your
+        rental equipment; catering, bar service, DJ / MC, photography, videography, flowers and cake
+        come from other vendors. We recommend contacting a few vendors in each category to compare
+        pricing and availability for your date and venue.
       </p>
-
-      <h2 className="text-xl font-bold text-dark mb-3">Catering</h2>
-      <p className="text-body mb-6">
-        <a href="https://www.reevescatering.com" target="_blank" rel="noopener noreferrer" className="underline">Reeves Catering</a> (Riverdale) - full-service catering for
-        weddings and events. 864-275-0021
-      </p>
-
-      <h2 className="text-xl font-bold text-dark mb-3">Bar Service</h2>
-      <p className="text-body mb-6">
-        <a href="https://southernlibationsevents.com" target="_blank" rel="noopener noreferrer" className="underline">Southern Libations</a> (Riverdale) - dry-hire mobile bartending; you supply the
-        alcohol, they supply the bar service. 864-906-8400
-      </p>
-
-      <h2 className="text-xl font-bold text-dark mb-3">DJ / MC</h2>
-      <p className="text-body mb-6">
-        <a href="https://uptownentertainmentdj.com" target="_blank" rel="noopener noreferrer" className="underline">Uptown Entertainment</a> (Riverdale) - wedding DJ, MC, and event production.
-        864-275-4779
-      </p>
-
-      <h2 className="text-xl font-bold text-dark mb-3">Photography</h2>
-      <p className="text-body mb-6">
-        <a href="https://kendramartinphotography.com" target="_blank" rel="noopener noreferrer" className="underline">Kendra Martin Photography</a> (Riverdale) - wedding and engagement photography.
-      </p>
-
-      <h2 className="text-xl font-bold text-dark mb-3">Videography</h2>
-      <p className="text-body mb-6">
-        <a href="https://mpmweddings.com" target="_blank" rel="noopener noreferrer" className="underline">MPM Weddings</a> (Riverdale) - cinematic wedding films.
-      </p>
-
-      <h2 className="text-xl font-bold text-dark mb-3">Florist</h2>
-      <p className="text-body mb-6">
-        <a href="https://bellabloomsdesigns.com" target="_blank" rel="noopener noreferrer" className="underline">Bella Blooms</a> (Riverdale) - fresh floral arrangements and bouquets.
-        864-483-1453
-      </p>
-
-      <h2 className="text-xl font-bold text-dark mb-3">Cake / Dessert</h2>
-      <p className="text-body mb-6">
-        <a href="https://couturecakesofgreenville.com" target="_blank" rel="noopener noreferrer" className="underline">Couture Cakes of Riverdale</a> (Riverdale) - custom wedding cakes and dessert displays.
-        864-288-6610
+      <p className="text-body mb-10">
+        We do not have formal partnerships with other vendors. If you would like suggestions for an
+        event in {NYC_SERVICE_AREA_SUMMARY}, call or text {BUSINESS.phone} and our team will share
+        what we can.
       </p>
 
       <div className="text-center">

@@ -1,0 +1,1514 @@
+{
+  "version": 2,
+  "policy": "Every published non-package Syracuse rental price is snapshotted at ×1.70 for NYC. Packages are explicitly excluded and unchanged.",
+  "multiplier": 1.7,
+  "source": {
+    "kind": "live-public-api",
+    "url": "https://www.friendlypartyrental.com/api/items",
+    "capturedOn": "2026-09-29",
+    "publishedPricedCount": 216,
+    "nonPackageCount": 198,
+    "excludedPackageCount": 18
+  },
+  "packageExclusion": {
+    "rule": "Exclude any item whose name, slug, category name, or category slug contains 'package'.",
+    "excluded": [
+      {
+        "name": "20x20 Tent Package – 4 Tables & 32 Chairs",
+        "slug": "20x20-tent-package-4-tables-32-chairs",
+        "syracusePrice": 325,
+        "categorySlug": "party-rental-packages"
+      },
+      {
+        "name": "Wedding Package - Backyard Elopement",
+        "slug": "wedding-package-backyard-elopement",
+        "syracusePrice": 345,
+        "categorySlug": "weddings"
+      },
+      {
+        "name": "20x30 Tent + 8 Tables + 64 Chairs Package",
+        "slug": "20x30-tent-8-tables-64-chairs-package-syracuse-ny",
+        "syracusePrice": 530,
+        "categorySlug": "party-rental-packages"
+      },
+      {
+        "name": "Wedding Package - Classic Ceremony",
+        "slug": "wedding-package-classic-ceremony",
+        "syracusePrice": 520,
+        "categorySlug": "weddings"
+      },
+      {
+        "name": "30x30 Tent Package – 8 Tables & 80 Chairs",
+        "slug": "30x30-tent-package-8-tables-80-chairs",
+        "syracusePrice": 820,
+        "categorySlug": "party-rental-packages"
+      },
+      {
+        "name": "Wedding Package - Garden Reception",
+        "slug": "wedding-package-garden-reception",
+        "syracusePrice": 2295,
+        "categorySlug": "weddings"
+      },
+      {
+        "name": "Linen Tent Package",
+        "slug": "linen-tent-package-tent-tables-chairs-tablecloths-syracuse-ny",
+        "syracusePrice": 425,
+        "categorySlug": "party-rental-packages"
+      },
+      {
+        "name": "Wedding Package - Luxury Estate",
+        "slug": "wedding-package-luxury-estate",
+        "syracusePrice": 4995,
+        "categorySlug": "weddings"
+      },
+      {
+        "name": "Bounce House Package – 4 Tables & 24 Chairs",
+        "slug": "bounce-house-package-4-tables-24-chairs",
+        "syracusePrice": 275,
+        "categorySlug": "party-rental-packages"
+      },
+      {
+        "name": "Wedding Package - All-Inclusive Premium",
+        "slug": "wedding-package-all-inclusive-premium",
+        "syracusePrice": 7495,
+        "categorySlug": "weddings"
+      },
+      {
+        "name": "Bounce House + Water Slide Combo Package",
+        "slug": "bounce-house-water-slide-combo-package",
+        "syracusePrice": 500,
+        "categorySlug": "party-rental-packages"
+      },
+      {
+        "name": "Summer Splash Package",
+        "slug": "summer-splash-package-waterslide-tables-chairs-syracuse-ny",
+        "syracusePrice": 350,
+        "categorySlug": "party-rental-packages"
+      },
+      {
+        "name": "Kids Birthday Party Package (Bounce House, Cotton Candy Machine, Tables & Chairs)",
+        "slug": "kids-birthday-party-package-bounce-house-cotton-candy-tables-chairs",
+        "syracusePrice": 350,
+        "categorySlug": "party-rental-packages"
+      },
+      {
+        "name": "Graduation Party Package - Small (Seats 64)",
+        "slug": "graduation-party-package-small-seats-64-syracuse-ny",
+        "syracusePrice": 665,
+        "categorySlug": "party-rental-packages"
+      },
+      {
+        "name": "Graduation Party Package - Large (Seats 100)",
+        "slug": "graduation-party-package-large-seats-100-syracuse-ny",
+        "syracusePrice": 875,
+        "categorySlug": "party-rental-packages"
+      },
+      {
+        "name": "Backyard BBQ Party Package",
+        "slug": "backyard-bbq-party-package-tent-tables-chairs-popcorn-machine",
+        "syracusePrice": 415,
+        "categorySlug": "party-rental-packages"
+      },
+      {
+        "name": "Corporate Event Package",
+        "slug": "corporate-event-package-tent-tables-chairs-concessions-syracuse-ny",
+        "syracusePrice": 800,
+        "categorySlug": "party-rental-packages"
+      },
+      {
+        "name": "Uplighting Package - 12 Lights",
+        "slug": "uplighting-package-12-lights",
+        "syracusePrice": 225,
+        "categorySlug": "event-lighting-rentals"
+      }
+    ]
+  },
+  "items": [
+    {
+      "name": "10 1/2 oz. Water Goblet",
+      "slug": "10-12-oz-water-goblet",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "10-5/8 Dinner Plate",
+      "slug": "10-58-dinner-plate",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "10 Gallon Insulated Beverage Dispenser",
+      "slug": "10-gallon-insulated-beverage-dispenser",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 35,
+      "nycPrice": 59.5
+    },
+    {
+      "name": "10-Inch Cake Plate",
+      "slug": "10-inch-cake-plate",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1,
+      "nycPrice": 1.7
+    },
+    {
+      "name": "10 x 10 EZ Pop Up Canopy Tent",
+      "slug": "10-x-10-ez-pop-up-canopy-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 100,
+      "nycPrice": 170
+    },
+    {
+      "name": "10 x 20 EZ Pop Up Canopy Tent",
+      "slug": "10-x-20-ez-pop-up-canopy-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 175,
+      "nycPrice": 297.5
+    },
+    {
+      "name": "100 lb. Propane Tank",
+      "slug": "100-lb-propane-tank",
+      "categorySlug": "heater-fan-rentals",
+      "syracusePrice": 100,
+      "nycPrice": 170
+    },
+    {
+      "name": "108 Round Polyester Tablecloth",
+      "slug": "108-round-polyester-tablecloth",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 18,
+      "nycPrice": 30.6
+    },
+    {
+      "name": "10x10 Pop-Up Sidewall",
+      "slug": "10x10-pop-up-sidewall",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 20,
+      "nycPrice": 34
+    },
+    {
+      "name": "11 Qt Round Soup Chafer",
+      "slug": "11-qt-round-soup-chafer",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 40,
+      "nycPrice": 68
+    },
+    {
+      "name": "120 inch Round Polyester Tablecloth",
+      "slug": "120-inch-round-polyester-tablecloth",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 20,
+      "nycPrice": 34
+    },
+    {
+      "name": "120-Quart Hard Ice Chest Cooler",
+      "slug": "120-quart-hard-ice-chest-cooler",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 25,
+      "nycPrice": 42.5
+    },
+    {
+      "name": "120 Round Satin Tablecloth",
+      "slug": "120-round-satin-tablecloth",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 22.5,
+      "nycPrice": 38.25
+    },
+    {
+      "name": "120 Round Sequin Tablecloth",
+      "slug": "120in-round-sequin-tablecloth-rose-gold",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 22.5,
+      "nycPrice": 38.25
+    },
+    {
+      "name": "132 Round Polyester Tablecloth",
+      "slug": "132-round-polyester-tablecloth",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 24,
+      "nycPrice": 40.8
+    },
+    {
+      "name": "170K BTU Tent Heater",
+      "slug": "170k-btu-tent-heater",
+      "categorySlug": "heater-fan-rentals",
+      "syracusePrice": 125,
+      "nycPrice": 212.5
+    },
+    {
+      "name": "18ft Purple Tropical Marble Double Bay Waterslide",
+      "slug": "18ft-purple-tropical-marble-double-bay-waterslide",
+      "categorySlug": "bounce-house-rentals",
+      "syracusePrice": 399,
+      "nycPrice": 678.3
+    },
+    {
+      "name": "20-Inch Fan",
+      "slug": "20-inch-fan",
+      "categorySlug": "heater-fan-rentals",
+      "syracusePrice": 20,
+      "nycPrice": 34
+    },
+    {
+      "name": "20 lb. Propane Tank",
+      "slug": "20-lb-propane-tank",
+      "categorySlug": "heater-fan-rentals",
+      "syracusePrice": 25,
+      "nycPrice": 42.5
+    },
+    {
+      "name": "20' Side Wall Tent",
+      "slug": "20-side-wall-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 40,
+      "nycPrice": 68
+    },
+    {
+      "name": "20' Side Wall with Windows",
+      "slug": "20-side-wall-with-windows",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 50,
+      "nycPrice": 85
+    },
+    {
+      "name": "20 x 20 Frame Tent",
+      "slug": "20-x-20-frame-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 400,
+      "nycPrice": 680
+    },
+    {
+      "name": "20 x 30 Frame Tent",
+      "slug": "20-x-30-frame-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 475,
+      "nycPrice": 807.5
+    },
+    {
+      "name": "20 x 40 Frame Tent",
+      "slug": "20-x-40-frame-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 550,
+      "nycPrice": 935
+    },
+    {
+      "name": "20x20 Pole Tent",
+      "slug": "20x20-pole-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 250,
+      "nycPrice": 425
+    },
+    {
+      "name": "20x30 Pole Tent",
+      "slug": "20x30-pole-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 350,
+      "nycPrice": 595
+    },
+    {
+      "name": "20x40 Pole Tent",
+      "slug": "20x40-pole-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 450,
+      "nycPrice": 765
+    },
+    {
+      "name": "22ft Tropical Lava Wave Marble Waterslide",
+      "slug": "22ft-tropical-lava-wave-marble-waterslide",
+      "categorySlug": "bounce-house-rentals",
+      "syracusePrice": 499,
+      "nycPrice": 848.3
+    },
+    {
+      "name": "25-Foot Movie Screen with Projector",
+      "slug": "25-foot-movie-screen-with-projector",
+      "categorySlug": "inflatable-movie-screen-rentals",
+      "syracusePrice": 200,
+      "nycPrice": 340
+    },
+    {
+      "name": "2.5 Gallon Insulated Beverage Dispenser",
+      "slug": "25-gallon-insulated-beverage-dispenser",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 25,
+      "nycPrice": 42.5
+    },
+    {
+      "name": "30 x 30 Pole Tent",
+      "slug": "30-x-30-pole-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 575,
+      "nycPrice": 977.5
+    },
+    {
+      "name": "30 x 45 Pole Tent",
+      "slug": "30-x-45-pole-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 700,
+      "nycPrice": 1190
+    },
+    {
+      "name": "30 x 60 Pole Tent",
+      "slug": "30-x-60-pole-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 850,
+      "nycPrice": 1445
+    },
+    {
+      "name": "30A Power Distribution Spider Box",
+      "slug": "30a-power-distribution-spider-box",
+      "categorySlug": "generator-rentals",
+      "syracusePrice": 24.99,
+      "nycPrice": 42.48
+    },
+    {
+      "name": "30x40 Classic Frame Tent",
+      "slug": "30x40-classic-frame-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 700,
+      "nycPrice": 1190
+    },
+    {
+      "name": "32 Gallon Trash Can",
+      "slug": "32-gallon-trash-can",
+      "categorySlug": "party-rental-accessories",
+      "syracusePrice": 30,
+      "nycPrice": 51
+    },
+    {
+      "name": "4 Qt Round Chafer",
+      "slug": "4-qt-round-chafer",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 30,
+      "nycPrice": 51
+    },
+    {
+      "name": "40 x 100 Pole Tent",
+      "slug": "40-x-100-pole-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 1950,
+      "nycPrice": 3315
+    },
+    {
+      "name": "40 x 40 Pole Tent",
+      "slug": "40-x-40-pole-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 1500,
+      "nycPrice": 2550
+    },
+    {
+      "name": "40 x 80 Pole Tent",
+      "slug": "40-x-80-pole-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 1850,
+      "nycPrice": 3145
+    },
+    {
+      "name": "40x60 Pole Tent",
+      "slug": "40x60-pole-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 1600,
+      "nycPrice": 2720
+    },
+    {
+      "name": "4375-Watt Generator",
+      "slug": "4375-watt-generator",
+      "categorySlug": "generator-rentals",
+      "syracusePrice": 125,
+      "nycPrice": 212.5
+    },
+    {
+      "name": "4.5 oz Champagne Flute",
+      "slug": "45-oz-champagne-flute",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "4ft Fill and Chill Table",
+      "slug": "4ft-fill-and-chill-table",
+      "categorySlug": "table-chair-rentals",
+      "syracusePrice": 40,
+      "nycPrice": 68
+    },
+    {
+      "name": "5 oz Footed Rocks Glass",
+      "slug": "5-oz-footed-rocks-glass",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "54x120 Banquet Polyester Tablecloth",
+      "slug": "54x120-banquet-polyester-tablecloth",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 16,
+      "nycPrice": 27.2
+    },
+    {
+      "name": "5.5 oz Popcorn Kernel",
+      "slug": "55-oz-popcorn-kernel",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 5,
+      "nycPrice": 8.5
+    },
+    {
+      "name": "550W Bluetooth Speaker",
+      "slug": "550w-bluetooth-speaker",
+      "categorySlug": "party-rental-accessories",
+      "syracusePrice": 75,
+      "nycPrice": 127.5
+    },
+    {
+      "name": "5ft Round Table",
+      "slug": "5ft-round-table",
+      "categorySlug": "table-chair-rentals",
+      "syracusePrice": 15,
+      "nycPrice": 25.5
+    },
+    {
+      "name": "5ft Tumbling Timbers",
+      "slug": "5ft-tumbling-timbers",
+      "categorySlug": "yard-game-rentals",
+      "syracusePrice": 25,
+      "nycPrice": 42.5
+    },
+    {
+      "name": "6-Inch Bread and Butter Plate",
+      "slug": "6-inch-bread-and-butter-plate",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "60 oz Beverage Pitcher",
+      "slug": "60-oz-beverage-pitcher",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 10,
+      "nycPrice": 17
+    },
+    {
+      "name": "6.5 Qt Round Top Chafer",
+      "slug": "65-qt-round-top-chafer",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 25,
+      "nycPrice": 42.5
+    },
+    {
+      "name": "6ft Plastic Folding Table",
+      "slug": "6ft-plastic-folding-table",
+      "categorySlug": "table-chair-rentals",
+      "syracusePrice": 13,
+      "nycPrice": 22.1
+    },
+    {
+      "name": "7-Inch Salad Plate",
+      "slug": "7-inch-salad-plate",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "72 x 120 Banquet Tablecloth",
+      "slug": "72-x-120-banquet-tablecloth",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 18,
+      "nycPrice": 30.6
+    },
+    {
+      "name": "7.25 oz Martini Glass",
+      "slug": "725-oz-martini-glass",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "8-Quart Full-Size Chafer",
+      "slug": "8-quart-full-size-chafer",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 30,
+      "nycPrice": 51
+    },
+    {
+      "name": "80K BTU Tent Heater",
+      "slug": "80k-btu-tent-heater",
+      "categorySlug": "heater-fan-rentals",
+      "syracusePrice": 99,
+      "nycPrice": 168.3
+    },
+    {
+      "name": "8.5-Inch Rim Soup Bowl",
+      "slug": "85-inch-rim-soup-bowl",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 2,
+      "nycPrice": 3.4
+    },
+    {
+      "name": "8.5 oz Wine Glass",
+      "slug": "85-oz-wine-glass",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "8ft Banquet Table",
+      "slug": "8ft-banquet-table",
+      "categorySlug": "table-chair-rentals",
+      "syracusePrice": 14,
+      "nycPrice": 23.8
+    },
+    {
+      "name": "8ft x 31in Stage Skirt",
+      "slug": "8ft-x-31in-stage-skirt",
+      "categorySlug": "dance-floor-stage-rentals",
+      "syracusePrice": 25,
+      "nycPrice": 42.5
+    },
+    {
+      "name": "90 Round Polyester Tablecloth",
+      "slug": "90-round-polyester-tablecloth",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 17,
+      "nycPrice": 28.9
+    },
+    {
+      "name": "90x132 Banquet Polyester Tablecloth",
+      "slug": "90x132-banquet-polyester-tablecloth",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 24,
+      "nycPrice": 40.8
+    },
+    {
+      "name": "90x156 Banquet Polyester Tablecloth",
+      "slug": "90x156-banquet-polyester-tablecloth",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 26,
+      "nycPrice": 44.2
+    },
+    {
+      "name": "9ft Table Runner",
+      "slug": "9ft-table-runner",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 4,
+      "nycPrice": 6.8
+    },
+    {
+      "name": "Audio Guest Book",
+      "slug": "audio-guest-book",
+      "categorySlug": "weddings",
+      "syracusePrice": 199,
+      "nycPrice": 338.3
+    },
+    {
+      "name": "Battery-Operated Crystal Chandelier",
+      "slug": "battery-operated-crystal-chandelier",
+      "categorySlug": "event-lighting-rentals",
+      "syracusePrice": 99,
+      "nycPrice": 168.3
+    },
+    {
+      "name": "Bistro Lighting (20x20)",
+      "slug": "bistro-lighting-20x20",
+      "categorySlug": "event-lighting-rentals",
+      "syracusePrice": 125,
+      "nycPrice": 212.5
+    },
+    {
+      "name": "Spandex 6ft Table Linen",
+      "slug": "black-spandex-6ft-table-linen",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 18,
+      "nycPrice": 30.6
+    },
+    {
+      "name": "Black Spandex 8ft Table Linen",
+      "slug": "black-spandex-8ft-table-linen",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 20,
+      "nycPrice": 34
+    },
+    {
+      "name": "Bus Bin",
+      "slug": "bus-bin",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 5,
+      "nycPrice": 8.5
+    },
+    {
+      "name": "Cake Fork",
+      "slug": "cake-fork",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "Chess Set",
+      "slug": "chess-set",
+      "categorySlug": "yard-game-rentals",
+      "syracusePrice": 25,
+      "nycPrice": 42.5
+    },
+    {
+      "name": "Chocolate Fountain",
+      "slug": "chocolate-fountain",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 75,
+      "nycPrice": 127.5
+    },
+    {
+      "name": "Cocktail Table",
+      "slug": "cocktail-table",
+      "categorySlug": "table-chair-rentals",
+      "syracusePrice": 12,
+      "nycPrice": 20.4
+    },
+    {
+      "name": "Cocktail Table Cover",
+      "slug": "cocktail-table-cover-white",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 12,
+      "nycPrice": 20.4
+    },
+    {
+      "name": "Coffee Urn / Percolator",
+      "slug": "coffee-urn-percolator",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 35,
+      "nycPrice": 59.5
+    },
+    {
+      "name": "Cornhole",
+      "slug": "cornhole",
+      "categorySlug": "yard-game-rentals",
+      "syracusePrice": 40,
+      "nycPrice": 68
+    },
+    {
+      "name": "Cotton Candy Floss Sugar - Blue Raspberry",
+      "slug": "cotton-candy-floss-sugar-blue-raspberry",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 10,
+      "nycPrice": 17
+    },
+    {
+      "name": "Cotton Candy Floss Sugar - Grape",
+      "slug": "cotton-candy-floss-sugar-grape",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 10,
+      "nycPrice": 17
+    },
+    {
+      "name": "Cotton Candy Floss Sugar - Lemon",
+      "slug": "cotton-candy-floss-sugar-lemon",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 10,
+      "nycPrice": 17
+    },
+    {
+      "name": "Cotton Candy Floss Sugar - Pink",
+      "slug": "cotton-candy-floss-sugar-pink",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 10,
+      "nycPrice": 17
+    },
+    {
+      "name": "Cotton Candy Machine/Floss Maker",
+      "slug": "cotton-candy-machinefloss-maker",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 100,
+      "nycPrice": 170
+    },
+    {
+      "name": "Rainbow Castle Bounce House",
+      "slug": "crayon-bounce-house",
+      "categorySlug": "bounce-house-rentals",
+      "syracusePrice": 199,
+      "nycPrice": 338.3
+    },
+    {
+      "name": "Cross-Back Farmhouse Chair",
+      "slug": "cross-back-farmhouse-chair",
+      "categorySlug": "weddings",
+      "syracusePrice": 14,
+      "nycPrice": 23.8
+    },
+    {
+      "name": "Crowd Control Stanchion",
+      "slug": "crowd-control-stanchion",
+      "categorySlug": "party-rental-accessories",
+      "syracusePrice": 15,
+      "nycPrice": 25.5
+    },
+    {
+      "name": "Custom Lighting - 300ft",
+      "slug": "custom-lighting-300ft",
+      "categorySlug": "event-lighting-rentals",
+      "syracusePrice": 200,
+      "nycPrice": 340
+    },
+    {
+      "name": "Dance Floor 3x3 Section",
+      "slug": "dance-floor-3x3-section",
+      "categorySlug": "dance-floor-stage-rentals",
+      "syracusePrice": 35,
+      "nycPrice": 59.5
+    },
+    {
+      "name": "Dinner Fork",
+      "slug": "dinner-fork",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "Dinner Knife",
+      "slug": "dinner-knife",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "Extra Movie Night Speaker",
+      "slug": "extra-movie-night-speaker",
+      "categorySlug": "inflatable-movie-screen-rentals",
+      "syracusePrice": 55,
+      "nycPrice": 93.5
+    },
+    {
+      "name": "Fire Red Marble Inflatable Water Slide",
+      "slug": "fire-red-marble-inflatable-water-slide",
+      "categorySlug": "bounce-house-rentals",
+      "syracusePrice": 299,
+      "nycPrice": 508.3
+    },
+    {
+      "name": "Fire Truck Water Slide Bounce House",
+      "slug": "fire-truck-water-slide-bounce-house",
+      "categorySlug": "bounce-house-rentals",
+      "syracusePrice": 350,
+      "nycPrice": 595
+    },
+    {
+      "name": "Foam Party Machine",
+      "slug": "foam-party-machine",
+      "categorySlug": "foam-party-machine-rentals",
+      "syracusePrice": 275,
+      "nycPrice": 467.5
+    },
+    {
+      "name": "Freezer Chest",
+      "slug": "freezer-chest",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 50,
+      "nycPrice": 85
+    },
+    {
+      "name": "Giant Uno Cards",
+      "slug": "giant-uno-cards",
+      "categorySlug": "yard-game-rentals",
+      "syracusePrice": 20,
+      "nycPrice": 34
+    },
+    {
+      "name": "Glass Beaded Charger Plate",
+      "slug": "glass-beaded-charger-plate",
+      "categorySlug": "weddings",
+      "syracusePrice": 2,
+      "nycPrice": 3.4
+    },
+    {
+      "name": "Glass Carafe",
+      "slug": "glass-carafe",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 4,
+      "nycPrice": 6.8
+    },
+    {
+      "name": "Glass Coffee Mug",
+      "slug": "glass-coffee-mug",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 2,
+      "nycPrice": 3.4
+    },
+    {
+      "name": "Glass Water Pitcher (64 oz)",
+      "slug": "glass-water-pitcher-64-oz",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 10,
+      "nycPrice": 17
+    },
+    {
+      "name": "Gold 5-Arm Candelabra",
+      "slug": "gold-5-arm-candelabra",
+      "categorySlug": "weddings",
+      "syracusePrice": 20,
+      "nycPrice": 34
+    },
+    {
+      "name": "Gold Beaded Charger Plate",
+      "slug": "gold-beaded-charger-plate",
+      "categorySlug": "weddings",
+      "syracusePrice": 2,
+      "nycPrice": 3.4
+    },
+    {
+      "name": "Gold Card Box",
+      "slug": "gold-card-box",
+      "categorySlug": "weddings",
+      "syracusePrice": 15,
+      "nycPrice": 25.5
+    },
+    {
+      "name": "Gold Chiavari Chair",
+      "slug": "gold-chiavari-chair",
+      "categorySlug": "table-chair-rentals",
+      "syracusePrice": 11.99,
+      "nycPrice": 20.38
+    },
+    {
+      "name": "Gold Mirror Welcome Sign",
+      "slug": "gold-mirror-welcome-sign",
+      "categorySlug": "weddings",
+      "syracusePrice": 35,
+      "nycPrice": 59.5
+    },
+    {
+      "name": "Gold Pedestal Cake Stand (14in)",
+      "slug": "gold-pedestal-cake-stand-14in",
+      "categorySlug": "weddings",
+      "syracusePrice": 15,
+      "nycPrice": 25.5
+    },
+    {
+      "name": "Gold Welcome Sign Easel",
+      "slug": "gold-welcome-sign-easel",
+      "categorySlug": "weddings",
+      "syracusePrice": 25,
+      "nycPrice": 42.5
+    },
+    {
+      "name": "Greenery and Floral Wall (8x8)",
+      "slug": "greenery-and-floral-wall-8x8",
+      "categorySlug": "weddings",
+      "syracusePrice": 150,
+      "nycPrice": 255
+    },
+    {
+      "name": "Handwashing Station",
+      "slug": "handwashing-station",
+      "categorySlug": "restroom-rentals",
+      "syracusePrice": 199,
+      "nycPrice": 338.3
+    },
+    {
+      "name": "Hexagon Wedding Arch",
+      "slug": "hexagon-wedding-arch",
+      "categorySlug": "weddings",
+      "syracusePrice": 75,
+      "nycPrice": 127.5
+    },
+    {
+      "name": "Hot Dog Bun Warmer",
+      "slug": "hot-dog-bun-warmer",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 30,
+      "nycPrice": 51
+    },
+    {
+      "name": "Hot Dog Roller Grill",
+      "slug": "hot-dog-roller-grill",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 95,
+      "nycPrice": 161.5
+    },
+    {
+      "name": "Inflatable Basketball Game",
+      "slug": "inflatable-basketball-game",
+      "categorySlug": "bounce-house-rentals",
+      "syracusePrice": 100,
+      "nycPrice": 170
+    },
+    {
+      "name": "Keg Cooler/Tub",
+      "slug": "keg-coolertub",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 20,
+      "nycPrice": 34
+    },
+    {
+      "name": "King Throne Chair",
+      "slug": "king-throne-chair",
+      "categorySlug": "table-chair-rentals",
+      "syracusePrice": 120,
+      "nycPrice": 204
+    },
+    {
+      "name": "Ladderball",
+      "slug": "ladderball",
+      "categorySlug": "yard-game-rentals",
+      "syracusePrice": 40,
+      "nycPrice": 68
+    },
+    {
+      "name": "Large Connect Four",
+      "slug": "large-connect-four",
+      "categorySlug": "yard-game-rentals",
+      "syracusePrice": 30,
+      "nycPrice": 51
+    },
+    {
+      "name": "Plastic Round Catering / Serving Bowl",
+      "slug": "large-family-style-serving-bowl",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 2,
+      "nycPrice": 3.4
+    },
+    {
+      "name": "Leg Drape",
+      "slug": "leg-drape",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 25,
+      "nycPrice": 42.5
+    },
+    {
+      "name": "Madison Arbor",
+      "slug": "madison-arbor",
+      "categorySlug": "weddings",
+      "syracusePrice": 75,
+      "nycPrice": 127.5
+    },
+    {
+      "name": "Mahogany Chiavari Chair",
+      "slug": "mahogany-chiavari-chair",
+      "categorySlug": "table-chair-rentals",
+      "syracusePrice": 12,
+      "nycPrice": 20.4
+    },
+    {
+      "name": "Matching Napkins",
+      "slug": "matching-napkins",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 2,
+      "nycPrice": 3.4
+    },
+    {
+      "name": "Movie Night Laptop Rental",
+      "slug": "movie-night-laptop-rental",
+      "categorySlug": "inflatable-movie-screen-rentals",
+      "syracusePrice": 75,
+      "nycPrice": 127.5
+    },
+    {
+      "name": "Nacho Cheese Warmer",
+      "slug": "nacho-cheese-warmer",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 40,
+      "nycPrice": 68
+    },
+    {
+      "name": "Patriotic Red, White and Blue Bounce House",
+      "slug": "patriotic-red-white-and-blue-bounce-house",
+      "categorySlug": "bounce-house-rentals",
+      "syracusePrice": 250,
+      "nycPrice": 425
+    },
+    {
+      "name": "Photobooth (3-Hour) With Attendant",
+      "slug": "photobooth-3-hour-with-attendant",
+      "categorySlug": "photobooth-rentals",
+      "syracusePrice": 549,
+      "nycPrice": 933.3
+    },
+    {
+      "name": "Photobooth (4-Hour) No Attendant",
+      "slug": "photobooth-4-hour-no-attendant",
+      "categorySlug": "photobooth-rentals",
+      "syracusePrice": 375,
+      "nycPrice": 637.5
+    },
+    {
+      "name": "Photobooth (4-Hour) With Attendant",
+      "slug": "photobooth-4-hour-with-attendant",
+      "categorySlug": "photobooth-rentals",
+      "syracusePrice": 649,
+      "nycPrice": 1103.3
+    },
+    {
+      "name": "Photobooth 4x6 Print Upgrade",
+      "slug": "photobooth-4x6-print-upgrade",
+      "categorySlug": "photobooth-rentals",
+      "syracusePrice": 100,
+      "nycPrice": 170
+    },
+    {
+      "name": "Photobooth (6-Hour) No Attendant",
+      "slug": "photobooth-6-hour-no-attendant",
+      "categorySlug": "photobooth-rentals",
+      "syracusePrice": 475,
+      "nycPrice": 807.5
+    },
+    {
+      "name": "Photobooth (6-Hour) With Attendant",
+      "slug": "photobooth-6-hour-with-attendant",
+      "categorySlug": "photobooth-rentals",
+      "syracusePrice": 799,
+      "nycPrice": 1358.3
+    },
+    {
+      "name": "Photobooth (8-Hour) No Attendant",
+      "slug": "photobooth-8-hour-no-attendant",
+      "categorySlug": "photobooth-rentals",
+      "syracusePrice": 575,
+      "nycPrice": 977.5
+    },
+    {
+      "name": "Photobooth (8-Hour) With Attendant",
+      "slug": "photobooth-8-hour-with-attendant",
+      "categorySlug": "photobooth-rentals",
+      "syracusePrice": 949,
+      "nycPrice": 1613.3
+    },
+    {
+      "name": "Photobooth Custom Backdrop Upgrade",
+      "slug": "photobooth-custom-backdrop-upgrade",
+      "categorySlug": "photobooth-rentals",
+      "syracusePrice": 85,
+      "nycPrice": 144.5
+    },
+    {
+      "name": "Photobooth Extra Hour (Attended)",
+      "slug": "photobooth-extra-hour-attended",
+      "categorySlug": "photobooth-rentals",
+      "syracusePrice": 100,
+      "nycPrice": 170
+    },
+    {
+      "name": "Pie/Cake Server",
+      "slug": "piecake-server",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 2,
+      "nycPrice": 3.4
+    },
+    {
+      "name": "Pilsner Beer Glass",
+      "slug": "pilsner-beer-glass",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 2,
+      "nycPrice": 3.4
+    },
+    {
+      "name": "Pink Inflatable Bounce House",
+      "slug": "pink-inflatable-bounce-house",
+      "categorySlug": "bounce-house-rentals",
+      "syracusePrice": 199,
+      "nycPrice": 338.3
+    },
+    {
+      "name": "Pirate Ship Slide Combo Bounce House",
+      "slug": "pirate-ship-slide-combo-bounce-house",
+      "categorySlug": "bounce-house-rentals",
+      "syracusePrice": 399,
+      "nycPrice": 678.3
+    },
+    {
+      "name": "Plastic Linen Clips (12 Pack)",
+      "slug": "plastic-linen-clips",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 4,
+      "nycPrice": 6.8
+    },
+    {
+      "name": "Podium and Microphone",
+      "slug": "podium-and-microphone",
+      "categorySlug": "party-rental-accessories",
+      "syracusePrice": 99,
+      "nycPrice": 168.3
+    },
+    {
+      "name": "Pong Game",
+      "slug": "pong-game",
+      "categorySlug": "yard-game-rentals",
+      "syracusePrice": 25,
+      "nycPrice": 42.5
+    },
+    {
+      "name": "Popcorn Machine",
+      "slug": "popcorn-machine",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 75,
+      "nycPrice": 127.5
+    },
+    {
+      "name": "Pretzel Display Warmer",
+      "slug": "pretzel-display-warmer",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 75,
+      "nycPrice": 127.5
+    },
+    {
+      "name": "Propane Heater",
+      "slug": "propane-heater",
+      "categorySlug": "heater-fan-rentals",
+      "syracusePrice": 80,
+      "nycPrice": 136
+    },
+    {
+      "name": "Queen Tiffany Throne Chair",
+      "slug": "queen-tiffany-throne-chair",
+      "categorySlug": "table-chair-rentals",
+      "syracusePrice": 125,
+      "nycPrice": 212.5
+    },
+    {
+      "name": "Red Carpet",
+      "slug": "red-carpet",
+      "categorySlug": "party-rental-accessories",
+      "syracusePrice": 75,
+      "nycPrice": 127.5
+    },
+    {
+      "name": "Roll-Top 8 Qt Chafer",
+      "slug": "roll-top-8-qt-chafer",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 45,
+      "nycPrice": 76.5
+    },
+    {
+      "name": "Round Gold Metal Display Dish",
+      "slug": "round-gold-metal-display-dish",
+      "categorySlug": "weddings",
+      "syracusePrice": 10,
+      "nycPrice": 17
+    },
+    {
+      "name": "Round Wedding Arch (7ft)",
+      "slug": "round-wedding-arch-7ft",
+      "categorySlug": "weddings",
+      "syracusePrice": 75,
+      "nycPrice": 127.5
+    },
+    {
+      "name": "Rustic Lantern Table Centerpiece",
+      "slug": "rustic-lantern-table-centerpiece",
+      "categorySlug": "table-chair-rentals",
+      "syracusePrice": 25,
+      "nycPrice": 42.5
+    },
+    {
+      "name": "Salad Fork",
+      "slug": "salad-fork",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "Salt and Pepper Shaker Set",
+      "slug": "salt-and-pepper-shaker-set",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 3,
+      "nycPrice": 5.1
+    },
+    {
+      "name": "Sequin Backdrop Panel (8x8)",
+      "slug": "sequin-backdrop-panel-8x8",
+      "categorySlug": "weddings",
+      "syracusePrice": 100,
+      "nycPrice": 170
+    },
+    {
+      "name": "Serving Spoon",
+      "slug": "serving-spoon",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 3,
+      "nycPrice": 5.1
+    },
+    {
+      "name": "Serving Tongs",
+      "slug": "serving-tongs",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 2,
+      "nycPrice": 3.4
+    },
+    {
+      "name": "Sheet Pan",
+      "slug": "sheet-pan",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 7.5,
+      "nycPrice": 12.75
+    },
+    {
+      "name": "Snow Cone Machine",
+      "slug": "snow-cone-machine",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 55,
+      "nycPrice": 93.5
+    },
+    {
+      "name": "Snow Cone Syrup - Blue Raspberry",
+      "slug": "snow-cone-syrup-blue-raspberry",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 8,
+      "nycPrice": 13.6
+    },
+    {
+      "name": "Snow Cone Syrup - Cherry",
+      "slug": "snow-cone-syrup-cherry",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 8,
+      "nycPrice": 13.6
+    },
+    {
+      "name": "Snow Cone Syrup - Orange",
+      "slug": "snow-cone-syrup-orange",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 8,
+      "nycPrice": 13.6
+    },
+    {
+      "name": "Snow Cone Syrup - Pina Colada",
+      "slug": "snow-cone-syrup-pina-colada",
+      "categorySlug": "concession-machine-rentals",
+      "syracusePrice": 8,
+      "nycPrice": 13.6
+    },
+    {
+      "name": "Spandex Chair Cover",
+      "slug": "spandex-chair-cover",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 2,
+      "nycPrice": 3.4
+    },
+    {
+      "name": "Stage Ramp",
+      "slug": "stage-ramp",
+      "categorySlug": "dance-floor-stage-rentals",
+      "syracusePrice": 50,
+      "nycPrice": 85
+    },
+    {
+      "name": "Stage Section",
+      "slug": "stage-section",
+      "categorySlug": "dance-floor-stage-rentals",
+      "syracusePrice": 125,
+      "nycPrice": 212.5
+    },
+    {
+      "name": "Stage Stair",
+      "slug": "stage-stair",
+      "categorySlug": "dance-floor-stage-rentals",
+      "syracusePrice": 55,
+      "nycPrice": 93.5
+    },
+    {
+      "name": "Standard Portable Restroom",
+      "slug": "standard-portable-restroom",
+      "categorySlug": "restroom-rentals",
+      "syracusePrice": 299,
+      "nycPrice": 508.3
+    },
+    {
+      "name": "Sterno Fuel Cans (Pack of 2)",
+      "slug": "sterno-fuel-cans-pack-of-2",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 5,
+      "nycPrice": 8.5
+    },
+    {
+      "name": "Sugar and Creamer Set",
+      "slug": "sugar-and-creamer-set",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 5,
+      "nycPrice": 8.5
+    },
+    {
+      "name": "Sweetheart Table (60in Half-Round)",
+      "slug": "sweetheart-table-60in-half-round",
+      "categorySlug": "weddings",
+      "syracusePrice": 35,
+      "nycPrice": 59.5
+    },
+    {
+      "name": "Table Number Stands",
+      "slug": "table-number-stands",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 2,
+      "nycPrice": 3.4
+    },
+    {
+      "name": "Tablespoon / Soup Spoon",
+      "slug": "tablespoon-soup-spoon",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "Tall Highball Glass",
+      "slug": "tall-highball-glass",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "Teaspoon",
+      "slug": "teaspoon",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 1.5,
+      "nycPrice": 2.55
+    },
+    {
+      "name": "Tent Lighting (20x20)",
+      "slug": "tent-lighting-20x20",
+      "categorySlug": "event-lighting-rentals",
+      "syracusePrice": 100,
+      "nycPrice": 170
+    },
+    {
+      "name": "Tent Lighting - 20x30",
+      "slug": "tent-lighting-20x30",
+      "categorySlug": "event-lighting-rentals",
+      "syracusePrice": 125,
+      "nycPrice": 212.5
+    },
+    {
+      "name": "Tent Lighting (20x40)",
+      "slug": "tent-lighting-20x40",
+      "categorySlug": "event-lighting-rentals",
+      "syracusePrice": 150,
+      "nycPrice": 255
+    },
+    {
+      "name": "Tent Lighting - 30x30",
+      "slug": "tent-lighting-30x30",
+      "categorySlug": "event-lighting-rentals",
+      "syracusePrice": 125,
+      "nycPrice": 212.5
+    },
+    {
+      "name": "Tent Lighting - 30x45",
+      "slug": "tent-lighting-30x45",
+      "categorySlug": "event-lighting-rentals",
+      "syracusePrice": 175,
+      "nycPrice": 297.5
+    },
+    {
+      "name": "Tent Lighting - 30x60",
+      "slug": "tent-lighting-30x60",
+      "categorySlug": "event-lighting-rentals",
+      "syracusePrice": 200,
+      "nycPrice": 340
+    },
+    {
+      "name": "Tent Lighting - 40x100",
+      "slug": "tent-lighting-40x100",
+      "categorySlug": "event-lighting-rentals",
+      "syracusePrice": 350,
+      "nycPrice": 595
+    },
+    {
+      "name": "Tent Lighting - 40x40",
+      "slug": "tent-lighting-40x40",
+      "categorySlug": "event-lighting-rentals",
+      "syracusePrice": 225,
+      "nycPrice": 382.5
+    },
+    {
+      "name": "Tent Lighting - 40x60",
+      "slug": "tent-lighting-40x60",
+      "categorySlug": "event-lighting-rentals",
+      "syracusePrice": 250,
+      "nycPrice": 425
+    },
+    {
+      "name": "Tent Lighting - 40x80",
+      "slug": "tent-lighting-40x80",
+      "categorySlug": "event-lighting-rentals",
+      "syracusePrice": 300,
+      "nycPrice": 510
+    },
+    {
+      "name": "Tent Misting 10x10 Pop Up Tent",
+      "slug": "tent-misting-10x10-pop-up-tent",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 149.99,
+      "nycPrice": 254.98
+    },
+    {
+      "name": "Tidal Wave Inflatable Water Slide",
+      "slug": "tidal-wave-inflatable-water-slide",
+      "categorySlug": "bounce-house-rentals",
+      "syracusePrice": 250,
+      "nycPrice": 425
+    },
+    {
+      "name": "Tiered Cake Display - 3-Level Gold",
+      "slug": "tiered-cake-display-3-level-gold",
+      "categorySlug": "weddings",
+      "syracusePrice": 25,
+      "nycPrice": 42.5
+    },
+    {
+      "name": "Water Barrel Cover",
+      "slug": "water-barrel-cover",
+      "categorySlug": "tent-rentals",
+      "syracusePrice": 20,
+      "nycPrice": 34
+    },
+    {
+      "name": "Wedding White Bounce House",
+      "slug": "wedding-white-bounce-house",
+      "categorySlug": "bounce-house-rentals",
+      "syracusePrice": 250,
+      "nycPrice": 425
+    },
+    {
+      "name": "White Aisle Runner (100ft)",
+      "slug": "white-aisle-runner-100ft",
+      "categorySlug": "weddings",
+      "syracusePrice": 100,
+      "nycPrice": 170
+    },
+    {
+      "name": "White Chiavari Chair",
+      "slug": "white-chiavari-chair",
+      "categorySlug": "table-chair-rentals",
+      "syracusePrice": 11.99,
+      "nycPrice": 20.38
+    },
+    {
+      "name": "White Plastic Folding Chair",
+      "slug": "white-plastic-folding-chair",
+      "categorySlug": "table-chair-rentals",
+      "syracusePrice": 2.5,
+      "nycPrice": 4.25
+    },
+    {
+      "name": "White Resin Folding Chair",
+      "slug": "white-resin-folding-chair",
+      "categorySlug": "table-chair-rentals",
+      "syracusePrice": 4.75,
+      "nycPrice": 8.07
+    },
+    {
+      "name": "White Table Linen Round 60\"",
+      "slug": "white-table-linen-round-60",
+      "categorySlug": "linen-rentals",
+      "syracusePrice": 16,
+      "nycPrice": 27.2
+    },
+    {
+      "name": "Wine / Champagne Bucket",
+      "slug": "wine-champagne-bucket",
+      "categorySlug": "beverage-food-service",
+      "syracusePrice": 15,
+      "nycPrice": 25.5
+    },
+    {
+      "name": "Wireless LED Uplight",
+      "slug": "wireless-led-uplight",
+      "categorySlug": "event-lighting-rentals",
+      "syracusePrice": 25,
+      "nycPrice": 42.5
+    }
+  ]
+}

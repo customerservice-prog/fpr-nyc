@@ -8,6 +8,7 @@ import { fetchDeliveryEstimate, type DeliveryEstimate } from '@/lib/deliveryEsti
 import { calculateEstimate, estimateInquiry, estimatePackages, initialEstimate, integer, money, normalizeEstimateItems, recommendedPackage, sanitizeEstimate, sanitizeSelections, ESTIMATE_EVENT, ESTIMATE_STORAGE_KEY, EXTRA_PLANNING_RATE, MAX_RENTAL_QUANTITY, MAX_RENTAL_SELECTIONS, type EstimateDetails, type EstimateItem, type PlanningProgress } from '@/lib/planningEstimator'
 import styles from './PlanningEstimator.module.css'
 import { NYC_PUBLIC_HOST } from '@/lib/nycPublicOrigin'
+import { nycItemPath } from '@/lib/nycItemPath'
 
 const steps = ['Your event', 'Planning', 'Rentals', 'Your estimate']
 const progressOptions: { value: PlanningProgress; title: string; description: string }[] = [
@@ -216,8 +217,8 @@ export default function PlanningEstimator({ initialType = '' }: { initialType?: 
             {catalogStatus === 'error' && <div className={styles.error} role="alert">{catalogError}<button type="button" className={styles.textButton} onClick={() => setCatalogAttempt(n => n + 1)}>Retry catalog</button></div>}
             {catalogStatus === 'ready' && !filtered.length && <div className={styles.empty}>No matching rentals are available in this view. Try another category or continue to request a custom quote.</div>}
             <div className={styles.catalog}>{filtered.slice(0, visibleCount).map(item => <article key={item.id} className={styles.rentalCard} data-selected={!!selections[item.id]}>
-              <a className={styles.rentalPhoto} href={'/items/' + item.slug} target="_blank" rel="noreferrer" tabIndex={-1} aria-hidden="true"><Photo src={item.image} alt={item.name} contain sizes="(max-width: 767px) 40vw, 210px"/></a>
-              <div className={styles.rentalCopy}><a href={'/items/' + item.slug} target="_blank" rel="noreferrer">{item.name}</a><p>{item.cost > 0 ? money(item.cost) : 'Confirm price'}</p><small>{item.available !== null ? `${item.available} available for selected date · not reserved` : 'Base rental rate · choose a date to check stock'}</small>
+              <a className={styles.rentalPhoto} href={nycItemPath(item.slug)} target="_blank" rel="noreferrer" tabIndex={-1} aria-hidden="true"><Photo src={item.image} alt={item.name} contain sizes="(max-width: 767px) 40vw, 210px"/></a>
+              <div className={styles.rentalCopy}><a href={nycItemPath(item.slug)} target="_blank" rel="noreferrer">{item.name}</a><p>{item.cost > 0 ? money(item.cost) : 'Confirm price'}</p><small>{item.available !== null ? `${item.available} available for selected date · not reserved` : 'Base rental rate · choose a date to check stock'}</small>
                 {selections[item.id] ? <div className={styles.quantity}><button type="button" aria-label={'Remove one ' + item.name} onClick={() => changeQuantity(item.id, selections[item.id] - 1)}><Minus size={14}/></button><NumberInput label={item.name + ' quantity'} value={selections[item.id]} max={MAX_RENTAL_QUANTITY} onChange={n => changeQuantity(item.id, n)}/><button type="button" aria-label={'Add one ' + item.name} onClick={() => changeQuantity(item.id, selections[item.id] + 1)}><Plus size={14}/></button></div> : <button type="button" className={styles.addButton} aria-label={'Add ' + item.name} disabled={item.available === 0} onClick={() => changeQuantity(item.id, 1)}>{item.available === 0 ? 'Unavailable for this date' : '+ Add to estimate'}</button>}
               </div>
             </article>)}</div>

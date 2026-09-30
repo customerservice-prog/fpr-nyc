@@ -92,23 +92,25 @@ jobs:
           JS
       - name: Actual production React search and mobile acceptance with browser-only mock responses
         run: node tests/nyc-search-ui.cjs
-      - name: Capture freshly opened mobile menu and desktop search error without saving any records
+      - name: Capture mobile menu and simulated search error without saving any records
         run: |
           node - <<'JS'
           const { chromium } = require('playwright')
-          const fs = require('node:fs')
           ;(async () => {
             const browser = await chromium.launch()
             try {
               const context = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce', serviceWorkers: 'block' })
               await context.route('**/*', route => ['GET','HEAD'].includes(route.request().method()) ? route.continue() : route.fulfill({ status: 204, body: '' }))
               const page = await context.newPage()
+              page.setDefaultTimeout(15000)
               await page.goto(process.env.NYC_QA_ORIGIN, { waitUntil: 'domcontentloaded' })
               await page.getByRole('button', { name: 'Open menu', exact: true }).click()
-              await page.getByRole('dialog', { name: 'Mobile navigation', exact: true }).waitFor({ state: 'visible' })
+              const menu = page.getByRole('dialog', { name: 'Mobile navigation', exact: true })
+              await menu.waitFor({ state: 'visible' })
               await page.screenshot({ path: '/tmp/nyc-search-live-proof/mobile-menu-open.png' })
               await page.keyboard.press('Escape')
-              await page.getByRole('button', { name: 'Search', exact: true }).click()
+              await menu.waitFor({ state: 'detached' })
+              await page.locator('header:visible').getByRole('button', { name: 'Search', exact: true }).click()
               await page.route(url => url.pathname === '/api/items' && url.searchParams.has('search'), route => route.fulfill({ status: 503, json: { error: 'Browser-only simulated failure' } }))
               await page.getByRole('dialog').getByRole('searchbox').fill('tents')
               await page.getByRole('alert').waitFor({ state: 'visible' })

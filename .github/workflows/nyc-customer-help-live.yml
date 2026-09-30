@@ -1,0 +1,109 @@
+name: NYC customer help live acceptance
+on:
+  push:
+    branches: [verify/nyc-customer-help-live-20260930]
+    paths: [.github/workflows/nyc-customer-help-live.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    env:
+      NYC_HELP_QA_ORIGIN: https://friendlypartyrentalnyc.com
+      NYC_HELP_QA_OUTPUT: nyc-help-live-proof
+      NODE_PATH: /tmp/nyc-help-browser/node_modules
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install isolated browser tooling
+        run: |
+          npm install --prefix /tmp/nyc-help-browser --no-save --package-lock=false playwright@1.56.1
+          /tmp/nyc-help-browser/node_modules/.bin/playwright install --with-deps chromium
+      - name: Wait for the new customer-help pages without submitting anything
+        run: |
+          node - <<'JS'
+          const assert = require('node:assert/strict');
+          (async () => {
+            for(let attempt=0; attempt<90; attempt++) {
+              try {
+                const r=await fetch(process.env.NYC_HELP_QA_ORIGIN+'/frequently_asked_questions',{signal:AbortSignal.timeout(12000)});
+                if(r.status===200 && (await r.text()).includes('data-nyc-customer-help="faq"')) { console.log('New NYC customer-help release is visible.'); return; }
+              } catch {}
+              await new Promise(resolve=>setTimeout(resolve,5000));
+            }
+            throw new Error('The new NYC customer-help release did not become visible.');
+          })().catch(error=>{console.error(error);process.exitCode=1});
+          JS
+      - name: Read-only live browser acceptance
+        run: node scripts/verify-nyc-customer-help.cjs
+      - name: Recheck public catalog, payment readiness and admin isolation
+        run: |
+          node - <<'JS'
+          const fs=require('node:fs'),assert=require('node:assert/strict');
+          const {chromium}=require('playwright');
+          const origin=process.env.NYC_HELP_QA_ORIGIN,out=process.env.NYC_HELP_QA_OUTPUT;
+          const report={checkedAt:new Date().toISOString(),origin,readOnly:true,pages:[],adminAccess:[]};
+          async function get(path, options={}) { return fetch(origin+path,{signal:AbortSignal.timeout(20000),redirect:'manual',...options}); }
+          (async()=>{
+            for(const path of ['/health','/','/category','/admin/login','/checkout']) {
+              const r=await get(path); assert.equal(r.status,200,path);report.pages.push({path,status:r.status});
+            }
+            const categoriesResponse=await get('/api/categories');assert.equal(categoriesResponse.status,200);
+            const {categories}=await categoriesResponse.json();assert.ok(Array.isArray(categories));report.categoryCount=categories.length;
+            for(const category of categories) {
+              assert.match(category.slug,/^[a-zA-Z0-9_-]+$/);
+              for(const path of ['/category/'+category.slug,'/api/categories/'+category.slug]) {
+                const r=await get(path);assert.equal(r.status,200,path);report.pages.push({path,status:r.status});
+              }
+            }
+            const itemsResponse=await get('/api/items');assert.equal(itemsResponse.status,200);
+            const items=await itemsResponse.json();report.itemsReturnedByPublicCatalog=Array.isArray(items.items)?items.items.length:null;
+            for(const path of ['/api/payments/status','/api/tax-rate','/api/deposit-rule','/api/contact']) {
+              const r=await get(path);assert.equal(r.status,200,path);const data=await r.json();
+              if(path==='/api/contact') report.contactNotificationsEnabled=data.notificationsEnabled;
+              else report[path]=data;
+            }
+            for(const path of ['/api/admin/orders','/api/admin/customers','/api/admin/items']) {
+              const r=await get(path);assert.ok([401,403].includes(r.status),path+' exposed an unexpected response');report.adminAccess.push({path,status:r.status});
+            }
+            const robots=await get('/robots.txt');report.robotsStatus=robots.status;report.robots=(await robots.text()).slice(0,2000);
+            const redirect=await fetch('https://www.friendlypartyrentalnyc.com/contact_us?qa=help',{redirect:'manual',signal:AbortSignal.timeout(20000)});
+            assert.equal(redirect.status,308);assert.equal(redirect.headers.get('location'),origin+'/contact_us?qa=help');report.wwwRedirect='passed';
+            // Optional rendering of the real public Google map. No POST or other
+            // writes are allowed; only NYC pages and Google's public map hosts.
+            const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+            try {
+              const context=await browser.newContext({viewport:{width:1440,height:1000}});
+              await context.route('**/*',route=>{
+                const r=route.request(),url=new URL(r.url());
+                const google=['www.google.com','maps.google.com','maps.gstatic.com','www.gstatic.com','fonts.gstatic.com','maps.googleapis.com','streetviewpixels-pa.googleapis.com'].includes(url.hostname);
+                if(!['GET','HEAD'].includes(r.method()) || (url.origin!==origin && !google)) return route.abort();
+                return route.continue();
+              });
+              const page=await context.newPage();await page.goto(origin+'/contact_us',{waitUntil:'domcontentloaded'});
+              await page.locator('[data-nyc-customer-help="contact"]').waitFor();
+              const frame=page.locator('iframe[title="Riverdale, Bronx, New York service-area map"]');
+              await frame.scrollIntoViewIfNeeded();await page.waitForTimeout(6000);
+              report.mapUrl=await frame.getAttribute('src');
+              await page.screenshot({path:out+'/contact-desktop-with-map.png',fullPage:true});
+              report.mapScreenshot='contact-desktop-with-map.png';
+              await context.close();
+            } finally {await browser.close();}
+            report.success=true;
+          })().catch(error=>{report.error=error.message;console.error(error);process.exitCode=1}).finally(()=>{
+            fs.mkdirSync(out,{recursive:true});fs.writeFileSync(out+'/live-readiness.json',JSON.stringify(report,null,2));
+          });
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nyc-customer-help-live-proof
+          path: nyc-help-live-proof/
+          retention-days: 5
+          if-no-files-found: ignore

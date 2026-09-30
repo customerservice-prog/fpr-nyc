@@ -17,6 +17,14 @@ export function openNycMobileModal(
   const viewportChanged = () => { if (desktop.matches) requestDismiss() }
 
   const keyboard = (event: KeyboardEvent) => {
+    // Search inputs consume Escape to clear their text before a native dialog
+    // receives cancel. Capture it so the first press always closes this panel.
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      event.stopPropagation()
+      requestDismiss()
+      return
+    }
     if (event.key !== 'Tab') return
     const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(
       'a[href], button, input, select, textarea, [tabindex]'
@@ -39,7 +47,7 @@ export function openNycMobileModal(
   document.body.style.overflow = 'hidden'
   dialog.addEventListener('cancel', cancel)
   dialog.addEventListener('close', closed)
-  dialog.addEventListener('keydown', keyboard)
+  dialog.addEventListener('keydown', keyboard, true)
   desktop.addEventListener('change', viewportChanged)
   try {
     dialog.showModal()
@@ -55,7 +63,7 @@ export function openNycMobileModal(
     disposed = true
     dialog.removeEventListener('cancel', cancel)
     dialog.removeEventListener('close', closed)
-    dialog.removeEventListener('keydown', keyboard)
+    dialog.removeEventListener('keydown', keyboard, true)
     desktop.removeEventListener('change', viewportChanged)
     if (dialog.open) dialog.close()
     document.body.style.overflow = previousOverflow

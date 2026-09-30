@@ -41,6 +41,12 @@ try {
   const rule = await prisma.depositRule.findFirst({ where: { isActive: true }, orderBy: { createdAt: 'desc' } })
   assert.equal(rule?.type, 'percentage')
   assert.equal(Number(rule?.amount), 25)
+  const tiers = await prisma.pricingTier.findMany({ orderBy: { sortOrder: 'asc' } })
+  assert.deepEqual(tiers.map((tier) => [tier.label, tier.minDays, tier.maxDays, tier.percent]), [
+    ['1 Day', 1, 1, 0], ['2 Days', 2, 2, 60], ['3 Days', 3, 3, 110], ['4 Days', 4, 4, 145], ['5 Days', 5, 5, 170],
+    ['6 Days', 6, 6, 188], ['7 Days (1 Week)', 7, 7, 200], ['2 Weeks', 8, 14, 400], ['3 Weeks', 15, 21, 600],
+    ['4 Weeks (Monthly)', 22, 28, 800], ['29+ Days (Long-Term)', 29, null, 800],
+  ], 'NYC duration tiers are the Syracuse tiers')
   const stamps = Object.fromEntries(rows.map((row) => [row.slug, row.updatedAt.toISOString()]))
   if (snapshotPath) fs.writeFileSync(snapshotPath, JSON.stringify(stamps))
   if (comparePath) {

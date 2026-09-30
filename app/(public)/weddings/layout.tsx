@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import {prisma} from '@/lib/prisma'
 import {isSearchableSlug} from '@/lib/nycSeo'
+import { nycItemPath } from '@/lib/nycItemPath'
 
 /** Link the complete existing wedding catalog from the indexable wedding hub.
  * Featured cards are intentionally limited; this visible directory covers the rest.
@@ -18,7 +19,7 @@ export default async function WeddingsLayout({children}:{children:React.ReactNod
       <h2 id="wedding-catalog-heading" className="text-2xl font-bold text-dark">Wedding rental catalog</h2>
       <p className="mt-3 mb-6 text-sm leading-6 text-body">Explore the individual Riverdale catalog listings, including pieces not shown in the featured collection above. Review each listing and confirm your date and package inclusions with our team.</p>
       <ul className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
-        {published.map(item=><li key={item.id}><Link href={'/items/'+encodeURIComponent(item.slug!)} prefetch={false} className="text-sm font-medium text-blue-700 underline underline-offset-2 hover:text-blue-900">{item.name}</Link></li>)}
+        {published.map(item=><li key={item.id}><Link href={nycItemPath(item.slug!)} prefetch={false} className="text-sm font-medium text-blue-700 underline underline-offset-2 hover:text-blue-900">{item.name}</Link></li>)}
       </ul>
     </div>
   </section>}</>

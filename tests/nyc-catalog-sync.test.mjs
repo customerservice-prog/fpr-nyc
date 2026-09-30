@@ -13,6 +13,7 @@ import {
 } from '../lib/nycCatalogCore.mjs'
 import { SourceUnavailableError, resolveSourceOrigin, runCatalogSync } from '../scripts/nyc-catalog-sync-engine.mjs'
 import { syracuseCategories, syracuseHasPhoto, syracuseItems } from './fixtures/syracuse-catalog-sample.mjs'
+import { PREDEPLOY_STEPS, runPredeploy } from '../scripts/nyc-predeploy.mjs'
 
 const ORIGIN = 'https://www.friendlypartyrental.com'
 
@@ -259,4 +260,21 @@ test('parity report flags every kind of drift', () => {
   assert.equal(report.nonPackagePricesWithCents.length, 1)
   assert.equal(report.customerCopyProblems.length, 1)
   assert.deepEqual(report.missingSyracuseSlugs, ['madison-arbor'])
+})
+
+test('Railway pre-deploy entry point runs every step in order and stops at the first failure', () => {
+  assert.deepEqual(PREDEPLOY_STEPS.map(([, args]) => args.join(' ')), [
+    'scripts/sync-nyc-catalog-from-syracuse.mjs --apply',
+    'scripts/apply-nyc-premium-prices.mjs --apply',
+    'scripts/sync-nyc-quantities-from-syracuse.mjs --apply',
+    'scripts/ensure-nyc-deposit-rule.mjs --apply',
+    'prisma migrate deploy',
+  ])
+  const ran = []
+  assert.equal(runPredeploy(PREDEPLOY_STEPS, (command, args) => { ran.push(args[0]); return { status: 0 } }), 0)
+  assert.equal(ran.length, 5)
+  const partial = []
+  assert.equal(runPredeploy(PREDEPLOY_STEPS, (command, args) => { partial.push(args[0]); return { status: partial.length === 2 ? 4 : 0 } }), 4)
+  assert.deepEqual(partial, ['scripts/sync-nyc-catalog-from-syracuse.mjs', 'scripts/apply-nyc-premium-prices.mjs'])
+  assert.equal(runPredeploy(PREDEPLOY_STEPS, () => ({ status: null, error: new Error('spawn ENOENT') })), 1)
 })

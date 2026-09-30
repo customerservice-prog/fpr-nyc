@@ -1,40 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useId } from 'react'
 import { ChevronDown } from 'lucide-react'
 
-interface AccordionItem {
-  question: string
-  answer: string
-}
-
-interface AccordionProps {
-  items: AccordionItem[]
-}
+interface AccordionItem { question: string; answer: string }
+interface AccordionProps { items: AccordionItem[] }
 
 export default function Accordion({ items }: AccordionProps) {
-  const [openIndex, setOpenIndex] = useState<number | null>(null)
-
+  const groupName = useId()
+  // Native disclosures remain readable and keyboard-operable without JavaScript.
   return (
     <div className="space-y-2">
-      {items.map((item, index) => (
-        <div key={index} className="border border-primary/30 rounded-lg overflow-hidden">
-          <button
-            onClick={() => setOpenIndex(openIndex === index ? null : index)}
-            className="w-full flex items-center justify-between p-4 text-left bg-white hover:bg-primary/10 transition-colors"
-          >
-            <span className="font-medium text-dark">{item.question}</span>
-            <ChevronDown
-              size={20}
-              className={`transition-transform ${openIndex === index ? 'rotate-180' : ''}`}
-            />
-          </button>
-          {openIndex === index && (
-            <div className="p-4 bg-gray-50 text-body text-sm border-t">
-              {item.answer}
-            </div>
-          )}
-        </div>
+      {items.map(item => (
+        <details key={item.question} name={groupName} className="group rounded-lg border border-primary/30 bg-white">
+          <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 rounded-lg p-4 text-left transition-colors hover:bg-primary/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary [&::-webkit-details-marker]:hidden">
+            <span className="min-w-0 font-medium text-dark">{item.question}</span>
+            <ChevronDown aria-hidden="true" size={20} className="shrink-0 transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="rounded-b-lg border-t bg-gray-50 p-4 text-sm leading-7 text-body">{item.answer}</div>
+        </details>
       ))}
     </div>
   )

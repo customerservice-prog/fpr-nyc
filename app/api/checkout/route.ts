@@ -198,7 +198,6 @@ export async function POST(request: NextRequest) {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountCents,
       currency: 'usd',
-      payment_method_types: ['card'],
       description: 'Friendly Party Rental NYC order ' + order.orderNumber,
       ...(stripeCustomerId ? { customer: stripeCustomerId } : {}),
       ...(saveCard ? { setup_future_usage: 'off_session' as const } : {}),

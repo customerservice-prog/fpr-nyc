@@ -13,6 +13,7 @@ const node = process.execPath
 const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx'
 
 export const PREDEPLOY_STEPS = [
+  [node, ['scripts/verify-nyc-stripe-readiness.mjs']],
   [node, ['scripts/sync-nyc-catalog-from-syracuse.mjs', '--apply']],
   [node, ['scripts/apply-nyc-premium-prices.mjs', '--apply']],
   [node, ['scripts/sync-nyc-quantities-from-syracuse.mjs', '--apply']],

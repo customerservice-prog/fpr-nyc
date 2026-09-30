@@ -1,0 +1,193 @@
+{
+  "version": 1,
+  "policy": "NYC prices are a one-time snapshot at Syracuse baseline × 1.70. NYC does not dynamically follow Syracuse after this snapshot.",
+  "multiplier": 1.7,
+  "source": {
+    "repository": "customerservice-prog/friendly-party-rental-app",
+    "commit": "9329bf06e826375d06778f4a59b8ff647fae526c",
+    "file": "prisma/seed.js",
+    "capturedOn": "2026-09-29"
+  },
+  "items": [
+    {
+      "name": "White Plastic Folding Chair",
+      "slug": "white-plastic-folding-chair",
+      "syracusePrice": 2.5,
+      "nycPrice": 4.25
+    },
+    {
+      "name": "6ft Plastic Folding Table",
+      "slug": "6ft-plastic-folding-table",
+      "syracusePrice": 13,
+      "nycPrice": 22.1
+    },
+    {
+      "name": "8ft Plastic Folding Table",
+      "slug": "8ft-plastic-folding-table",
+      "syracusePrice": 15,
+      "nycPrice": 25.5
+    },
+    {
+      "name": "White Resin Chair with Pad",
+      "slug": "white-resin-chair-pad",
+      "syracusePrice": 4.5,
+      "nycPrice": 7.65
+    },
+    {
+      "name": "Gold Chiavari Chair",
+      "slug": "gold-chiavari-chair",
+      "syracusePrice": 8,
+      "nycPrice": 13.6
+    },
+    {
+      "name": "White Chiavari Chair",
+      "slug": "white-chiavari-chair",
+      "syracusePrice": 7.5,
+      "nycPrice": 12.75
+    },
+    {
+      "name": "20x20 Pole Tent",
+      "slug": "20x20-pole-tent",
+      "syracusePrice": 250,
+      "nycPrice": 425
+    },
+    {
+      "name": "20x30 Pole Tent",
+      "slug": "20x30-pole-tent",
+      "syracusePrice": 350,
+      "nycPrice": 595
+    },
+    {
+      "name": "20x40 Pole Tent",
+      "slug": "20x40-pole-tent",
+      "syracusePrice": 450,
+      "nycPrice": 765
+    },
+    {
+      "name": "40x60 Pole Tent",
+      "slug": "40x60-pole-tent",
+      "syracusePrice": 850,
+      "nycPrice": 1445
+    },
+    {
+      "name": "12x12 Dance Floor Section",
+      "slug": "12x12-dance-floor",
+      "syracusePrice": 175,
+      "nycPrice": 297.5
+    },
+    {
+      "name": "White Table Linen 6ft",
+      "slug": "white-table-linen-6ft",
+      "syracusePrice": 8,
+      "nycPrice": 13.6
+    },
+    {
+      "name": "White Table Linen Round 60\"",
+      "slug": "white-table-linen-round-60",
+      "syracusePrice": 12,
+      "nycPrice": 20.4
+    },
+    {
+      "name": "Popcorn Machine",
+      "slug": "popcorn-machine",
+      "syracusePrice": 75,
+      "nycPrice": 127.5
+    },
+    {
+      "name": "Cotton Candy Machine",
+      "slug": "cotton-candy-machine",
+      "syracusePrice": 65,
+      "nycPrice": 110.5
+    },
+    {
+      "name": "Snow Cone Machine",
+      "slug": "snow-cone-machine",
+      "syracusePrice": 55,
+      "nycPrice": 93.5
+    },
+    {
+      "name": "Giant Jenga",
+      "slug": "giant-jenga",
+      "syracusePrice": 45,
+      "nycPrice": 76.5
+    },
+    {
+      "name": "Cornhole Set",
+      "slug": "cornhole-set",
+      "syracusePrice": 35,
+      "nycPrice": 59.5
+    },
+    {
+      "name": "String Lights 50ft",
+      "slug": "string-lights-50ft",
+      "syracusePrice": 40,
+      "nycPrice": 68
+    },
+    {
+      "name": "Uplighting Package (4 lights)",
+      "slug": "uplighting-package",
+      "syracusePrice": 85,
+      "nycPrice": 144.5
+    },
+    {
+      "name": "3500W Generator",
+      "slug": "3500w-generator",
+      "syracusePrice": 125,
+      "nycPrice": 212.5
+    },
+    {
+      "name": "Photo Booth Package",
+      "slug": "photo-booth-package",
+      "syracusePrice": 350,
+      "nycPrice": 595
+    },
+    {
+      "name": "Foam Party Machine",
+      "slug": "foam-party-machine",
+      "syracusePrice": 275,
+      "nycPrice": 467.5
+    },
+    {
+      "name": "Inflatable Movie Screen 12ft",
+      "slug": "inflatable-movie-screen-12ft",
+      "syracusePrice": 199,
+      "nycPrice": 338.3
+    },
+    {
+      "name": "Bounce House - Castle",
+      "slug": "bounce-house-castle",
+      "syracusePrice": 199,
+      "nycPrice": 338.3
+    },
+    {
+      "name": "Water Slide 14ft",
+      "slug": "water-slide-14ft",
+      "syracusePrice": 299,
+      "nycPrice": 508.3
+    },
+    {
+      "name": "Combo Bounce House & Slide",
+      "slug": "combo-bounce-house-slide",
+      "syracusePrice": 499,
+      "nycPrice": 848.3
+    },
+    {
+      "name": "Portable Heater",
+      "slug": "portable-heater",
+      "syracusePrice": 45,
+      "nycPrice": 76.5
+    },
+    {
+      "name": "Industrial Fan",
+      "slug": "industrial-fan",
+      "syracusePrice": 35,
+      "nycPrice": 59.5
+    },
+    {
+      "name": "Stanchion with Rope",
+      "slug": "stanchion-rope",
+      "syracusePrice": 15,
+      "nycPrice": 25.5
+    }
+  ]
+}

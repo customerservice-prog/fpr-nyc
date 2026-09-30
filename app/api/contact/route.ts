@@ -7,7 +7,7 @@ import { NYC_EMAIL_ADDRESS, nycEmailHref } from '@/lib/nycEmail'
 import { NYC_PUBLIC_HOST } from '@/lib/nycPublicOrigin'
 
 export async function GET() {
- return NextResponse.json({ email: NYC_EMAIL_ADDRESS, emailHref: nycEmailHref(), notificationsEnabled: !!(process.env.EMAIL_USER && process.env.EMAIL_PASS) }, { headers: { 'Cache-Control': 'no-store' } })
+ return NextResponse.json({ email: NYC_EMAIL_ADDRESS, emailHref: nycEmailHref(), notificationsEnabled: !!((process.env.RESEND_API_KEY && process.env.RESEND_FROM) || (process.env.EMAIL_USER && process.env.EMAIL_PASS)) }, { headers: { 'Cache-Control': 'no-store' } })
 }
 
 export async function POST(request: NextRequest) {

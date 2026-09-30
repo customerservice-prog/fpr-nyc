@@ -7,7 +7,7 @@ const ts = require('typescript')
 function load(file, mocks={}, env={}) {
  const output = ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText
  const module={exports:{}}
- vm.runInNewContext(output,{module,exports:module.exports,process:{env},console:{log(){},warn(){},error(){}},Buffer,Date,URL,encodeURIComponent,require(id){if(id in mocks)return mocks[id];throw new Error('Unexpected import '+id)}},{filename:file})
+ vm.runInNewContext(output,{module,exports:module.exports,process:{env},console:{log(){},warn(){},error(){}},Buffer,Date,URL,encodeURIComponent,fetch:mocks.__fetch||fetch,require(id){if(id==='__fetch')throw new Error('Unexpected import __fetch');if(id in mocks)return mocks[id];throw new Error('Unexpected import '+id)}},{filename:file})
  return module.exports
 }
 const location=load('lib/scEmail.ts')
@@ -30,11 +30,32 @@ for(const html of ['<p>Example notification</p>','<!doctype html><html><head><ti
   if(html.includes('<body>')) assert.ok(branded.indexOf('data-fpr-location')>branded.indexOf('<body>'))
  })
 }
-function mailModule(sendMail,env={}) {return load('lib/email.ts',{'nodemailer':{createTransport(){return {sendMail}}},'@/lib/nycEmail':location,'@/lib/utils':{BUSINESS:business,formatDateTime:()=>''}},env)}
+function mailModule(sendMail,env={},fetchImpl) {return load('lib/email.ts',{'nodemailer':{createTransport(){return {sendMail}}},'@/lib/nycEmail':location,'@/lib/utils':{BUSINESS:business,formatDateTime:()=>''},...(fetchImpl?{__fetch:fetchImpl}:{})},env)}
 test('missing SMTP credentials never simulate a sent message',async()=>{
  let sends=0;const mail=mailModule(()=>sends++)
  await assert.rejects(mail.sendEmail({to:business.email,subject:'QA',html:'<p>QA</p>'}),/not configured/)
  assert.equal(sends,0)
+})
+
+test('Resend sends transactional email without Gmail app password and preserves NYC envelope',async()=>{
+ let smtpSends=0,request
+ const mockFetch=async(url,options)=>{request={url,options,body:JSON.parse(options.body)};return {ok:true,status:200,async json(){return {id:'email_qa_mock'}},async text(){return ''}}}
+ const mail=mailModule(()=>smtpSends++,{RESEND_API_KEY:'re_qa_not_real',RESEND_FROM:'Friendly Party Rental NYC <orders@friendlypartyrentalnyc.com>'},mockFetch)
+ const result=await mail.sendEmail({to:'customerservice@fpr-nyc-production.up.railway.app',subject:'New contact inquiry',html:'<p>Test only</p>',replyTo:'customer@example.invalid'})
+ assert.equal(result.success,true);assert.equal(result.provider,'resend');assert.equal(smtpSends,0)
+ assert.equal(request.url,'https://api.resend.com/emails')
+ assert.equal(request.body.to[0],business.email);assert.equal(request.body.reply_to[0],'customer@example.invalid')
+ assert.equal(request.body.from,'Friendly Party Rental NYC <orders@friendlypartyrentalnyc.com>')
+ assert.equal(request.body.subject,'[Downstate New York] New contact inquiry')
+ assert.equal(request.body.headers['X-FPR-Location'],'nyc-downstate')
+ assert.ok(request.body.html.includes('data-fpr-location'));assert.ok(request.body.text.startsWith('NYC / DOWNSTATE NEW YORK'))
+})
+test('Resend provider failure is propagated and never falls through to SMTP',async()=>{
+ let smtpSends=0
+ const mockFetch=async()=>({ok:false,status:403,async text(){return 'domain not verified'},async json(){return {}}})
+ const mail=mailModule(()=>smtpSends++,{RESEND_API_KEY:'re_qa_not_real',RESEND_FROM:'Friendly Party Rental NYC <orders@friendlypartyrentalnyc.com>',EMAIL_USER:'sender@example.invalid',EMAIL_PASS:'mock-not-a-secret'},mockFetch)
+ await assert.rejects(mail.sendEmail({to:business.email,subject:'QA',html:'<p>QA</p>'}),/could not be delivered/)
+ assert.equal(smtpSends,0)
 })
 test('provider failure is propagated instead of returning a false success',async()=>{
  const mail=mailModule(async()=>{throw Error('fake provider outage')},{EMAIL_USER:'sender@example.invalid',EMAIL_PASS:'mock-not-a-secret'})

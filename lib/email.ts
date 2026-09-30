@@ -25,6 +25,61 @@ const transporter = nodemailer.createTransport({
 
 const LOGO_URL = NYC_EMAIL_LOGO_URL
 
+function normalizedRecipient(to: string) {
+  return to.toLowerCase() === 'customerservice@fpr-nyc-production.up.railway.app' ? NYC_EMAIL_ADDRESS : to
+}
+
+function plainTextBody(text: string | undefined, html: string) {
+  return 'NYC / DOWNSTATE NEW YORK | ' + NYC_EMAIL_SITE_HOST + '\n\n' + (text || html.replace(/<[^>]*>/g, ''))
+}
+
+async function sendWithResend({
+  to,
+  subject,
+  html,
+  text,
+  replyTo,
+}: {
+  to: string
+  subject: string
+  html: string
+  text: string
+  replyTo: string
+}) {
+  const apiKey = String(process.env.RESEND_API_KEY || '').trim()
+  const from = String(process.env.RESEND_FROM || '').trim()
+  if (!apiKey || !from) return null
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + apiKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from,
+      to: [to],
+      reply_to: [replyTo],
+      subject,
+      html,
+      text,
+      headers: {
+        'X-FPR-Location': 'nyc-downstate',
+        'X-FPR-Website': NYC_EMAIL_SITE_HOST,
+      },
+    }),
+  })
+
+  if (!response.ok) {
+    const detail = (await response.text()).slice(0, 500)
+    throw new Error('Resend rejected the message (' + response.status + '): ' + detail)
+  }
+
+  const delivery = await response.json() as { id?: string }
+  if (!delivery?.id) throw new Error('Resend did not return an email id')
+  return { success: true as const, simulated: false as const, provider: 'resend' as const, providerId: delivery.id }
+}
+
 export async function sendEmail({
   to,
   subject,
@@ -38,19 +93,34 @@ export async function sendEmail({
   text?: string
   replyTo?: string
 }) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+  const recipient = normalizedRecipient(to)
+  const finalReplyTo = replyTo || NYC_EMAIL_ADDRESS
+  const finalSubject = nycEmailSubject(subject)
+  const finalHtml = nycEmailHtml(html)
+  const finalText = plainTextBody(text, html)
+
+  if (!process.env.RESEND_API_KEY && (!process.env.EMAIL_USER || !process.env.EMAIL_PASS)) {
     // Never count an unsent notification as delivered.
-    throw new Error('Riverdale outgoing email is not configured (EMAIL_USER / EMAIL_PASS).')
+    throw new Error('Riverdale outgoing email is not configured (RESEND_API_KEY or EMAIL_USER / EMAIL_PASS).')
   }
 
   try {
+    const resend = await sendWithResend({
+      to: recipient,
+      replyTo: finalReplyTo,
+      subject: finalSubject,
+      html: finalHtml,
+      text: finalText,
+    })
+    if (resend) return resend
+
     const delivery = await transporter.sendMail({
       from: { name: BUSINESS.name, address: (process.env.EMAIL_FROM || process.env.EMAIL_USER || NYC_EMAIL_ADDRESS).replace(/^.*<([^>]+)>.*$/, '$1').trim() },
-      to: to.toLowerCase() === 'customerservice@fpr-nyc-production.up.railway.app' ? NYC_EMAIL_ADDRESS : to,
-      replyTo: replyTo || NYC_EMAIL_ADDRESS,
-      subject: nycEmailSubject(subject),
-      html: nycEmailHtml(html),
-      text: 'NYC / DOWNSTATE NEW YORK | ' + NYC_EMAIL_SITE_HOST + '\n\n' + (text || html.replace(/<[^>]*>/g, '')),
+      to: recipient,
+      replyTo: finalReplyTo,
+      subject: finalSubject,
+      html: finalHtml,
+      text: finalText,
       headers: { 'X-FPR-Location': 'nyc-downstate', 'X-FPR-Website': NYC_EMAIL_SITE_HOST },
     })
     // SMTP acceptance is not inbox delivery, but an empty/rejected envelope is
@@ -58,7 +128,7 @@ export async function sendEmail({
     if (!Array.isArray(delivery?.accepted) || delivery.accepted.length === 0 || (delivery.rejected?.length || 0) > 0) {
       throw new Error('SMTP did not accept every intended recipient')
     }
-    return { success: true, simulated: false }
+    return { success: true, simulated: false, provider: 'smtp' as const }
   } catch (error) {
     console.error('Riverdale email delivery failed')
     throw new Error('Riverdale email could not be delivered. Check the outgoing email configuration.')

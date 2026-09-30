@@ -3,13 +3,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendEmail } from '@/lib/email'
 import { parsePlanningInquiry, savePlanningInquiry, planningInquiryEmail, PlanningInquiryError } from '@/lib/planningInquiry'
+import { NYC_PRIMARY_ORIGIN, NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
 
 export async function POST(request: NextRequest) {
   try {
     const origin = request.headers.get('origin')
     // Next's internal request URL can differ from the browser's origin behind a
     // reverse proxy. Trust the site's configured origins, not forwarded headers.
-    const allowedOrigins = new Set(['https://fpr-nyc-production.up.railway.app', 'https://fpr-nyc-production.up.railway.app'])
+    const allowedOrigins = new Set([NYC_PUBLIC_ORIGIN, NYC_PRIMARY_ORIGIN, 'https://www.friendlypartyrentalnyc.com', 'https://fpr-nyc-production.up.railway.app'])
     for (const configured of [process.env.PUBLIC_BASE_URL, process.env.NEXTAUTH_URL]) {
       if (!configured) continue
       try {

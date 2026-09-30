@@ -22,3 +22,5 @@ jobs:
           dig +short CNAME www.friendlypartyrentalnyc.com || true
           echo "WWW A:"
           dig +short A www.friendlypartyrentalnyc.com || true
+          echo "PARENT NS:"
+          dig +short NS friendlypartyrental.com || true

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import sharp from 'sharp'
 import { prisma } from '@/lib/prisma'
+import { pickStoredItem, storedItemSlugCandidates } from '@/lib/nycItemPath'
 
 export const dynamic = 'force-dynamic'
 
@@ -61,19 +62,17 @@ export async function GET(
     return new NextResponse('Not found', { status: 404 })
   }
 
-  let name = 'Rental item'
-  let source: string | null | undefined = null
-  if (index === null) {
-    const item = await prisma.item.findUnique({ where: { slug }, select: { name: true, picture: true } })
-    if (!item) return new NextResponse('Not found', { status: 404 })
-    name = item.name
-    source = item.picture
-  } else {
-    const item = await prisma.item.findUnique({ where: { slug }, select: { name: true, additionalImages: true } })
-    if (!item) return new NextResponse('Not found', { status: 404 })
-    name = item.name
-    source = Array.isArray(item.additionalImages) ? item.additionalImages[index] : null
-  }
+  // Exact stored slug first, then the stored slug behind a short NYC URL (lib/nycItemPath).
+  const candidates = storedItemSlugCandidates(slug)
+  const rows = candidates.length
+    ? await prisma.item.findMany({ where: { slug: { in: candidates } }, select: { slug: true, name: true, picture: true, additionalImages: true } })
+    : []
+  const item = pickStoredItem(slug, rows)
+  if (!item) return new NextResponse('Not found', { status: 404 })
+  const name = item.name || 'Rental item'
+  const source: string | null | undefined = index === null
+    ? item.picture
+    : (Array.isArray(item.additionalImages) ? item.additionalImages[index] : null)
   if (!source) {
     return index === null ? fallbackImage(name, 'missing') : new NextResponse('Not found', { status: 404 })
   }

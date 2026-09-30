@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
+import { isAuthorizedCronRequest } from '@/lib/cronAuth'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, incompleteOrderRecaptureEmail } from '@/lib/email'
 import { BUSINESS } from '@/lib/utils'
@@ -50,11 +51,9 @@ async function deliverRecoveryEmail(to: string | null | undefined, email: { subj
 }
 
 export async function GET(request: NextRequest) {
-    const authHeader = request.headers.get('authorization')
-    const cronSecret = process.env.CRON_SECRET
-    if (!cronSecret || authHeader !== 'Bearer ' + cronSecret) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+  if (!(await isAuthorizedCronRequest(request, '.github/workflows/incomplete-orders-cron.yml'))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
     const [stage0Setting, stage3Setting, stage7Setting] = await Promise.all([prisma.automaticMessage.findFirst({ where: { id: 'cmrcnccto0002uabltdx1eakk' } }), prisma.automaticMessage.findFirst({ where: { id: 'cmrcnccwv0003uablnwo23fgq' } }), prisma.automaticMessage.findFirst({ where: { id: 'cmrcncd030004uable6fvbdep' } })]); const stage0Enabled = stage0Setting?.enabled !== false; const stage3Enabled = stage3Setting?.enabled !== false; const stage7Enabled = stage7Setting?.enabled !== false; const now = new Date()
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000)

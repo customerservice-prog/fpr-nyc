@@ -6,6 +6,11 @@ const publishableKey = String(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 
 const webhookSecret = String(process.env.STRIPE_WEBHOOK_SECRET || '').trim()
 const onlineEnabled = String(process.env.NYC_ONLINE_PAYMENTS_ENABLED || '').trim() === 'true'
 
+if (process.env.GITHUB_ACTIONS === 'true' && !process.env.NYC_STRIPE_ACCOUNT_ID && !process.env.STRIPE_SECRET_KEY) {
+  console.log('[nyc-stripe-verify] skipped: GitHub Actions catalog/schema CI does not receive live Stripe credentials')
+  process.exit(0)
+}
+
 function fail(message) {
   console.error('[nyc-stripe-verify] ' + message)
   process.exit(1)

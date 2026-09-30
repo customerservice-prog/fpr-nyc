@@ -30,7 +30,7 @@ export async function GET(
       description: categoryDescriptionForNyc(category.name, category.description),
       items: category.items.map((item) => ({
         ...item,
-        description: itemDescriptionForNyc(item.name, item.description),
+        description: itemDescriptionForNyc(item.name, item.description, Number(item.cost)),
       })),
     },
   }, { headers: { 'Cache-Control': 'private, no-store' } })

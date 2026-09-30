@@ -37,7 +37,8 @@ interface Stop {
   lng: number | null
 }
 
-const GREENVILLE_CENTER: [number, number] = [34.8472, -82.406]
+// Riverdale, Bronx neighborhood reference point (not a warehouse address).
+const RIVERDALE_CENTER: [number, number] = [40.894, -73.913]
 const ROUTE_COLORS = ['#1e3a8a', '#7c3aed', '#0d9488', '#b45309', '#be185d', '#4338ca', '#0369a1', '#65a30d']
 
 function groupStopsByDriver(stops: Stop[]) {
@@ -153,7 +154,7 @@ export default function TruckTrackerPage() {
   useEffect(() => {
     if (!mapReady || !mapRef.current || leafletMapRef.current) return
     const L = (window as any).L
-    leafletMapRef.current = L.map(mapRef.current).setView(GREENVILLE_CENTER, 11)
+    leafletMapRef.current = L.map(mapRef.current).setView(RIVERDALE_CENTER, 11)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(leafletMapRef.current)

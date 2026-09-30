@@ -2,15 +2,17 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getItemAvailability } from '@/lib/availability'
+import { getItemAvailability, PUBLIC_ITEM_SELECT } from '@/lib/availability'
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const item = await prisma.item.findUnique({
-    where: { id: (await params).id },
-    include: { category: true },
+  // Public endpoint: only published items in published categories, and only the
+  // public fields (never internal notes, SKUs or hidden catalog items).
+  const item = await prisma.item.findFirst({
+    where: { id: (await params).id, displayToCustomer: true, category: { displayToCustomer: true } },
+    select: PUBLIC_ITEM_SELECT,
   })
 
   if (!item) {

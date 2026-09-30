@@ -352,3 +352,46 @@ behavior('planning estimator leaves unapproved planning prices out of every tota
   assert.doesNotMatch(summary, /\$1,|\$2,|\$3,|\$5,|\$85/)
   for (const faq of planning.planningFaqs) assert.doesNotMatch(faq.answer, /\$\d/, faq.question)
 })
+
+// ---------------------------------------------------------------------------
+// Owner-approved deposit and hidden catalog import (2026-09-30)
+// ---------------------------------------------------------------------------
+
+test('the approved 25% deposit is added once and never overrides a rule saved in admin', () => {
+  const sql = read('prisma/migrations/20260930120000_nyc_owner_approved_deposit_25_percent/migration.sql')
+  assert.match(sql, /INSERT INTO "DepositRule" \("id", "type", "amount", "isActive", "createdAt"\)/)
+  assert.match(sql, /SELECT 'nyc-owner-approved-deposit-25-percent', 'percentage', 25, true, CURRENT_TIMESTAMP/)
+  assert.match(sql, /WHERE NOT EXISTS \(SELECT 1 FROM "DepositRule" WHERE "isActive" = true\)/)
+  assert.doesNotMatch(sql, /UPDATE|DELETE/)
+})
+
+test('the approved catalog is imported hidden, at the whole-dollar 1.70x prices, without copied stock', () => {
+  const sql = read('prisma/migrations/20260930120500_nyc_approved_catalog_hidden_import/migration.sql')
+  const snapshot = JSON.parse(read('data/nyc-premium-price-snapshot-20260930.json'))
+  // Same rounding as scripts/apply-nyc-premium-prices.mjs.
+  const clean = raw => { const v = Number(raw); if (Number.isInteger(v)) return v; if (v < 10) return Math.ceil(v); if (v < 100) return Math.round(v); if (v < 500) return Math.round(v / 5) * 5; if (v < 1000) return Math.round(v / 10) * 10; return Math.round(v / 25) * 25 }
+  const rows = new Map(Array.from(sql.matchAll(/^  \('([a-z0-9-]+)', '((?:[^']|'')*)', (\d+), '([a-z0-9-]+)', (\d+)\)/gm), m => [m[1], { name: m[2].replace(/''/g, "'"), price: Number(m[3]), category: m[4] }]))
+  assert.equal(rows.size, snapshot.items.length)
+  assert.equal(rows.size, 198)
+  const nycCategories = new Set(Array.from(read('prisma/migrations/20260929234500_restore_nyc_catalog_categories/migration.sql').matchAll(/\('([a-z0-9-]+)', '[^']+', \d+\)/g), m => m[1]))
+  for (const item of snapshot.items) {
+    const row = rows.get(item.slug)
+    assert.ok(row, item.slug)
+    assert.equal(row.price, clean(item.nycPrice), item.slug)
+    assert.ok(row.price > 0, item.slug)
+    assert.equal(row.name, item.name, item.slug)
+    assert.ok(nycCategories.has(row.category), item.slug + ' uses an existing NYC category')
+    assert.doesNotMatch(item.slug + ' ' + item.name, /package/i)
+  }
+  // Hidden, zero quantity, never overwriting existing items or touching other data.
+  assert.match(sql, /^\s+0,\n\s+false,\n\s+'Available',/m)
+  assert.match(sql, /ON CONFLICT \("slug"\) DO NOTHING;/)
+  assert.doesNotMatch(sql, /UPDATE |DELETE |INSERT INTO "Category"|"Customer"|"Order"|"Payment"/)
+})
+
+test('the public item API never returns hidden catalog items or internal fields', () => {
+  const route = read('app/api/items/[id]/route.ts')
+  assert.match(route, /displayToCustomer: true, category: \{ displayToCustomer: true \}/)
+  assert.match(route, /select: PUBLIC_ITEM_SELECT/)
+  assert.doesNotMatch(route, /include: \{ category: true \}/)
+})

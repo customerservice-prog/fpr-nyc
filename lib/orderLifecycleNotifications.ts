@@ -1,4 +1,5 @@
 import { BUSINESS, formatDate } from '@/lib/utils'
+import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
 
 export function ownerNotificationRecipients() {
   const configured = String(process.env.OWNER_NOTIFICATION_EMAIL || '').trim()
@@ -42,7 +43,7 @@ export function orderReceivedEmail(order: {
   ).join('')
   const dueNow = Math.max(Number(order.depositAmount || 0), 0)
   return {
-    subject: `Order Received #${order.orderNumber} - Friendly Party Rental`,
+    subject: `Order Received #${order.orderNumber} - Friendly Party Rental NYC`,
     html: `<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#172536">
       <h2 style="color:#1A6FD4">We received your order</h2>
       <p>Hi ${esc(order.customerName)},</p>
@@ -55,7 +56,7 @@ export function orderReceivedEmail(order: {
       </table>
       <p><strong>Order total:</strong> ${money(order.totalAmount)}<br>
       <strong>Required payment now:</strong> ${money(dueNow)}</p>
-      <p style="margin:24px 0"><a href="https://fpr-nyc-production.up.railway.app/pay/${encodeURIComponent(order.id)}" style="background:#1A6FD4;color:#fff;padding:12px 20px;border-radius:7px;text-decoration:none;font-weight:bold">Complete Payment</a></p>
+      <p style="margin:24px 0"><a href="${NYC_PUBLIC_ORIGIN}/pay/${encodeURIComponent(order.id)}" style="background:#1A6FD4;color:#fff;padding:12px 20px;border-radius:7px;text-decoration:none;font-weight:bold">Complete Payment</a></p>
       <p style="font-size:13px;color:#555">After your payment succeeds, we will automatically email your confirmed-order receipt. Keep your order number for reference.</p>
       <p>Questions? Call or text ${esc(BUSINESS.phone)} or reply to this email.</p>
     </div>`
@@ -68,7 +69,7 @@ export function automaticCancellationEmail(order: {
   eventDate: Date | string
 }) {
   return {
-    subject: `Order Canceled #${order.orderNumber} - Friendly Party Rental`,
+    subject: `Order Canceled #${order.orderNumber} - Friendly Party Rental NYC`,
     html: `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#172536">
       <h2 style="color:#1A6FD4">Your order has been canceled</h2>
       <p>Hi ${esc(order.customerName)},</p>
@@ -100,7 +101,7 @@ export function ownerCancellationEmail(order: {
       <strong>Event date:</strong> ${esc(formatDate(order.eventDate))}<br>
       <strong>Paid:</strong> ${money(order.amountPaid)}<br>
       <strong>Balance shown at cancellation:</strong> ${money(order.balanceDue)}</p>
-      <p><a href="https://fpr-nyc-production.up.railway.app/admin/orders/${encodeURIComponent(order.id)}">Review order in admin</a></p>
+      <p><a href="${NYC_PUBLIC_ORIGIN}/admin/orders/${encodeURIComponent(order.id)}">Review order in admin</a></p>
     </div>`
   }
 }

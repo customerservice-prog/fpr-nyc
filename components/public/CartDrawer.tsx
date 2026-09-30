@@ -2,7 +2,7 @@
 
 import { X, Plus, Minus, ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
-import { useCart } from './CartContext'
+import { cartQuantityForItem, useCart } from './CartContext'
 import { formatCurrency } from '@/lib/utils'
 
 interface CartDrawerProps {
@@ -41,7 +41,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           ) : (
             <ul className="space-y-4">
               {items.map((item) => (
-                <li key={item.id} className="flex gap-3 border-b pb-4">
+                <li key={item.id + '|' + (item.selectedColor || '')} className="flex gap-3 border-b pb-4">
                               {item.picture && (
               <img src={item.picture} alt={item.name} className="w-16 h-16 object-cover rounded flex-shrink-0" />
             )}
@@ -51,21 +51,21 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     <p className="text-secondary font-bold">{formatCurrency(item.price)}/day</p>
                     <div className="flex items-center gap-2 mt-2">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedColor)}
                         className="p-1 border rounded hover:bg-gray-100"
                       >
                         <Minus size={14} />
                       </button>
                       <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedColor)}
                         className="p-1 border rounded hover:bg-gray-100"
-                        disabled={item.quantity >= item.maxQuantity}
+                        disabled={cartQuantityForItem(items, item.id) >= item.maxQuantity}
                       >
                         <Plus size={14} />
                       </button>
                       <button
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(item.id, item.selectedColor)}
                         className="text-red-500 text-xs ml-2 hover:underline"
                       >
                         Remove

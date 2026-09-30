@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { nycItemPath } from '@/lib/nycItemPath'
 import Image from 'next/image'
 import type { ReactNode } from 'react'
 import { Home, Sparkles, Truck, CalendarCheck, MousePointerClick } from 'lucide-react'
@@ -24,7 +25,7 @@ export default function MobileHome({categories,popularItems,bounceItems,packages
  const editable=(key:string,fallback:string)=><span onClick={contentEditMode?()=>contentEditMode.onSelect(key):undefined} className={contentEditMode?'cursor-text hover:outline hover:outline-blue-400':''}>{text(key,fallback)}</span>
  const savedImage=hero?.mobileImageUrl
  const cleanImage=typeof savedImage==='string'&&!savedImage.includes('mobile-hero-event-scene')?savedImage:undefined
- const product=(item:MobilePopularItem)=><Link key={item.id} href={item.slug?'/items/'+item.slug:'/category'} prefetch={false} className="home-product">
+ const product=(item:MobilePopularItem)=><Link key={item.id} href={item.slug?nycItemPath(item.slug):'/category'} prefetch={false} className="home-product">
   <div className="relative aspect-[4/3] bg-white">{item.picture?<Image src={item.picture} alt={item.name} fill sizes="(max-width:599px) 50vw, (max-width:767px) 33vw, 25vw" className="object-contain p-2"/>:<div className="absolute inset-0 grid place-items-center text-xs text-gray-400">Photo coming soon</div>}</div>
   <div className="home-product-copy"><p className="font-bold">{item.name}</p><p className="home-product-price">From {formatCurrency(item.cost)}</p></div>
  </Link>

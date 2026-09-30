@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { NYC_LOGO_PATH, NYC_LOGO_WIDTH, NYC_LOGO_HEIGHT } from '@/lib/nycBrand'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
+import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
 import {
   Home,
   Settings,
@@ -57,7 +58,7 @@ export default function AdminNav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 h-20" style={{ backgroundColor: '#2d6a2d', borderBottom: '3px solid #4CAF50' }}>
       <div className="flex items-center gap-4">
-        <Link href="https://www.fpr-nyc-production.up.railway.app" target="_blank" rel="noopener noreferrer" className="block rounded-md bg-white p-1">
+        <Link href={NYC_PUBLIC_ORIGIN} target="_blank" rel="noopener noreferrer" className="block rounded-md bg-white p-1">
           <Image
             src={NYC_LOGO_PATH}
             alt="Friendly Party Rental NYC"

@@ -2,6 +2,12 @@ import { prisma } from '@/lib/prisma'
 import { sendEmail, orderConfirmationEmail, paymentReceiptEmail } from '@/lib/email'
 import { formatDate } from '@/lib/utils'
 import { ownerNotificationRecipients } from '@/lib/orderLifecycleNotifications'
+import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
+/** Email photo of an order line: the NYC photo proxy (never another store's image host). */
+function nycItemImage(item: { slug?: string | null; picture?: string | null } | null | undefined): string | null {
+  return item?.slug && item.picture ? NYC_PUBLIC_ORIGIN + '/api/item-image/' + encodeURIComponent(item.slug) : null
+}
+
 
 export async function finalizePayment(input: {
   orderId: string
@@ -107,11 +113,11 @@ export async function finalizePayment(input: {
       const sharedDetails = { eventAddress: updated.eventAddress, eventCity: updated.eventCity, eventState: updated.eventState, eventZip: updated.eventZip, deliveryType: updated.deliveryType, eventTimeSlot: updated.eventTimeSlot, pickupTimeSlot: updated.pickupTimeSlot, eventStartTime: updated.eventStartTime, eventEndTime: updated.eventEndTime, deliveryWindowStart: updated.deliveryWindowStart, deliveryWindowEnd: updated.deliveryWindowEnd, exactDeliveryRequested: updated.exactDeliveryRequested, exactDeliveryTime: updated.exactDeliveryTime, pickupType: updated.pickupType, pickupRequiredByTime: updated.pickupRequiredByTime, exactPickupTime: updated.exactPickupTime, customerPhone: updated.customer.phone, customerEmail: updated.customer.email, subtotal: updated.subtotal, rentalDays: updated.rentalDays, durationLabel: updated.durationLabel, durationFee: updated.durationFee, specialRequestFee: updated.specialRequestFee, specialRequestNames: updated.specialRequestNames, damageWaiver: updated.damageWaiver, damageWaiverFee: updated.damageWaiverFee, deliveryFee: updated.deliveryFee, deliveryDistance: updated.deliveryDistance, exactDeliveryFee: updated.exactDeliveryFee, exactPickupFee: updated.exactPickupFee, lastMinuteFeeAmount: updated.lastMinuteFeeAmount, miscellaneousFees: updated.miscellaneousFees, couponCode: updated.couponCode, couponDiscount: updated.couponDiscount, generalDiscount: updated.generalDiscount, taxAmount: updated.taxAmount, taxRate: updated.taxRate, tipAmount: updated.tipAmount }
       if (isFirstPayment) {
         const setting = await prisma.automaticMessage.findFirst({ where: { id: 'automsg_order_confirmation' } })
-        const content = orderConfirmationEmail({ id: updated.id, orderNumber: updated.orderNumber, customerName, eventDate: formatDate(updated.eventDate), totalAmount: updated.totalAmount, depositAmount: paidAmount, balanceDue: updated.balanceDue, items: updated.items.map(i => ({ name:i.itemName, quantity:i.quantity, unitPrice:i.unitPrice, total:i.total, image:i.item?.picture || null })), ...sharedDetails }, setting ?? undefined)
+        const content = orderConfirmationEmail({ id: updated.id, orderNumber: updated.orderNumber, customerName, eventDate: formatDate(updated.eventDate), totalAmount: updated.totalAmount, depositAmount: paidAmount, balanceDue: updated.balanceDue, items: updated.items.map(i => ({ name:i.itemName, quantity:i.quantity, unitPrice:i.unitPrice, total:i.total, image:nycItemImage(i.item) })), ...sharedDetails }, setting ?? undefined)
         if (setting?.enabled !== false && canEmailCustomer && !isCanceled && sendReceipt !== false) try { await sendEmail({to:email,subject:content.subject,html:content.html + reasonHtml}) } catch {}
         try { await sendEmail({to:ownerNotificationRecipients(),subject:'[Copy] '+content.subject,html:content.html + reasonHtml}) } catch {}
       } else {
-        const content = paymentReceiptEmail({ id:updated.id, orderNumber:updated.orderNumber, customerName, amountPaid:paidAmount, totalAmount:updated.totalAmount, balanceDue:updated.balanceDue, eventDate:formatDate(updated.eventDate), items:updated.items.map(i=>({name:i.itemName,quantity:i.quantity,unitPrice:i.unitPrice,total:i.total,image:i.item?.picture||null})), depositAmount:updated.depositAmount, payments:(updated.payments||[]).map(p=>({amount:p.amount,method:p.method,createdAt:formatDate(p.createdAt),recordedByName:p.recordedByName})), ...sharedDetails })
+        const content = paymentReceiptEmail({ id:updated.id, orderNumber:updated.orderNumber, customerName, amountPaid:paidAmount, totalAmount:updated.totalAmount, balanceDue:updated.balanceDue, eventDate:formatDate(updated.eventDate), items:updated.items.map(i=>({name:i.itemName,quantity:i.quantity,unitPrice:i.unitPrice,total:i.total,image:nycItemImage(i.item)})), depositAmount:updated.depositAmount, payments:(updated.payments||[]).map(p=>({amount:p.amount,method:p.method,createdAt:formatDate(p.createdAt),recordedByName:p.recordedByName})), ...sharedDetails })
         if (canEmailCustomer && !isCanceled && sendReceipt !== false) try { await sendEmail({to:email,subject:content.subject,html:content.html + reasonHtml}) } catch {}
         try { await sendEmail({to:ownerNotificationRecipients(),subject:'[Copy] '+content.subject,html:content.html + reasonHtml}) } catch {}
       }

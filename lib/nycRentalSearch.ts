@@ -60,9 +60,12 @@ export function parseRentalSearchResponse(payload: unknown): RentalSearchItem[] 
   return items
 }
 
+// Same public item URL rule as lib/nycItemPath.ts (kept inline: this module has no imports).
+const MARKET_SUFFIX = /-(?:syracuse|minoa|cny|central-new-york)(?:-ny)?$/i
+
 export function rentalItemHref(item: Pick<RentalSearchItem, 'slug'>): string {
   if (!isRoutableSlug(item.slug)) throw new Error('Invalid rental item slug')
-  return `/items/${encodeURIComponent(item.slug)}`
+  return `/items/${encodeURIComponent(item.slug.replace(MARKET_SUFFIX, '') || item.slug)}`
 }
 
 export interface RentalSearchOptions {

@@ -9,4 +9,4 @@ export const NYC_LOGO_WIDTH = 1774
 export const NYC_LOGO_HEIGHT = 887
 export const NYC_LOGO_ALT = 'Friendly Party Rental NYC'
 // Email clients need an absolute URL on a host that resolves today.
-export const NYC_EMAIL_LOGO_URL = 'https://fpr-nyc-production.up.railway.app' + NYC_LOGO_PATH
+export const NYC_EMAIL_LOGO_URL = 'https://friendlypartyrentalnyc.com' + NYC_LOGO_PATH

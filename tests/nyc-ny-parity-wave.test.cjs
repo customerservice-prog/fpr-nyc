@@ -17,7 +17,7 @@ test('Riverdale planning pages use SC identity and published SC planning prices'
 test('visual estimator uses SC contact and no NY planning footer',()=>{
   const source=read('components/public/PlanningEstimator.tsx')
   assert.ok(source.includes('315-884-1498'))
-  assert.ok(source.includes('fpr-nyc-production.up.railway.app/event-planning'))
+  assert.ok(source.includes('{NYC_PUBLIC_HOST}/event-planning'), 'printed estimate footer uses the NYC primary domain')
   assert.ok(!source.includes('friendlypartyrental.com/event-planning'))
 })
 

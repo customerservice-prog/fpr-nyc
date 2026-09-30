@@ -9,7 +9,7 @@ import { NYC_SERVER_PRICED_VERSIONS, toCents } from '@/lib/nycCheckoutPricing'
 import { aggregateQuantities } from '@/lib/nycCheckoutPricingServer'
 import { recordSucceededIntent } from '@/lib/nycStripeReconcile'
 import { prisma } from '@/lib/prisma'
-import { getItemAvailability } from '@/lib/availability'
+import { exactSlotConflict, findInventoryShortfalls, lockNycCapacity, rentalPeriod, shortfallMessage } from '@/lib/nycInventory'
 import { evaluateRentalRestrictions } from '@/lib/rentalRestrictions'
 import { DeliveryQuoteError, getDeliveryQuote, requireDeliveryMethod, requireMatchingDeliveryFee } from '@/lib/delivery'
 
@@ -19,18 +19,6 @@ import { DeliveryQuoteError, getDeliveryQuote, requireDeliveryMethod, requireMat
 
 const STRIPE_MINIMUM_CHARGE_CENTS = 50
 const REUSABLE_STATUSES = new Set(['requires_payment_method', 'requires_confirmation', 'requires_action'])
-
-async function reserveExactTimeSlot(tx: any, date: Date, time: string, type: 'delivery' | 'pickup', defaultCapacity: number) {
-  const dayDate = new Date(date); dayDate.setHours(0,0,0,0)
-  const existing = await tx.exactTimeSlot.findUnique({ where: { date_time_type: { date: dayDate, time, type } } })
-  if (existing) {
-    if (existing.isBlocked || existing.bookedCount >= existing.capacity) return false
-    await tx.exactTimeSlot.update({ where: { id: existing.id }, data: { bookedCount: { increment: 1 } } })
-    return true
-  }
-  await tx.exactTimeSlot.create({ data: { date: dayDate, time, type, capacity: defaultCapacity, bookedCount: 1, isBlocked: false } })
-  return true
-}
 
 function isStripeMissingResource(error: unknown): boolean {
   return (error as { code?: string })?.code === 'resource_missing'
@@ -62,7 +50,7 @@ export async function POST(request: NextRequest) {
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
-    if (order.status === 'canceled') {
+    if (order.status === 'canceled' || order.status === 'cancelled') {
       return NextResponse.json({ error: 'This order has been canceled. Please contact us.' }, { status: 409 })
     }
     if (order.source === 'online' && !NYC_SERVER_PRICED_VERSIONS.includes(order.pricingVersion || '')) {
@@ -70,10 +58,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'We need to confirm your total before payment. Please restart checkout or contact us.' }, { status: 409 })
     }
 
-    if (order.status === 'incomplete') {
+    // First online payment (saved checkout or a pay link for an unpaid order): the
+    // stock hold of an unpaid order expires, so re-check everything that could have
+    // changed since it was priced before any card can be charged.
+    const firstOnlinePayment = order.source === 'online' && Number(order.amountPaid || 0) <= 0 && ['incomplete', 'quote'].includes(order.status)
+    if (firstOnlinePayment) {
       requireDeliveryMethod(order.deliveryType)
-      if (order.checkoutStage === 'details_completed') {
+      if (order.status === 'incomplete' && order.checkoutStage === 'details_completed') {
         return NextResponse.json({ error: 'This saved checkout still needs final pricing. Please return to checkout to continue.' }, { status: 409 })
+      }
+      if (order.eventDate.getTime() - Date.now() < 24 * 60 * 60 * 1000) {
+        return NextResponse.json({ error: 'Orders cannot be paid online within 24 hours of the event date. Please call our office.' }, { status: 409 })
       }
       const restriction = await evaluateRentalRestrictions({
         customerId: order.customerId,
@@ -86,30 +81,38 @@ export async function POST(request: NextRequest) {
       }
       const deliveryQuote = await getDeliveryQuote(order.eventZip)
       requireMatchingDeliveryFee(order.deliveryFee, deliveryQuote)
+      // Catalog prices must still match what the customer was quoted.
+      const lineIds = Array.from(new Set(order.items.map(line => line.itemId).filter((id): id is string => !!id)))
+      const catalog = await prisma.item.findMany({ where: { id: { in: lineIds } }, select: { id: true, cost: true } })
+      const catalogCents = new Map(catalog.map(item => [item.id, toCents(Number(item.cost))]))
+      if (order.items.some(line => !line.itemId || catalogCents.get(line.itemId) !== toCents(Number(line.unitPrice)))) {
+        return NextResponse.json({ error: 'Prices in this saved checkout have changed. Please restart checkout to see the current total before paying.' }, { status: 409 })
+      }
+      const exactSettings = (order.exactDeliveryRequested && order.exactDeliveryTime) || (order.pickupType === 'exact' && order.exactPickupTime)
+        ? await prisma.exactTimeSettings.findFirst()
+        : null
+      if (exactSettings?.enabled === false) return NextResponse.json({ error: 'Exact-time scheduling is currently unavailable. Please contact our office.' }, { status: 409 })
       const quantities = aggregateQuantities(order.items.map(line => ({ id: line.itemId || '', quantity: line.quantity })))
-      for (const [itemId, quantity] of quantities) {
-        const available = await getItemAvailability(itemId, order.eventDate)
-        if (quantity > available) {
-          const name = order.items.find(line => line.itemId === itemId)?.itemName || 'An item'
-          return NextResponse.json({ error: '"' + name + '" is no longer available in the saved quantity. Please contact us or restart checkout.' }, { status: 409 })
-        }
-      }
-      const exactSettings = await prisma.exactTimeSettings.findFirst()
-      const capacity = exactSettings?.defaultCapacityPerSlot ?? 1
-      if ((order.exactDeliveryRequested && order.exactDeliveryTime) || (order.pickupType === 'exact' && order.exactPickupTime)) {
-        if (exactSettings?.enabled === false) return NextResponse.json({ error: 'Exact-time scheduling is currently unavailable. Please contact our office.' }, { status: 409 })
-        const reserved = await prisma.$transaction(async tx => {
-          if (order!.exactDeliveryRequested && order!.exactDeliveryTime && !await reserveExactTimeSlot(tx, order!.eventDate, order!.exactDeliveryTime, 'delivery', capacity)) return false
-          if (order!.pickupType === 'exact' && order!.exactPickupTime && !await reserveExactTimeSlot(tx, order!.eventDate, order!.exactPickupTime, 'pickup', capacity)) return false
-          return true
+      const period = rentalPeriod(order.eventDate, order.rentalDays, order.eventEndDate)
+      const current = order
+      const held = await prisma.$transaction(async tx => {
+        await lockNycCapacity(tx)
+        const shortfalls = await findInventoryShortfalls(tx, quantities, period, current.id)
+        if (shortfalls.length) return { ok: false as const, error: shortfallMessage(shortfalls[0]) }
+        const conflict = await exactSlotConflict(tx, {
+          eventDate: current.eventDate,
+          deliveryTime: current.exactDeliveryRequested ? current.exactDeliveryTime : null,
+          pickupTime: current.pickupType === 'exact' ? current.exactPickupTime : null,
+          defaultCapacity: exactSettings?.defaultCapacityPerSlot ?? 1,
+          excludeOrderId: current.id,
         })
-        if (!reserved) return NextResponse.json({ error: 'An exact scheduling time on this saved checkout is no longer available. Please contact our office.' }, { status: 409 })
-      }
-      order = await prisma.order.update({
-        where: { id: order.id },
-        data: { status: 'quote', checkoutStage: 'payment_started', checkoutLastSeenAt: new Date() },
-        include: { items: true, customer: true },
-      })
+        if (conflict) return { ok: false as const, error: 'The exact ' + conflict + ' time on this order is no longer available. Please contact our office.' }
+        // Refresh the hold: an unpaid online order holds stock while payment is in progress.
+        await tx.order.update({ where: { id: current.id }, data: { status: 'quote', checkoutStage: 'payment_started', checkoutLastSeenAt: new Date() } })
+        return { ok: true as const }
+      }, { maxWait: 10000, timeout: 20000 })
+      if (!held.ok) return NextResponse.json({ error: held.error }, { status: 409 })
+      order = await prisma.order.findUniqueOrThrow({ where: { id: order.id }, include: { items: true, customer: true } })
     }
 
     // SECURITY: the amount owed comes from the order record, never from the browser.

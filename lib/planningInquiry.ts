@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@prisma/client'
 import { PLANNING_HELP, planningServices } from './eventPlanning'
+import { NYC_PUBLIC_ORIGIN } from './nycPublicOrigin'
 
 export class PlanningInquiryError extends Error {
   constructor(message: string, public status = 400) { super(message) }
@@ -70,5 +71,5 @@ export function planningInquiryEmail(inquiry: PlanningInquiry) {
   const escape = (value: string) => value.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!))
   const lines = [inquiry.name, inquiry.email, inquiry.phone, 'Date: ' + (inquiry.eventDate?.toISOString().slice(0,10) || 'Undecided'), '', inquiry.message, '', 'Reference: ' + inquiry.id]
   return { subject: '[NYC EVENT PLANNING] ' + inquiry.eventType + ' — ' + inquiry.name,
-    html: '<h2>New Riverdale / Downstate New York planning inquiry</h2><p>' + lines.map(escape).join('<br/>') + '</p><p><a href="https://fpr-nyc-production.up.railway.app/admin/planning-inquiries">Review planning inquiries</a></p>', text: lines.join('\n') }
+    html: '<h2>New Riverdale / Downstate New York planning inquiry</h2><p>' + lines.map(escape).join('<br/>') + '</p><p><a href="' + NYC_PUBLIC_ORIGIN + '/admin/planning-inquiries">Review planning inquiries</a></p>', text: lines.join('\n') }
 }

@@ -31,6 +31,12 @@ function configuredFees():Record<string,number>{
   }catch{return {}}
 }
 
+/** Approved service-area ZIPs that have an owner-configured delivery fee above $0. */
+export function configuredDeliveryFeeZips():string[]{
+  const fees=configuredFees()
+  return Array.from(approvedZips()).filter(zip=>zip in fees&&fees[zip]>0)
+}
+
 export interface DeliveryQuote{fee:number;zip:string;distance:number|null;isEstimate:false;distanceBasis:'configured-zip-fee'}
 
 export function requireMatchingDeliveryFee(value:unknown,quote:DeliveryQuote):void{

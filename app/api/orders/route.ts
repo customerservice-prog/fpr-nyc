@@ -275,6 +275,8 @@ export async function POST(request: NextRequest) {
       amountPaid: 0,
       balanceDue: totalAmount,
       pricingVersion: pricing.version,
+      // Where the sales tax was charged, for the NYS sales tax return.
+      internalNotes: 'Sales tax: ' + pricing.taxRate + '% ' + pricing.taxJurisdiction.name + ', NYS reporting code ' + pricing.taxJurisdiction.reportingCode + ' (delivery ZIP ' + pricing.taxJurisdiction.zip + ').',
       notes: notes || null,
       eventStartTime: schedulingDetails?.eventStartTime || null,
       eventEndTime: schedulingDetails?.eventEndTime || null,

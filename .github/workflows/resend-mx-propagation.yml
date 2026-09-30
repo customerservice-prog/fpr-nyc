@@ -1,0 +1,24 @@
+name: Resend MX propagation check
+
+on:
+  push:
+    paths:
+      - '.github/resend-mx-propagation'
+
+permissions:
+  contents: read
+
+jobs:
+  dns:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Resend MX
+        run: |
+          echo "MX:"
+          dig +short MX send.friendlypartyrentalnyc.com
+          echo "TXT:"
+          dig +short TXT send.friendlypartyrentalnyc.com
+          echo "DKIM:"
+          dig +short TXT resend._domainkey.friendlypartyrentalnyc.com
+          echo "CNAME:"
+          dig +short CNAME rsend.friendlypartyrentalnyc.com

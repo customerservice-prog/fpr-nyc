@@ -41,12 +41,12 @@ jobs:
         run: |
           node tests/fixtures/mock-syracuse-server.mjs 4010 > mock.log 2>&1 &
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4010/api/items >/dev/null && break; sleep 1; done
-      - name: Run the production pre-deploy command (first run)
-        run: node scripts/sync-nyc-catalog-from-syracuse.mjs --apply && node scripts/apply-nyc-premium-prices.mjs --apply && node scripts/sync-nyc-quantities-from-syracuse.mjs --apply && node scripts/ensure-nyc-deposit-rule.mjs --apply && npx prisma migrate deploy
+      - name: Run the Railway pre-deploy entry point (first run)
+        run: node scripts/nyc-predeploy.mjs
       - name: Database matches Syracuse exactly
         run: node tests/nyc-catalog-sync-db-check.mjs --snapshot first-run.json
-      - name: Run the pre-deploy command again (must change nothing)
-        run: node scripts/sync-nyc-catalog-from-syracuse.mjs --apply && node scripts/apply-nyc-premium-prices.mjs --apply && node scripts/sync-nyc-quantities-from-syracuse.mjs --apply && node scripts/ensure-nyc-deposit-rule.mjs --apply && npx prisma migrate deploy
+      - name: Run the pre-deploy entry point again (must change nothing)
+        run: node scripts/nyc-predeploy.mjs
       - name: Second run was a no-op
         run: node tests/nyc-catalog-sync-db-check.mjs --compare first-run.json
       - name: Syracuse unreachable never blocks a deploy or changes NYC

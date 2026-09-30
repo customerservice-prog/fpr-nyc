@@ -1,4 +1,5 @@
 import { nycPageMetadata } from '@/lib/nycSeo'
+import { nycItemPath } from '@/lib/nycItemPath'
 import Link from 'next/link'
 import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 import WeddingPackageCard from '@/components/public/WeddingPackageCard'
@@ -134,7 +135,7 @@ export default async function WeddingsPage() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8">
               {decorItems.map((item) => (
-                <Link key={item.id} href={`/items/${item.slug}`} className="group block bg-white rounded-xl border border-primary/20 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <Link key={item.id} href={nycItemPath(item.slug!)} className="group block bg-white rounded-xl border border-primary/20 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                   <div className="relative w-full aspect-square bg-gray-50">
                     <img src={`/api/item-image/${item.slug}?v=${IMAGE_CACHE_BUST}`} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   </div>

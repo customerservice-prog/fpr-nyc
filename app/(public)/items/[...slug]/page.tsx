@@ -46,7 +46,7 @@ async function findItem(slugParts: string[]) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
   const item = await findItem((await params).slug)
   if (!item) return { title: 'Rental not found', robots:{index:false,follow:true} }
-  const fullDescription = itemDescriptionForNyc(item.name, item.description)
+  const fullDescription = itemDescriptionForNyc(item.name, item.description, Number(item.cost))
   const desc = nycMetaText(`Rent ${item.name} in Riverdale, NY. ${fullDescription}`)
   const canonical = `${BASE_URL}/items/${item.slug}`
   return {
@@ -69,7 +69,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
   const lastRequested = (slugParts || []).join('/').split('/').pop() || ''
   if (item.slug !== (slugParts || []).join('/')) permanentRedirect(`/items/${encodeURIComponent(item.slug!)}`)
 
-  const description = itemDescriptionForNyc(item.name, item.description)
+  const description = itemDescriptionForNyc(item.name, item.description, Number(item.cost))
   const relatedItems = await prisma.item.findMany({ where: { categoryId: item.categoryId, id: { not: item.id }, displayToCustomer: true }, orderBy: { name: 'asc' }, take: 4 })
   const validRelatedItems = relatedItems.filter((ri) => { const slug = typeof ri.slug === 'string' ? ri.slug.trim() : ''; return slug.length > 0 && slug.toLowerCase() !== 'null' && slug.toLowerCase() !== 'undefined' })
   let suggestedAddons = item.suggestedAddonIds && item.suggestedAddonIds.length > 0 ? await prisma.item.findMany({ where: { id: { in: item.suggestedAddonIds }, displayToCustomer: true }, select: { id: true, name: true, slug: true, description: true, cost: true, picture: true, quantity: true } }) : []
@@ -77,7 +77,10 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
     const lighting=await prisma.item.findMany({where:{displayToCustomer:true,status:'Available',quantity:{gt:0},name:{contains:'Tent Lighting',mode:'insensitive'}},select:{id:true,name:true,slug:true,description:true,cost:true,picture:true,quantity:true},take:100})
     suggestedAddons=lighting.filter(addon=>matchesTentLighting(item.name,addon.name))
   }
-  const validSuggestedAddons = suggestedAddons.filter((addon) => { const slug = typeof addon.slug === 'string' ? addon.slug.trim() : ''; return slug.length > 0 && slug.toLowerCase() !== 'null' && slug.toLowerCase() !== 'undefined' })
+  // Add-on cards show NYC copy and the NYC photo proxy (never another store's URL or wording).
+  const validSuggestedAddons = suggestedAddons
+    .filter((addon) => { const slug = typeof addon.slug === 'string' ? addon.slug.trim() : ''; return slug.length > 0 && slug.toLowerCase() !== 'null' && slug.toLowerCase() !== 'undefined' })
+    .map((addon) => ({ ...addon, description: itemDescriptionForNyc(addon.name, addon.description, Number(addon.cost)), picture: addon.picture ? `/api/item-image/${encodeURIComponent(addon.slug)}` : null }))
 
   const isStandaloneTent = /\btent\b/i.test(item.name) && /\b\d+\s*(?:x|×)\s*\d+\b/i.test(item.name) && !/(?:side\s*wall|sidewall|package|accessor)/i.test(item.name)
 
@@ -106,7 +109,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
       <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(nycBreadcrumbs([{name:"Home",path:"/"},{name:item.category.name,path:`/category/${item.category.slug}`},{name:item.name,path:`/items/${encodeURIComponent(item.slug!)}`}]))}}/>
       <nav className="text-sm text-gray-500 mb-4"><Link href="/">Home</Link>{' / '}<Link href={`/category/${item.category.slug}`}>{item.category.name}</Link>{' / '}<span>{item.name}</span></nav>
       <div className="grid md:grid-cols-2 gap-8 items-start">
-        <ItemGallery slug={item.slug} name={item.name} hasPicture={!!item.picture} additionalImages={item.additionalImages || []} />
+        <ItemGallery slug={item.slug} name={item.name} hasPicture={!!item.picture} additionalImageCount={(item.additionalImages || []).length} version={String(item.updatedAt.getTime())} />
         <div>
           <h1 className="text-3xl font-bold mb-4 text-gray-900">{item.name}</h1>
           <p className="text-xl font-semibold mb-4 text-gray-900">Starting at ${Number(item.cost).toFixed(2)}<span className="text-sm font-normal text-gray-500">/day</span></p>

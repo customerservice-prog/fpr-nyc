@@ -156,6 +156,8 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
   const [wantsExactDelivery, setWantsExactDelivery] = useState(false)
   const [exactDeliveryTime, setExactDeliveryTime] = useState('')
   const [pickupType, setPickupTypeLocal] = useState<'flexible' | 'requiredBy' | 'exact'>('flexible')
+  const [pickupRequiredByTime, setPickupRequiredByTime] = useState('')
+  const [exactPickupTime, setExactPickupTime] = useState('')
   // Exact-time options and their fees come only from the owner-approved checkout policy.
   const checkoutPolicy = useCheckoutPolicy()
   const approvedPolicy = checkoutPolicy?.policy ?? null
@@ -163,8 +165,6 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
   const exactPickupOffered = approvedPolicy?.exactPickupFee != null
   const exactPickupTimeOptions = EXACT_PICKUP_TIME_OPTIONS.filter((opt) => approvedPolicy?.lateExactPickupFee != null || !isLateExactPickupTime(opt.value))
   const selectedExactPickupFee = exactPickupFeeForPolicy(approvedPolicy, exactPickupTime)
-  const [pickupRequiredByTime, setPickupRequiredByTime] = useState('')
-  const [exactPickupTime, setExactPickupTime] = useState('')
   const [appointmentSlot, setAppointmentSlot] = useState('')
   const [appointmentSpecificTime, setAppointmentSpecificTime] = useState('')
   const [tiers, setTiers] = useState<{ id: string; label: string; percent: number }[]>([])

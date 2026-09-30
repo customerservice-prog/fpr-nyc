@@ -121,7 +121,7 @@ export function isLateExactPickupTime(time: string | null | undefined): boolean 
  * Exact-time pickup fee for a chosen time under the approved policy, or null when that
  * time cannot be booked online (exact pickup not offered, or a late time without a late fee).
  */
-export function exactPickupFeeForPolicy(policy: NycCheckoutPolicy | null, time: string | null | undefined): number | null {
+export function exactPickupFeeForPolicy(policy: Pick<NycCheckoutPolicy, 'exactPickupFee' | 'lateExactPickupFee'> | null, time: string | null | undefined): number | null {
   if (!policy || policy.exactPickupFee === null) return null
   if (timeToMinutes(time) < 0) return null
   if (isLateExactPickupTime(time)) return policy.lateExactPickupFee

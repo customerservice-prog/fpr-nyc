@@ -35,6 +35,13 @@ const MINIMUM_LEAD_HOURS = 24
 const LAST_MINUTE_WINDOW_HOURS = 72
 const LATE_PICKUP_FROM = 22 * 60
 const LATE_PICKUP_UNTIL = 23 * 60 + 30
+// Exact times the storefront offers (30-minute steps). Anything else is refused so a
+// hand-made request can never buy an exact time the policy does not price.
+export const NYC_EXACT_DELIVERY_FROM_MINUTES = 8 * 60
+export const NYC_EXACT_DELIVERY_UNTIL_MINUTES = 18 * 60
+export const NYC_EXACT_PICKUP_FROM_MINUTES = 12 * 60
+export const NYC_EXACT_PICKUP_UNTIL_MINUTES = LATE_PICKUP_UNTIL
+const EXACT_TIME_STEP_MINUTES = 30
 
 export class CheckoutPricingError extends Error {
   readonly status: number
@@ -157,10 +164,26 @@ export interface CheckoutPricingResult {
   totalWithTip: number
 }
 
-const round2 = (value: number) => Math.round(value * 100) / 100
 
 export function toCents(value: number): number {
   return Math.round(value * 100)
+}
+
+/**
+ * `percent`% of an amount in cents, rounded half-up to the cent with exact integer
+ * math (percent may have up to 3 decimals, e.g. 8.875). Avoids binary floating-point
+ * errors such as 836.00 x 8.875% = 74.195 being rounded down to 74.19.
+ */
+export function percentOfCents(cents: number, percent: number): number {
+  const scaledPercent = Math.round(percent * 1000)
+  const numerator = cents * scaledPercent
+  return Math.floor((numerator + 50000) / 100000)
+}
+
+const fromCents = (cents: number) => cents / 100
+
+function onExactTimeGrid(minutes: number, from: number, until: number): boolean {
+  return minutes >= from && minutes <= until && (minutes - from) % EXACT_TIME_STEP_MINUTES === 0
 }
 
 /** True when two dollar amounts are equal to the cent. */
@@ -179,14 +202,14 @@ export function normalizeCouponCode(value: unknown): string {
   return typeof value === 'string' ? value.toUpperCase().trim() : ''
 }
 
-function couponDiscountFor(coupon: CouponConfig | null, code: string, cartSubtotal: number, now: Date): number {
+function couponDiscountCentsFor(coupon: CouponConfig | null, code: string, cartSubtotalCents: number, now: Date): number {
   if (!code || !coupon || !coupon.isActive || normalizeCouponCode(coupon.code) !== code) return 0
   if (coupon.expiresAt && new Date(coupon.expiresAt).getTime() < now.getTime()) return 0
   const amount = Number(coupon.discountAmount)
   if (!Number.isFinite(amount) || amount <= 0) return 0
   return coupon.discountType === 'percentage'
-    ? Math.round(cartSubtotal * (amount / 100) * 100) / 100
-    : Math.min(amount, cartSubtotal)
+    ? Math.min(percentOfCents(cartSubtotalCents, Math.min(amount, 100)), cartSubtotalCents)
+    : Math.min(toCents(amount), cartSubtotalCents)
 }
 
 function money(value: number): string {
@@ -219,7 +242,8 @@ export function computeNycCheckoutPricing(request: CheckoutPricingRequest, confi
     }
   }
 
-  let cartSubtotal = 0
+  // All money math runs in integer cents; results are converted to dollars once.
+  let cartSubtotalCents = 0
   const lines: CheckoutPricingLine[] = []
   for (const entry of request.items) {
     const item = config.items[entry.id]
@@ -228,34 +252,35 @@ export function computeNycCheckoutPricing(request: CheckoutPricingRequest, confi
       throw new CheckoutPricingError('item_unavailable', 'An item in your cart is no longer available online. Please review your cart or contact us.', 409)
     }
     const quantity = Number(entry.quantity)
-    cartSubtotal += item.cost * quantity
-    lines.push({ itemId: item.id, itemName: item.name, quantity, unitPrice: item.cost, total: round2(item.cost * quantity) })
+    const lineCents = toCents(item.cost) * quantity
+    cartSubtotalCents += lineCents
+    lines.push({ itemId: item.id, itemName: item.name, quantity, unitPrice: fromCents(toCents(item.cost)), total: fromCents(lineCents) })
   }
 
-  if (cartSubtotal < policy.minimumOrderSubtotal) {
+  if (cartSubtotalCents < toCents(policy.minimumOrderSubtotal)) {
     throw new CheckoutPricingError('below_minimum', 'The minimum online delivery order is ' + money(policy.minimumOrderSubtotal) + ' in rentals before fees and tax. Please add items or call ' + phone + '.', 400)
   }
 
   const tierId = typeof request.durationTierId === 'string' ? request.durationTierId : null
   const durationTier = config.tiers.find(tier => tier.id === tierId) || config.tiers[0] || null
-  const durationFee = durationTier ? Math.round(cartSubtotal * (durationTier.percent / 100) * 100) / 100 : 0
-  const adjustedSubtotal = Math.round((cartSubtotal + durationFee) * 100) / 100
+  const durationFeeCents = durationTier && Number.isFinite(durationTier.percent) && durationTier.percent > 0 ? percentOfCents(cartSubtotalCents, durationTier.percent) : 0
+  const adjustedSubtotalCents = cartSubtotalCents + durationFeeCents
 
   // Only currently active special-request fees are applied; an ID that is no
   // longer offered is ignored rather than charged.
   const requestedFeeIds = new Set((request.specialRequestIds || []).filter(id => typeof id === 'string'))
   const selectedFees = config.specialRequestFees.filter(fee => requestedFeeIds.has(fee.id))
-  const specialRequestFee = selectedFees.reduce((sum, fee) => sum + fee.amount, 0)
+  const specialRequestFeeCents = selectedFees.reduce((sum, fee) => sum + toCents(fee.amount), 0)
 
   const couponCode = normalizeCouponCode(request.couponCode)
-  const couponDiscount = couponDiscountFor(config.coupon, couponCode, cartSubtotal, config.now)
+  const couponDiscountCents = couponDiscountCentsFor(config.coupon, couponCode, cartSubtotalCents, config.now)
 
-  let lastMinuteFee = 0
+  let lastMinuteFeeCents = 0
   if (hoursUntilEvent < LAST_MINUTE_WINDOW_HOURS) {
     if (policy.lastMinuteFee === null) {
       throw new CheckoutPricingError('last_minute_not_offered', 'Events less than 72 hours away cannot be booked online. Please call ' + phone + ' to check availability.', 400)
     }
-    lastMinuteFee = policy.lastMinuteFee
+    lastMinuteFeeCents = toCents(policy.lastMinuteFee)
   }
 
   const damageWaiver = !!request.damageWaiver
@@ -263,31 +288,33 @@ export function computeNycCheckoutPricing(request: CheckoutPricingRequest, confi
     throw new CheckoutPricingError('damage_waiver_not_offered', 'The damage waiver is not offered online. Please go back to checkout and review your options.', 400)
   }
   const damageWaiverPercent = policy.damageWaiverPercent
-  const damageWaiverFee = damageWaiver && damageWaiverPercent !== null ? Math.round(adjustedSubtotal * (damageWaiverPercent / 100) * 100) / 100 : 0
+  const damageWaiverFeeCents = damageWaiver && damageWaiverPercent !== null ? percentOfCents(adjustedSubtotalCents, damageWaiverPercent) : 0
 
-  let exactDeliveryFee = 0
+  let exactDeliveryFeeCents = 0
   if (request.exactDeliveryRequested) {
     if (policy.exactDeliveryFee === null) {
       throw new CheckoutPricingError('exact_delivery_not_offered', 'Guaranteed exact-time delivery is not offered online. Please choose a delivery window or call ' + phone + '.', 400)
     }
-    if (timeToMinutes(request.exactDeliveryTime) < 0) {
-      throw new CheckoutPricingError('exact_time_invalid', 'Please choose a valid exact delivery time.', 400)
+    if (!onExactTimeGrid(timeToMinutes(request.exactDeliveryTime), NYC_EXACT_DELIVERY_FROM_MINUTES, NYC_EXACT_DELIVERY_UNTIL_MINUTES)) {
+      throw new CheckoutPricingError('exact_time_invalid', 'Please choose an exact delivery time between 8:00 am and 6:00 pm (on the hour or half hour).', 400)
     }
-    exactDeliveryFee = policy.exactDeliveryFee
+    exactDeliveryFeeCents = toCents(policy.exactDeliveryFee)
   }
 
-  let exactPickupFee = 0
+  let exactPickupFeeCents = 0
   if (request.pickupType === 'exact') {
     const minutes = timeToMinutes(request.exactPickupTime)
-    if (minutes < 0) throw new CheckoutPricingError('exact_time_invalid', 'Please choose a valid exact pickup time.', 400)
+    if (!onExactTimeGrid(minutes, NYC_EXACT_PICKUP_FROM_MINUTES, NYC_EXACT_PICKUP_UNTIL_MINUTES)) {
+      throw new CheckoutPricingError('exact_time_invalid', 'Please choose an exact pickup time between 12:00 pm and 11:30 pm (on the hour or half hour).', 400)
+    }
     const late = minutes >= LATE_PICKUP_FROM && minutes <= LATE_PICKUP_UNTIL
     const fee = policy.exactPickupFee === null ? null : late ? policy.lateExactPickupFee : policy.exactPickupFee
     if (fee === null) {
       throw new CheckoutPricingError('exact_pickup_not_offered', 'Guaranteed exact-time pickup is not offered online for that time. Please choose a flexible pickup or call ' + phone + '.', 400)
     }
-    exactPickupFee = fee
+    exactPickupFeeCents = toCents(fee)
   }
-  const schedulingFeeTotal = exactDeliveryFee + exactPickupFee
+  const schedulingFeeCents = exactDeliveryFeeCents + exactPickupFeeCents
 
   const salesTax = config.salesTax
   if (!salesTax || salesTax.status === 'unknown_zip') {
@@ -309,50 +336,68 @@ export function computeNycCheckoutPricing(request: CheckoutPricingRequest, confi
   if (!Number.isFinite(deliveryFee) || deliveryFee <= 0) {
     throw new CheckoutPricingError('delivery_not_configured', 'Delivery pricing for this ZIP has not been configured yet. Please contact us before checkout.', 503)
   }
+  const deliveryFeeCents = toCents(deliveryFee)
 
-  const discountedSubtotal = Math.max(adjustedSubtotal - couponDiscount, 0)
-  const taxableBase = discountedSubtotal + deliveryFee + damageWaiverFee + specialRequestFee + lastMinuteFee + schedulingFeeTotal
-  const taxAmount = Math.round(taxableBase * (taxRate / 100) * 100) / 100
-  const grandTotal = discountedSubtotal + deliveryFee + damageWaiverFee + specialRequestFee + taxAmount + lastMinuteFee + schedulingFeeTotal
+  const discountedSubtotalCents = Math.max(adjustedSubtotalCents - couponDiscountCents, 0)
+  const taxableBaseCents = discountedSubtotalCents + deliveryFeeCents + damageWaiverFeeCents + specialRequestFeeCents + lastMinuteFeeCents + schedulingFeeCents
+  const taxCents = percentOfCents(taxableBaseCents, taxRate)
+  const grandTotalCents = taxableBaseCents + taxCents
 
   const rule = config.depositRule
-  const requiredDeposit = rule.type !== 'percentage'
-    ? Math.min(rule.amount, grandTotal)
-    : Math.round(grandTotal * (rule.amount / 100) * 100) / 100
+  if (rule.type === 'percentage' && rule.amount > 100) {
+    throw new CheckoutPricingError('deposit_not_configured', 'Deposit rules have not been configured for online checkout yet. Please contact us to book.', 503)
+  }
+  const requiredDepositCents = rule.type !== 'percentage'
+    ? Math.min(toCents(rule.amount), grandTotalCents)
+    : percentOfCents(grandTotalCents, rule.amount)
 
-  const tipAmount = Number(request.tipAmount) || 0
-  if (!Number.isFinite(tipAmount) || tipAmount < 0) throw new CheckoutPricingError('tip_invalid', 'Please enter a valid tip amount.', 400)
-  if (tipAmount > round2(grandTotal * NYC_MAX_TIP_RATIO)) throw new CheckoutPricingError('tip_too_large', 'Please contact us to add a tip larger than the order total.', 400)
+  const tipInput = Number(request.tipAmount) || 0
+  if (!Number.isFinite(tipInput) || tipInput < 0) throw new CheckoutPricingError('tip_invalid', 'Please enter a valid tip amount.', 400)
+  const tipCents = toCents(tipInput)
+  if (tipCents > Math.round(grandTotalCents * NYC_MAX_TIP_RATIO)) throw new CheckoutPricingError('tip_too_large', 'Please contact us to add a tip larger than the order total.', 400)
 
   return {
     version: NYC_PRICING_VERSION,
     lines,
-    cartSubtotal,
+    cartSubtotal: fromCents(cartSubtotalCents),
     durationTier,
-    durationFee,
-    adjustedSubtotal,
+    durationFee: fromCents(durationFeeCents),
+    adjustedSubtotal: fromCents(adjustedSubtotalCents),
     rentalDays: durationTier?.minDays || 1,
     durationLabel: durationTier?.label || null,
     specialRequests: selectedFees.map(fee => ({ id: fee.id, name: fee.name, amount: fee.amount })),
-    specialRequestFee,
+    specialRequestFee: fromCents(specialRequestFeeCents),
     specialRequestNames: selectedFees.map(fee => fee.name).join(', ') || null,
-    couponCode: couponDiscount > 0 ? couponCode : null,
-    couponDiscount,
+    couponCode: couponDiscountCents > 0 ? couponCode : null,
+    couponDiscount: fromCents(couponDiscountCents),
     damageWaiver,
     damageWaiverPercent,
-    damageWaiverFee,
-    lastMinuteFee,
-    exactDeliveryFee,
-    exactPickupFee,
-    deliveryFee,
+    damageWaiverFee: fromCents(damageWaiverFeeCents),
+    lastMinuteFee: fromCents(lastMinuteFeeCents),
+    exactDeliveryFee: fromCents(exactDeliveryFeeCents),
+    exactPickupFee: fromCents(exactPickupFeeCents),
+    deliveryFee: fromCents(deliveryFeeCents),
     taxRate,
     taxJurisdiction: { id: salesTax.jurisdiction.id, name: salesTax.jurisdiction.name, reportingCode: salesTax.jurisdiction.reportingCode, zip: salesTax.zip },
-    taxAmount,
-    grandTotal,
-    requiredDeposit,
-    tipAmount,
-    totalWithTip: grandTotal + tipAmount,
+    taxAmount: fromCents(taxCents),
+    grandTotal: fromCents(grandTotalCents),
+    requiredDeposit: fromCents(requiredDepositCents),
+    tipAmount: fromCents(tipCents),
+    totalWithTip: fromCents(grandTotalCents + tipCents),
   }
+}
+
+/**
+ * Customer-facing order line name: the catalog name, plus " (Color)" only when the
+ * browser sent a real color option of that item. Any other browser text is ignored.
+ */
+export function checkoutLineName(catalogName: string, colorOptions: readonly string[] | null | undefined, browserName: unknown): string {
+  if (typeof browserName !== 'string') return catalogName
+  const trimmed = browserName.trim()
+  for (const color of colorOptions || []) {
+    if (trimmed === catalogName + ' (' + color + ')') return trimmed.slice(0, 240)
+  }
+  return catalogName
 }
 
 /**

@@ -58,10 +58,11 @@ test('NYC anchor prices are clean and visually sensible', () => {
   assert.equal(price('dance-floor-3x3-section'), 60)
 })
 
-test('price apply script only updates cost on existing matching slugs and cleans cents', () => {
+test('price apply script only updates cost on existing matching slugs from the live Syracuse catalog', () => {
   const script = fs.readFileSync(path.join(root, 'scripts/apply-nyc-premium-prices.mjs'), 'utf8')
-  assert.match(script, /cleanNycPrice/)
-  assert.match(script, /updateMany\(\{ where: \{ slug: row\.slug \}, data: \{ cost: cleanPrice \} \}\)/)
+  assert.match(script, /nycPriceForSyracuseItem/)
+  assert.match(script, /loadSyracuseCatalog/)
+  assert.match(script, /data: \{ cost: change\.nycPrice \}/)
   assert.doesNotMatch(script, /create\s*\(/)
   assert.doesNotMatch(script, /upsert\s*\(/)
   assert.doesNotMatch(script, /quantity\s*:/)
@@ -78,12 +79,12 @@ test('all package prices remain excluded and unchanged by the NYC premium snapsh
   for (const row of snapshot.items) assert.equal(excludedSlugs.has(row.slug), false)
 })
 
-test('NYC keeps its own stock: nothing copies Syracuse inventory quantities (owner decision 2026-09-30)', () => {
-  assert.equal(fs.existsSync(path.join(root, 'scripts/sync-nyc-quantities-from-syracuse.mjs')), false)
-  for (const name of fs.readdirSync(path.join(root, 'scripts'))) {
-    const source = fs.readFileSync(path.join(root, 'scripts', name), 'utf8')
-    const readsSyracuse = /friendlypartyrental\.com\/api\/items/.test(source)
-    const writesQuantity = /data:\s*\{[^}]*quantity\s*:/.test(source)
-    assert.ok(!(readsSyracuse && writesQuantity), name + ' must not copy Syracuse quantities into NYC')
-  }
+test('NYC quantities mirror Syracuse exactly by slug (owner decision 2026-09-30, supersedes own-stock)', () => {
+  const script = fs.readFileSync(path.join(root, 'scripts/sync-nyc-quantities-from-syracuse.mjs'), 'utf8')
+  assert.match(script, /loadSyracuseCatalog/)
+  assert.match(script, /data: \{ quantity: change\.syracuseQuantity \}/)
+  assert.doesNotMatch(script, /cost\s*:/, 'the quantity sync never changes prices')
+  const engine = fs.readFileSync(path.join(root, 'scripts/nyc-catalog-sync-engine.mjs'), 'utf8')
+  assert.doesNotMatch(engine, /method: 'POST'|method: 'PUT'|method: 'DELETE'|method: 'PATCH'/, 'Syracuse is only read')
+  assert.match(fs.readFileSync(path.join(root, 'lib/nycCatalogCore.mjs'), 'utf8'), /quantity: Number\(source\.quantity\)/)
 })

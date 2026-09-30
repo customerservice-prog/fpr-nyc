@@ -1,0 +1,28 @@
+// Nine real Syracuse catalog rows (captured 2026-09-30) covering every sync rule:
+// suggested add-ons, a $2.50 item, color options, a package, an additional photo,
+// an item without a photo, a non-Available status and a future bookable date.
+const category = (slug, name, pricingProfile = 'standard') => ({ id: 'syr-cat-' + slug, slug, name, pricingProfile, picture: '/api/category-image/' + slug })
+export const syracuseItems = [
+  { id: 'syr-tent', slug: '20x20-pole-tent', name: '20x20 Pole Tent', description: 'Pole tent. Starting at $250.00/day. Serving Syracuse and the surrounding Central New York area — reserve yours online today!', type: 'Regular', cost: 250, quantity: 19, displayToCustomer: true, scheduleProfile: null, status: 'Available', bookableAfter: null, bookableAfterMessage: '', specialDisplayName: '', setupArea: '', attendants: null, ageGroup: '', colorOptions: [], taxable: true, setupFee: null, suggestedAddonIds: ['syr-light'], category: category('tent-rentals', 'Tent Rentals', 'tables_tents') },
+  { id: 'syr-light', slug: 'tent-lighting-20x20', name: 'Tent Lighting (20x20)', description: 'Rent Tent Lighting (20x20) in Syracuse, NY from Friendly Party Rental. Starting at $100.00/day.', type: 'Regular', cost: 100, quantity: 100, displayToCustomer: true, scheduleProfile: null, status: 'Available', bookableAfter: null, bookableAfterMessage: '', specialDisplayName: '', setupArea: '', attendants: null, ageGroup: '', colorOptions: [], taxable: true, setupFee: null, suggestedAddonIds: [], category: category('event-lighting-rentals', 'Lighting') },
+  { id: 'syr-chair', slug: 'white-plastic-folding-chair', name: 'White Plastic Folding Chair', description: '', type: 'Regular', cost: 2.5, quantity: 1000, displayToCustomer: true, scheduleProfile: null, status: 'Available', bookableAfter: null, bookableAfterMessage: '', specialDisplayName: '', setupArea: '', attendants: null, ageGroup: '', colorOptions: [], taxable: true, setupFee: null, suggestedAddonIds: ['syr-cover'], category: category('table-chair-rentals', 'Table and Chair Rentals', 'tables_tents') },
+  { id: 'syr-cover', slug: 'spandex-chair-cover', name: 'Spandex Chair Cover', description: 'Cover.', type: 'Regular', cost: 2, quantity: 1000, displayToCustomer: true, scheduleProfile: null, status: 'Available', bookableAfter: null, bookableAfterMessage: '', specialDisplayName: '', setupArea: '', attendants: null, ageGroup: '', colorOptions: ['White', 'Black'], taxable: true, setupFee: null, suggestedAddonIds: [], category: category('linen-rentals', 'Linens') },
+  { id: 'syr-pkg', slug: '20x20-tent-package-4-tables-32-chairs', name: '20x20 Tent Package – 4 Tables & 32 Chairs', description: 'Everything. Starting at $325.00/day.', type: 'Regular', cost: 325, quantity: 10, displayToCustomer: true, scheduleProfile: null, status: 'Available', bookableAfter: null, bookableAfterMessage: null, specialDisplayName: null, setupArea: null, attendants: null, ageGroup: null, colorOptions: [], taxable: true, setupFee: null, suggestedAddonIds: [], category: category('party-rental-packages', 'Party Rental Packages') },
+  { id: 'syr-big', slug: '30-x-60-pole-tent', name: '30 x 60 Pole Tent', description: 'Big tent.', type: 'Regular', cost: 850, quantity: 6, displayToCustomer: true, scheduleProfile: null, status: 'Available', bookableAfter: null, bookableAfterMessage: '', specialDisplayName: '', setupArea: '', attendants: null, ageGroup: '', colorOptions: [], taxable: true, setupFee: null, suggestedAddonIds: [], category: category('tent-rentals', 'Tent Rentals', 'tables_tents') },
+  { id: 'syr-sugar', slug: 'sugar-and-creamer-set', name: 'Sugar and Creamer Set', description: '', type: 'Regular', cost: 5, quantity: 1000, displayToCustomer: true, scheduleProfile: null, status: 'Available', bookableAfter: null, bookableAfterMessage: '', specialDisplayName: '', setupArea: '', attendants: null, ageGroup: '', colorOptions: [], taxable: true, setupFee: null, suggestedAddonIds: [], category: category('beverage-food-service', 'Beverage and Food Service') },
+  { id: 'syr-tank', slug: '100-lb-propane-tank', name: '100 lb. Propane Tank', description: 'Tank.', type: 'Regular', cost: 100, quantity: 20, displayToCustomer: true, scheduleProfile: null, status: 'Damaged', bookableAfter: null, bookableAfterMessage: '', specialDisplayName: '', setupArea: '', attendants: null, ageGroup: '', colorOptions: [], taxable: true, setupFee: null, suggestedAddonIds: [], category: category('heater-fan-rentals', 'Heating & Cooling') },
+  { id: 'syr-arbor', slug: 'madison-arbor', name: 'Madison Arbor', description: 'Arbor.', type: 'Regular', cost: 75, quantity: 22, displayToCustomer: true, scheduleProfile: null, status: 'Available', bookableAfter: '2026-11-01T00:00:00.000Z', bookableAfterMessage: '', specialDisplayName: '', setupArea: '', attendants: null, ageGroup: '', colorOptions: [], taxable: true, setupFee: null, suggestedAddonIds: [], category: category('weddings', 'Wedding Rentals') },
+]
+export const syracuseCategories = [
+  { slug: 'restroom-rentals', name: 'Restroom Rentals', sortOrder: 0 },
+  { slug: 'table-chair-rentals', name: 'Table and Chair Rentals', sortOrder: 1 },
+  { slug: 'tent-rentals', name: 'Tent Rentals', sortOrder: 2 },
+  { slug: 'party-rental-packages', name: 'Party Rental Packages', sortOrder: 5 },
+]
+
+
+/** Photo rules of the fake Syracuse API: every item has a main photo except the
+ * sugar-and-creamer-set; only the 30 x 60 pole tent has one additional photo. */
+export function syracuseHasPhoto(slug, index) {
+  return index === null ? slug !== 'sugar-and-creamer-set' : slug === '30-x-60-pole-tent' && String(index) === '0'
+}

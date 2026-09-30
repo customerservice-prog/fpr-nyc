@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer'
 import { NYC_EMAIL_ADDRESS, nycEmailSubject, nycEmailHtml } from '@/lib/nycEmail'
 import { BUSINESS, formatDateTime } from '@/lib/utils'
 import { NYC_EMAIL_LOGO_URL } from '@/lib/nycBrand'
-import { NYC_PUBLIC_HOST } from '@/lib/nycPublicOrigin'
+import { NYC_PUBLIC_HOST, NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
 import { formatTaxRatePercent } from '@/lib/nycSalesTax'
 
 // Host shown in the plain-text part and the X-FPR-Website header of every NYC email.
@@ -78,33 +78,25 @@ function emailFooter() {
     <hr style="border:none; border-top:1px solid #e5e5e5; margin:28px 0 14px;" />
     <p style="font-size:13px; color:#555; margin:4px 0;">${BUSINESS.legalName}<br/>${BUSINESS.address}</p>
     <p style="font-size:13px; color:#555; margin:4px 0;">Questions? Call or text us at <a href="tel:${BUSINESS.phone.replace(/[^0-9]/g, '')}">${BUSINESS.phone}</a> or email <a href="${BUSINESS.emailHref}">${BUSINESS.email}</a></p>
-    <p style="font-size:12px; color:#999; margin-top:14px; line-height:1.5;">Please note: payment in full is due 3 days prior to your event. Setup for tents and bounce houses is included; full setup for tables and chairs is available for $1 per table and $1 per chair upon request. Deposits are non-refundable. Please refer to your signed contract for complete rental terms and policies.</p>
+    <p style="font-size:12px; color:#999; margin-top:14px; line-height:1.5;">Please note: your confirmed NYC quote and signed rental agreement set your payment deadline and rental terms. The remaining balance is due before your event. Deposits are non-refundable.</p>
     <p style="font-size:12px; color:#999; margin-top:8px;">Thank you for choosing ${BUSINESS.name}!</p>
   `
 }
 
 function policyFooterHtml() {
+  // NYC terms come from the customer's confirmed NYC quote and rental agreement. No
+  // inherited fees, damage waiver or other locations' policies are promised here.
   return `
     <div style="margin-top:24px; padding-top:16px; border-top:1px solid #e5e5e5; font-size:12px; color:#555; line-height:1.6;">
       <p style="font-weight:bold; margin-bottom:8px; color:#C0392B; text-decoration:underline;">A few tips and reminders: (PLEASE READ BELOW)</p>
-      <p>Please note: A damage waiver charge and sales tax apply to all items. The <strong style="color:#C0392B;">10% damage waiver</strong> covers accidental damage to our equipment during your rental period, excluding intentional damage or theft.</p>
-      <p>1) We accept cash and credit cards. If paying with cash, please note our drivers do not carry change. Payment is due 3 days prior to your event, and the contract must be signed upon final payment. Checks are not accepted. If payment and the signed contract are not completed, delivery will not occur.</p>
-      <p>2) Please contact our office in advance if your location includes stairs, hills, a tiered yard, or other obstacles so we can review setup requirements. If additional labor is required due to site conditions not disclosed in advance, a $50 fee may apply. The delivery driver will notify you if this applies.</p>
-      <p>3) Pole tents may be installed on most natural surfaces but not on concrete or pavement. Stakes are installed using gas-powered equipment and driven approximately 42 inches into the ground. Customers are responsible for identifying underground utilities, irrigation lines, and drains. Early morning deliveries may involve equipment noise similar to a lawn mower. If stakes are placed against our recommendation and encounter underground obstructions, the customer is responsible for removal and return of the stake.</p>
-      <p>4) All inflatable units must be securely staked for safety. If staking is not possible, inflatables must be secured to approved fixed objects as determined by our staff. Units must be secured on at least three corners. Sandbags are not used, as they are not safe for most setups.</p>
-      <p>5) A delivery driver will call when en route. On busy days, delivery may occur earlier than scheduled to ensure all events are serviced on time. There is no additional charge for early delivery.</p>
-      <p>6) Please notify us as early as possible if you need to cancel due to weather or other circumstances. Once setup has been completed, no refunds are issued, including for weather. Please refer to our FAQ and Policies pages for full details.</p>
-      <p>7) If your event is at a park or public venue, please notify us in advance, as this affects scheduling and pricing. For inflatable rentals, electricity must be available within 50 feet or a generator must be rented if required.</p>
-      <p>8) The following items are non-refundable once booked: sidewalls, fans, and tent heaters. These items are limited and reserved specifically for your event.</p>
-      <p>9) Yard assessments are available for customers unsure which tent size will fit. Please contact our office to schedule an assessment. Please note that at least 3 feet of clearance around the tent perimeter is required for stakes and poles. If the tent cannot safely fit on event day, the event may be canceled and charges may still apply.</p>
-      <p>10) In the rare event we are unable to arrive on time, a driver will contact you and offer a full refund. If you choose to proceed with the order despite delays, no refund will be issued.</p>
-      <p>11) Setup and takedown of tables and chairs are not included, but may be added for an additional $5 per chair and $10 per table.</p>
-      <p>Net 30 payment terms apply to public entities only. A credit card deposit is required at booking. The remaining balance is due within 30 days of the invoice date. A purchase order is required prior to the event. Late payments are subject to a 5% late fee per month.</p>
-      <p style="font-weight:bold; margin-bottom:4px;">Cancellation policy:</p>
-      <p>Cancellations made 14 or more days before the event are subject to a 25% cancellation fee. Cancellations made less than 14 days before the event are subject to the full rental charge.</p>
-      <p>Payment methods: The deposit must be paid by credit card. The remaining balance may be paid by check or credit card. Please refer to the contract for full details.</p>
-      <p>If you need to cancel, cancellations are reviewed on a case-by-case basis. In certain situations, a raincheck valid for up to one year may be issued at our discretion. Deposits are non-refundable.</p>
-      <p>Events may also be canceled at our discretion. Abusive, threatening, or offensive behavior will not be tolerated. While unforeseen circumstances can occur, our goal is to remain fair, consistent, and professional while protecting our staff, equipment, and schedule.</p>
+      <p>Your confirmed NYC quote and signed rental agreement set your prices, payment deadline and cancellation terms. Friendly Party Rental NYC is delivery-only: our crew delivers, sets up and picks up at your event address. No damage waiver is offered or charged.</p>
+      <p>1) Please tell us in advance about stairs, hills, a tiered yard, narrow gates or other obstacles at the setup area so we can review the setup requirements.</p>
+      <p>2) Pole tents can be installed on most natural surfaces but not on concrete or pavement. Stakes are driven about 42 inches into the ground, so please identify underground utilities, irrigation lines and drains before your event.</p>
+      <p>3) Inflatables must be staked, or secured to approved fixed points on at least three corners. Sandbags are not used. Electricity must be available within 50 feet of each inflatable unless a generator is rented.</p>
+      <p>4) Our driver will call when en route. On busy days delivery may arrive earlier than scheduled, at no additional charge.</p>
+      <p>5) Please tell us in advance if your event is at a park, school or other public venue, and share any venue rules or permits with our team.</p>
+      <p>6) Tents need at least 3 feet of clearance around the perimeter for stakes and poles. Contact us if you are unsure which tent size fits your space.</p>
+      <p>7) If you need to change or cancel your order (including for weather), contact the NYC team as early as possible. Your rental agreement explains which cancellation or raincheck terms apply.</p>
       <p style="margin-top:12px;">We want your party to go as smoothly as possible. Please call if you have any questions. Thanks!</p>
     </div>
   `
@@ -126,7 +118,7 @@ function eventDetailsHtml(order: {
     .filter(Boolean)
     .join(', ')
   const isPickup = order.deliveryType === 'pickup'
-  const addressLabel = isPickup ? 'Pickup Location (Our Warehouse)' : 'Delivery Address'
+  const addressLabel = isPickup ? 'Pickup Location' : 'Delivery Address'
 
   let html = `<div style="background:#EDE7F6;border-radius:6px;padding:10px 14px;margin-bottom:10px;"><strong style="color:#4A2E83;">Event Date:</strong> ${order.eventDate}</div>`
   if (fullAddress) {
@@ -251,7 +243,7 @@ export function orderConfirmationEmail(order: {
         <p style="margin-top:16px;"><strong>Total:</strong> $${order.totalAmount.toFixed(2)}</p>
         <p><strong>Deposit Paid:</strong> $${order.depositAmount.toFixed(2)}</p>
         <p><strong>Balance Due:</strong> $${order.balanceDue.toFixed(2)}</p>
-        <p style="margin-top:20px;"><a href="https://fpr-nyc-production.up.railway.app/contract/${order.id}" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>
+        <p style="margin-top:20px;"><a href="${NYC_PUBLIC_ORIGIN}/contract/${order.id}" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>
         ${policyFooterHtml()}
         ${emailFooter()}
       </div>
@@ -387,7 +379,7 @@ export function paymentReceiptEmail(payment: {
         <p><strong>Order Total:</strong> $${payment.totalAmount.toFixed(2)}</p>
         <p><strong>Remaining Balance:</strong> $${payment.balanceDue.toFixed(2)}</p>
         ${payment.payments && payment.payments.length ? paymentHistoryHtml(payment.payments) : ''}
-        ${payment.id ? '<p style="margin-top:20px;"><a href="https://fpr-nyc-production.up.railway.app/contract/' + payment.id + '" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>' : ''}
+        ${payment.id ? '<p style="margin-top:20px;"><a href="' + NYC_PUBLIC_ORIGIN + '/contract/' + payment.id + '" style="background:#1A6FD4;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">View &amp; Sign Your Contract</a></p>' : ''}
         ${policyFooterHtml()}
         ${emailFooter()}
       </div>
@@ -494,7 +486,7 @@ export function selfServiceQuoteEmail(data: {
     .join('')
 
   return {
-    subject: 'Your Quote from Friendly Party Rental',
+    subject: 'Your Quote from Friendly Party Rental NYC',
     html: `
       <div style="font-family: Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
         ${emailHeader()}
@@ -510,7 +502,7 @@ export function selfServiceQuoteEmail(data: {
           <tr><td style="padding:8px; font-weight:bold;">Subtotal</td><td style="padding:8px; text-align:right; font-weight:bold;">$${data.subtotal.toFixed(2)}</td></tr>
         </table>
         <p style="margin-top:16px; font-size:13px; color:#666;">Delivery fees and sales tax are calculated at checkout based on your address. This quote does not reserve your date - complete checkout to confirm your booking.</p>
-        <p style="margin-top:24px;"><a href="https://fpr-nyc-production.up.railway.app/checkout">Return to checkout to complete your booking</a></p>
+        <p style="margin-top:24px;"><a href="${NYC_PUBLIC_ORIGIN}/checkout">Return to checkout to complete your booking</a></p>
         ${emailFooter()}
       </div>
     `,
@@ -529,7 +521,7 @@ export function cancellationMessageEmail(data: {
     html: `
       <div style="font-family: Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
         ${emailHeader()}
-        <h2 style="color: #1A6FD4;">Friendly Party Rental</h2>
+        <h2 style="color: #1A6FD4;">Friendly Party Rental NYC</h2>
         <p>Dear ${data.customerName},</p>
         <p>${messageHtml}</p>
         <p><strong>Order Number:</strong> ${data.orderNumber}</p>

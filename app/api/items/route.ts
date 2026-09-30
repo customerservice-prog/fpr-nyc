@@ -4,8 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getItemsWithAvailability, PUBLIC_ITEM_SELECT, withCategoryImage } from '@/lib/availability'
 import { itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 
-function localizeItem<T extends { name: string; description?: string | null }>(item: T): T {
-  return { ...item, description: itemDescriptionForNyc(item.name, item.description) }
+function localizeItem<T extends { name: string; description?: string | null; cost?: number | null }>(item: T): T {
+  return { ...item, description: itemDescriptionForNyc(item.name, item.description, typeof item.cost === 'number' ? item.cost : null) }
 }
 
 export async function GET(request: NextRequest) {

@@ -16,6 +16,7 @@
 // This module is pure data + pure functions (no Prisma import) so it can
 // be safely imported from both server and client components.
 
+import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
 export type CampaignFamily = 'seasonal' | 'lifecycle' | 'product' | 'opportunity'
 export type AudienceConfidence = 'ready' | 'broad' | 'limited'
 export type CampaignTag =
@@ -1340,7 +1341,7 @@ const TAG_EYEBROW: Record<CampaignTag, string> = {
   upsell: 'ADD TO YOUR ORDER',
 }
 
-const ORIGIN = 'https://fpr-nyc-production.up.railway.app'
+const ORIGIN = NYC_PUBLIC_ORIGIN
 
 function uid() {
   return Math.random().toString(36).slice(2, 10)

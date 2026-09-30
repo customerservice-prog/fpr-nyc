@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import sharp from 'sharp'
-import { readFile } from 'node:fs/promises'
-import path from 'node:path'
-import { NYC_ITEM_MEDIA } from '@/lib/nycItemMedia'
-import { NYC_WEDDING_ITEM_TO_PACKAGE } from '@/lib/nycWeddingImages'
-import { readNycWeddingArtwork } from '@/lib/nycWeddingArtworkServer'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
+
+// Serves NYC item photos from this NYC domain.
+//   /api/item-image/<slug>            main photo (Item.picture)
+//   /api/item-image/<slug>?index=N    additional photo N (Item.additionalImages[N])
+// The catalog sync stores the Syracuse photo URLs for every mirrored item, so NYC
+// shows exactly the Syracuse photo through this local proxy (no hotlinking from
+// customer browsers). Inline (data:) images and uploads stored by NYC admin work too.
+
+const CACHE_CONTROL = 'public, max-age=3600, stale-while-revalidate=86400'
+const MAX_ADDITIONAL_INDEX = 50
 
 function escapeXml(value: string) {
   return value.replace(/[&<>'"]/g, (char) => ({
@@ -19,8 +24,9 @@ function escapeXml(value: string) {
   }[char] || char))
 }
 
+// Last resort only: every published NYC item has a real photo (the catalog sync does
+// not publish an item until Syracuse has a photo for it).
 async function fallbackImage(name: string, reason: string) {
-  if (/12\s*x\s*12/i.test(name) && /dance floor/i.test(name)) return new NextResponse(await readFile(path.join(process.cwd(),'public/images/sc-12x12-dance-floor.jpg')),{headers:{'Content-Type':'image/jpeg','Cache-Control':'public, max-age=300'}})
   const safeName = escapeXml(name || 'Rental item')
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="${safeName}"><rect width="1200" height="900" fill="#f4f4f5"/><rect x="80" y="80" width="1040" height="740" rx="32" fill="#fff" stroke="#d4d4d8" stroke-width="4"/><text x="600" y="410" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="54" font-weight="700" fill="#18181b">${safeName}</text><text x="600" y="485" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="34" fill="#71717a">Photo coming soon</text></svg>`
 
@@ -28,113 +34,88 @@ async function fallbackImage(name: string, reason: string) {
     status: 200,
     headers: {
       'Content-Type': 'image/png',
-      'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
+      'Cache-Control': 'public, max-age=300',
       'X-Content-Type-Options': 'nosniff',
       'X-Image-Fallback': reason,
     },
   })
 }
 
-function isAllowedImageUrl(raw: string) {
+function sourceUrl(raw: string, requestUrl: string): URL | null {
   try {
-    const url = new URL(raw)
-    return url.protocol === 'https:' || url.protocol === 'http:'
+    const url = raw.startsWith('/') ? new URL(raw, requestUrl) : new URL(raw)
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url : null
   } catch {
-    return false
+    return null
   }
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params
-  const item = await prisma.item.findUnique({
-    where: { slug },
-    select: { name: true, picture: true, updatedAt: true },
-  })
-
-  if (!item) {
+  const indexParam = request.nextUrl.searchParams.get('index')
+  const index = indexParam === null ? null : Number(indexParam)
+  if (index !== null && (!Number.isInteger(index) || index < 0 || index > MAX_ADDITIONAL_INDEX)) {
     return new NextResponse('Not found', { status: 404 })
   }
 
-  const weddingPackageId = NYC_WEDDING_ITEM_TO_PACKAGE[slug]
-  if (weddingPackageId) {
-    try {
-      const artwork = await readNycWeddingArtwork(weddingPackageId)
-      if (artwork) return new NextResponse(artwork.bytes, { headers: {
-        'Content-Type': artwork.contentType,
-        'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
-        'X-Image-Reference': 'exact-public-NY-artwork-local-SC-snapshot',
-        'X-Content-Type-Options': 'nosniff',
-      } })
-    } catch {
-      return fallbackImage(item.name, 'wedding-art-unavailable')
-    }
+  let name = 'Rental item'
+  let source: string | null | undefined = null
+  if (index === null) {
+    const item = await prisma.item.findUnique({ where: { slug }, select: { name: true, picture: true } })
+    if (!item) return new NextResponse('Not found', { status: 404 })
+    name = item.name
+    source = item.picture
+  } else {
+    const item = await prisma.item.findUnique({ where: { slug }, select: { name: true, additionalImages: true } })
+    if (!item) return new NextResponse('Not found', { status: 404 })
+    name = item.name
+    source = Array.isArray(item.additionalImages) ? item.additionalImages[index] : null
+  }
+  if (!source) {
+    return index === null ? fallbackImage(name, 'missing') : new NextResponse('Not found', { status: 404 })
   }
 
-  const media = NYC_ITEM_MEDIA[slug]
-  if (media && item.updatedAt.toISOString() === media.updatedAt) {
-    return new NextResponse(await readFile(path.join(process.cwd(), 'public', media.path)), { headers: {
-      'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
-      'X-Image-Reference': 'Illustrative reference; see visible caption', 'X-Content-Type-Options': 'nosniff',
-    } })
-  }
-  if (!item.picture) {
-    return fallbackImage(item.name, 'missing')
-  }
-
-  const match = item.picture.match(/^data:([^;]+);base64,(.+)$/)
-  if (match) {
+  const inline = source.match(/^data:(image\/[a-z0-9.+-]+);base64,(.+)$/i)
+  if (inline) {
     try {
-      const buffer = Buffer.from(match[2], 'base64')
-      return new NextResponse(buffer, {
-        headers: {
-          'Content-Type': match[1],
-          'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
-          'X-Content-Type-Options': 'nosniff',
-        },
+      return new NextResponse(Buffer.from(inline[2], 'base64'), {
+        headers: { 'Content-Type': inline[1], 'Cache-Control': CACHE_CONTROL, 'X-Content-Type-Options': 'nosniff' },
       })
     } catch {
-      return fallbackImage(item.name, 'invalid-inline-image')
+      return fallbackImage(name, 'invalid-inline-image')
     }
   }
 
-  if (!isAllowedImageUrl(item.picture)) {
-    return fallbackImage(item.name, 'invalid-url')
+  const upstreamUrl = sourceUrl(source, request.url)
+  if (!upstreamUrl) {
+    return fallbackImage(name, 'invalid-url')
   }
 
   try {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 8000)
-
-    try {
-      const upstream = await fetch(item.picture, {
-        signal: controller.signal,
-        redirect: 'follow',
-        cache: 'no-store',
-      })
-
-      if (!upstream.ok) {
-        return fallbackImage(item.name, `upstream-${upstream.status}`)
-      }
-
-      const contentType = upstream.headers.get('content-type') || ''
-      if (!contentType.toLowerCase().startsWith('image/')) {
-        return fallbackImage(item.name, 'invalid-content-type')
-      }
-
-      return new NextResponse(Buffer.from(await upstream.arrayBuffer()), {
-        headers: {
-          'Content-Type': contentType,
-          'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
-          'X-Content-Type-Options': 'nosniff',
-        },
-      })
-    } finally {
-      clearTimeout(timeout)
+    const upstream = await fetch(upstreamUrl, {
+      signal: AbortSignal.timeout(10000),
+      redirect: 'follow',
+      cache: 'no-store',
+      headers: { Accept: 'image/*' },
+    })
+    if (!upstream.ok) {
+      return fallbackImage(name, `upstream-${upstream.status}`)
     }
+    const contentType = upstream.headers.get('content-type') || ''
+    if (!contentType.toLowerCase().startsWith('image/')) {
+      return fallbackImage(name, 'invalid-content-type')
+    }
+    return new NextResponse(Buffer.from(await upstream.arrayBuffer()), {
+      headers: {
+        'Content-Type': contentType,
+        'Cache-Control': CACHE_CONTROL,
+        'X-Content-Type-Options': 'nosniff',
+      },
+    })
   } catch {
-    return fallbackImage(item.name, 'fetch-failed')
+    return fallbackImage(name, 'fetch-failed')
   }
 }

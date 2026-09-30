@@ -6,8 +6,9 @@ import { getNextOrderNumber } from '@/lib/orderNumber'
 import { evaluateRentalRestrictions } from '@/lib/rentalRestrictions'
 import { DeliveryQuoteError, getDeliveryQuote, requireDeliveryMethod } from '@/lib/delivery'
 import { effectiveEventEndDate } from '@/lib/orderDates'
-import { CheckoutPricingError, NYC_PRICING_VERSION, toCents, type CheckoutPricingResult } from '@/lib/nycCheckoutPricing'
+import { CheckoutPricingError, NYC_PRICING_VERSION, checkoutLineName, toCents, type CheckoutPricingResult } from '@/lib/nycCheckoutPricing'
 import { priceNycCheckout } from '@/lib/nycCheckoutPricingServer'
+import { lockNycCapacity } from '@/lib/nycInventory'
 
 function clean(value: unknown, max = 255) {
   return typeof value === 'string' ? value.trim().slice(0, max) : ''
@@ -41,21 +42,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true, orderId: existing.id, orderNumber: existing.orderNumber, status: existing.status })
     }
 
-    const matchedCustomer = existing?.customer || await prisma.customer.findFirst({
+    // Rental-restriction checks match by email OR phone; the customer record itself
+    // is only ever linked by email and is never overwritten from this public form.
+    const restrictionCustomer = await prisma.customer.findFirst({
       where: { OR: [{ email: { equals: email, mode: 'insensitive' } }, { phone }] },
+      select: { id: true },
     })
     const restriction = await evaluateRentalRestrictions({
-      customerId: matchedCustomer?.id || null,
+      customerId: restrictionCustomer?.id || null,
       emails: [email], phones: [phone],
       address: { street1: eventAddress, city: eventCity, state: eventState, zip: eventZip },
     })
     if (restriction.matched) return NextResponse.json({ requiresAssistance: true }, { status: 200 })
 
     const deliveryQuote = await getDeliveryQuote(eventZip)
-    const customer = matchedCustomer
+    const sameEmail = (value: string | null | undefined) => typeof value === 'string' && value.trim().toLowerCase() === email
+    const emailCustomer = existing?.customer && sameEmail(existing.customer.email)
+      ? existing.customer
+      : await prisma.customer.findFirst({ where: { email: { equals: email, mode: 'insensitive' } }, orderBy: { createdAt: 'asc' } })
+    const customer = emailCustomer
+      // Existing customer: only fill in details that are still blank.
       ? await prisma.customer.update({
-          where: { id: matchedCustomer.id },
-          data: { firstName, lastName, email, phone, address: eventAddress, city: eventCity, state: eventState, zip: eventZip },
+          where: { id: emailCustomer.id },
+          data: {
+            ...(emailCustomer.phone ? {} : { phone }),
+            ...(emailCustomer.address ? {} : { address: eventAddress, city: eventCity, state: eventState, zip: eventZip }),
+          },
         })
       : await prisma.customer.create({
           data: { firstName, lastName, email, phone, address: eventAddress, city: eventCity, state: eventState, zip: eventZip },
@@ -77,6 +89,8 @@ export async function POST(request: NextRequest) {
     const depositAmount = pricing
       ? (Number.isFinite(requestedPrincipal) && toCents(requestedPrincipal) >= toCents(pricing.requiredDeposit) && toCents(requestedPrincipal) <= toCents(pricing.grandTotal) ? Math.round(requestedPrincipal * 100) / 100 : pricing.requiredDeposit)
       : 0
+    const catalogRows = await prisma.item.findMany({ where: { id: { in: items.map((item: any) => String(item.id)) } }, select: { id: true, name: true, colorOptions: true } })
+    const catalogById = new Map(catalogRows.map(row => [row.id, row]))
     const stage = ['details_completed','payment_page','payment_started'].includes(body.stage) ? body.stage : 'details_completed'
     const rentalDayCount = Math.max(pricing?.rentalDays || 1, 1)
     const data: any = {
@@ -122,7 +136,8 @@ export async function POST(request: NextRequest) {
           const line = pricing?.lines[index]
           const quantity = Math.max(Math.floor(Number(item.quantity) || 1), 1)
           return {
-            itemId: item.id, itemName: clean(item.name, 240),
+            itemId: item.id,
+            itemName: catalogById.get(String(item.id)) ? checkoutLineName(catalogById.get(String(item.id))!.name, catalogById.get(String(item.id))!.colorOptions, item.name) : clean(item.name, 240),
             quantity,
             unitPrice: line ? line.unitPrice : 0,
             total: line ? line.total : 0,
@@ -131,9 +146,17 @@ export async function POST(request: NextRequest) {
       },
     }
 
-    const order = existing
-      ? await prisma.order.update({ where: { id: existing.id }, data, include: { items: true } })
-      : await prisma.order.create({ data: { ...data, checkoutDraftKey, orderNumber: await getNextOrderNumber() }, include: { items: true } })
+    // Under the capacity lock, never turn an order that has meanwhile been submitted
+    // for payment back into an incomplete draft.
+    const newOrderNumber = existing ? null : await getNextOrderNumber()
+    const order = await prisma.$transaction(async (tx) => {
+      await lockNycCapacity(tx)
+      const current = await tx.order.findUnique({ where: { checkoutDraftKey } })
+      if (current && current.status !== 'incomplete') return current
+      return current
+        ? tx.order.update({ where: { id: current.id }, data })
+        : tx.order.create({ data: { ...data, items: { create: data.items.create }, checkoutDraftKey, orderNumber: newOrderNumber || await getNextOrderNumber() } })
+    }, { maxWait: 10000, timeout: 20000 })
 
     return NextResponse.json({ ok: true, orderId: order.id, orderNumber: order.orderNumber, status: order.status, stage: order.checkoutStage })
   } catch (error) {

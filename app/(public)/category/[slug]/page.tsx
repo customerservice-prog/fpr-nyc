@@ -39,7 +39,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
 
   const initialItems = items.map((item) => ({
     ...item,
-    description: itemDescriptionForNyc(item.name, item.description),
+    description: itemDescriptionForNyc(item.name, item.description, Number(item.cost)),
     available: item.quantity,
     bookableAfter: item.bookableAfter ? item.bookableAfter.toISOString() : null,
     updatedAt: item.updatedAt ? item.updatedAt.toISOString() : null,

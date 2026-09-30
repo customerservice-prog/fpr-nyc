@@ -70,6 +70,9 @@ const nextConfig = {
     const privatePaths=['/admin/:path*','/driver/:path*','/checkout/:path*','/pay/:path*','/pay-now','/contract/:path*','/schedule/:path*','/unsubscribe','/items']
     return [
       { source: '/:path*', headers: globalHeaders },
+      // The Railway service address stays usable for staff but is never indexed;
+      // canonical URLs always point at https://friendlypartyrentalnyc.com.
+      { source: '/:path*', has: [{ type: 'host', value: 'fpr-nyc-production.up.railway.app' }], headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] },
       ...privatePaths.map(source=>({source,headers:[{key:'X-Robots-Tag',value:'noindex, follow'}]})),
     ]
   },
@@ -107,6 +110,14 @@ const nextConfig = {
       {
         source: '/:path*',
         has: [{ type: 'host', value: 'www.friendlypartyrentalnyc.com' }],
+        destination: 'https://friendlypartyrentalnyc.com/:path*',
+        permanent: true,
+      },
+      // Retired NYC subdomain of the Syracuse domain: once its DNS points at this
+      // service, every request lands on the NYC primary domain (path kept).
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'nyc.friendlypartyrental.com' }],
         destination: 'https://friendlypartyrentalnyc.com/:path*',
         permanent: true,
       },

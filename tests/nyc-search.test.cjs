@@ -76,7 +76,7 @@ test('rentals are not marked as universally in-stock purchases',()=>{
 test('only NYC www redirects and temporary Railway carts remain on their own host',async()=>{
   const config=require('../next.config.js'),redirects=await config.redirects(),headers=await config.headers()
   const hostRedirects=redirects.filter(r=>r.has?.some(h=>h.type==='host'))
-  assert.deepEqual(hostRedirects.map(r=>[r.has[0].value,r.destination]),[['www.friendlypartyrentalnyc.com',PRIMARY+'/:path*'],['nyc.friendlypartyrental.com',PRIMARY+'/:path*']])
+  assert.deepEqual(hostRedirects.map(r=>[r.has[0].value,r.destination]),[['www.friendlypartyrentalnyc.com',PRIMARY+'/:path*']])
   assert.ok(redirects.filter(r=>!r.has).every(r=>r.destination.startsWith('/')&&!r.destination.startsWith('//')))
   for(const route of ['/','/category','/order-by-date'])assert.equal(seo.nycPageMetadata(route,'Title','Description').alternates.canonical,PRIMARY+route)
   for(const route of ['/checkout/:path*','/admin/:path*','/driver/:path*','/items'])assert.ok(headers.some(h=>h.source===route&&h.headers.some(v=>v.key==='X-Robots-Tag'&&v.value.includes('noindex'))))

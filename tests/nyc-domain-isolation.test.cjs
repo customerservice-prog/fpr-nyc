@@ -31,16 +31,17 @@ test('legacy NYC deployment documentation does not fall back to Syracuse',()=>{
   assert.ok(!wordpress.includes('friendlypartyrental.com)'))
 })
 
-test('shared media is labeled and NYC RentSketch access stays disabled',()=>{
-  // Another location's reviews are never shown on the NYC site (hidden until NYC reviews exist).
+test('shared media and cross-location trust proof stay explicitly labeled while RentSketch is NYC-isolated',()=>{
   const reviews=fs.readFileSync('components/public/ReviewCarousel.tsx','utf8')
-  assert.ok(!reviews.includes('friendlypartyrental.com'))
-  assert.match(reviews,/if \(!reviews\.length\) return null/)
+  assert.match(reviews,/original Syracuse-area location/)
+  assert.match(reviews,/not NYC rentals/)
+  assert.match(reviews,/nycReviews\.length === 0/)
   const media=fs.readFileSync('lib/nyMediaSnapshot.json','utf8')
   assert.ok(media.includes('friendlypartyrental.com'))
-  // Test the actual NYC module, not the removed SC source it was forked from.
+
   const rentSketch=fs.readFileSync('lib/nycRentSketch.ts','utf8')
-  assert.match(rentSketch,/NYC_RENTSKETCH_TENANT: string \| null = null/)
+  assert.match(rentSketch,/NEXT_PUBLIC_NYC_RENTSKETCH_TENANT/)
+  assert.match(rentSketch,/NYC_RENTSKETCH_TENANT: string \| null = configuredTenant \|\| null/)
   assert.match(rentSketch,/nycOrderAccessUrl: string \| null = null/)
-  assert.doesNotMatch(rentSketch,/NEXT_PUBLIC_RENTSKETCH_NYC_TENANT/)
+  assert.doesNotMatch(rentSketch,/tenant=friendly(?:&|')/)
 })

@@ -1,0 +1,31 @@
+name: NYC DNS Diagnostic
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - production-nyc-live
+    paths:
+      - '.github/workflows/nyc-dns-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  dns:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect NYC DNS chains
+        shell: bash
+        run: |
+          set -euo pipefail
+          for host in friendlypartyrentalnyc.com www.friendlypartyrentalnyc.com nyc.friendlypartyrental.com fpr-nyc-production.up.railway.app; do
+            echo "===== $host ====="
+            echo "A:"
+            dig +short A "$host" || true
+            echo "AAAA:"
+            dig +short AAAA "$host" || true
+            echo "CNAME:"
+            dig +short CNAME "$host" || true
+            echo
+          done

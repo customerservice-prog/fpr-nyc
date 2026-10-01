@@ -100,6 +100,33 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
     const lighting=await prisma.item.findMany({where:{displayToCustomer:true,status:'Available',quantity:{gt:0},name:{contains:'Tent Lighting',mode:'insensitive'}},select:{id:true,name:true,slug:true,description:true,cost:true,picture:true,quantity:true},take:100})
     suggestedAddons=lighting.filter(addon=>matchesTentLighting(item.name,addon.name))
   }
+  if (!suggestedAddons.length) {
+    const addonCategories: Record<string,string[]> = {
+      'tent-rentals':['event-lighting-rentals','table-chair-rentals','linen-rentals'],
+      'bounce-house-rentals':['concession-machine-rentals','generator-rentals','table-chair-rentals'],
+      'table-chair-rentals':['linen-rentals','event-lighting-rentals','party-rental-accessories'],
+      'linen-rentals':['table-chair-rentals','event-lighting-rentals','party-rental-accessories'],
+      'concession-machine-rentals':['beverage-food-service','table-chair-rentals','generator-rentals'],
+      'beverage-food-service':['table-chair-rentals','linen-rentals','concession-machine-rentals'],
+      'photobooth-rentals':['event-lighting-rentals','party-rental-accessories','table-chair-rentals'],
+      'dance-floor-stage-rentals':['event-lighting-rentals','table-chair-rentals','generator-rentals'],
+      'event-lighting-rentals':['generator-rentals','tent-rentals','dance-floor-stage-rentals'],
+      'weddings':['linen-rentals','event-lighting-rentals','table-chair-rentals'],
+      'party-rental-packages':['event-lighting-rentals','linen-rentals','concession-machine-rentals'],
+      'yard-game-rentals':['table-chair-rentals','concession-machine-rentals'],
+      'foam-party-machine-rentals':['generator-rentals','table-chair-rentals'],
+      'inflatable-movie-screen-rentals':['generator-rentals','table-chair-rentals'],
+    }
+    const categorySlugs=addonCategories[item.category.slug]||[]
+    if(categorySlugs.length){
+      suggestedAddons=await prisma.item.findMany({
+        where:{displayToCustomer:true,status:'Available',quantity:{gt:0},id:{not:item.id},category:{slug:{in:categorySlugs}}},
+        select:{id:true,name:true,slug:true,description:true,cost:true,picture:true,quantity:true},
+        orderBy:[{sortOrder:'asc'},{name:'asc'}],
+        take:3,
+      })
+    }
+  }
   // Add-on cards show NYC copy and the NYC photo proxy (never another store's URL or wording).
   const validSuggestedAddons = suggestedAddons
     .filter((addon) => { const slug = typeof addon.slug === 'string' ? addon.slug.trim() : ''; return slug.length > 0 && slug.toLowerCase() !== 'null' && slug.toLowerCase() !== 'undefined' })

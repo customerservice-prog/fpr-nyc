@@ -18,4 +18,4 @@ jobs:
           OIDC_TOKEN="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=fpr-nyc-cron" | jq -r '.value')"
           test -n "$OIDC_TOKEN"
           test "$OIDC_TOKEN" != "null"
-          curl -fsS https://fpr-nyc-production.up.railway.app/api/cron/internal-email-smoke -H "Authorization: Bearer $OIDC_TOKEN"
+          curl -sS https://fpr-nyc-production.up.railway.app/api/cron/internal-email-smoke -H "Authorization: Bearer $OIDC_TOKEN" -w "\nHTTP_STATUS:%{http_code}\n"

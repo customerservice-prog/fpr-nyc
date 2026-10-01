@@ -1,6 +1,8 @@
 name: IndexNow Live Catalog Refresh
 
 on:
+  push:
+    branches: [production-nyc-live]
   schedule:
     - cron: '25 14 * * *'
   workflow_dispatch: {}
@@ -9,16 +11,30 @@ permissions:
   contents: read
   id-token: write
 
+concurrency:
+  group: nyc-indexnow-production
+  cancel-in-progress: true
+
 jobs:
   call-endpoint:
     runs-on: ubuntu-latest
     steps:
       - name: Submit current NYC searchable URLs to IndexNow
+        shell: bash
         run: |
+          set -euo pipefail
           OIDC_TOKEN="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=fpr-nyc-cron" | jq -r '.value')"
-
           test -n "$OIDC_TOKEN"
-
           test "$OIDC_TOKEN" != "null"
 
-          curl -f -X GET https://fpr-nyc-production.up.railway.app/api/cron/indexnow -H "Authorization: Bearer $OIDC_TOKEN"
+          for attempt in $(seq 1 18); do
+            BODY="$(curl -sS https://fpr-nyc-production.up.railway.app/api/cron/indexnow -H "Authorization: Bearer $OIDC_TOKEN" || true)"
+            echo "$BODY"
+            if echo "$BODY" | jq -e '.ok == true and (.submitted // 0) > 0' >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 10
+          done
+
+          echo "::error::IndexNow did not confirm a non-zero NYC URL submission."
+          exit 1

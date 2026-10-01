@@ -59,7 +59,7 @@ export default function DesktopHome(props: MobileHomeProps) {
     </section>
 
     <section className="mx-auto max-w-4xl px-4 py-14 text-center">
-      <h1 className="mb-6 text-3xl font-bold text-dark">{text('desktopIntroHeading','Party Rentals in Riverdale, NY & Surrounding Areas')}</h1>
+      <h2 className="mb-6 text-3xl font-bold text-dark">{text('desktopIntroHeading','Party Rentals in Riverdale, NY & Surrounding Areas')}</h2>
       <div className="whitespace-pre-line leading-8 text-body">{text('desktopIntroBody','Friendly Party Rental provides tents, tables, chairs, inflatables, wedding rentals, event essentials, delivery, setup, and pickup throughout Riverdale and nearby Downstate New York communities.\n\nBrowse by category or start with your event date to see the rentals that fit your celebration.')}</div>
       <Link href="/order-by-date" prefetch={false} className="btn-gold mt-8 inline-block">{text('desktopIntroButton','Book Your Party Rentals Online')}</Link>
     </section>

@@ -96,28 +96,45 @@ jobs:
             exit 1
           fi
 
-          echo "Checking sitemap..."
-          fetch "$NYC_BASE/sitemap.xml" -o /tmp/sitemap.xml
-          grep -Fq "$NYC_BASE/design-your-event" /tmp/sitemap.xml
-          grep -Fq "$NYC_BASE/category/tent-rentals" /tmp/sitemap.xml
-          for local_path in \
-            party-rentals-riverdale-ny \
-            party-rentals-fieldston-ny \
-            party-rentals-kingsbridge-ny \
-            party-rentals-bronx-ny \
-            party-rentals-yonkers-ny \
-            party-rentals-mount-vernon-ny \
-            party-rentals-new-rochelle-ny \
-            party-rentals-bronxville-ny \
-            party-rentals-pelham-ny
-          do
-            grep -Fq "$NYC_BASE/$local_path" /tmp/sitemap.xml
+          echo "Waiting for the verified local-guide sitemap state..."
+          sitemap_ready=0
+          for attempt in $(seq 1 30); do
+            if fetch "$NYC_BASE/sitemap.xml" -o /tmp/sitemap.xml; then
+              local_ok=1
+              for local_path in \
+                party-rentals-riverdale-ny \
+                party-rentals-fieldston-ny \
+                party-rentals-kingsbridge-ny \
+                party-rentals-bronx-ny \
+                party-rentals-yonkers-ny \
+                party-rentals-mount-vernon-ny \
+                party-rentals-new-rochelle-ny \
+                party-rentals-bronxville-ny \
+                party-rentals-pelham-ny
+              do
+                if ! grep -Fq "$NYC_BASE/$local_path" /tmp/sitemap.xml; then
+                  local_ok=0
+                  break
+                fi
+              done
+
+              if [ "$local_ok" -eq 1 ] \
+                && grep -Fq "$NYC_BASE/design-your-event" /tmp/sitemap.xml \
+                && grep -Fq "$NYC_BASE/category/tent-rentals" /tmp/sitemap.xml \
+                && ! grep -Fq "$NYC_BASE/party-rentals-eastchester-ny" /tmp/sitemap.xml \
+                && ! grep -Fq "$NYC_BASE/party-rentals-tuckahoe-ny" /tmp/sitemap.xml; then
+                sitemap_ready=1
+                break
+              fi
+            fi
+
+            if [ "$attempt" -eq 30 ]; then
+              echo "::error::NYC sitemap never reached the verified local-guide state."
+              exit 1
+            fi
+            sleep 10
           done
-          if grep -Fq "$NYC_BASE/party-rentals-eastchester-ny" /tmp/sitemap.xml \
-            || grep -Fq "$NYC_BASE/party-rentals-tuckahoe-ny" /tmp/sitemap.xml; then
-            echo "::error::Unverified NYC local guide leaked into sitemap."
-            exit 1
-          fi
+
           if grep -Eqi 'friendlypartyrentalsc\.com|nyc\.friendlypartyrental\.com|www\.friendlypartyrentalnyc\.com' /tmp/sitemap.xml; then
             echo "::error::Non-primary domain leaked into the NYC sitemap."
             exit 1

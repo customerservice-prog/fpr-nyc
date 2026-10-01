@@ -51,43 +51,20 @@ jobs:
           echo "----- robots.txt -----"
           cat /tmp/robots.txt
           echo "----------------------"
-          if ! grep -Fqi "Sitemap: $NYC_BASE/sitemap.xml" /tmp/robots.txt; then
-            echo "::error::NYC robots.txt does not advertise the primary-domain sitemap."
+
+          robots_sitemap="$(awk 'BEGIN{IGNORECASE=1} /^Sitemap:/ {print $2; exit}' /tmp/robots.txt)"
+          if [ "$robots_sitemap" != "$NYC_BASE/sitemap.xml" ]; then
+            echo "::error::NYC robots.txt sitemap is '$robots_sitemap', expected '$NYC_BASE/sitemap.xml'."
             exit 1
           fi
-          if grep -Eiq '^Disallow:[[:space:]]*/[[:space:]]*          grep -q "$NYC_BASE/design-your-event" /tmp/sitemap.xml
-          grep -q "$NYC_BASE/category/tent-rentals" /tmp/sitemap.xml
-
-          echo "Checking live NYC catalog API..."
-          fetch "$NYC_BASE/api/items" -o /tmp/items.json
-          jq -e '.items | type == "array" and length > 0' /tmp/items.json >/dev/null
-          jq -e '[.items[] | select(.slug != null and .name != null and .cost != null)] | length > 0' /tmp/items.json >/dev/null
-
-          echo "Checking NYC event designer page..."
-          fetch "$NYC_BASE/design-your-event" -o /tmp/designer.html
-          grep -qi 'RentSketch' /tmp/designer.html
-          grep -qi 'friendly party rental nyc' /tmp/designer.html
-
-          echo "Checking RentSketch dedicated NYC tenant entry points..."
-          fetch "$RENTSKETCH_BASE/designer/?tenant=friendly-nyc&source=production_smoke" -o /tmp/rentsketch-designer.html
-          grep -Eqi 'RentSketch|Event Designer|Design' /tmp/rentsketch-designer.html
-
-          fetch "$RENTSKETCH_BASE/my-event/?tenant=friendly-nyc&mode=order" -o /tmp/rentsketch-order.html
-          grep -Eqi 'order|first name|RentSketch|event' /tmp/rentsketch-order.html
-
-          echo "Checking NYC booking-return route renders safely without creating an order..."
-          fetch "$NYC_BASE/design-your-event/book" -o /tmp/booking-return.html
-          grep -Eqi 'RentSketch|checkout|design|layout' /tmp/booking-return.html
-
-          echo "NYC production customer-path smoke passed."
- /tmp/robots.txt; then
+          if grep -Eiq '^Disallow:[[:space:]]*/[[:space:]]*$' /tmp/robots.txt; then
             echo "::error::NYC robots.txt is blocking the entire site."
             exit 1
           fi
 
           fetch "$NYC_BASE/sitemap.xml" -o /tmp/sitemap.xml
-          grep -q "$NYC_BASE/design-your-event" /tmp/sitemap.xml
-          grep -q "$NYC_BASE/category/tent-rentals" /tmp/sitemap.xml
+          grep -Fq "$NYC_BASE/design-your-event" /tmp/sitemap.xml
+          grep -Fq "$NYC_BASE/category/tent-rentals" /tmp/sitemap.xml
 
           echo "Checking live NYC catalog API..."
           fetch "$NYC_BASE/api/items" -o /tmp/items.json

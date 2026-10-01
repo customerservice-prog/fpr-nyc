@@ -330,12 +330,12 @@ export const NYC_GSC_DOMAIN_PROPERTY=NYC_GSC_PROPERTY
 export const NYC_GSC_URL_PREFIX=''
 """)
 
-# RentSketch stays intentionally disabled until NYC has its own verified tenant/order entitlement.
+# NYC has a dedicated RentSketch tenant and signed order-access relay.
 rentsketch = ROOT/"lib/nycRentSketch.ts"
-rentsketch.write_text("""// NYC customer RentSketch access is deliberately disabled until this location
-// has its own server-enforced tenant and order/paid-entitlement integration.
-export const NYC_RENTSKETCH_TENANT: string | null = null
-export const nycOrderAccessUrl: string | null = null
+rentsketch.write_text("""// Dedicated RentSketch tenant for Friendly Party Rental NYC.
+export const NYC_RENTSKETCH_TENANT = 'friendly-nyc'
+export const nycOrderAccessUrl = 'https://rentsketch.com/my-event/?tenant=' + encodeURIComponent(NYC_RENTSKETCH_TENANT) + '&mode=order'
+export const nycRentSketchDesignerUrl = (source = 'nyc') => 'https://rentsketch.com/designer/?tenant=' + encodeURIComponent(NYC_RENTSKETCH_TENANT) + '&source=' + encodeURIComponent(source)
 """)
 
 # Search Console code must use NYC symbols and generic private configuration.

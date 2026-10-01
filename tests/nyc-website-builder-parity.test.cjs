@@ -43,3 +43,21 @@ test('NYC website builder keeps edits private until explicit publication', () =>
   assert.match(builder, /Publish this private homepage draft to the live NYC website/)
   assert.match(builder, /Discard the private NYC homepage draft/)
 })
+
+
+test('desktop and tablet preview clicks are wired into the editor inspector', () => {
+  const builder = read('components/admin/NycWebsiteBuilder.tsx')
+  const desktop = read('components/public/DesktopHome.tsx')
+  assert.ok(builder.includes('heroEditMode={{'), 'builder must pass hero editing to every device')
+  assert.ok(builder.includes('contentEditMode={{'), 'builder must pass text editing to every device')
+  assert.ok(builder.includes('categoryEditMode={{'), 'builder must pass category editing to every device')
+  assert.ok(!builder.includes("heroEditMode={device === 'mobile'"), 'desktop hero editing must not be disabled')
+  assert.ok(!builder.includes("contentEditMode={device === 'mobile'"), 'desktop text editing must not be disabled')
+  assert.ok(desktop.includes('contentEditMode'))
+  assert.ok(desktop.includes('heroEditMode'))
+  assert.ok(desktop.includes('categoryEditMode'))
+  assert.ok(desktop.includes('data-home-field'))
+  assert.ok(desktop.includes('data-home-category'))
+  assert.ok(builder.includes('data-website-preview-chrome="header"'))
+  assert.ok(builder.includes('data-website-preview-chrome="footer"'))
+})

@@ -51,6 +51,7 @@ type Selection =
   | { kind: 'hero'; target: 'image' | 'primary' | 'secondary' }
   | { kind: 'content'; key: string }
   | { kind: 'category'; slug: string }
+  | { kind: 'chrome'; target: 'header' | 'footer' }
   | null
 
 type RevisionSummary = {
@@ -511,27 +512,51 @@ export default function NycWebsiteBuilder() {
               if (target.closest('a,button')) event.preventDefault()
             }}
           >
-            {device !== 'mobile' && <Header />}
+            {device !== 'mobile' && <div
+              data-website-preview-chrome="header"
+              className={selection?.kind === 'chrome' && selection.target === 'header' ? 'relative outline outline-[3px] outline-cyan-400 outline-offset-[-3px]' : 'relative hover:outline hover:outline-2 hover:outline-cyan-300 hover:outline-offset-[-2px]'}
+              onClickCapture={event => {
+                event.preventDefault()
+                event.stopPropagation()
+                setSelection({ kind: 'chrome', target: 'header' })
+                setShowInspector(true)
+              }}
+            >
+              <Header />
+              <span className="pointer-events-none absolute right-3 top-3 z-[85] rounded-full bg-cyan-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-white shadow-lg">Edit header</span>
+            </div>}
             <ResponsiveHome
               {...homeData}
               hero={draft.hero}
               content={draft.content}
               seoSection={<NycHomeSeo />}
               device={device}
-              heroEditMode={device === 'mobile' ? {
+              heroEditMode={{
                 selected: selection?.kind === 'hero' ? selection.target : null,
                 onSelect: target => { setSelection({ kind:'hero', target }); setShowInspector(true) },
-              } : undefined}
-              contentEditMode={device === 'mobile' ? {
+              }}
+              contentEditMode={{
                 selectedKey: selectedContentKey,
                 onSelect: key => { setSelection({ kind:'content', key }); setShowInspector(true) },
-              } : undefined}
-              categoryEditMode={device === 'mobile' ? {
+              }}
+              categoryEditMode={{
                 selectedSlug: selection?.kind === 'category' ? selection.slug : null,
                 onSelect: slug => { setSelection({ kind:'category', slug }); setShowInspector(true) },
-              } : undefined}
+              }}
             />
-            <Footer />
+            <div
+              data-website-preview-chrome="footer"
+              className={selection?.kind === 'chrome' && selection.target === 'footer' ? 'relative outline outline-[3px] outline-cyan-400 outline-offset-[-3px]' : 'relative hover:outline hover:outline-2 hover:outline-cyan-300 hover:outline-offset-[-2px]'}
+              onClickCapture={event => {
+                event.preventDefault()
+                event.stopPropagation()
+                setSelection({ kind: 'chrome', target: 'footer' })
+                setShowInspector(true)
+              }}
+            >
+              <Footer />
+              <span className="pointer-events-none absolute right-3 top-3 z-[85] rounded-full bg-cyan-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-white shadow-lg">Edit footer</span>
+            </div>
           </div>
         </div>
       </div>
@@ -540,12 +565,12 @@ export default function NycWebsiteBuilder() {
     {showInspector && <aside className="fixed bottom-4 right-4 top-[11rem] z-[140] w-[min(390px,calc(100vw-2rem))] overflow-y-auto rounded-3xl border border-slate-200 bg-[#f8faf9] shadow-2xl">
       <div className="sticky top-0 z-10 flex items-start gap-3 border-b border-slate-200 bg-white px-4 py-3">
         <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-green-50 text-green-700"><PanelRight size={18}/></div>
-        <div className="min-w-0 flex-1"><p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Inspector</p><h2 className="text-base font-black text-slate-900">{selection?.kind === 'content' ? CONTENT_LABELS[selection.key] || selection.key : selection?.kind === 'hero' ? 'Hero' : selection?.kind === 'category' ? 'Category card' : 'Homepage'}</h2></div>
+        <div className="min-w-0 flex-1"><p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Inspector</p><h2 className="text-base font-black text-slate-900">{selection?.kind === 'content' ? CONTENT_LABELS[selection.key] || selection.key : selection?.kind === 'hero' ? 'Hero' : selection?.kind === 'category' ? 'Category card' : selection?.kind === 'chrome' ? (selection.target === 'header' ? 'Header' : 'Footer') : 'Homepage'}</h2></div>
         <button onClick={() => setShowInspector(false)} className="grid h-9 w-9 place-items-center rounded-xl border border-slate-200 bg-white"><X size={16}/></button>
       </div>
       <div className="space-y-4 p-4">
         {!selection && <>
-          <p className="text-sm leading-6 text-slate-600">Choose a homepage text field, or switch to Mobile and click editable content directly.</p>
+          <p className="text-sm leading-6 text-slate-600">Click editable content directly in Desktop, Tablet, or Mobile preview, or choose a homepage field below.</p>
           <button onClick={() => setShowTextPicker(true)} className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-800">Choose homepage text</button>
           <button onClick={() => { setSelection({kind:'hero',target:'image'}); fileInput.current?.click() }} className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-800"><ImagePlus size={17}/>Replace {device === 'mobile' ? 'mobile' : 'desktop'} hero image</button>
         </>}
@@ -558,6 +583,16 @@ export default function NycWebsiteBuilder() {
           <label className="block text-sm font-black text-slate-700">Button destination<input value={selection.target === 'primary' ? draft.hero.primaryActionValue : draft.hero.secondaryActionValue} onChange={e => updateHero(selection.target === 'primary' ? {primaryActionValue:e.target.value} : {secondaryActionValue:e.target.value})} className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-3 text-sm font-normal"/></label>
         </>}
         {selection?.kind === 'category' && <p className="text-sm leading-6 text-slate-600">Category card content is managed from <Link href="/admin/categories" className="font-bold text-green-700 underline">Categories</Link>. This preview always uses the current NYC category data.</p>}
+        {selection?.kind === 'chrome' && selection.target === 'header' && <div className="space-y-3">
+          <p className="text-sm leading-6 text-slate-600">The preview header is live NYC website chrome. Manage its navigation and business-facing assets from the admin tools below.</p>
+          <Link href="/admin/settings/navigation-editor" className="block rounded-xl bg-[#1f6b38] px-4 py-3 text-center text-sm font-black text-white">Edit navigation</Link>
+          <Link href="/admin/settings/general-images" className="block rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-black text-slate-800">Manage website images</Link>
+        </div>}
+        {selection?.kind === 'chrome' && selection.target === 'footer' && <div className="space-y-3">
+          <p className="text-sm leading-6 text-slate-600">The preview footer uses the NYC business identity and service-area content.</p>
+          <Link href="/admin/settings/company-info" className="block rounded-xl bg-[#1f6b38] px-4 py-3 text-center text-sm font-black text-white">Edit company information</Link>
+          <Link href="/admin/settings/navigation-editor" className="block rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-black text-slate-800">Edit navigation links</Link>
+        </div>}
       </div>
     </aside>}
 

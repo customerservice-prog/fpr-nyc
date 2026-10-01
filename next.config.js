@@ -113,14 +113,6 @@ const nextConfig = {
         destination: 'https://friendlypartyrentalnyc.com/:path*',
         permanent: true,
       },
-      // Retired NYC subdomain of the Syracuse domain: once its DNS points at this
-      // service, every request lands on the NYC primary domain (path kept).
-      {
-        source: '/:path*',
-        has: [{ type: 'host', value: 'nyc.friendlypartyrental.com' }],
-        destination: 'https://friendlypartyrentalnyc.com/:path*',
-        permanent: true,
-      },
     ]
   },
 }

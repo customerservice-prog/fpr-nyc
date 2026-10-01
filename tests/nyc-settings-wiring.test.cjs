@@ -171,3 +171,15 @@ test('top NYC admin navigation is wired to real routes and logout', () => {
   assert.match(nav, /signOut\(\{ redirect: false \}\)/)
   assert.match(nav, /router\.push\('\/admin\/login'\)/)
 })
+
+
+test('NYC production build does not depend on next/font Google fetches', () => {
+  for (const file of [
+    'app/layout.tsx',
+    'components/public/HomeYouTube.tsx',
+    'app/(public)/design-your-event/page.tsx',
+  ]) {
+    const source = fs.readFileSync(file, 'utf8')
+    assert.ok(!source.includes('next/font/google'), file + ' reintroduced a Google-font build dependency')
+  }
+})

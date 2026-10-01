@@ -13,6 +13,7 @@ interface DesignYourEventCTAProps {
   className?: string
   tent?: string
   tentSlug?: string
+  productType?: 'tent' | 'inflatable'
 }
 
 /** Launch the embedded Friendly/RentSketch designer directly. */
@@ -23,6 +24,7 @@ export default function DesignYourEventCTA({
   className = '',
   tent,
   tentSlug,
+  productType = 'tent',
 }: DesignYourEventCTAProps) {
   const [tentPhotoOpen, setTentPhotoOpen] = useState(false)
   useEffect(() => {
@@ -44,11 +46,11 @@ export default function DesignYourEventCTA({
   const handleClick = () => {
     if (typeof window === 'undefined') return
     window.dispatchEvent(new CustomEvent('open-design-your-event', {
-      detail: { source, ...(tent ? { tent } : {}), ...(tentSlug ? { tentSlug } : {}) },
+      detail: { source, ...(tent ? { tent } : {}), ...(tentSlug ? { tentSlug } : {}), productType },
     }))
   }
 
-  if (tent || tentSlug) {
+  if ((tent || tentSlug) && !NYC_RENTSKETCH_TENANT) {
     const slug = tentSlug || ''
     const image = slug ? '/api/item-image/' + encodeURIComponent(slug) : ''
     return <>
@@ -67,6 +69,10 @@ export default function DesignYourEventCTA({
 
   if (!NYC_RENTSKETCH_TENANT) {
     return <Link href={source.startsWith('design_your_event') || source === 'home_designer_section' ? '/contact_us' : '/design-your-event'} className={`${base} ${variants[variant] || variants.primary} ${className}`}>Get Riverdale Layout Help</Link>
+  }
+
+  if (tent || tentSlug) {
+    return <button type="button" onClick={handleClick} className={`${base} ${variants[variant] || variants.primary} ${className}`}>{label}</button>
   }
 
   if (source === 'mobile_home') {

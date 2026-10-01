@@ -1,0 +1,27 @@
+name: Live Site Parity Audit
+
+on:
+  push:
+    branches:
+      - diagnostic/live-site-parity-audit-20260930
+    paths:
+      - 'scripts/live_site_audit.py'
+      - '.github/live-site-parity-audit-trigger'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Crawl both live sites
+        run: python3 scripts/live_site_audit.py
+      - name: Upload full crawl artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-site-parity-audit
+          path: live_site_audit.json
+          retention-days: 1

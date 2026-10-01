@@ -140,6 +140,37 @@ jobs:
             exit 1
           fi
 
+          echo "Checking published local pages are canonical and indexable..."
+          for local_path in \
+            party-rentals-riverdale-ny \
+            party-rentals-fieldston-ny \
+            party-rentals-kingsbridge-ny \
+            party-rentals-bronx-ny \
+            party-rentals-yonkers-ny \
+            party-rentals-mount-vernon-ny \
+            party-rentals-new-rochelle-ny \
+            party-rentals-bronxville-ny \
+            party-rentals-pelham-ny
+          do
+            fetch "$NYC_BASE/$local_path" -o "/tmp/$local_path.html"
+            grep -Eqi "<link[^>]+rel=[\"']canonical[\"'][^>]+href=[\"']$NYC_BASE/$local_path[\"']" "/tmp/$local_path.html"
+            if grep -Eqi '<meta[^>]+name=["'"'"']robots["'"'"'][^>]+content=["'"'"'][^"'"'"']*noindex' "/tmp/$local_path.html"; then
+              echo "::error::$local_path is unexpectedly noindex."
+              exit 1
+            fi
+            grep -qi 'Official public planning resource' "/tmp/$local_path.html"
+          done
+
+          echo "Checking withheld local pages remain noindex..."
+          for local_path in party-rentals-eastchester-ny party-rentals-tuckahoe-ny
+          do
+            fetch "$NYC_BASE/$local_path" -o "/tmp/$local_path.html"
+            if ! grep -Eqi '<meta[^>]+name=["'"'"']robots["'"'"'][^>]+content=["'"'"'][^"'"'"']*noindex' "/tmp/$local_path.html"; then
+              echo "::error::$local_path became indexable without a verified planning source."
+              exit 1
+            fi
+          done
+
           echo "Checking NYC catalog API..."
           fetch "$NYC_BASE/api/items" -o /tmp/items.json
           jq -e '.items | type == "array" and length > 0' /tmp/items.json >/dev/null

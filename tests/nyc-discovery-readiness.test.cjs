@@ -162,6 +162,10 @@ test('NYC parity wave keeps RentSketch, trust and local content isolated and lau
   assert.match(item,/See This Inflatable in a Layout/)
   assert.match(item,/See This Tent in a Layout/)
   assert.match(item,/fallbackCategories/)
+  assert.match(item,/const isInflatable = item\.category\.slug === 'bounce-house-rentals'/)
+  assert.match(item,/blower\|sandbag\|extension cord\|accessor/)
+  assert.match(item,/type:'Regular'/)
+  assert.match(item,/fee\|replacement\|upgrade\|extra hour\|delivery\|travel/)
 
   assert.equal((hero.match(/<h1/g)||[]).length,1)
   assert.equal((desktop.match(/<h1/g)||[]).length,0)

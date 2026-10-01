@@ -48,16 +48,27 @@ test('priority IndexNow list contains NYC service-area pages and no SC city rout
   assert.doesNotMatch(submit,/friendlypartyrentalsc\.com/)
 })
 
-test('NYC city pages stay out of the sitemap until unique local planning content exists',()=>{
+test('NYC city pages index only with verified official local planning resources',()=>{
   const resources=read('lib/nycLocalPlanningResources.ts')
   const serviceAreas=read('lib/nycServiceAreas.ts')
   const guide=read('components/public/CityRentalGuide.tsx')
   const sitemap=read('app/sitemap.ts')
-  assert.ok(resources.includes('intentionally remain empty'))
-  for(const slug of ['riverdale','fieldston','kingsbridge','bronx','yonkers','mount-vernon','new-rochelle']){
+  const verified=['riverdale','fieldston','kingsbridge','bronx','yonkers','mount-vernon','new-rochelle','bronxville','pelham']
+  const withheld=['eastchester','tuckahoe']
+  const resourceKeys=[...resources.matchAll(/^  (?:'([^']+)'|([a-z-]+)):\s*\{/gm)].map(match=>match[1]||match[2])
+
+  assert.deepEqual([...resourceKeys].sort(),[...verified].sort())
+  for(const slug of [...verified,...withheld]){
     assert.ok(serviceAreas.includes("slug:'"+slug+"'"),slug)
   }
+  for(const slug of withheld) assert.ok(!resourceKeys.includes(slug),slug)
+  assert.equal((resources.match(/checked: 'October 1, 2026'/g)||[]).length,verified.length)
+  for(const domain of ['nycgovparks.org','yonkersny.gov','mountvernonny.gov','newrochelleny.com','villageofbronxville.gov','pelhamny.gov']){
+    assert.ok(resources.includes(domain),domain)
+  }
+  assert.doesNotMatch(resources,/friendlypartyrentalsc\.com|Greenville|South Carolina/)
   assert.ok(guide.includes('const hasLocalGuide=Boolean(NYC_LOCAL_PLANNING[slug])'))
+  assert.ok(guide.includes('checked {resource.checked}'))
   assert.ok(sitemap.includes("NYC_LOCAL_PLANNING[a.slug]"))
 })
 
@@ -130,7 +141,7 @@ test('daily IndexNow refresh uses NYC searchable URLs and safely no-ops before l
 
 test('NYC search revision reflects the independent full-location rebuild',()=>{
   const seo=read('lib/nycSeo.ts')
-  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-09-27-nyc-full-location-v1'"))
+  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-10-01-nyc-local-guides-v2'"))
 })
 
 

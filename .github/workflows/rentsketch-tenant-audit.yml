@@ -1,0 +1,26 @@
+name: RentSketch Public Tenant Audit
+
+on:
+  push:
+    branches:
+      - diagnostic/live-site-parity-audit-20260930
+    paths:
+      - '.github/rentsketch-tenant-audit-trigger'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect public tenant/catalog
+        run: |
+          echo "TENANT"
+          curl -fsS https://rentsketch-api-production.up.railway.app/api/tenants/friendly | jq
+          echo "PRODUCT_COUNT_AND_SAMPLE"
+          curl -fsS https://rentsketch-api-production.up.railway.app/api/tenants/friendly/products | jq '{count:(.products|length), sample:(.products[:25] | map({id,external_id,name,price_per_day,category,visual_model_id,active}))}'
+          echo "NYC_TENANT_STATUS"
+          code=$(curl -sS -o /tmp/nyc-tenant.json -w "%{http_code}" https://rentsketch-api-production.up.railway.app/api/tenants/friendly-nyc)
+          echo "HTTP:$code"
+          cat /tmp/nyc-tenant.json | jq || cat /tmp/nyc-tenant.json

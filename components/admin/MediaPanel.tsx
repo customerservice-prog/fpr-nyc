@@ -11,6 +11,8 @@ interface CalendarStatus {
   connected: boolean
   connectionExists: boolean
   searchConsoleAuthorized: boolean
+  searchConsoleVerificationFile: string | null
+  searchConsoleVerifiedAt: string | null
   connectionError: string | null
   googleEmail: string | null
   calendarId: string
@@ -155,6 +157,8 @@ export default function MediaPanel() {
     const params = new URLSearchParams(window.location.search)
     const oauth = params.get('googleCalendar')
     if (oauth === 'connected') setNotice('Google connected. Calendar is ready, and Search Console permission is refreshed when granted.')
+    if (oauth === 'connected-search-verified') setNotice('Google connected and the NYC Search Console site was verified automatically.')
+    if (oauth === 'connected-search-pending') setError('Google connected, but NYC Search Console verification still needs a retry. Use Search Visibility in Settings or reconnect Google permissions.')
     if (oauth === 'denied') setError('Google connection was canceled. Nothing was changed.')
     if (oauth === 'invalid-state') setError('The Google connection session expired. Click Connect Google Calendar and try again.')
     if (oauth === 'missing-refresh-token') setError('Google did not return offline access. Reconnect and approve Calendar access.')
@@ -364,7 +368,8 @@ export default function MediaPanel() {
         {!calendarStatus?.connected && calendarStatus?.configured && <a href="/api/admin/google-calendar/connect" className="rounded-lg bg-green-500 px-3 py-2 font-bold text-slate-950">Connect Google Calendar</a>}
         {!calendarStatus?.connected && !calendarStatus?.configured && calendarStatus?.canManageConnection && <button type="button" onClick={() => setShowGoogleSetup(value => !value)} className="rounded-lg border border-white/30 px-3 py-2 font-bold">Set up Google Calendar</button>}
         {calendarStatus?.connected && !calendarStatus.searchConsoleAuthorized && calendarStatus.canManageConnection && <a href="/api/admin/google-calendar/connect" className="rounded-lg bg-amber-300 px-3 py-2 font-bold text-slate-950">Reconnect Google permissions</a>}
-        {calendarStatus?.connected && calendarStatus.searchConsoleAuthorized && <span className="rounded-full bg-blue-400/15 px-3 py-1.5 font-bold text-blue-100">Search Console read-only enabled</span>}
+        {calendarStatus?.connected && calendarStatus.searchConsoleVerifiedAt && <span className="rounded-full bg-blue-400/15 px-3 py-1.5 font-bold text-blue-100">Search Console verified</span>}
+        {calendarStatus?.connected && calendarStatus.searchConsoleAuthorized && !calendarStatus.searchConsoleVerifiedAt && <span className="rounded-full bg-blue-400/15 px-3 py-1.5 font-bold text-blue-100">Search Console permission granted</span>}
         {calendarStatus?.connected && calendarStatus.canManageConnection && <button type="button" onClick={() => openDialog('disconnect')} disabled={busy} className="font-semibold text-slate-300 underline underline-offset-4 hover:text-white">Connection settings</button>}
         <span className="text-slate-400">Times shown for New York and the Philippines</span>
       </div>
@@ -375,7 +380,7 @@ export default function MediaPanel() {
     {callFallback && <div className="border-b bg-blue-50 px-5 py-3 text-sm"><a className="font-bold text-blue-700 underline" href={callFallback} target="_blank" rel="noopener noreferrer">Open video call</a><span className="ml-2 text-slate-600">Your meeting management stays here.</span></div>}
 
     {showGoogleSetup && calendarStatus?.canManageConnection && <div className="grid gap-4 border-b border-amber-200 bg-amber-50 p-5 lg:grid-cols-2">
-      <div><h4 className="font-black text-slate-900">One-time Google setup</h4><p className="mt-2 text-sm leading-6 text-slate-700">Use <strong>{calendarStatus.expectedEmail || 'customerservice@friendlypartyrental.com'}</strong>. In Google Cloud, enable Google Calendar API and Google Search Console API, then create an OAuth 2.0 Web application client with this exact redirect URI.</p><a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-bold text-amber-900 underline">Google Cloud credentials</a></div>
+      <div><h4 className="font-black text-slate-900">One-time Google setup</h4><p className="mt-2 text-sm leading-6 text-slate-700">Use <strong>{calendarStatus.expectedEmail || 'customerservice@friendlypartyrental.com'}</strong>. In Google Cloud, enable Google Calendar API, Google Search Console API, and Google Site Verification API, then create an OAuth 2.0 Web application client with this exact redirect URI.</p><a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-bold text-amber-900 underline">Google Cloud credentials</a></div>
       <div className="space-y-3 rounded-xl border border-amber-200 bg-white p-4">
         <label className="block text-xs font-bold text-slate-600">Authorized redirect URI<div className="mt-1 flex gap-2"><input readOnly value={calendarStatus.callbackUrl || ''} className={input + ' min-w-0'} /><button type="button" onClick={() => copyText(calendarStatus.callbackUrl, 'Redirect URI')} className={button}>Copy</button></div></label>
         <label className="block text-xs font-bold text-slate-600">Google OAuth Client ID<input value={googleClientId} onChange={event => setGoogleClientId(event.target.value)} className={input + ' mt-1'} /></label>

@@ -21,6 +21,9 @@ jobs:
     timeout-minutes: 8
     env:
       NYC_BASE: https://friendlypartyrentalnyc.com
+      NYC_WWW: https://www.friendlypartyrentalnyc.com
+      NYC_RETIRED: https://nyc.friendlypartyrental.com
+      NYC_RAILWAY: https://fpr-nyc-production.up.railway.app
       RENTSKETCH_BASE: https://rentsketch.com
     steps:
       - name: Verify live NYC storefront and RentSketch path
@@ -48,6 +51,19 @@ jobs:
             sleep 10
           done
 
+          echo "Checking canonical domains and duplicate-host protections..."
+          www_code="$(curl -sS -o /dev/null -w '%{http_code}' "$NYC_WWW/design-your-event")"
+          www_location="$(curl -sS -o /dev/null -w '%{redirect_url}' "$NYC_WWW/design-your-event")"
+          retired_code="$(curl -sS -o /dev/null -w '%{http_code}' "$NYC_RETIRED/design-your-event")"
+          retired_location="$(curl -sS -o /dev/null -w '%{redirect_url}' "$NYC_RETIRED/design-your-event")"
+          case "$www_code" in 301|308) ;; *) echo "::error::www host did not permanently redirect (got $www_code)."; exit 1;; esac
+          case "$retired_code" in 301|308) ;; *) echo "::error::retired NYC host did not permanently redirect (got $retired_code)."; exit 1;; esac
+          [ "$www_location" = "$NYC_BASE/design-your-event" ]
+          [ "$retired_location" = "$NYC_BASE/design-your-event" ]
+
+          curl -sSI "$NYC_RAILWAY/" -o /tmp/railway-headers.txt
+          grep -Eqi '^x-robots-tag:[[:space:]]*noindex,[[:space:]]*nofollow' /tmp/railway-headers.txt
+
           echo "Waiting for public indexing state..."
           for attempt in $(seq 1 30); do
             fetch "$NYC_BASE/robots.txt" -o /tmp/robots.txt || true
@@ -66,22 +82,42 @@ jobs:
             sleep 10
           done
 
+          echo "Checking primary-domain canonical tags and identity..."
+          grep -Eqi '<link[^>]+rel=["'"'"']canonical["'"'"'][^>]+href=["'"'"']https://friendlypartyrentalnyc\.com/?["'"'"']' /tmp/home.html
+          if grep -Eqi 'Greenville|South Carolina|friendlypartyrentalsc\.com' /tmp/home.html; then
+            echo "::error::SC identity leaked into the NYC homepage."
+            exit 1
+          fi
+
           echo "Checking sitemap..."
           fetch "$NYC_BASE/sitemap.xml" -o /tmp/sitemap.xml
           grep -Fq "$NYC_BASE/design-your-event" /tmp/sitemap.xml
           grep -Fq "$NYC_BASE/category/tent-rentals" /tmp/sitemap.xml
+          if grep -Eqi 'friendlypartyrentalsc\.com|nyc\.friendlypartyrental\.com|www\.friendlypartyrentalnyc\.com' /tmp/sitemap.xml; then
+            echo "::error::Non-primary domain leaked into the NYC sitemap."
+            exit 1
+          fi
 
           echo "Checking NYC catalog API..."
           fetch "$NYC_BASE/api/items" -o /tmp/items.json
           jq -e '.items | type == "array" and length > 0' /tmp/items.json >/dev/null
           jq -e '[.items[] | select(.slug != null and .name != null and .cost != null)] | length > 0' /tmp/items.json >/dev/null
+          if grep -Eqi 'Greenville|South Carolina|friendlypartyrentalsc\.com' /tmp/items.json; then
+            echo "::error::SC identity leaked into the NYC catalog API."
+            exit 1
+          fi
 
           echo "Checking NYC designer page..."
           fetch "$NYC_BASE/design-your-event" -o /tmp/designer.html
           grep -qi 'RentSketch' /tmp/designer.html
           grep -qi 'Friendly Party Rental NYC' /tmp/designer.html
+          grep -Eqi '<link[^>]+rel=["'"'"']canonical["'"'"'][^>]+href=["'"'"']https://friendlypartyrentalnyc\.com/design-your-event["'"'"']' /tmp/designer.html
           if grep -Eqi '<meta[^>]+name=["'"'"']robots["'"'"'][^>]+content=["'"'"'][^"'"'"']*noindex' /tmp/designer.html; then
             echo "::error::NYC designer page is unexpectedly noindex."
+            exit 1
+          fi
+          if grep -Eqi 'Greenville|South Carolina|friendlypartyrentalsc\.com' /tmp/designer.html; then
+            echo "::error::SC identity leaked into the NYC designer page."
             exit 1
           fi
 

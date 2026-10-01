@@ -56,7 +56,7 @@ export default function AdminNav() {
   const visibleItems = navItems.filter((item) => !item.ownerOnly || isAdmin)
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 h-20" style={{ backgroundColor: '#2d6a2d', borderBottom: '3px solid #4CAF50' }}>
+    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-3 h-20" style={{ backgroundColor: '#2d6a2d', borderBottom: '3px solid #4CAF50' }}>
       <div className="flex shrink-0 items-center gap-4">
         <Link
           href={NYC_PUBLIC_ORIGIN}
@@ -76,7 +76,7 @@ export default function AdminNav() {
         </Link>
       </div>
 
-      <div className="hidden lg:flex items-center gap-2">
+      <div className="hidden xl:flex items-center gap-0.5">
         {visibleItems.map(({ href, icon: Icon, label }) => {
           const isActive = pathname === href
           return (
@@ -84,30 +84,30 @@ export default function AdminNav() {
               key={href}
               href={href}
               title={label}
-              className="flex flex-col items-center px-4 py-2 rounded hover:bg-green-700 transition-colors"
+              className="flex flex-col items-center px-2 py-2 rounded hover:bg-green-700 transition-colors"
               style={{ color: isActive ? '#f5c518' : 'white' }}
             >
-              <Icon size={24} />
-              <span className="text-sm mt-1">{label}</span>
+              <Icon size={22} />
+              <span className="text-xs mt-1 whitespace-nowrap">{label}</span>
             </Link>
           )
         })}
       </div>
 
-      <div className="hidden lg:flex items-center gap-4">
-        <span className="text-white text-base">
+      <div className="hidden xl:flex items-center gap-2 shrink-0">
+        <span className="text-white text-sm whitespace-nowrap">
           Signed in as <strong>{username}</strong> ({isAdmin ? 'Administrator' : 'Employee'})
         </span>
         <button
           onClick={handleSignOut}
-          className="px-4 py-2 text-base rounded text-white hover:bg-green-700 border border-green-500"
+          className="px-3 py-2 text-sm rounded text-white hover:bg-green-700 border border-green-500 shrink-0"
         >
           Logout
         </button>
       </div>
 
       <button
-        className="lg:hidden text-white p-2"
+        className="xl:hidden text-white p-2"
         onClick={() => setMobileOpen(!mobileOpen)}
         aria-label="Toggle menu"
       >
@@ -115,7 +115,7 @@ export default function AdminNav() {
       </button>
 
       {mobileOpen && (
-        <div className="lg:hidden absolute top-16 left-0 right-0 bg-white shadow-lg border-t max-h-[calc(100vh-4rem)] overflow-y-auto" style={{ borderColor: '#2d6a2d' }}>
+        <div className="xl:hidden absolute top-16 left-0 right-0 bg-white shadow-lg border-t max-h-[calc(100vh-4rem)] overflow-y-auto" style={{ borderColor: '#2d6a2d' }}>
           <div className="flex flex-col py-2">
             {visibleItems.map(({ href, icon: Icon, label }) => {
               const isActive = pathname === href

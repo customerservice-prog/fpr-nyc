@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useLayoutEffect, useState, useCallback } from 'react'
 import { migrateDeliveryOnlySession } from '@/lib/delivery-session'
+import { RENTSKETCH_ATTRIBUTION_KEY, bookingDateKey, bookingCartDate } from '@/lib/rentsketchBooking'
+import type { BookingAttribution } from '@/lib/rentsketchBooking'
 
 export interface CartItem {
   id: string
@@ -75,6 +77,7 @@ interface CartContextType {
   setPickupTimeSlot: (slot: string | null) => void
   setExactTimeRequested: (value: boolean) => void
   setSchedulingDetails: (details: Partial<SchedulingDetails>) => void
+  applyDesignCart: (items: CartItem[], date: string, booking: BookingAttribution) => void
   subtotal: number
   itemCount: number
   loaded: boolean
@@ -267,6 +270,33 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setSchedulingDetailsState((prev) => ({ ...prev, ...details }))
   }, [])
 
+  const applyDesignCart = useCallback((nextItems: CartItem[], date: string, booking: BookingAttribution) => {
+    const cartDate = bookingCartDate(date)
+    const datedItems = nextItems.map(item => ({ ...item, eventDate: cartDate }))
+    const previousDate = bookingDateKey(eventDate)
+    try {
+      localStorage.setItem(CART_KEY, JSON.stringify(datedItems))
+      localStorage.setItem(DATE_KEY, cartDate)
+      localStorage.setItem(RENTSKETCH_ATTRIBUTION_KEY, JSON.stringify(booking))
+    } catch {
+      throw new Error('Browser storage could not save this cart. Please enable site storage and retry.')
+    }
+    if (previousDate !== date) {
+      setDurationTierIdState(null)
+      setEventTimeSlotState(null)
+      setPickupTimeSlotState(null)
+      setExactTimeRequestedState(false)
+      setSchedulingDetailsState(DEFAULT_SCHEDULING_DETAILS)
+      localStorage.removeItem(DURATION_KEY)
+      localStorage.removeItem(TIME_SLOT_KEY)
+      localStorage.removeItem(PICKUP_TIME_KEY)
+      localStorage.removeItem(EXACT_TIME_KEY)
+      localStorage.removeItem(SCHEDULING_KEY)
+    }
+    setItems(datedItems)
+    setEventDateState(cartDate)
+  }, [eventDate])
+
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0)
 
@@ -275,7 +305,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       items, eventDate, durationTierId, eventTimeSlot, deliveryType, pickupTimeSlot,
       exactTimeRequested, schedulingDetails, addItem, removeItem, updateQuantity,
       clearCart, setEventDate, setDurationTierId, setEventTimeSlot, setDeliveryType,
-      setPickupTimeSlot, setExactTimeRequested, setSchedulingDetails, subtotal,
+      setPickupTimeSlot, setExactTimeRequested, setSchedulingDetails, applyDesignCart, subtotal,
       itemCount, loaded,
     }}>
       {children}

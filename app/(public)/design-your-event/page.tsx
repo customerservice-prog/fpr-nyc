@@ -7,13 +7,13 @@ import Image from 'next/image'
 
 const playfair = Playfair_Display({ weight: ['600', '700'], subsets: ['latin'], display: 'swap' })
 
-export const metadata = nycPageMetadata("/design-your-event","Event Layout Help in Riverdale, Bronx, NY","Explore event layout ideas for tents, tables and chairs. Contact our NYC / Downstate team for planning help; online Riverdale order access is not yet available.")
+export const metadata = nycPageMetadata("/design-your-event","2D & 3D Event Designer in Riverdale, Bronx, NY","Build a real 2D and 3D event layout with Friendly Party Rental NYC equipment, preview tents and inflatables, and open included design access for qualifying NYC orders.")
 
 const features = [
   ['01', 'Start with your event', 'Tell our NYC / Downstate team your guest count and what you are planning.'],
   ['02', 'Build the layout', 'Arrange tents, tables, chairs, dance floors and other event equipment.'],
   ['03', 'See it in 3D', 'Switch from floor-plan view to a visual preview of the event you created.'],
-  ['04', 'Send us your design', 'Contact our NYC / Downstate team with your layout ideas to confirm availability and final pricing.'],
+  ['04', 'Send us your design', 'Request a quote from the layout or continue to the Friendly Party Rental NYC catalog to confirm date availability and final pricing.'],
 ]
 
 const equipment = [
@@ -31,7 +31,7 @@ export default function DesignYourEventPage() {
         <div>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[.18em] text-[#F4C542]">RentSketch Event Designer</div>
           <h1 className={`${playfair.className} max-w-xl text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl`}>Build Your Event. See It Before Setup Day.</h1>
-          <p className="mt-5 max-w-xl text-base leading-7 text-white/75 sm:text-lg">See how a 2D floor plan becomes a 3D event layout. Our NYC / Downstate team can help you choose equipment and plan your space; ask us about layout assistance with your order.</p>
+          <p className="mt-5 max-w-xl text-base leading-7 text-white/75 sm:text-lg">See how a 2D floor plan becomes a 3D event layout using the dedicated Friendly Party Rental NYC RentSketch workspace. Start from a rental, build the room or yard around it, and use your saved layout as the planning reference for the quote.</p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
             <a href="#quick-demo" className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#E07B00] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#c96d00]">Watch the Quick Demo</a>
             <Link href="/contact_us" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/35 px-6 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-[#0B1F3A]">Get Riverdale Layout Help</Link>
@@ -77,12 +77,29 @@ export default function DesignYourEventPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{equipment.map(([title,kicker,body])=><div key={title} className="group rounded-2xl border border-gray-200 p-6 transition hover:-translate-y-1 hover:shadow-lg"><p className="text-xs font-bold uppercase tracking-wider text-[#D66E00]">{kicker}</p><h3 className="mt-3 text-xl font-black">{title}</h3><p className="mt-2 text-sm leading-6 text-gray-600">{body}</p></div>)}</div>
     </section>
 
+    <section className="bg-[#FAFAF8] py-14 md:py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-6 lg:grid-cols-3">
+          <article className="rounded-2xl border border-gray-200 bg-white p-7"><p className="text-xs font-extrabold uppercase tracking-[.16em] text-[#D66E00]">Start from the exact rental</p><h2 className="mt-2 text-2xl font-bold">Preview tents and inflatables from their item pages</h2><p className="mt-3 text-sm leading-7 text-gray-600">Open a tent or inflatable listing and launch RentSketch with that rental already selected. Continue the same scene with seating, dance-floor space and event extras instead of starting over.</p></article>
+          <article className="rounded-2xl border border-gray-200 bg-white p-7"><p className="text-xs font-extrabold uppercase tracking-[.16em] text-[#D66E00]">Already booked?</p><h2 className="mt-2 text-2xl font-bold">Qualifying NYC orders include design access</h2><p className="mt-3 text-sm leading-7 text-gray-600">Use the Existing Order Login with the first name on the booking and the order number. Paid or staff-approved active bookings can reopen the same saved event through seven days after the event date.</p></article>
+          <article className="rounded-2xl border border-gray-200 bg-white p-7"><p className="text-xs font-extrabold uppercase tracking-[.16em] text-[#D66E00]">Price safely</p><h2 className="mt-2 text-2xl font-bold">The layout does not replace checkout pricing</h2><p className="mt-3 text-sm leading-7 text-gray-600">Use RentSketch for fit and planning. Use Friendly Party Rental NYC checkout for the live rental subtotal, duration pricing, delivery fee, jurisdiction tax, deposit and event-date availability.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 md:py-20 lg:px-8">
+      <div className="grid gap-8 lg:grid-cols-2">
+        <div><p className="text-xs font-extrabold uppercase tracking-[.2em] text-[#D66E00]">Before you finalize the layout</p><h2 className={`${playfair.className} mt-2 text-3xl font-bold`}>Measure the usable space, not just the property line.</h2><p className="mt-4 leading-7 text-gray-600">Note fences, gates, stairs, slopes, trees, overhead lines, utilities, driveways and the actual setup surface. Leave circulation room around buffet tables, dance floors and tent exits. A visual layout helps the conversation, but installation requirements are confirmed by the delivery/setup team.</p></div>
+        <div className="rounded-2xl bg-[#0B1F3A] p-7 text-white"><h2 className="text-2xl font-bold">What the NYC planner can help answer</h2><ul className="mt-5 space-y-3 text-sm leading-6 text-white/80"><li>✓ Will the table count leave comfortable walkways?</li><li>✓ Does a dance floor change the tent size I need?</li><li>✓ Where can concessions, games or an inflatable fit?</li><li>✓ How does the layout change between 2D planning and 3D preview?</li><li>✓ Which rentals should I add before requesting the final quote?</li></ul></div>
+      </div>
+    </section>
+
     <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 md:pb-20 lg:px-8">
       <div className="overflow-hidden rounded-[2rem] bg-[#0B1F3A] px-6 py-10 text-white md:px-10 lg:grid lg:grid-cols-[1fr_auto] lg:items-center lg:gap-10">
         <div><p className="text-xs font-extrabold uppercase tracking-[.2em] text-[#F4C542]">When your layout is ready</p><h2 className={`${playfair.className} mt-2 text-3xl font-bold`}>Send it to Friendly Party Rental.</h2><p className="mt-3 max-w-2xl leading-7 text-white/70">Your layout ideas help our NYC / Downstate team understand the setup you are trying to create. We will confirm equipment, availability, site details and final pricing before the order is finalized.</p></div>
         <div className="mt-7 flex flex-col gap-3 lg:mt-0"><a href="#quick-demo" className="btn-primary inline-flex min-h-12 items-center justify-center rounded-full px-6 py-3 font-semibold">Watch the Quick Demo</a><Link href="/contact_us" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/40 px-6 py-3 text-sm font-bold text-white">Get Layout Help</Link></div>
       </div>
-      <p className="mx-auto mt-5 max-w-3xl text-center text-xs leading-5 text-gray-500">The Event Designer is a planning and visualization tool. Designs and estimates are not reservations. Final equipment availability, site requirements and pricing are confirmed by Friendly Party Rental.</p>
+      <p className="mx-auto mt-5 max-w-3xl text-center text-xs leading-5 text-gray-500">The Event Designer is a planning and visualization tool. Designs and estimates are planning tools, not reservations. NYC checkout remains the pricing and date-availability authority. RentSketch prices are intentionally hidden until the NYC catalog-price sync is complete; final equipment availability, delivery, tax, site requirements and pricing are confirmed by Friendly Party Rental NYC.</p>
     </section>
   </main>
 }

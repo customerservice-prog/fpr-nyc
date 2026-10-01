@@ -14,7 +14,7 @@ test('NYC admin mirrors the Syracuse dashboard structure', () => {
 
 test('NYC uses the Syracuse interview and video meeting center, not the old media panel', () => {
   const panel = read('components/admin/MediaPanel.tsx')
-  for (const text of ['INTERVIEW & VIDEO MEETING CENTER', 'Your meetings, managed here', '+ New interview', 'Connection settings', 'Refresh meetings']) {
+  for (const text of ['Interview & Video Meeting Center', 'Your meetings, managed here', '+ New interview', 'Connection settings', 'Refresh meetings']) {
     assert.ok(panel.includes(text), 'missing meeting-center marker: ' + text)
   }
   assert.ok(!panel.includes('Paste a YouTube link below to watch a video here'))

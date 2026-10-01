@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from 'crypto'
+import { createHmac, randomUUID, timingSafeEqual } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { lookupNycRentSketchOrder } from '@/lib/nycRentSketchOrderAccess'
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
   if (payload?.type !== 'quote_request.created') return NextResponse.json({ ok: true, ignored: true })
 
-  const requestId = String(d.id || crypto.randomUUID()).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80)
+  const requestId = String(d.id || randomUUID()).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80)
   const name = String(d.customerName || 'RentSketch customer').slice(0, 160)
   const email = String(d.customerEmail || '').slice(0, 254) || 'customerservice@friendlypartyrental.com'
   const phone = String(d.customerPhone || '').slice(0, 50) || null

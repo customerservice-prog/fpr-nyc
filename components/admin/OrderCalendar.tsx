@@ -12,7 +12,6 @@ import {
   subMonths,
 } from 'date-fns'
 import { ChevronLeft, ChevronRight, Sun } from 'lucide-react'
-import Link from 'next/link'
 
 export interface CalendarOrder {
   id: string
@@ -22,20 +21,25 @@ export interface CalendarOrder {
   customerName: string
   eventDate: string
   eventEndDate?: string | null
+  deliveredAt?: string | null
+  pickedUpAt?: string | null
 }
 
 interface OrderCalendarProps {
   orders: CalendarOrder[]
   closedDates?: string[]
   currentMonth?: Date
+  minYear?: number
   onMonthChange?: (date: Date) => void
   onDateClick?: (date: Date) => void
   filter?: string
   onFilterChange?: (filter: string) => void
+  jobFilter?: string
   compact?: boolean
 }
 
 const FILTERS = [
+  'All Orders',
   'Active',
   'Active-Deliver',
   'Active-Customer Pickup',
@@ -45,14 +49,45 @@ const FILTERS = [
   'Orders Created',
 ]
 
+function matchesStatus(order: CalendarOrder, filter: string) {
+  if (filter === 'All Orders' || filter === 'Orders Created') return true
+  if (filter === 'Canceled') return order.status === 'canceled' || order.status === 'cancelled'
+  if (filter === 'Incomplete') return order.status === 'incomplete'
+  if (filter === 'Sent Quotes') return order.status === 'quote'
+  if (filter === 'Active-Deliver') return order.status === 'active' && order.deliveryType === 'delivery'
+  if (filter === 'Active-Customer Pickup') return order.status === 'active' && order.deliveryType === 'pickup'
+  return order.status === 'active'
+}
+
+function rentalDates(order: CalendarOrder) {
+  const start = order.eventDate.slice(0, 10)
+  const end = order.eventEndDate ? order.eventEndDate.slice(0, 10) : start
+  return { start, end }
+}
+
+function jobKind(order: CalendarOrder, day: string) {
+  const { start, end } = rentalDates(order)
+  if (order.deliveryType === 'pickup') return 'customerPickup'
+  if (order.pickedUpAt) return 'complete'
+  if (day === end && (day !== start || order.deliveredAt)) return 'collection'
+  return 'delivery'
+}
+
+function matchesJob(order: CalendarOrder, day: string, filter: string) {
+  if (filter === 'all') return true
+  return jobKind(order, day) === filter
+}
+
 export default function OrderCalendar({
   orders,
   closedDates = [],
   currentMonth: initialMonth,
+  minYear = 2021,
   onMonthChange,
   onDateClick,
   filter = 'Active',
   onFilterChange,
+  jobFilter = 'all',
   compact = false,
 }: OrderCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(initialMonth || new Date())
@@ -69,20 +104,22 @@ export default function OrderCalendar({
 
   const ordersByDay = days.map((day) => {
     const dayStr = format(day, 'yyyy-MM-dd')
-    // A delivery badge (green) shows on the day an order is dropped off (eventDate),
-    // and a pickup badge (red) shows on the day it is picked back up (eventEndDate,
-    // falling back to eventDate for single-day orders). This mirrors the Delivery
-    // Schedule page so all calendars in the admin app are consistent.
     let deliveryCount = 0
     let pickupCount = 0
-    orders.forEach((o) => {
-      if (o.status === 'canceled' || o.status === 'cancelled') return
-      const startStr = o.eventDate.slice(0, 10)
-      const endStr = o.eventEndDate ? o.eventEndDate.slice(0, 10) : startStr
-      if (startStr === dayStr) deliveryCount++
-      if (endStr === dayStr) pickupCount++
+    let customerPickupCount = 0
+
+    orders.filter((order) => matchesStatus(order, filter) && matchesJob(order, dayStr, jobFilter)).forEach((order) => {
+      if (order.status === 'canceled' || order.status === 'cancelled') return
+      const { start, end } = rentalDates(order)
+      if (order.deliveryType === 'pickup') {
+        if (dayStr === start || dayStr === end) customerPickupCount++
+        return
+      }
+      if (dayStr === start) deliveryCount++
+      if (dayStr === end) pickupCount++
     })
-    return { day, deliveryCount, pickupCount }
+
+    return { day, deliveryCount, pickupCount, customerPickupCount }
   })
 
   const isClosed = (date: Date) => closedDates.some((d) => d.slice(0, 10) === format(date, 'yyyy-MM-dd'))
@@ -90,7 +127,7 @@ export default function OrderCalendar({
   return (
     <div className={compact ? '' : 'bg-white rounded shadow'}>
       <div className="flex items-center justify-between p-3 border-b bg-gray-50">
-        <button onClick={() => changeMonth(subMonths(currentMonth, 1))} className="p-1 hover:bg-gray-200 rounded">
+        <button onClick={() => changeMonth(subMonths(currentMonth, 1))} className="p-1 hover:bg-gray-200 rounded" aria-label="Previous month">
           <ChevronLeft size={18} />
         </button>
         <div className="flex items-center gap-2">
@@ -108,12 +145,12 @@ export default function OrderCalendar({
             onChange={(e) => changeMonth(new Date(parseInt(e.target.value), currentMonth.getMonth(), 1))}
             className="border rounded px-2 py-1 text-sm"
           >
-            {Array.from({ length: new Date().getFullYear() + 2 - 2021 }, (_, i) => 2021 + i).map((y) => (
-              <option key={y} value={y}>{y}</option>
+            {Array.from({ length: Math.max(1, new Date().getFullYear() + 2 - minYear) }, (_, i) => minYear + i).map((year) => (
+              <option key={year} value={year}>{year}</option>
             ))}
           </select>
         </div>
-        <button onClick={() => changeMonth(addMonths(currentMonth, 1))} className="p-1 hover:bg-gray-200 rounded">
+        <button onClick={() => changeMonth(addMonths(currentMonth, 1))} className="p-1 hover:bg-gray-200 rounded" aria-label="Next month">
           <ChevronRight size={18} />
         </button>
       </div>
@@ -125,26 +162,20 @@ export default function OrderCalendar({
             onChange={(e) => onFilterChange(e.target.value)}
             className="border rounded px-2 py-1 text-sm w-full"
           >
-            {FILTERS.map((f) => (
-              <option key={f} value={f}>{f}</option>
-            ))}
+            {FILTERS.map((item) => <option key={item} value={item}>{item}</option>)}
           </select>
         </div>
       )}
 
       <div className="grid grid-cols-7 text-center text-xs font-medium text-gray-500 border-b">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-          <div key={d} className="py-2">{d}</div>
-        ))}
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <div key={day} className="py-2">{day}</div>)}
       </div>
 
       <div className="grid grid-cols-7">
-        {Array.from({ length: startPadding }).map((_, i) => (
-          <div key={`pad-${i}`} className="min-h-[80px] border border-gray-100 bg-gray-50" />
-        ))}
-        {ordersByDay.map(({ day, deliveryCount, pickupCount }) => {
+        {Array.from({ length: startPadding }).map((_, i) => <div key={'pad-' + i} className="min-h-[80px] border border-gray-100 bg-gray-50" />)}
+        {ordersByDay.map(({ day, deliveryCount, pickupCount, customerPickupCount }) => {
           const closed = isClosed(day)
-              const today = isToday(day)
+          const today = isToday(day)
           return (
             <div
               key={day.toISOString()}
@@ -160,26 +191,20 @@ export default function OrderCalendar({
                 {closed && <span className="text-[10px] text-red-500 font-bold">closed</span>}
               </div>
               <div className="flex flex-wrap gap-1 mt-1">
-                {deliveryCount > 0 && (
-                  <span className="flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-green-500 text-white text-[10px] font-bold px-1" title={`${deliveryCount} Delivery`}>
-                    {deliveryCount}
-                  </span>
-                )}
-                {pickupCount > 0 && (
-                  <span className="flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold px-1" title={`${pickupCount} Pickup`}>
-                    {pickupCount}
-                  </span>
-                )}
+                {deliveryCount > 0 && <span className="flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-green-500 text-white text-[10px] font-bold px-1" title={deliveryCount + ' Delivery'}>{deliveryCount}</span>}
+                {customerPickupCount > 0 && <span className="flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-600 text-white text-[10px] font-bold px-1" title={customerPickupCount + ' Customer pickup / return'}>{customerPickupCount}</span>}
+                {pickupCount > 0 && <span className="flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-blue-600 text-white text-[10px] font-bold px-1" title={pickupCount + ' Pickup from event'}>{pickupCount}</span>}
               </div>
             </div>
           )
         })}
       </div>
 
-      <div className="p-2 border-t text-xs text-gray-500 flex flex-wrap gap-3">
-        <span className="flex items-center gap-1"><span className="admin-badge-active" /> Delivery</span>
-        <span className="flex items-center gap-1"><span className="admin-badge-pickup" /> Pickup</span>
-        <span className="flex items-center gap-1"><Sun size={12} className="text-yellow-500" /> Holiday</span>
+      <div className="p-2 border-t text-xs text-gray-500 flex flex-wrap gap-4">
+        <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm border-2 border-green-600 bg-green-50" />Delivery / drop-off</span>
+        <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm border-2 border-blue-600 bg-blue-50" />Pickup from event</span>
+        <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm border-2 border-red-600 bg-red-50" />Customer pickup / return</span>
+        <span className="inline-flex items-center gap-1"><Sun size={12} className="text-yellow-500" /> Holiday</span>
       </div>
     </div>
   )

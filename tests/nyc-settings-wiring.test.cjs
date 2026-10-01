@@ -147,3 +147,27 @@ test('legacy delivery, pickup and exact-time request fees stay out of public che
   assert.match(helper, /isLegacySchedulingSpecialRequestFee/)
   assert.match(publicApi, /isLegacySchedulingSpecialRequestFee/)
 })
+
+
+test('top NYC admin navigation is wired to real routes and logout', () => {
+  const nav = fs.readFileSync('components/admin/AdminNav.tsx', 'utf8')
+  const topRoutes = {
+    'Home': '/admin',
+    'Edit Website': '/admin/website',
+    'Admin': '/admin/settings',
+    'Scheduling': '/admin/scheduling',
+    'Customers': '/admin/customers',
+    'Do Not Rent': '/admin/do-not-rent',
+    'Delivery': '/admin/delivery',
+    'Reports': '/admin/reports',
+    'Analytics': '/admin/analytics',
+    'Marketing': '/admin/marketing',
+  }
+  for (const [label, route] of Object.entries(topRoutes)) {
+    assert.ok(nav.includes(label), 'Admin navigation is missing ' + label)
+    assert.ok(nav.includes(route), label + ' is not linked to ' + route)
+    assert.ok(fs.existsSync('app' + route + '/page.tsx'), label + ' points to a missing page')
+  }
+  assert.match(nav, /signOut\(\{ redirect: false \}\)/)
+  assert.match(nav, /router\.push\('\/admin\/login'\)/)
+})

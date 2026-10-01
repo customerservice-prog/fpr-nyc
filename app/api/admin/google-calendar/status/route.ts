@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { expectedGoogleCalendarEmail, getGoogleCalendarAccessToken, getGoogleCalendarConnection, getGoogleCredentials } from '@/lib/googleCalendar'
+import { expectedGoogleCalendarEmail, getGoogleCalendarAccessToken, getGoogleCalendarConnection, getGoogleCredentials, googleConnectionHasSearchConsoleScope } from '@/lib/googleCalendar'
 
 const CANONICAL_ORIGIN = 'https://friendlypartyrentalnyc.com'
 
@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
     configurationSource: credentials?.source || null,
     connected: !!connection && healthy,
     connectionExists: !!connection,
+    searchConsoleAuthorized: googleConnectionHasSearchConsoleScope(connection),
     connectionError,
     googleEmail: connection?.googleEmail || null,
     calendarId: connection?.calendarId || 'primary',

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { isLegacySchedulingSpecialRequestFee } from '@/lib/publicSpecialRequestFees'
 
 interface Fee {
   id: string
@@ -38,10 +39,10 @@ export default function SpecialRequestFeesPage() {
     <div className="p-4 max-w-3xl">
       <h1 className="text-xl font-bold text-dark mb-2">Special Request Fees</h1>
       <p className="text-sm text-body mb-6">
-        These optional flat fees appear at checkout for same-day Tents/Tables/Chairs rentals, matching
-        the &quot;Tables and chairs&quot; price rule set configured in ERS (Overnight $75, Flexible Delivery
-        $40, Exact Time $100). Only categories with Pricing Profile set to &quot;Tables/Tents/Chairs&quot;
-        will show these options to customers.
+        These are legacy/special-request add-ons. Current Event Time / Delivery Time / Pickup Time
+        scheduling uses included 2-hour delivery windows, $50 guaranteed exact delivery, flexible pickup,
+        requested-by pickup, and the current exact-pickup tiers. Fees whose names describe delivery, pickup,
+        or exact-time scheduling are automatically hidden from the public checkout so customers are not charged twice.
       </p>
       <div className="bg-white rounded shadow overflow-hidden">
         <table className="w-full text-sm">
@@ -62,6 +63,9 @@ export default function SpecialRequestFeesPage() {
                     onChange={(e) => updateFee(fee.id, 'name', e.target.value)}
                     className="border rounded px-2 py-1 text-sm w-48"
                   />
+                  {isLegacySchedulingSpecialRequestFee(fee.name) && (
+                    <div className="mt-1 text-[11px] font-semibold text-amber-700">Hidden from public checkout — current scheduler handles this.</div>
+                  )}
                 </td>
                 <td className="px-4 py-2 text-right">
                   <input

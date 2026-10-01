@@ -13,6 +13,8 @@ model User {
   password String
   name String
   role String @default("admin")
+  driverProfileId String? @unique
+  driverProfile Driver? @relation("DriverStaffUser", fields: [driverProfileId], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -111,6 +113,7 @@ model Driver {
   pin String? @unique
   locations DriverLocation[]
   timeEntries DriverTimeEntry[]
+  staffUser User? @relation("DriverStaffUser")
 }
 
 model Order {
@@ -756,6 +759,18 @@ model GeneralImage {
   category String?
   isActive Boolean @default(true)
   createdAt DateTime @default(now())
+  altText String?
+  focalPoint String?
+  tags String?
+  seasonTags String[] @default([])
+  categoryTags String[] @default([])
+  eventTypeTags String[] @default([])
+  brandTags String[] @default([])
+  width Int?
+  height Int?
+  mimeType String?
+  uploadedBy String?
+  updatedAt DateTime @updatedAt
 }
 
 model NavigationItem {

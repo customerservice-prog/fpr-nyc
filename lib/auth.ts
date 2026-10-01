@@ -2,6 +2,7 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
+import { STAFF_ABSOLUTE_SESSION_SECONDS } from './staffSessionSecurity'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -56,7 +57,8 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  session: { strategy: 'jwt' },
+  session: { strategy: 'jwt', maxAge: STAFF_ABSOLUTE_SESSION_SECONDS },
+  jwt: { maxAge: STAFF_ABSOLUTE_SESSION_SECONDS },
   pages: {
     signIn: '/admin/login',
   },

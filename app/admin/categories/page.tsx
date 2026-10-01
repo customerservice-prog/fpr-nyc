@@ -122,9 +122,10 @@ const addCategory = async () => {
     <div className="p-4">
       <h1 className="text-xl font-bold text-dark mb-2">Categories</h1>
       <p className="text-sm text-body mb-6">
-        Pricing Profile controls which multi-day rental rules apply. &quot;Tables/Tents/Chairs&quot; also
-        enables Overnight, Flexible Delivery, and Exact Time special request fees at checkout. Upload an
-        image below to control the photo shown for that category on the public site.
+        Pricing Profile controls which multi-day rental rules apply. Public checkout scheduling now uses
+        included 2-hour delivery windows, optional guaranteed exact-time service, and standard pickup timing.
+        Legacy delivery/pickup special-request fees are not shown to customers. Upload an image below to control
+        the photo shown for that category on the public site.
       </p>
 <div className="mb-4 flex items-center gap-2">
 <input

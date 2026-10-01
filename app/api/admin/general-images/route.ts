@@ -5,10 +5,20 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const items = await prisma.generalImage.findMany({ orderBy: { createdAt: 'desc' } })
+  const { searchParams } = new URL(request.url)
+  const season = searchParams.get('season')
+  const category = searchParams.get('category')
+  const eventType = searchParams.get('eventType')
+  const brand = searchParams.get('brand')
+  const where: any = {}
+  if (season) where.seasonTags = { has: season }
+  if (category) where.categoryTags = { has: category }
+  if (eventType) where.eventTypeTags = { has: eventType }
+  if (brand) where.brandTags = { has: brand }
+  const items = await prisma.generalImage.findMany({ where, orderBy: { createdAt: 'desc' } })
   return NextResponse.json({ items })
   }
 

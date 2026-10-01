@@ -7,6 +7,7 @@ import { NYC_LOGO_PATH, NYC_LOGO_WIDTH, NYC_LOGO_HEIGHT } from '@/lib/nycBrand'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
+import { hasStaffPermission, staffRoleLabel, type StaffPermission } from '@/lib/staffPermissions'
 import {
   Home,
   Settings,
@@ -22,17 +23,17 @@ import {
   LayoutTemplate,
 } from 'lucide-react'
 
-const navItems = [
-  { href: '/admin', icon: Home, label: 'Home', ownerOnly: false },
-  { href: '/admin/website', icon: LayoutTemplate, label: 'Edit Website', ownerOnly: false },
-  { href: '/admin/settings', icon: Settings, label: 'Admin', ownerOnly: true },
-  { href: '/admin/scheduling', icon: Calendar, label: 'Scheduling', ownerOnly: false },
-  { href: '/admin/customers', icon: Users, label: 'Customers', ownerOnly: false },
-  { href: '/admin/do-not-rent', icon: Ban, label: 'Do Not Rent', ownerOnly: false },
-  { href: '/admin/delivery', icon: Truck, label: 'Delivery', ownerOnly: false },
-  { href: '/admin/reports', icon: BarChart2, label: 'Reports', ownerOnly: true },
-  { href: '/admin/analytics', icon: LineChart, label: 'Analytics', ownerOnly: true },
-  { href: '/admin/marketing', icon: Megaphone, label: 'Marketing', ownerOnly: false },
+const navItems: Array<{ href: string; icon: any; label: string; permission?: StaffPermission }> = [
+  { href: '/admin', icon: Home, label: 'Home' },
+  { href: '/admin/website', icon: LayoutTemplate, label: 'Edit Website', permission: 'website' },
+  { href: '/admin/settings', icon: Settings, label: 'Admin', permission: 'owner_settings' },
+  { href: '/admin/scheduling', icon: Calendar, label: 'Scheduling', permission: 'scheduling' },
+  { href: '/admin/customers', icon: Users, label: 'Customers', permission: 'customers' },
+  { href: '/admin/do-not-rent', icon: Ban, label: 'Do Not Rent', permission: 'customers' },
+  { href: '/admin/delivery', icon: Truck, label: 'Delivery', permission: 'delivery' },
+  { href: '/admin/reports', icon: BarChart2, label: 'Reports', permission: 'reports' },
+  { href: '/admin/analytics', icon: LineChart, label: 'Analytics', permission: 'analytics' },
+  { href: '/admin/marketing', icon: Megaphone, label: 'Marketing', permission: 'marketing' },
 ]
 
 export default function AdminNav() {
@@ -48,10 +49,9 @@ export default function AdminNav() {
     router.push('/admin/login')
   }
 
-  const role = (session?.user as { role?: string } | undefined)?.role || 'admin'
-  const isAdmin = role === 'admin'
-  const username = session?.user?.name || 'bryanp315'
-  const visibleItems = navItems.filter((item) => !item.ownerOnly || isAdmin)
+  const role = (session?.user as { role?: string } | undefined)?.role || 'employee'
+  const username = session?.user?.name || 'Staff'
+  const visibleItems = navItems.filter((item) => !item.permission || hasStaffPermission(role, item.permission))
 
   return (
     <nav
@@ -97,7 +97,7 @@ export default function AdminNav() {
 
       <div className="hidden lg:flex shrink-0 items-center gap-2 xl:gap-4">
         <span className="block w-32 text-sm leading-5 text-white xl:w-40 xl:text-base xl:leading-6 2xl:w-auto 2xl:max-w-56">
-          Signed in as <strong>{username}</strong> ({isAdmin ? 'Administrator' : 'Employee'})
+          Signed in as <strong>{username}</strong> ({role === 'admin' ? 'Administrator' : staffRoleLabel(role)})
         </span>
         <button
           onClick={handleSignOut}
@@ -134,7 +134,7 @@ export default function AdminNav() {
               )
             })}
             <div className="px-5 py-3 text-sm text-gray-600 border-t mt-1">
-              Signed in as <strong>{username}</strong> ({isAdmin ? 'Administrator' : 'Employee'})
+              Signed in as <strong>{username}</strong> ({staffRoleLabel(role)})
             </div>
             <button
               onClick={handleSignOut}

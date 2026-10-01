@@ -4,10 +4,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { driverForAdmin } from '@/lib/driverProfile'
+import { hasStaffPermission } from '@/lib/staffPermissions'
 
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!hasStaffPermission((session.user as { role?: string }).role, 'delivery')) {
+    return NextResponse.json({ error: 'This staff role cannot access driver dispatch data.' }, { status: 403 })
+  }
 
   const searchParams = request.nextUrl.searchParams
   const activeOnly = searchParams.get('activeOnly') === 'true'
@@ -16,14 +21,14 @@ export async function GET(request: NextRequest) {
     where: activeOnly ? { isActive: true } : undefined,
     orderBy: { name: 'asc' },
   })
-  return NextResponse.json({ drivers })
+  return NextResponse.json({ drivers: drivers.map(driverForAdmin) })
 }
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  if ((session.user as { role?: string }).role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!hasStaffPermission((session.user as { role?: string }).role, 'manage_drivers')) {
+    return NextResponse.json({ error: 'This staff role cannot manage drivers.' }, { status: 403 })
   }
 
   const body = await request.json()
@@ -41,5 +46,6 @@ export async function POST(request: NextRequest) {
       isActive: body.isActive !== undefined ? body.isActive : true,
     },
   })
-  return NextResponse.json({ driver })
+  return NextResponse.json({ driver: driverForAdmin(driver) })
 }
+

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { Roboto } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
 import Script from 'next/script'
 import { CartProvider } from '@/components/public/CartContext'
@@ -12,11 +11,6 @@ import { BUSINESS } from '@/lib/utils'
 import { NYC_SERVICE_AREAS } from '@/lib/nycServiceAreas'
 import { NYC_LOGO_PATH, NYC_LOGO_WIDTH, NYC_LOGO_HEIGHT } from '@/lib/nycBrand'
 
-const roboto = Roboto({
-  weight: ['300', '400', '500', '700'],
-  subsets: ['latin'],
-  display: 'swap',
-})
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://friendlypartyrentalnyc.com').replace(/\/$/, '')
 const INDEXABLE = process.env.PUBLIC_INDEXABLE === 'true'
@@ -134,7 +128,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           />
         </>}
       </head>
-      <body className={roboto.className}>
+      <body className="font-sans">
         <GoogleAnalyticsListener />
         <VisitorTracker />
         <CartProvider>

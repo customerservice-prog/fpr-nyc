@@ -3,6 +3,7 @@
 import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { recordStaffActivity } from '@/lib/staffSessionSecurity'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -26,6 +27,7 @@ export default function AdminLoginPage() {
       setError('Invalid username or password')
       setLoading(false)
     } else {
+      recordStaffActivity()
       router.push('/admin')
     }
   }

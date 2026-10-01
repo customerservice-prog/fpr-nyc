@@ -25,14 +25,14 @@ export default async function SearchVisibilityPage(){
     <section className="rounded-xl border p-5 bg-blue-50">
       <h2 className="text-lg font-bold">Google reporting</h2>
       <p className="mt-2 font-semibold">{report?.connected?'Riverdale Search Console query succeeded':'Google indexing and ranking are not verified here'}</p>
-      {report?.connected?<><p className="mt-2">{report.totals.clicks.toLocaleString()} clicks and {report.totals.impressions.toLocaleString()} impressions reported for the requested {report.rangeDays}-day window. Recent Google data can be delayed.</p><p className="mt-2">These are search-performance totals, not a count of indexed pages.</p></>:<p className="mt-2">{report?.reason||'The Google report could not be retrieved. This is not evidence of zero traffic or zero indexed pages.'}</p>}
+      {report?.connected?<><p className="mt-2">{report.totals.clicks.toLocaleString()} clicks and {report.totals.impressions.toLocaleString()} impressions reported for the requested {report.rangeDays}-day window. Recent Google data can be delayed.</p><p className="mt-2">These are search-performance totals, not a count of indexed pages.</p></>:<><p className="mt-2">{report?.reason||'The Google report could not be retrieved. This is not evidence of zero traffic or zero indexed pages.'}</p><a href="/api/admin/google-calendar/connect" className="mt-3 inline-block rounded-lg border border-blue-700 px-4 py-2 font-semibold text-blue-700">Reconnect Google permissions</a></>}
       <a href={consoleUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block rounded-lg bg-blue-700 px-4 py-3 text-white font-semibold">Open New York Search Console</a>
     </section>
     <section className="rounded-xl border p-5">
       <h2 className="text-lg font-bold">Verify the correct property</h2>
       <p className="mt-2 break-all">Domain property: <code>{NYC_GSC_DOMAIN_PROPERTY}</code></p>
       <p className="mt-2 break-all">URL-prefix alternative: <code>{NYC_GSC_URL_PREFIX}</code></p>
-      <p className="mt-3">Use the Google account that owns or has permission for the New York website. If Google asks you to add the property, follow its ownership verification. A New York property does not verify this separate domain.</p>
+      <p className="mt-3">Use the Google account that owns or has permission for the New York website. If Google asks you to add the property, follow its ownership verification. A Search Console property for another Friendly Party Rental location does not verify this separate NYC domain.</p>
       <p className="mt-3">Public HTML verification tag in this deployment: <strong>{hasVerificationTag?'Present; ownership is still confirmed by Google':'Not configured; another valid Google verification method may still be used'}</strong>.</p>
       <p className="mt-3">For the URL-prefix HTML-tag method, Google supplies a public verification token for <code>NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION</code>. Domain verification uses the DNS record Google supplies. Never put passwords, service-account private keys or tokens into public page content.</p>
     </section>
@@ -45,7 +45,7 @@ export default async function SearchVisibilityPage(){
     <section className="rounded-xl border p-5">
       <h2 className="text-lg font-bold">Local business and reporting are separate</h2>
       <p className="mt-2">Search Console reporting is separate from any Google Business Profile. Do not create or claim a physical NYC storefront unless the business actually qualifies for one.</p>
-      <p className="mt-3">The saved Google Integration switch is only a settings record. It does not prove Search Console access. To load reporting in this admin, configure an authorized Google service account and an NYC <code>GSC_SITE_URL</code> privately; read-only Search Console permission is sufficient for the existing metrics endpoint.</p>
+      <p className="mt-3">The saved Google Integration switch is only a settings record. It does not prove Search Console access. This admin now reuses the encrypted business Google OAuth connection used by Calendar. Reconnect Google permissions to grant Search Console read-only access; a service account remains an optional fallback.</p>
       <p className="mt-3">No Google submission, customer email, order or payment is sent by opening this page.</p>
     </section>
   </div>

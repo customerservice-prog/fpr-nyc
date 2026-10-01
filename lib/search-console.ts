@@ -1,16 +1,14 @@
 import { normalizeNycSearchProperty } from './nycSearchReadiness'
 import { getAccessToken, hasGoogleCredentials } from './google-auth'
+import { getGoogleSearchConsoleAccessToken } from './googleCalendar'
 
 /**
  * Google Search Console (Search Analytics API) integration.
  *
- * Reads search-query performance for the site identified by GSC_SITE_URL.
- * For a domain property use the form "sc-domain:fpr-nyc-production.up.railway.app";
- * for a URL-prefix property use the full "https://fpr-nyc-production.up.railway.app/".
- *
- * Requires a service-account credential (see lib/google-auth.ts) that has been
- * added as a user on the Search Console property. Returns { connected: false }
- * whenever credentials or the site url are missing.
+ * Reads search-query performance for the canonical Friendly Party Rental NYC property.
+ * Authentication prefers the encrypted business-Google OAuth connection used by
+ * Google Calendar, with a service-account credential as a backwards-compatible fallback.
+ * Returns { connected: false } whenever the property or Google authorization is missing.
  */
 
 const GSC_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly'
@@ -73,6 +71,17 @@ interface GscApiRow {
   position?: number
 }
 
+async function searchConsoleToken(): Promise<string | null> {
+  try {
+    const oauth = await getGoogleSearchConsoleAccessToken()
+    if (oauth?.accessToken) return oauth.accessToken
+  } catch {
+    // Fall through to the service-account path when available.
+  }
+  if (!hasGoogleCredentials()) return null
+  return getAccessToken(GSC_SCOPE)
+}
+
 async function query(siteUrl: string, token: string, body: unknown): Promise<{ rows?: GscApiRow[] }> {
   const res = await fetch(
     'https://www.googleapis.com/webmasters/v3/sites/' +
@@ -98,31 +107,40 @@ async function query(siteUrl: string, token: string, body: unknown): Promise<{ r
 
 export async function getSearchConsoleSummary(rangeDays = 28): Promise<GscSummary> {
   const configuredSite = process.env.GSC_SITE_URL || process.env.NYC_GSC_PROPERTY
-  if (!configuredSite) return notConnected('Riverdale Search Console reporting is not configured (GSC_SITE_URL is not set). This does not mean the website is absent from Google.')
+  if (!configuredSite) return notConnected('NYC Search Console reporting is not configured. This does not mean the website is absent from Google.')
   const siteUrl = normalizeNycSearchProperty(configuredSite)
-  if (!siteUrl) return notConnected('Only the the configured NYC Search Console property may be used here. New York and unrelated properties are not Riverdale search data.')
-  if (!hasGoogleCredentials()) return notConnected('Google credentials are not configured')
-
-  const token = await getAccessToken(GSC_SCOPE)
-  if (!token) return notConnected('Could not obtain a Google access token')
+  if (!siteUrl) return notConnected('Only the canonical Friendly Party Rental NYC Search Console property may be used here. Railway, Syracuse, SC and unrelated properties are rejected.')
+  const token = await searchConsoleToken()
+  if (!token) return notConnected('Reconnect the Friendly Party Rental business Google account in Admin to grant Search Console read-only access. Calendar access can remain connected while permissions are refreshed.')
 
   const startDate = isoDaysAgo(rangeDays)
   const endDate = isoDaysAgo(1)
 
-  const [totalsRes, queriesRes, trendRes] = await Promise.all([
-    query(siteUrl, token, { startDate, endDate, dimensions: [] }),
-    query(siteUrl, token, {
-      startDate,
-      endDate,
-      dimensions: ['query'],
-      rowLimit: 15,
-    }),
-    query(siteUrl, token, {
-      startDate,
-      endDate,
-      dimensions: ['date'],
-    }),
-  ])
+  let totalsRes: { rows?: GscApiRow[] }
+  let queriesRes: { rows?: GscApiRow[] }
+  let trendRes: { rows?: GscApiRow[] }
+  try {
+    ;[totalsRes, queriesRes, trendRes] = await Promise.all([
+      query(siteUrl, token, { startDate, endDate, dimensions: [] }),
+      query(siteUrl, token, {
+        startDate,
+        endDate,
+        dimensions: ['query'],
+        rowLimit: 15,
+      }),
+      query(siteUrl, token, {
+        startDate,
+        endDate,
+        dimensions: ['date'],
+      }),
+    ])
+  } catch (error) {
+    const message = error instanceof Error ? error.message : ''
+    if (/\b403\b/.test(message)) {
+      return notConnected('The connected business Google account does not have access to this NYC Search Console property yet. Verify/add friendlypartyrentalnyc.com in Search Console, then reconnect Google permissions in Admin.')
+    }
+    throw error
+  }
 
   const t = totalsRes.rows?.[0]
   const topQueries: GscQueryRow[] = (queriesRes.rows ?? []).map((r) => ({

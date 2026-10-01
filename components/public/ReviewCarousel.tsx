@@ -16,7 +16,18 @@ function avatarColor(name: string) {
 // presented on the NYC site, so the section stays hidden until NYC reviews exist.
 export default function ReviewCarousel() {
   const reviews = REVIEWS
-  if (!reviews.length) return null
+  if (!reviews.length) return (
+    <section className="bg-gray-50 py-12" aria-label="Friendly Party Rental NYC trust">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm md:p-9">
+          <p className="text-xs font-extrabold uppercase tracking-[.18em] text-[#C85F00]">New Riverdale / Downstate location</p>
+          <h2 className="mt-2 text-2xl font-bold text-dark">Friendly service, now serving Downstate New York</h2>
+          <p className="mx-auto mt-3 max-w-3xl text-sm leading-6 text-body">This NYC / Downstate location is new, so we do not copy reviews from another Friendly Party Rental location and present them as local reviews. Book online with live date availability, transparent delivery pricing, a 25% deposit, and the same Friendly Party Rental equipment standards.</p>
+          <div className="mt-6 grid gap-3 text-sm font-semibold sm:grid-cols-4"><div className="rounded-xl bg-slate-50 p-4">Live online booking</div><div className="rounded-xl bg-slate-50 p-4">25% deposit</div><div className="rounded-xl bg-slate-50 p-4">Delivery & setup options</div><div className="rounded-xl bg-slate-50 p-4">Real NYC support</div></div>
+        </div>
+      </div>
+    </section>
+  )
   const shared = false
   return (
     <div className="bg-gray-50 py-12">

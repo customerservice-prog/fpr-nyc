@@ -177,3 +177,21 @@ test('NYC parity wave keeps RentSketch, trust and local content isolated and lau
   assert.match(design,/dedicated Friendly Party Rental NYC RentSketch workspace/)
   assert.match(design,/NYC checkout remains the pricing and date-availability authority/)
 })
+
+
+test('NYC RentSketch booking handoff uses exact NYC cart and checkout authority',()=>{
+  const booking=read('lib/rentsketchBooking.ts')
+  const flow=read('lib/rentsketchBookingFlow.ts')
+  const cart=read('components/public/CartContext.tsx')
+  const page=read('app/(public)/design-your-event/book/page.tsx')
+  assert.match(booking,/tenant: 'friendly-nyc'/)
+  assert.match(booking,/p\.tenant !== 'friendly-nyc'/)
+  assert.match(flow,/resolveExactDesignCart/)
+  assert.match(flow,/prepareDesignCheckout/)
+  assert.match(cart,/applyDesignCart/)
+  assert.match(cart,/RENTSKETCH_ATTRIBUTION_KEY/)
+  assert.match(page,/Friendly Party Rental NYC checkout/)
+  assert.match(page,/tenant=friendly-nyc&source=booking_return/)
+  assert.match(page,/readCatalog\(date/)
+  assert.match(page,/router\.replace\('\/checkout'\)/)
+})

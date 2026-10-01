@@ -7,7 +7,7 @@ import Image from 'next/image'
 
 const playfair = Playfair_Display({ weight: ['600', '700'], subsets: ['latin'], display: 'swap' })
 
-export const metadata = nycPageMetadata("/design-your-event","Event Layout Help in Riverdale, Bronx, NY","Explore event layout ideas for tents, tables and chairs. Contact our NYC / Downstate team for planning help; online Riverdale order access is not yet available.")
+export const metadata = nycPageMetadata("/design-your-event","2D & 3D Event Designer in Riverdale, Bronx, NY","Build a real-scale event layout with Friendly Party Rental NYC rentals in RentSketch. Plan tents, tables, chairs and event extras, or open the layout included with an eligible NYC order.")
 
 const features = [
   ['01', 'Start with your event', 'Tell our NYC / Downstate team your guest count and what you are planning.'],
@@ -75,6 +75,38 @@ export default function DesignYourEventPage() {
     <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 md:py-20 lg:px-8">
       <div className="mb-9 max-w-2xl"><p className="text-xs font-extrabold uppercase tracking-[.2em] text-[#D66E00]">Build with our equipment</p><h2 className={`${playfair.className} mt-2 text-3xl font-bold sm:text-4xl`}>Design more than a tent</h2><p className="mt-3 leading-7 text-gray-600">Work through the pieces that determine whether an event layout actually fits and feels comfortable.</p></div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{equipment.map(([title,kicker,body])=><div key={title} className="group rounded-2xl border border-gray-200 p-6 transition hover:-translate-y-1 hover:shadow-lg"><p className="text-xs font-bold uppercase tracking-wider text-[#D66E00]">{kicker}</p><h3 className="mt-3 text-xl font-black">{title}</h3><p className="mt-2 text-sm leading-6 text-gray-600">{body}</p></div>)}</div>
+    </section>
+
+    <section className="border-y border-gray-100 bg-[#FAFAF8] py-14 md:py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-8 lg:grid-cols-3">
+          <article className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200"><h2 className="text-2xl font-black">Start with the real property</h2><p className="mt-3 text-sm leading-7 text-gray-600">Enter the event address and your usable setup dimensions. Treat pools, fences, trees, slopes, overhead lines, septic areas and restricted surfaces as unavailable space. RentSketch helps visualize the plan; it is not a property survey.</p></article>
+          <article className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200"><h2 className="text-2xl font-black">Use the actual NYC rental catalog</h2><p className="mt-3 text-sm leading-7 text-gray-600">The Friendly Party Rental NYC designer loads the NYC tenant catalog and NYC rental pricing. Tents, tables, chairs, lighting, dance floors, concessions, inflatables and other mapped equipment can be placed around the event area.</p></article>
+          <article className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200"><h2 className="text-2xl font-black">Finish with live checkout</h2><p className="mt-3 text-sm leading-7 text-gray-600">When your layout is ready, carry supported rentals into Friendly Party Rental NYC checkout. The website rechecks the event date, current price, quantity, color options and inventory before anything is added to your cart.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 md:py-20 lg:px-8">
+      <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
+        <div><p className="text-xs font-extrabold uppercase tracking-[.2em] text-[#D66E00]">Included with eligible NYC bookings</p><h2 className={`${playfair.className} mt-2 text-3xl font-bold sm:text-4xl`}>Already booked? Open your saved event.</h2><p className="mt-4 leading-7 text-gray-600">Customers with an eligible Friendly Party Rental NYC booking can enter the first name on the order plus the order number. RentSketch verifies that exact booking and opens its saved event without asking for an email address.</p><a href="https://rentsketch.com/my-event/?tenant=friendly-nyc&mode=order" className="mt-6 inline-flex min-h-12 items-center justify-center rounded-full bg-[#0B1F3A] px-6 py-3 font-bold text-white">Open My NYC Order Layout</a></div>
+        <div className="rounded-2xl border border-gray-200 bg-white p-6"><h2 className="text-2xl font-black">What to measure before you start</h2><ul className="mt-4 space-y-3 text-sm leading-6 text-gray-600"><li>✓ Clear usable width and length.</li><li>✓ Grass, concrete, asphalt, deck or mixed surfaces.</li><li>✓ Gate widths, stairs and delivery access.</li><li>✓ Trees, pools, fences, slopes and overhead obstructions.</li><li>✓ Guest count plus buffet, bar, dance floor and walkway needs.</li></ul></div>
+      </div>
+    </section>
+
+    <section className="bg-[#0B1F3A] py-14 text-white md:py-20">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-3 lg:px-8">
+        <div><h2 className={`${playfair.className} text-3xl font-bold`}>2D for spacing</h2><p className="mt-3 text-sm leading-7 text-white/75">Use the plan view to compare footprints, guest flow, table spacing and the clear areas around tents and equipment.</p></div>
+        <div><h2 className={`${playfair.className} text-3xl font-bold`}>3D for perspective</h2><p className="mt-3 text-sm leading-7 text-white/75">Switch to 3D to understand scale, furniture placement, lighting and how the setup reads from a guest’s point of view.</p></div>
+        <div><h2 className={`${playfair.className} text-3xl font-bold`}>Friendly verifies the final setup</h2><p className="mt-3 text-sm leading-7 text-white/75">A visual plan does not guarantee fit, staking, ballast, venue approval or availability. Our team confirms those details before the order is finalized.</p></div>
+      </div>
+    </section>
+
+    <section className="mx-auto max-w-4xl px-4 py-14 sm:px-6 md:py-20">
+      <h2 className={`${playfair.className} text-3xl font-bold sm:text-4xl`}>Event Designer questions</h2>
+      <div className="mt-6 divide-y divide-gray-200">
+        {[['Does the designer reserve equipment?','No. The layout is a planning tool. Use Friendly checkout or a confirmed quote to reserve equipment.'],['Are the prices the NYC prices?','The NYC RentSketch tenant is synced from the Friendly Party Rental NYC catalog. Checkout still rechecks the current price before booking.'],['Can I start with a tent or inflatable I am viewing?','Yes. Supported tent and inflatable product pages can open RentSketch with that exact rental already selected.'],['Can I use it on my phone?','Yes. The hosted designer is responsive for phone, tablet and desktop use.'],['What if my venue has hard surfaces or tight access?','Enter the surface and usable dimensions in the planner, then tell our team about stairs, gates, elevators, loading rules and anchoring restrictions before booking.']].map(([q,a])=><details key={q} className="py-5"><summary className="cursor-pointer font-bold">{q}</summary><p className="mt-3 text-sm leading-7 text-gray-600">{a}</p></details>)}
+      </div>
     </section>
 
     <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 md:pb-20 lg:px-8">

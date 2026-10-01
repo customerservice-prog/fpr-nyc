@@ -1,0 +1,57 @@
+const test=require('node:test')
+const assert=require('node:assert/strict')
+const fs=require('node:fs')
+const read=p=>fs.readFileSync(p,'utf8')
+
+test('homepage has one semantic H1 source and richer local-intent/trust content',()=>{
+  const desktop=read('components/public/DesktopHome.tsx')
+  const hero=read('components/public/HeroSection.tsx')
+  const seo=read('components/public/NycHomeSeo.tsx')
+  const reviews=read('components/public/ReviewCarousel.tsx')
+  assert.equal((desktop.match(/<h1\b/g)||[]).length,0)
+  assert.equal((hero.match(/<h1\b/g)||[]).length,1)
+  assert.match(seo,/Linen &amp; Concession Rentals in Riverdale, NY/)
+  assert.match(reviews,/original Syracuse-area location/)
+  assert.match(reviews,/not NYC rentals/)
+})
+
+test('NYC RentSketch is isolated, free-planner copy is present, and item previews support tents and inflatables',()=>{
+  const policy=read('lib/nycRentSketch.ts')
+  const launcher=read('components/public/DesignYourEventLauncher.tsx')
+  const cta=read('components/public/DesignYourEventCTA.tsx')
+  const item=read('app/(public)/items/[...slug]/page.tsx')
+  const designer=read('app/(public)/design-your-event/page.tsx')
+  assert.match(policy,/NEXT_PUBLIC_NYC_RENTSKETCH_TENANT/)
+  assert.doesNotMatch(policy,/tenant=friendly(?:&|')/)
+  assert.match(launcher,/productSlug/)
+  assert.match(launcher,/inflatable-preview/)
+  assert.match(cta,/productType/)
+  assert.match(item,/See This Tent in a Layout/)
+  assert.match(item,/See This Inflatable in a Layout/)
+  assert.match(designer,/Free Friendly NYC planner/)
+  assert.match(designer,/Open the Free Event Designer/)
+})
+
+test('smart add-ons cover key rental categories without replacing Syracuse-synced explicit add-ons',()=>{
+  const item=read('app/(public)/items/[...slug]/page.tsx')
+  assert.match(item,/item\.suggestedAddonIds && item\.suggestedAddonIds\.length > 0/)
+  for(const slug of ['bounce-house-rentals','table-chair-rentals','concession-machine-rentals','photobooth-rentals','dance-floor-stage-rentals','linen-rentals','party-rental-packages']) assert.ok(item.includes("'"+slug+"'"),slug)
+  assert.match(item,/suggestedAddons=fallback/)
+})
+
+test('graduation and every city guide include visual layout planning',()=>{
+  const graduation=read('app/(public)/graduation-rentals/page.tsx')
+  const city=read('components/public/CityRentalGuide.tsx')
+  assert.match(graduation,/Plan the space before you book/)
+  assert.match(graduation,/Design My Graduation Layout/)
+  assert.match(city,/Plan your \{area\.name\} setup before you book/)
+  assert.match(city,/Design My/)
+  assert.match(city,/venue timing/i)
+})
+
+test('wedding vendor page contains researched independent categories and explicit non-partnership disclosure',()=>{
+  const vendors=read('app/(public)/wedding-vendors/page.tsx')
+  for(const section of ['Catering','DJ, MC & Event Production','Photography & Video','Florals & Event Design','Wedding Cakes & Desserts','Mobile Bar & Bartending']) assert.ok(vendors.includes(section),section)
+  assert.match(vendors,/No paid placements or implied partnerships/)
+  assert.match(vendors,/does not represent or guarantee/)
+})

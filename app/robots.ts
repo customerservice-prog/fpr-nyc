@@ -1,6 +1,8 @@
 import type {MetadataRoute} from 'next'
 import {NYC_SITE_URL,nycIndexingEnabled} from '@/lib/nycSeo'
 
+export const dynamic='force-dynamic'
+
 export default function robots():MetadataRoute.Robots{
   if(!nycIndexingEnabled()){
     return {rules:{userAgent:'*',disallow:'/'}}

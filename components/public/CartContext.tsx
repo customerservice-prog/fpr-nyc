@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useLayoutEffect, useState, useCallback } from 'react'
 import { migrateDeliveryOnlySession } from '@/lib/delivery-session'
+import { RENTSKETCH_ATTRIBUTION_KEY, bookingDateKey } from '@/lib/rentsketchBooking'
+import type { BookingAttribution } from '@/lib/rentsketchBooking'
 
 export interface CartItem {
   id: string
@@ -78,6 +80,8 @@ interface CartContextType {
   subtotal: number
   itemCount: number
   loaded: boolean
+  bookingDesign: BookingAttribution | null
+  applyDesignCart: (items: CartItem[], date: string, booking: BookingAttribution) => void
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
@@ -111,12 +115,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [exactTimeRequested, setExactTimeRequestedState] = useState<boolean>(false)
   const [schedulingDetails, setSchedulingDetailsState] = useState<SchedulingDetails>(DEFAULT_SCHEDULING_DETAILS)
   const [loaded, setLoaded] = useState(false)
+  const [bookingDesign, setBookingDesign] = useState<BookingAttribution | null>(null)
 
   // Run before descendant passive effects read bookingMethod or checkout_data.
   // Otherwise a category can rehydrate a retired warehouse-pickup appointment.
   useLayoutEffect(() => {
     try {
       migrateDeliveryOnlySession(localStorage, sessionStorage)
+      const savedBooking = localStorage.getItem(RENTSKETCH_ATTRIBUTION_KEY)
+      if (savedBooking) { try { setBookingDesign(JSON.parse(savedBooking)) } catch { localStorage.removeItem(RENTSKETCH_ATTRIBUTION_KEY) } }
       const saved = localStorage.getItem(CART_KEY)
       const savedDate = localStorage.getItem(DATE_KEY)
       const savedDuration = localStorage.getItem(DURATION_KEY)
@@ -227,7 +234,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = useCallback(() => {
     setItems([])
+    setBookingDesign(null)
     localStorage.removeItem(CART_KEY)
+    localStorage.removeItem(RENTSKETCH_ATTRIBUTION_KEY)
   }, [])
 
   const setEventDate = useCallback((date: string) => {
@@ -267,6 +276,41 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setSchedulingDetailsState((prev) => ({ ...prev, ...details }))
   }, [])
 
+  const applyDesignCart = useCallback((nextItems: CartItem[], date: string, booking: BookingAttribution) => {
+    const datedItems = nextItems.map((item) => ({ ...item, eventDate: date }))
+    const values: Record<string,string> = {
+      [CART_KEY]: JSON.stringify(datedItems),
+      [DATE_KEY]: date,
+      [RENTSKETCH_ATTRIBUTION_KEY]: JSON.stringify(booking),
+    }
+    const previous: Record<string,string|null> = {}
+    try {
+      for (const key of Object.keys(values)) previous[key] = localStorage.getItem(key)
+      for (const [key,value] of Object.entries(values)) localStorage.setItem(key,value)
+    } catch {
+      for (const [key,value] of Object.entries(previous)) {
+        if (value === null) localStorage.removeItem(key)
+        else localStorage.setItem(key,value)
+      }
+      throw new Error('Browser storage could not save this cart. Please enable site storage and retry.')
+    }
+    if (bookingDateKey(eventDate) !== date) {
+      setEventTimeSlotState(null)
+      setPickupTimeSlotState(null)
+      setDurationTierIdState(null)
+      setExactTimeRequestedState(false)
+      setSchedulingDetailsState(DEFAULT_SCHEDULING_DETAILS)
+      localStorage.removeItem(TIME_SLOT_KEY)
+      localStorage.removeItem(PICKUP_TIME_KEY)
+      localStorage.removeItem(DURATION_KEY)
+      localStorage.removeItem(EXACT_TIME_KEY)
+      localStorage.removeItem(SCHEDULING_KEY)
+    }
+    setItems(datedItems)
+    setEventDateState(date)
+    setBookingDesign(booking)
+  }, [eventDate])
+
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0)
 
@@ -276,7 +320,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       exactTimeRequested, schedulingDetails, addItem, removeItem, updateQuantity,
       clearCart, setEventDate, setDurationTierId, setEventTimeSlot, setDeliveryType,
       setPickupTimeSlot, setExactTimeRequested, setSchedulingDetails, subtotal,
-      itemCount, loaded,
+      itemCount, loaded, bookingDesign, applyDesignCart,
     }}>
       {children}
     </CartContext.Provider>

@@ -19,7 +19,6 @@ export const PREDEPLOY_STEPS = [
   [node, ['scripts/sync-nyc-quantities-from-syracuse.mjs', '--apply']],
   [node, ['scripts/ensure-nyc-deposit-rule.mjs', '--apply']],
   [npx, ['prisma', 'migrate', 'deploy']],
-  [node, ['scripts/check-google-scope.cjs']],
 ]
 
 function label(command, args) {

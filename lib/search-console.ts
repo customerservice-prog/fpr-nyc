@@ -98,9 +98,9 @@ async function query(siteUrl: string, token: string, body: unknown): Promise<{ r
 
 export async function getSearchConsoleSummary(rangeDays = 28): Promise<GscSummary> {
   const configuredSite = process.env.GSC_SITE_URL || process.env.NYC_GSC_PROPERTY
-  if (!configuredSite) return notConnected('Riverdale Search Console reporting is not configured (GSC_SITE_URL is not set). This does not mean the website is absent from Google.')
+  if (!configuredSite) return notConnected('NYC Search Console reporting is not configured. Set NYC_GSC_PROPERTY or GSC_SITE_URL to the canonical NYC Search Console property. This does not mean the website is absent from Google.')
   const siteUrl = normalizeNycSearchProperty(configuredSite)
-  if (!siteUrl) return notConnected('Only the the configured NYC Search Console property may be used here. New York and unrelated properties are not Riverdale search data.')
+  if (!siteUrl) return notConnected('Only sc-domain:friendlypartyrentalnyc.com or https://friendlypartyrentalnyc.com/ may be used for NYC Search Console reporting. Railway, www, Syracuse and other-location properties are rejected.')
   if (!hasGoogleCredentials()) return notConnected('Google credentials are not configured')
 
   const token = await getAccessToken(GSC_SCOPE)

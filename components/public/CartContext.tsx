@@ -231,6 +231,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const clearCart = useCallback(() => {
     setItems([])
     localStorage.removeItem(CART_KEY)
+    localStorage.removeItem(RENTSKETCH_ATTRIBUTION_KEY)
   }, [])
 
   const setEventDate = useCallback((date: string) => {

@@ -7,6 +7,7 @@ import LocalDeliveryLinks from '@/components/public/LocalDeliveryLinks'
 import { safeJsonLd } from '@/lib/jsonLd'
 import ItemGallery from '@/components/public/ItemGallery'
 import SuggestedAddons from '@/components/public/SuggestedAddons'
+import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 import { matchesTentLighting } from '@/lib/nycAddonMatching'
 import { itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 import { nycItemImagePath, nycItemPath, nycItemUrlSlug, pickStoredItem, storedItemSlugCandidates } from '@/lib/nycItemPath'
@@ -99,12 +100,41 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
     const lighting=await prisma.item.findMany({where:{displayToCustomer:true,status:'Available',quantity:{gt:0},name:{contains:'Tent Lighting',mode:'insensitive'}},select:{id:true,name:true,slug:true,description:true,cost:true,picture:true,quantity:true},take:100})
     suggestedAddons=lighting.filter(addon=>matchesTentLighting(item.name,addon.name))
   }
+  if (!suggestedAddons.length) {
+    const fallbackCategories: Record<string,string[]> = {
+      'bounce-house-rentals':['concession-machine-rentals','table-chair-rentals','generator-rentals'],
+      'table-chair-rentals':['linen-rentals','event-lighting-rentals'],
+      'concession-machine-rentals':['beverage-food-service','table-chair-rentals'],
+      'photobooth-rentals':['event-lighting-rentals','party-rental-accessories'],
+      'dance-floor-stage-rentals':['event-lighting-rentals','generator-rentals'],
+      'linen-rentals':['table-chair-rentals','event-lighting-rentals'],
+      'weddings':['linen-rentals','event-lighting-rentals','table-chair-rentals'],
+      'party-rental-packages':['event-lighting-rentals','linen-rentals','party-rental-accessories'],
+      'heater-fan-rentals':['generator-rentals','party-rental-accessories'],
+      'inflatable-movie-screen-rentals':['generator-rentals','table-chair-rentals'],
+      'foam-party-machine-rentals':['generator-rentals','party-rental-accessories'],
+      'yard-game-rentals':['table-chair-rentals','party-rental-accessories'],
+      'event-lighting-rentals':['generator-rentals','party-rental-accessories'],
+      'beverage-food-service':['table-chair-rentals','linen-rentals'],
+    }
+    const categorySlugs=fallbackCategories[item.category.slug]||[]
+    if(categorySlugs.length){
+      const fallback=await prisma.item.findMany({
+        where:{id:{not:item.id},displayToCustomer:true,status:'Available',quantity:{gt:0},type:'Regular',category:{slug:{in:categorySlugs}}},
+        orderBy:[{sortOrder:'asc'},{name:'asc'}],
+        select:{id:true,name:true,slug:true,description:true,cost:true,picture:true,quantity:true},
+        take:12,
+      })
+      suggestedAddons=fallback.filter(addon=>!/\b(fee|replacement|upgrade|extra hour|delivery|travel)\b/i.test(addon.name)).slice(0,3)
+    }
+  }
   // Add-on cards show NYC copy and the NYC photo proxy (never another store's URL or wording).
   const validSuggestedAddons = suggestedAddons
     .filter((addon) => { const slug = typeof addon.slug === 'string' ? addon.slug.trim() : ''; return slug.length > 0 && slug.toLowerCase() !== 'null' && slug.toLowerCase() !== 'undefined' })
     .map((addon) => ({ ...addon, description: itemDescriptionForNyc(addon.name, addon.description, Number(addon.cost)), picture: addon.picture ? nycItemImagePath(addon.slug) : null }))
 
   const isStandaloneTent = /\btent\b/i.test(item.name) && /\b\d+\s*(?:x|×)\s*\d+\b/i.test(item.name) && !/(?:side\s*wall|sidewall|package|accessor)/i.test(item.name)
+  const isInflatable = item.category.slug === 'bounce-house-rentals' && !/\b(package|blower|sandbag|extension cord|accessor)\b/i.test(item.name)
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -155,6 +185,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
           )}
           {item.colorOptions && item.colorOptions.length > 0 && <div className="mb-4"><p className="text-sm font-medium text-gray-700 mb-1">Available colors:</p><div className="flex flex-wrap gap-2">{item.colorOptions.map((c) => <span key={c} className="text-xs bg-gray-100 border rounded-full px-3 py-1 text-gray-700">{c}</span>)}</div><p className="text-xs text-gray-500 mt-1">Choose your color while checking availability and adding the item to your order.</p></div>}
           <p className="text-gray-700 mb-6 whitespace-pre-line leading-7">{description}</p>
+          {(isStandaloneTent || isInflatable) && <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-5"><h2 className="text-lg font-bold text-slate-950">See this rental in your event layout</h2><p className="mt-2 text-sm leading-6 text-slate-600">Preview this {isInflatable?'inflatable':'tent'} in the Friendly NYC event designer, then add tables, chairs and other equipment around it. The layout is a planning tool; availability and final setup requirements are confirmed separately.</p><DesignYourEventCTA source="item_page_visual_preview" label={isInflatable?'See This Inflatable in a Layout':'See This Tent in a Layout'} tent={item.name} tentSlug={segment} productType={isInflatable?'inflatable':'tent'} className="mt-4"/></div>}
           <SuggestedAddons addons={validSuggestedAddons} />
           {validRelatedItems.length > 0 && <div className="mb-6"><h2 className="text-sm font-semibold text-gray-700 mb-2">You Might Also Like</h2><div className="grid grid-cols-2 gap-2">{validRelatedItems.map((ri) => <Link key={ri.id} href={nycItemPath(ri.slug!)} prefetch={false} className="block border rounded-lg p-2 text-sm hover:shadow-md transition"><span className="block font-medium text-gray-900">{ri.name}</span><span className="block text-xs text-gray-500">From ${Number(ri.cost).toFixed(2)}/day</span></Link>)}</div></div>}
           <Link href={`/category/${item.category.slug}`} className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">Check Availability & Book</Link>

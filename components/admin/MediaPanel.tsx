@@ -3,6 +3,18 @@
 import { useEffect, useState } from 'react'
 import ZoomEmbeddedMeeting, { ZoomSdkSession } from './ZoomEmbeddedMeeting'
 
+function meetingLinkLabel(link: string | null) {
+  if (!link) return 'Join Zoom'
+  try {
+    const host = new URL(link).hostname.toLowerCase()
+    if (host === 'meet.google.com') return 'Join Google Meet'
+    if (host.endsWith('zoom.us')) return 'Join Zoom'
+  } catch {
+    // Fall back to a generic label for malformed or legacy links.
+  }
+  return 'Open Meeting'
+}
+
 function getYouTubeEmbedUrl(input: string): string | null {
   const trimmed = input.trim()
   if (!trimmed) return null
@@ -240,7 +252,7 @@ export default function MediaPanel() {
             )}
             <input
               type="text"
-              placeholder="Zoom link (optional, else default is used)"
+              placeholder="Meeting link (Google Meet or Zoom, optional)"
               value={newMeeting.zoomLink}
               onChange={(e) => setNewMeeting({ ...newMeeting, zoomLink: e.target.value })}
               className="w-full border rounded px-2 py-1 text-sm"
@@ -315,7 +327,7 @@ export default function MediaPanel() {
                       rel="noopener noreferrer"
                       className="flex-1 text-center text-xs border rounded px-2 py-1 hover:bg-gray-50 whitespace-nowrap bg-admin-green text-white border-admin-green"
                     >
-                      Join Zoom
+                      {meetingLinkLabel(m.zoomLink)}
                     </a>
                   )}
                   {m.zoomMeetingId && !m.pending && (
@@ -344,20 +356,36 @@ export default function MediaPanel() {
         </div>
       </div>
 
-      <div className="flex gap-2 mt-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3">
         <a
-          href="https://mail.google.com/"
+          href="https://mail.google.com/mail/u/0/#inbox"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 text-center text-sm border rounded px-3 py-1.5 hover:bg-gray-50"
+          className="text-center text-sm border rounded px-3 py-2 hover:bg-gray-50"
         >
-          Open Email
+          Open Gmail
+        </a>
+        <a
+          href="https://meet.google.com/new"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-center text-sm border rounded px-3 py-2 hover:bg-gray-50"
+        >
+          Start Google Meet
+        </a>
+        <a
+          href="https://calendar.google.com/calendar/u/0/r"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-center text-sm border rounded px-3 py-2 hover:bg-gray-50"
+        >
+          Google Calendar
         </a>
         <a
           href="https://zoom.us/join"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 text-center text-sm border rounded px-3 py-1.5 hover:bg-gray-50"
+          className="text-center text-sm border rounded px-3 py-2 hover:bg-gray-50"
         >
           Start Zoom Call
         </a>

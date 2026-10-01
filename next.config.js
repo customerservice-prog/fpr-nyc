@@ -76,6 +76,14 @@ const nextConfig = {
       ...privatePaths.map(source=>({source,headers:[{key:'X-Robots-Tag',value:'noindex, follow'}]})),
     ]
   },
+  async rewrites() {
+    return [
+      {
+        source: '/:file(google[A-Za-z0-9_-]+\\.html)',
+        destination: '/api/google-site-verification?file=:file',
+      },
+    ]
+  },
   async redirects() {
     // Keep temporary-host redirects internal to this NYC service. Custom-domain
     // canonicalization will be added only when the final NYC domain is connected.

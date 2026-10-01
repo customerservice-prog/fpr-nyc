@@ -7,6 +7,7 @@ import LocalDeliveryLinks from '@/components/public/LocalDeliveryLinks'
 import { safeJsonLd } from '@/lib/jsonLd'
 import ItemGallery from '@/components/public/ItemGallery'
 import SuggestedAddons from '@/components/public/SuggestedAddons'
+import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 import { matchesTentLighting } from '@/lib/nycAddonMatching'
 import { itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 import { nycItemImagePath, nycItemPath, nycItemUrlSlug, pickStoredItem, storedItemSlugCandidates } from '@/lib/nycItemPath'
@@ -105,6 +106,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
     .map((addon) => ({ ...addon, description: itemDescriptionForNyc(addon.name, addon.description, Number(addon.cost)), picture: addon.picture ? nycItemImagePath(addon.slug) : null }))
 
   const isStandaloneTent = /\btent\b/i.test(item.name) && /\b\d+\s*(?:x|×)\s*\d+\b/i.test(item.name) && !/(?:side\s*wall|sidewall|package|accessor)/i.test(item.name)
+  const isInflatable = item.category.slug === 'bounce-house-rentals'
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -155,6 +157,18 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
           )}
           {item.colorOptions && item.colorOptions.length > 0 && <div className="mb-4"><p className="text-sm font-medium text-gray-700 mb-1">Available colors:</p><div className="flex flex-wrap gap-2">{item.colorOptions.map((c) => <span key={c} className="text-xs bg-gray-100 border rounded-full px-3 py-1 text-gray-700">{c}</span>)}</div><p className="text-xs text-gray-500 mt-1">Choose your color while checking availability and adding the item to your order.</p></div>}
           <p className="text-gray-700 mb-6 whitespace-pre-line leading-7">{description}</p>
+          {(isStandaloneTent || isInflatable) && <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+            <h2 className="text-lg font-bold text-slate-900">See this rental in your event layout</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Open the Friendly Party Rental NYC RentSketch designer with this exact {isInflatable ? 'inflatable' : 'tent'} already selected, then add tables, chairs and other rentals around it.</p>
+            <DesignYourEventCTA
+              source={isInflatable ? 'nyc_item_inflatable' : 'nyc_item_tent'}
+              label={isInflatable ? 'See This Inflatable in a Layout' : 'See This Tent in a Layout'}
+              tent={item.name}
+              tentSlug={segment}
+              productType={isInflatable ? 'inflatable' : 'tent'}
+              className="mt-4"
+            />
+          </div>}
           <SuggestedAddons addons={validSuggestedAddons} />
           {validRelatedItems.length > 0 && <div className="mb-6"><h2 className="text-sm font-semibold text-gray-700 mb-2">You Might Also Like</h2><div className="grid grid-cols-2 gap-2">{validRelatedItems.map((ri) => <Link key={ri.id} href={nycItemPath(ri.slug!)} prefetch={false} className="block border rounded-lg p-2 text-sm hover:shadow-md transition"><span className="block font-medium text-gray-900">{ri.name}</span><span className="block text-xs text-gray-500">From ${Number(ri.cost).toFixed(2)}/day</span></Link>)}</div></div>}
           <Link href={`/category/${item.category.slug}`} className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">Check Availability & Book</Link>

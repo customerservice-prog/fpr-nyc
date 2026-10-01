@@ -1,12 +1,12 @@
 const test=require('node:test')
 const assert=require('node:assert/strict')
 const fs=require('node:fs')
-test('Riverdale standalone tent pages use a static rental photo, not a RentSketch launcher',()=>{
+test('NYC standalone tent and inflatable pages keep real photos and add isolated RentSketch layout previews',()=>{
   const source=fs.readFileSync('app/(public)/items/[...slug]/page.tsx','utf8')
   assert.match(source,/See what the \{item\.name\} looks like/)
   assert.match(source,/\/api\/item-image\//)
-  assert.doesNotMatch(source,/source="tent_product_page"/)
-  assert.doesNotMatch(source,/See This Tent in a Layout/)
-  assert.doesNotMatch(source,/NYC_RENTSKETCH_TENANT/)
-  assert.doesNotMatch(source,/DesignYourEventCTA/)
+  assert.match(source,/DesignYourEventCTA/)
+  assert.match(source,/See This Tent in a Layout/)
+  assert.match(source,/See This Inflatable in a Layout/)
+  assert.match(source,/productType=\{isInflatable\?'inflatable':'tent'\}/)
 })

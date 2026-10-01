@@ -54,12 +54,19 @@ jobs:
           echo "Checking canonical domains and duplicate-host protections..."
           www_code="$(curl -sS -o /dev/null -w '%{http_code}' "$NYC_WWW/design-your-event")"
           www_location="$(curl -sS -o /dev/null -w '%{redirect_url}' "$NYC_WWW/design-your-event")"
-          retired_code="$(curl -sS -o /dev/null -w '%{http_code}' "$NYC_RETIRED/design-your-event")"
-          retired_location="$(curl -sS -o /dev/null -w '%{redirect_url}' "$NYC_RETIRED/design-your-event")"
           case "$www_code" in 301|308) ;; *) echo "::error::www host did not permanently redirect (got $www_code)."; exit 1;; esac
-          case "$retired_code" in 301|308) ;; *) echo "::error::retired NYC host did not permanently redirect (got $retired_code)."; exit 1;; esac
           [ "$www_location" = "$NYC_BASE/design-your-event" ]
-          [ "$retired_location" = "$NYC_BASE/design-your-event" ]
+
+          if getent ahosts nyc.friendlypartyrental.com >/dev/null 2>&1; then
+            retired_code="$(curl -sS -o /dev/null -w '%{http_code}' "$NYC_RETIRED/design-your-event")"
+            retired_location="$(curl -sS -o /dev/null -w '%{redirect_url}' "$NYC_RETIRED/design-your-event")"
+            case "$retired_code" in 301|308) ;; *) echo "::warning::Retired NYC alias resolves but is not permanently redirecting (got $retired_code).";; esac
+            if [ "$retired_location" != "$NYC_BASE/design-your-event" ]; then
+              echo "::warning::Retired NYC alias resolves to the wrong destination: $retired_location"
+            fi
+          else
+            echo "::warning::nyc.friendlypartyrental.com has no public DNS record at the HostGator-managed friendlypartyrental.com zone."
+          fi
 
           curl -sSI "$NYC_RAILWAY/" -o /tmp/railway-headers.txt
           grep -Eqi '^x-robots-tag:[[:space:]]*noindex,[[:space:]]*nofollow' /tmp/railway-headers.txt

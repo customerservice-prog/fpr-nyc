@@ -1,0 +1,100 @@
+name: NYC Live Customer Path Smoke
+
+on:
+  push:
+    branches:
+      - production-nyc-live
+  schedule:
+    - cron: '45 13 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nyc-live-customer-path
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      NYC_BASE: https://friendlypartyrentalnyc.com
+      RENTSKETCH_BASE: https://rentsketch.com
+    steps:
+      - name: Verify live NYC storefront and RentSketch path
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          fetch() {
+            curl --fail --silent --show-error --location \
+              --retry 2 --retry-delay 2 --retry-all-errors \
+              --connect-timeout 10 --max-time 25 \
+              -H 'User-Agent: FPR-NYC-Live-Smoke/1.0' "$@"
+          }
+
+          echo "Waiting for live NYC homepage..."
+          for attempt in $(seq 1 30); do
+            if fetch "$NYC_BASE/" -o /tmp/home.html \
+              && grep -qi 'Friendly Party Rental NYC' /tmp/home.html; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              echo "::error::NYC homepage never became healthy."
+              exit 1
+            fi
+            sleep 10
+          done
+
+          echo "Waiting for public indexing state..."
+          for attempt in $(seq 1 30); do
+            fetch "$NYC_BASE/robots.txt" -o /tmp/robots.txt || true
+            sitemap_url="$(awk 'tolower($1)=="sitemap:" {print $2; exit}' /tmp/robots.txt 2>/dev/null || true)"
+            root_block="$(awk 'tolower($1)=="disallow:" && $2=="/" {print "yes"; exit}' /tmp/robots.txt 2>/dev/null || true)"
+            if [ "$sitemap_url" = "$NYC_BASE/sitemap.xml" ] && [ "$root_block" != "yes" ]; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              echo "----- robots.txt -----"
+              cat /tmp/robots.txt || true
+              echo "----------------------"
+              echo "::error::NYC robots.txt never reached the public indexable state."
+              exit 1
+            fi
+            sleep 10
+          done
+
+          echo "Checking sitemap..."
+          fetch "$NYC_BASE/sitemap.xml" -o /tmp/sitemap.xml
+          grep -Fq "$NYC_BASE/design-your-event" /tmp/sitemap.xml
+          grep -Fq "$NYC_BASE/category/tent-rentals" /tmp/sitemap.xml
+
+          echo "Checking NYC catalog API..."
+          fetch "$NYC_BASE/api/items" -o /tmp/items.json
+          jq -e '.items | type == "array" and length > 0' /tmp/items.json >/dev/null
+          jq -e '[.items[] | select(.slug != null and .name != null and .cost != null)] | length > 0' /tmp/items.json >/dev/null
+
+          echo "Checking NYC designer page..."
+          fetch "$NYC_BASE/design-your-event" -o /tmp/designer.html
+          grep -qi 'RentSketch' /tmp/designer.html
+          grep -qi 'Friendly Party Rental NYC' /tmp/designer.html
+          if grep -Eqi '<meta[^>]+name=["'"'"']robots["'"'"'][^>]+content=["'"'"'][^"'"'"']*noindex' /tmp/designer.html; then
+            echo "::error::NYC designer page is unexpectedly noindex."
+            exit 1
+          fi
+
+          echo "Checking dedicated NYC RentSketch designer..."
+          fetch "$RENTSKETCH_BASE/designer/?tenant=friendly-nyc&source=production_smoke" -o /tmp/rentsketch-designer.html
+          grep -Eqi 'RentSketch|Event Designer|Design' /tmp/rentsketch-designer.html
+
+          echo "Checking existing-order RentSketch access..."
+          fetch "$RENTSKETCH_BASE/my-event/?tenant=friendly-nyc&mode=order" -o /tmp/rentsketch-order.html
+          grep -Eqi 'order|first name|RentSketch|event' /tmp/rentsketch-order.html
+
+          echo "Checking NYC booking-return route without creating an order..."
+          fetch "$NYC_BASE/design-your-event/book" -o /tmp/booking-return.html
+          grep -Eqi 'RentSketch|checkout|design|layout' /tmp/booking-return.html
+
+          echo "NYC live customer-path smoke passed."

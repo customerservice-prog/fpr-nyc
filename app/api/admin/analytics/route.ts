@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { GA_MEASUREMENT_ID } from '@/lib/gtag'
+import { getGoogleCalendarConnection, googleConnectionHasSearchConsoleScope } from '@/lib/googleCalendar'
 import {
   calculateGrossBookedRevenue,
   calculateNetBookedRevenue,
@@ -132,13 +133,16 @@ export async function GET(request: Request) {
   const itemReservations = allOrderItems.map((oi) => ({ itemId: oi.itemId, orderId: oi.orderId, quantity: oi.quantity }))
   const inventoryUtilization = calculateInventoryUtilization(items, itemReservations, orderMeta, 14, now)
 
-  // Google connection status. These become "connected" once the corresponding
-  // server-side credentials are added to the environment. Until then the UI
-  // shows a connect state instead of fabricated numbers.
+  // Google connection status. Search Console can use the same encrypted
+  // business-Google OAuth connection as Calendar, or the legacy service-account path.
+  const googleConnection = await getGoogleCalendarConnection().catch(() => null)
   const google = {
     measurementId: GA_MEASUREMENT_ID,
     analyticsConnected: Boolean(process.env.GA_PROPERTY_ID && (process.env.GOOGLE_SERVICE_ACCOUNT_JSON || process.env.GOOGLE_APPLICATION_CREDENTIALS)),
-    searchConsoleConnected: Boolean((process.env.GSC_SITE_URL || process.env.NYC_GSC_PROPERTY) && (process.env.GOOGLE_SERVICE_ACCOUNT_JSON || process.env.GOOGLE_APPLICATION_CREDENTIALS)),
+    searchConsoleConnected: Boolean(
+      (process.env.GSC_SITE_URL || process.env.NYC_GSC_PROPERTY) &&
+      (googleConnectionHasSearchConsoleScope(googleConnection) || process.env.GOOGLE_SERVICE_ACCOUNT_JSON || process.env.GOOGLE_APPLICATION_CREDENTIALS)
+    ),
     analyticsUrl: 'https://analytics.google.com/',
     searchConsoleUrl: 'https://search.google.com/search-console',
   }

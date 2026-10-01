@@ -70,11 +70,24 @@ test('NYC entity schema exposes the service catalog without fabricating a storef
 
 test('ranking wave strengthens existing NYC authority URLs instead of adding doorway routes',()=>{
   const seo=read('lib/nycSeo.ts')
-  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-09-27-nyc-full-location-v1'"))
+  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-10-01-nyc-local-guides-v2'"))
   for(const bad of [
     '/tent-rentals-greenville-sc',
     '/table-chair-rentals-greenville-sc',
     '/bounce-house-rentals-greenville-sc',
     '/wedding-rentals-greenville-sc',
   ]) assert.ok(!seo.includes(bad), bad)
+})
+
+
+test('local service-area indexing is earned by verified planning depth',()=>{
+  const resources=read('lib/nycLocalPlanningResources.ts')
+  const sitemap=read('app/sitemap.ts')
+  const city=read('components/public/CityRentalGuide.tsx')
+  for(const slug of ['riverdale','fieldston','kingsbridge','bronx','yonkers','mount-vernon','new-rochelle','bronxville','pelham']){
+    assert.match(resources,new RegExp("(?:'"+slug+"'|"+slug+"):\\s*\\{"),slug)
+  }
+  assert.doesNotMatch(resources,/^  (?:'tuckahoe'|tuckahoe|'eastchester'|eastchester):\s*\{/m)
+  assert.ok(sitemap.includes("NYC_SERVICE_AREAS.filter(a=>a.href!=='/'&&NYC_LOCAL_PLANNING[a.slug])"))
+  assert.ok(city.includes('Official public planning resource'))
 })

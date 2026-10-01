@@ -57,14 +57,20 @@ export default function AdminNav() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 h-20" style={{ backgroundColor: '#2d6a2d', borderBottom: '3px solid #4CAF50' }}>
-      <div className="flex items-center gap-4">
-        <Link href={NYC_PUBLIC_ORIGIN} target="_blank" rel="noopener noreferrer" className="block rounded-md bg-white p-1">
+      <div className="flex shrink-0 items-center gap-4">
+        <Link
+          href={NYC_PUBLIC_ORIGIN}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open Friendly Party Rental NYC website"
+          className="block shrink-0 rounded-md bg-white p-1"
+        >
           <Image
             src={NYC_LOGO_PATH}
             alt="Friendly Party Rental NYC"
             width={NYC_LOGO_WIDTH}
             height={NYC_LOGO_HEIGHT}
-            className="block h-14 w-auto"
+            className="block h-14 w-28 shrink-0 object-contain"
             unoptimized
           />
         </Link>

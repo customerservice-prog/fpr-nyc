@@ -47,14 +47,14 @@ test('priority IndexNow list contains NYC service-area pages and no SC city rout
   assert.doesNotMatch(submit,/friendlypartyrentalsc\.com/)
 })
 
-test('NYC city pages stay out of the sitemap until unique local planning content exists',()=>{
+test('all NYC city pages have unique planning notes and become sitemap-eligible at launch',()=>{
   const resources=read('lib/nycLocalPlanningResources.ts')
   const serviceAreas=read('lib/nycServiceAreas.ts')
   const guide=read('components/public/CityRentalGuide.tsx')
   const sitemap=read('app/sitemap.ts')
-  assert.ok(resources.includes('intentionally remain empty'))
-  for(const slug of ['riverdale','fieldston','kingsbridge','bronx','yonkers','mount-vernon','new-rochelle']){
+  for(const slug of ['riverdale','fieldston','kingsbridge','bronx','yonkers','mount-vernon','new-rochelle','bronxville','tuckahoe','eastchester','pelham']){
     assert.ok(serviceAreas.includes("slug:'"+slug+"'"),slug)
+    assert.ok(resources.includes(slug.includes('-')?"'"+slug+"'":slug+':'),slug+' unique planning note')
   }
   assert.ok(guide.includes('const hasLocalGuide=Boolean(NYC_LOCAL_PLANNING[slug])'))
   assert.ok(sitemap.includes("NYC_LOCAL_PLANNING[a.slug]"))
@@ -130,4 +130,35 @@ test('daily IndexNow refresh uses NYC searchable URLs and safely no-ops before l
 test('NYC search revision reflects the independent full-location rebuild',()=>{
   const seo=read('lib/nycSeo.ts')
   assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-09-27-nyc-full-location-v1'"))
+})
+
+
+test('live storefront gap fixes stay wired together',()=>{
+  const rentSketch=read('lib/nycRentSketch.ts')
+  const launcher=read('components/public/DesignYourEventLauncher.tsx')
+  const item=read('app/(public)/items/[...slug]/page.tsx')
+  const reviews=read('components/public/ReviewCarousel.tsx')
+  const reviewApi=read('app/api/reviews/route.ts')
+  const city=read('components/public/CityRentalGuide.tsx')
+  const graduation=read('app/(public)/graduation-rentals/page.tsx')
+  const vendors=read('app/(public)/wedding-vendors/page.tsx')
+  const design=read('app/(public)/design-your-event/page.tsx')
+  const home=read('components/public/DesktopHome.tsx')
+  const homeSeo=read('components/public/NycHomeSeo.tsx')
+  const relay=read('app/api/integrations/rentsketch/route.ts')
+
+  assert.match(rentSketch,/NYC_RENTSKETCH_TENANT = 'friendly-nyc'/)
+  assert.match(rentSketch,/tenant=friendly-nyc&mode=order/)
+  assert.match(relay,/event_pass\.order_lookup/)
+  assert.match(launcher,/inflatable-preview/)
+  assert.match(item,/See This Inflatable in a Layout/)
+  assert.match(item,/Frequently Added With This|SuggestedAddons/)
+  assert.match(reviews,/NYC \/ Downstate customer reviews are building now/)
+  assert.match(reviewApi,/NYC_GOOGLE_PLACE_ID/)
+  assert.match(city,/Build a visual layout for \{area\.name\}/)
+  assert.match(graduation,/Plan the space before you book/)
+  assert.match(vendors,/Relish Catering \+ Hospitality/)
+  assert.match(design,/Open My NYC Order Layout/)
+  assert.equal((home.match(/<h1/g)||[]).length,0,'DesktopHome intro must not create a second H1')
+  assert.match(homeSeo,/Linens, Concessions &amp; Event Extras/)
 })

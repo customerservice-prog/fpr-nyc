@@ -7,8 +7,19 @@ import BestSellersChart from '@/components/admin/BestSellersChart'
 import WeatherWidget from '@/components/admin/WeatherWidget'
 import RevenueChart from '@/components/admin/RevenueChart'
 import MediaPanel from '@/components/admin/MediaPanel'
+import FriendlyPartyRentalHub from '@/components/admin/FriendlyPartyRentalHub'
 import { formatCurrency } from '@/lib/utils'
 import { format } from 'date-fns'
+
+interface TipPerformanceData {
+  totals: {
+    paid: number
+    tipped: number
+    tipRate: number
+    avgTip: number
+    tipRevenue: number
+  }
+}
 
 interface DashboardData {
   collectedToday: number
@@ -53,6 +64,7 @@ export default function AdminDashboard() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [bestSellers, setBestSellers] = useState<Array<{ name: string; count: number }>>([])
   const [revenue, setRevenue] = useState<Array<{ month: string; revenue: number }>>([])
+  const [tipPerformance, setTipPerformance] = useState<TipPerformanceData | null>(null)
   const [filter, setFilter] = useState('Active')
   const [newTask, setNewTask] = useState('')
   async function handleAddTask() {
@@ -83,7 +95,15 @@ export default function AdminDashboard() {
   }
 
   const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [jobFilter, setJobFilter] = useState('all')
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+
+  const handleCalendarMonthChange = (date: Date) => {
+    setCurrentMonth(date)
+    const now = new Date()
+    const historical = date.getFullYear() < now.getFullYear() || (date.getFullYear() === now.getFullYear() && date.getMonth() < now.getMonth())
+    if (historical) setFilter('All Orders')
+  }
 
   const money = (n?: number) => `$${(n || 0).toFixed(2)}`
 
@@ -124,6 +144,13 @@ export default function AdminDashboard() {
   }, [currentMonth])
 
   useEffect(() => {
+    fetch('/api/admin/tip-conversion?days=30')
+      .then((r) => r.ok ? r.json() : Promise.reject(new Error('tip conversion unavailable')))
+      .then((d) => setTipPerformance(d))
+      .catch(() => setTipPerformance(null))
+  }, [])
+
+  useEffect(() => {
 
     fetch('/api/admin/reports/best-sellers')
       .then((r) => r.json())
@@ -142,16 +169,33 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-4">
-        <div className="grid lg:grid-cols-3 gap-6">
+      <details className="mb-4 rounded-lg border border-gray-200 bg-white shadow-sm">
+        <summary className="cursor-pointer px-4 py-3 text-sm font-bold text-green-800">All tools</summary>
+        <div className="space-y-3 px-4 pb-4">
+          <FriendlyPartyRentalHub />
+        </div>
+      </details>
+
+      <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 flex flex-col gap-4">
+          <label className="mb-3 block text-xs font-semibold text-gray-600">Job type
+            <select aria-label="Job type" value={jobFilter} onChange={(e) => setJobFilter(e.target.value)} className="ml-2 rounded border bg-white px-3 py-2 text-sm">
+              <option value="all">All jobs</option>
+              <option value="delivery">Green · Delivery / drop-off</option>
+              <option value="collection">Blue · Pickup from event</option>
+              <option value="customerPickup">Red · Customer pickup / return</option>
+              <option value="complete">Completed pickups</option>
+            </select>
+          </label>
           <OrderCalendar
             orders={data?.calendarOrders || []}
             closedDates={closedDateStrings}
             filter={filter}
             onFilterChange={setFilter}
             currentMonth={currentMonth}
-            onMonthChange={setCurrentMonth}
+            onMonthChange={handleCalendarMonthChange}
             onDateClick={(d) => setSelectedDate(d)}
+            jobFilter={jobFilter}
             compact
           />
           <MediaPanel />
@@ -196,6 +240,36 @@ export default function AdminDashboard() {
             />
           </div>
 
+          <div className="bg-white rounded shadow p-4 border-l-[5px] border-emerald-600">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="font-bold text-dark text-sm">Tip Performance</h3>
+                <p className="mt-0.5 text-xs text-gray-500">Paid-order tip measurement</p>
+              </div>
+              <Link href="/admin/reports/tip-report" className="text-xs font-bold text-emerald-700 hover:underline">Details →</Link>
+            </div>
+            {!tipPerformance ? (
+              <p className="mt-4 text-sm text-gray-400">Waiting for tip data…</p>
+            ) : (
+              <>
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Live tip rate</p>
+                    <p className="mt-1 text-3xl font-black text-dark">{(tipPerformance.totals.tipRate * 100).toFixed(1)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Tip revenue</p>
+                    <p className="mt-1 text-2xl font-black text-emerald-700">{formatCurrency(tipPerformance.totals.tipRevenue)}</p>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-gray-600">
+                  <span className="font-semibold">{tipPerformance.totals.tipped}</span> tipped out of <span className="font-semibold">{tipPerformance.totals.paid}</span> paid orders
+                  {tipPerformance.totals.tipped > 0 && <> · {formatCurrency(tipPerformance.totals.avgTip)} avg tip</>}
+                </div>
+              </>
+            )}
+          </div>
+
           <div className="bg-white rounded shadow p-4">
             <h3 className="font-bold text-dark text-sm mb-3">Best Sellers (Last 60 Days)</h3>
             <BestSellersChart data={bestSellers} />
@@ -207,9 +281,12 @@ export default function AdminDashboard() {
 
           </div>
 
-          <div className="bg-white rounded shadow p-4">
-            <Link href="/admin/reports" className="text-secondary text-sm hover:underline">
+          <div className="bg-white rounded shadow p-4 space-y-2">
+            <Link href="/admin/reports" className="block text-secondary text-sm hover:underline">
               Month to Date → Go to report
+            </Link>
+            <Link href="/admin/reports/tip-report" className="block text-secondary text-sm font-semibold hover:underline">
+              Tips → Open Tip Report
             </Link>
           </div>
 
@@ -224,10 +301,10 @@ export default function AdminDashboard() {
 
           <div className="bg-white rounded shadow p-4">
             <h3 className="font-bold text-dark text-base mb-2">Control Panel Colors</h3>
-            <div className="space-y-1 text-xs">
-              <div className="flex items-center gap-2"><span className="admin-badge-active" /> Active (delivery)</div>
-              <div className="flex items-center gap-2"><span className="admin-badge-pickup" /> Active (pickup) / Incomplete</div>
-              <div className="flex items-center gap-2"><span className="admin-badge-multiday" /> Multiday</div>
+            <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs" aria-label="Job color key">
+              <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm border-2 border-green-600 bg-green-50" />Delivery / drop-off</span>
+              <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm border-2 border-blue-600 bg-blue-50" />Pickup from event</span>
+              <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm border-2 border-red-600 bg-red-50" />Customer pickup / return</span>
             </div>
           </div>
         </div>

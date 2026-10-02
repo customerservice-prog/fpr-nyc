@@ -157,3 +157,18 @@ test('category pages publish crawlable collection schema without inherited longe
   assert.ok(page.includes('nycItemPath(item.slug!)'))
   assert.doesNotMatch(page,/10\+ years|more than 10 years/i)
 })
+
+
+test('NYC review flywheel never sends an empty Google review link',()=>{
+  const email=read('lib/email.ts')
+  const utils=read('lib/utils.ts')
+  const thankYou=read('app/api/cron/thank-you/route.ts')
+  const migration=read('prisma/migrations/20260708120000_add_automatic_messages/migration.sql')
+  assert.ok(utils.includes('NEXT_PUBLIC_GOOGLE_BUSINESS_PROFILE_URL'))
+  assert.ok(email.includes('BUSINESS.googleProfile ?'))
+  assert.ok(email.includes('Review ${BUSINESS.name} on Google'))
+  assert.ok(email.includes('please reply directly to this email'))
+  assert.ok(thankYou.includes("id: 'automsg_thank_you'"))
+  assert.ok(migration.includes("'automsg_thank_you'"))
+  assert.ok(migration.includes("'After Order Ends'"))
+})

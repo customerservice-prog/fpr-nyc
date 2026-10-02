@@ -121,3 +121,16 @@ test('existing event-intent pages are indexable, canonical and included in sitem
     assert.ok(read('lib/eventPlanning.ts').includes("slug: '"+slug+"'"),slug)
   }
 })
+
+
+test('NYC trust copy avoids inherited longevity and reputation claims',()=>{
+  const weddings=read('app/(public)/weddings/page.tsx')
+  const graduation=read('app/(public)/graduation-rentals/page.tsx')
+  const chiavari=read('app/(public)/chiavari-chair-rentals/page.tsx')
+  for(const code of [weddings,graduation,chiavari]){
+    assert.doesNotMatch(code,/10\+ Years|10\+ years/)
+    assert.doesNotMatch(code,/Why Riverdale .*Choose/i)
+  }
+  assert.ok(weddings.includes('What Couples Can Expect'))
+  assert.ok(graduation.includes('What Families Can Expect'))
+})

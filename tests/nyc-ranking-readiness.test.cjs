@@ -46,7 +46,7 @@ test('category pages use query-focused Riverdale metadata, H1s and planning dept
 test('wedding hub targets Riverdale wedding intent without indexing the package selector',()=>{
   const weddings=read('app/(public)/weddings/page.tsx')
   const selector=read('app/(public)/wedding-packages/layout.tsx')
-  assert.ok(weddings.includes('Wedding Rentals in Riverdale, NY | Tents, Chairs, Linens & Packages'))
+  assert.ok(weddings.includes('Wedding Rentals | Riverdale, Bronx & Lower Westchester'))
   assert.ok(weddings.includes('Chiavari seating'))
   assert.ok(selector.includes(',false)'))
 })

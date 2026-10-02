@@ -91,23 +91,18 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
 
   const itemListJsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    '@id': nycUrl('/category/' + slug) + '#collection',
-    name: categoryLabel,
-    description: initialCategory.description,
-    url: nycUrl('/category/' + slug),
-    mainEntity: {
-      '@type': 'ItemList',
-      numberOfItems: items.filter((item) => typeof item.slug === 'string' && item.slug.trim()).length,
-      itemListElement: items
-        .filter((item) => typeof item.slug === 'string' && item.slug.trim())
-        .map((item, index) => ({
-          '@type': 'ListItem',
-          position: index + 1,
-          name: item.specialDisplayName || item.name,
-          url: nycUrl(nycItemPath(item.slug!)),
-        })),
-    },
+    '@type': 'ItemList',
+    '@id': nycUrl('/category/' + slug) + '#items',
+    name: categoryLabel + ' inventory',
+    numberOfItems: items.filter((item) => typeof item.slug === 'string' && item.slug.trim()).length,
+    itemListElement: items
+      .filter((item) => typeof item.slug === 'string' && item.slug.trim())
+      .map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: item.specialDisplayName || item.name,
+        url: nycUrl(nycItemPath(item.slug!)),
+      })),
   }
 
   const introText = categoryDescriptionForNyc(

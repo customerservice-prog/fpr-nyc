@@ -4,6 +4,7 @@ import {NYC_SERVICE_AREAS} from '@/lib/nycServiceAreas'
 import {NYC_LOCAL_PLANNING} from '@/lib/nycLocalPlanningResources'
 import {NYC_STATIC_SEARCH_PATHS,nycUrl,isSearchableSlug,isCmsSearchPage,nycIndexingEnabled} from '@/lib/nycSeo'
 import { nycItemPath } from '@/lib/nycItemPath'
+import { planningServices } from '@/lib/eventPlanning'
 export const dynamic='force-dynamic'
 export default async function sitemap():Promise<MetadataRoute.Sitemap>{
  if(!nycIndexingEnabled()) return []
@@ -17,6 +18,7 @@ export default async function sitemap():Promise<MetadataRoute.Sitemap>{
  const add=(path:string,lastModified?:Date)=>{const url=nycUrl(path);urls.set(url,lastModified?{url,lastModified}:{url})}
  // Request time is not a content modification date. Static lastmod is omitted.
  NYC_STATIC_SEARCH_PATHS.forEach(path=>add(path))
+ planningServices.forEach(service=>add('/event-planning/'+encodeURIComponent(service.slug)))
  NYC_SERVICE_AREAS.filter(a=>a.href!=='/'&&NYC_LOCAL_PLANNING[a.slug]).forEach(a=>add(a.href))
  categories.filter(c=>isSearchableSlug(c.slug)&&c.slug!=='weddings').forEach(c=>add('/category/'+encodeURIComponent(c.slug),c.updatedAt))
  items.filter(i=>isSearchableSlug(i.slug)).forEach(i=>add(nycItemPath(i.slug!),i.updatedAt))

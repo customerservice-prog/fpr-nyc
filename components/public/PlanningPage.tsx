@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { PLANNING_ORIGIN, planningFaqs, planningServices } from '@/lib/eventPlanning'
+import { planningFaqs, planningServices } from '@/lib/eventPlanning'
 import PlanningInquiryForm from './PlanningInquiryForm'
 import PlanningContactLinks from './PlanningContactLinks'
 import PlanningPackages from './PlanningPackages'

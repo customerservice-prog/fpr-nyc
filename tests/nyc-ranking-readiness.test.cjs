@@ -152,8 +152,8 @@ test('NYC entity authority binds structured data to verified public identities',
 
 test('category pages publish crawlable collection schema without inherited longevity claims',()=>{
   const page=read('app/(public)/category/[slug]/page.tsx')
-  assert.ok(page.includes("'@type': 'CollectionPage'"))
   assert.ok(page.includes("'@type': 'ItemList'"))
+  assert.equal((page.match(/'@type': 'CollectionPage'/g)||[]).length,0)
   assert.ok(page.includes('nycItemPath(item.slug!)'))
   assert.doesNotMatch(page,/10\+ years|more than 10 years/i)
 })

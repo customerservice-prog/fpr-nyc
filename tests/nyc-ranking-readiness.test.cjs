@@ -172,3 +172,10 @@ test('NYC review flywheel never sends an empty Google review link',()=>{
   assert.ok(migration.includes("'automsg_thank_you'"))
   assert.ok(migration.includes("'After Order Ends'"))
 })
+
+test('item offer schema covers the real NYC delivery footprint',()=>{
+  const item=read('app/(public)/items/[...slug]/page.tsx')
+  assert.ok(item.includes("import { NYC_SERVICE_AREAS }"))
+  assert.ok(item.includes("areaServed: NYC_SERVICE_AREAS.map"))
+  assert.doesNotMatch(item,/areaServed: 'Riverdale, NY'/)
+})

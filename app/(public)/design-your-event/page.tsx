@@ -1,11 +1,11 @@
-import { nycPageMetadata } from '@/lib/nycSeo'
+import { nycPageMetadata, nycBreadcrumbs, nycUrl, NYC_BUSINESS_ID } from '@/lib/nycSeo'
 import StorefrontDesigner from '@/components/public/StorefrontDesigner'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
+import { safeJsonLd } from '@/lib/jsonLd'
 
-
-export const metadata = nycPageMetadata("/design-your-event","2D & 3D Event Designer in Riverdale, Bronx, NY","Build a real 2D and 3D event layout with Friendly Party Rental NYC equipment, preview tents and inflatables, and open included design access for qualifying NYC orders.")
+export const metadata = nycPageMetadata('/design-your-event','2D & 3D Event Layout Planner | Riverdale, Bronx & Lower Westchester','Plan tents, tables, chairs, dance floors and inflatables in a real 2D and 3D event layout. Use Friendly Party Rental NYC equipment to visualize your Riverdale, Bronx or Lower Westchester event before booking.')
 
 const features = [
   ['01', 'Start with your event', 'Tell our NYC / Downstate team your guest count and what you are planning.'],
@@ -15,24 +15,50 @@ const features = [
 ]
 
 const equipment = [
-  ['Tents', 'Pole and frame tents', 'Build around the size and style of tent your event needs.'],
-  ['Tables & Chairs', 'Seating layouts', 'Test table placement, seating capacity and guest flow before setup day.'],
-  ['Dance Floors', 'Reception layouts', 'Place a dance floor and see how much usable space remains around it.'],
-  ['Event Extras', 'Complete the setup', 'Add equipment and details around the main event layout.'],
+  ['Tents', 'Pole and frame tents', 'Build around the size and style of tent your event needs.', '/category/tent-rentals'],
+  ['Tables & Chairs', 'Seating layouts', 'Test table placement, seating capacity and guest flow before setup day.', '/category/table-chair-rentals'],
+  ['Dance Floors', 'Reception layouts', 'Place a dance floor and see how much usable space remains around it.', '/category/dance-floor-stage-rentals'],
+  ['Event Extras', 'Complete the setup', 'Add equipment and details around the main event layout.', '/category'],
 ]
 
 export default function DesignYourEventPage() {
+  const appSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    '@id': nycUrl('/design-your-event') + '#planner',
+    name: 'Friendly Party Rental NYC 2D & 3D Event Layout Planner',
+    url: nycUrl('/design-your-event'),
+    applicationCategory: 'DesignApplication',
+    operatingSystem: 'Web browser',
+    browserRequirements: 'Requires JavaScript',
+    description: 'Plan tents, tables, chairs, dance floors, inflatables and event equipment in a 2D and 3D visual layout before confirming availability and pricing.',
+    provider: { '@id': NYC_BUSINESS_ID },
+    featureList: [
+      '2D event floor-plan layout',
+      '3D event preview',
+      'Tent and inflatable visualization',
+      'Table and chair placement',
+      'Dance-floor placement',
+      'Saved-layout handoff for qualifying NYC orders',
+    ],
+  }
+  const breadcrumbs = nycBreadcrumbs([
+    { name: 'Home', path: '/' },
+    { name: '2D & 3D Event Layout Planner', path: '/design-your-event' },
+  ])
   return <main className="overflow-hidden bg-white text-[#0B1F3A]">
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(appSchema)}} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(breadcrumbs)}} />
     <section className="relative bg-[#07182d] text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(224,123,0,.18),transparent_36%)]" />
       <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 md:grid-cols-[.9fr_1.1fr] md:py-20 lg:gap-16 lg:px-8">
         <div>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[.18em] text-[#F4C542]">RentSketch Event Designer</div>
-          <h1 className={`font-serif max-w-xl text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl`}>Build Your Event. See It Before Setup Day.</h1>
+          <h1 className={`font-serif max-w-xl text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl`}>2D &amp; 3D Event Layout Planner for Tents, Tables &amp; Chairs</h1>
           <p className="mt-5 max-w-xl text-base leading-7 text-white/75 sm:text-lg">See how a 2D floor plan becomes a 3D event layout using the dedicated Friendly Party Rental NYC RentSketch workspace. Start from a rental, build the room or yard around it, and use your saved layout as the planning reference for the quote.</p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
             <a href="#quick-demo" className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#E07B00] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#c96d00]">Watch the Quick Demo</a>
-            <Link href="/contact_us" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/35 px-6 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-[#0B1F3A]">Get Riverdale Layout Help</Link>
+            <Link href="/contact_us" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/35 px-6 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-[#0B1F3A]">Get NYC Layout Help</Link>
           </div>
           <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-white/65"><span>✓ Quick walkthrough</span><span>✓ No account needed</span><span>✓ Phone, tablet & desktop</span></div>
         </div>
@@ -72,7 +98,7 @@ export default function DesignYourEventPage() {
 
     <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 md:py-20 lg:px-8">
       <div className="mb-9 max-w-2xl"><p className="text-xs font-extrabold uppercase tracking-[.2em] text-[#D66E00]">Build with our equipment</p><h2 className={`font-serif mt-2 text-3xl font-bold sm:text-4xl`}>Design more than a tent</h2><p className="mt-3 leading-7 text-gray-600">Work through the pieces that determine whether an event layout actually fits and feels comfortable.</p></div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{equipment.map(([title,kicker,body])=><div key={title} className="group rounded-2xl border border-gray-200 p-6 transition hover:-translate-y-1 hover:shadow-lg"><p className="text-xs font-bold uppercase tracking-wider text-[#D66E00]">{kicker}</p><h3 className="mt-3 text-xl font-black">{title}</h3><p className="mt-2 text-sm leading-6 text-gray-600">{body}</p></div>)}</div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{equipment.map(([title,kicker,body,href])=><Link key={title} href={href} prefetch={false} className="group rounded-2xl border border-gray-200 p-6 transition hover:-translate-y-1 hover:shadow-lg"><p className="text-xs font-bold uppercase tracking-wider text-[#D66E00]">{kicker}</p><h3 className="mt-3 text-xl font-black">{title}</h3><p className="mt-2 text-sm leading-6 text-gray-600">{body}</p><span className="mt-4 inline-block text-sm font-bold text-[#0B1F3A] underline">Browse {title.toLowerCase()} →</span></Link>)}</div>
     </section>
 
     <section className="bg-[#FAFAF8] py-14 md:py-20">

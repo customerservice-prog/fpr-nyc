@@ -9,6 +9,8 @@ import CategoryClient from './CategoryClient'
 import CategoryPlanningGuide from '@/components/public/CategoryPlanningGuide'
 import { safeJsonLd } from '@/lib/jsonLd'
 import { categoryDescriptionForNyc, itemDescriptionForNyc } from '@/lib/nycPublicCopy'
+import { nycUrl } from '@/lib/nycSeo'
+import { nycItemPath } from '@/lib/nycItemPath'
 
 export default async function CategorySlugPage(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params
@@ -54,7 +56,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
   const categoryLower = category.name.toLowerCase()
 
   const whyChooseUs = [
-    'Family-owned with more than 10 years of event-rental experience',
+    'Family-owned rental company serving the NYC / Downstate market',
     'Fully insured with professional delivery and setup crews',
     'Clean, professionally maintained equipment',
     'Riverdale-area delivery and event-site collection; no warehouse customer pickup',
@@ -85,6 +87,22 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
     mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  }
+
+  const itemListJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    '@id': nycUrl('/category/' + slug) + '#items',
+    name: categoryLabel + ' inventory',
+    numberOfItems: items.filter((item) => typeof item.slug === 'string' && item.slug.trim()).length,
+    itemListElement: items
+      .filter((item) => typeof item.slug === 'string' && item.slug.trim())
+      .map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: item.specialDisplayName || item.name,
+        url: nycUrl(nycItemPath(item.slug!)),
+      })),
   }
 
   const introText = categoryDescriptionForNyc(
@@ -141,6 +159,11 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
     dangerouslySetInnerHTML: { __html: safeJsonLd(faqJsonLd) },
   })
 
+  const itemListSchemaEl = createElement('script', {
+    type: 'application/ld+json',
+    dangerouslySetInnerHTML: { __html: safeJsonLd(itemListJsonLd) },
+  })
+
   const seoSection = createElement(
     'section',
     { className: 'max-w-4xl mx-auto px-4 pb-16' },
@@ -148,6 +171,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
     whyChooseUsEl,
     faqEl,
     faqSchemaEl,
+    itemListSchemaEl,
     relatedEl,
     createElement(LocalDeliveryLinks)
   )

@@ -86,8 +86,8 @@ export const BUSINESS = {
   yelp: '',
   tiktok: 'https://www.tiktok.com/@friendlypartyrental',
   twitter: 'https://twitter.com/friendlypartyrent',
-  mapUrl: '',
-  googleProfile: '',
+  mapUrl: (process.env.NEXT_PUBLIC_GOOGLE_MAPS_URL || '').trim(),
+  googleProfile: (process.env.NEXT_PUBLIC_GOOGLE_BUSINESS_PROFILE_URL || '').trim(),
 }
 
 export const NAV_RENTALS = [

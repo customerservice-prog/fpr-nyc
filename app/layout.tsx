@@ -17,6 +17,16 @@ const INDEXABLE = process.env.PUBLIC_INDEXABLE === 'true'
 const SITE_DESCRIPTION =
   'Friendly Party Rental NYC provides party and event rentals in Riverdale, selected Bronx neighborhoods, Yonkers, Mount Vernon, New Rochelle and nearby Lower Westchester communities.'
 
+const ENTITY_PROFILES = [
+  BUSINESS.googleProfile,
+  BUSINESS.mapUrl,
+  BUSINESS.facebook,
+  BUSINESS.instagram,
+  BUSINESS.youtube,
+  BUSINESS.tiktok,
+  BUSINESS.twitter,
+].filter((value): value is string => Boolean(value))
+
 const LOCAL_BUSINESS_JSONLD = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
@@ -29,6 +39,27 @@ const LOCAL_BUSINESS_JSONLD = {
   telephone: '+1-' + BUSINESS.phone,
   email: BUSINESS.email,
   url: SITE_URL,
+  sameAs: ENTITY_PROFILES,
+  ...(BUSINESS.mapUrl ? { hasMap: BUSINESS.mapUrl } : {}),
+  contactPoint: [{
+    '@type': 'ContactPoint',
+    telephone: '+1-' + BUSINESS.phone,
+    contactType: 'customer service',
+    email: BUSINESS.email,
+    areaServed: 'US-NY',
+    availableLanguage: ['English'],
+  }],
+  knowsAbout: [
+    'Party rentals',
+    'Tent rentals',
+    'Table and chair rentals',
+    'Bounce house rentals',
+    'Wedding rentals',
+    'Event planning',
+    'Event lighting rentals',
+    'Linen rentals',
+    'Dance floor rentals',
+  ],
   openingHoursSpecification: [{
     '@type': 'OpeningHoursSpecification',
     dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],

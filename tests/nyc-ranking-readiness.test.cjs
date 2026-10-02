@@ -70,7 +70,7 @@ test('NYC entity schema exposes the service catalog without fabricating a storef
 
 test('ranking wave strengthens existing NYC authority URLs instead of adding doorway routes',()=>{
   const seo=read('lib/nycSeo.ts')
-  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-10-02-organic-link-graph-v3'"))
+  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-10-02-entity-authority-v4'"))
   for(const bad of [
     '/tent-rentals-greenville-sc',
     '/table-chair-rentals-greenville-sc',
@@ -135,4 +135,47 @@ test('NYC trust copy avoids inherited longevity and reputation claims',()=>{
   }
   assert.ok(weddings.includes('What Couples Can Expect'))
   assert.ok(graduation.includes('What Families Can Expect'))
+})
+
+
+test('NYC entity authority binds structured data to verified public identities',()=>{
+  const layout=read('app/layout.tsx')
+  const utils=read('lib/utils.ts')
+  const footer=read('components/public/Footer.tsx')
+  assert.ok(layout.includes('sameAs: ENTITY_PROFILES'))
+  assert.ok(layout.includes('contactPoint'))
+  assert.ok(layout.includes('knowsAbout'))
+  assert.ok(utils.includes('NEXT_PUBLIC_GOOGLE_BUSINESS_PROFILE_URL'))
+  assert.ok(utils.includes('NEXT_PUBLIC_GOOGLE_MAPS_URL'))
+  assert.ok(footer.includes('View Friendly Party Rental NYC on Google'))
+})
+
+test('category pages publish crawlable collection schema without inherited longevity claims',()=>{
+  const page=read('app/(public)/category/[slug]/page.tsx')
+  assert.ok(page.includes("'@type': 'ItemList'"))
+  assert.equal((page.match(/'@type': 'CollectionPage'/g)||[]).length,0)
+  assert.ok(page.includes('nycItemPath(item.slug!)'))
+  assert.doesNotMatch(page,/10\+ years|more than 10 years/i)
+})
+
+
+test('NYC review flywheel never sends an empty Google review link',()=>{
+  const email=read('lib/email.ts')
+  const utils=read('lib/utils.ts')
+  const thankYou=read('app/api/cron/thank-you/route.ts')
+  const migration=read('prisma/migrations/20260708120000_add_automatic_messages/migration.sql')
+  assert.ok(utils.includes('NEXT_PUBLIC_GOOGLE_BUSINESS_PROFILE_URL'))
+  assert.ok(email.includes('BUSINESS.googleProfile ?'))
+  assert.ok(email.includes('Review ${BUSINESS.name} on Google'))
+  assert.ok(email.includes('please reply directly to this email'))
+  assert.ok(thankYou.includes("id: 'automsg_thank_you'"))
+  assert.ok(migration.includes("'automsg_thank_you'"))
+  assert.ok(migration.includes("'After Order Ends'"))
+})
+
+test('item offer schema covers the real NYC delivery footprint',()=>{
+  const item=read('app/(public)/items/[...slug]/page.tsx')
+  assert.ok(item.includes("import { NYC_SERVICE_AREAS }"))
+  assert.ok(item.includes("areaServed: NYC_SERVICE_AREAS.map"))
+  assert.doesNotMatch(item,/areaServed: 'Riverdale, NY'/)
 })

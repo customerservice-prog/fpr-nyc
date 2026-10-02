@@ -17,6 +17,7 @@ export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string 
           <p className="font-bold text-base">{BUSINESS.name}</p>
           <p>{BUSINESS.address}</p>
           <p className="break-words">{BUSINESS.phone} | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
+          {BUSINESS.googleProfile && <p><a href={BUSINESS.googleProfile} target="_blank" rel="noopener noreferrer" className="underline">View Friendly Party Rental NYC on Google</a></p>}
           <p className="text-gray-500 text-sm pt-2">
             &copy; {new Date().getFullYear()} {BUSINESS.legalName} All rights reserved.
           </p>
@@ -33,6 +34,7 @@ export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string 
           <p className="font-bold text-base">{BUSINESS.name}</p>
           <p>{BUSINESS.address}</p>
           <p className="break-words">{BUSINESS.phone} | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
+          {BUSINESS.googleProfile && <p><a href={BUSINESS.googleProfile} target="_blank" rel="noopener noreferrer" className="underline">View Friendly Party Rental NYC on Google</a></p>}
           <p>Serving {BUSINESS.serviceArea}</p>
           <div className="flex items-center justify-center gap-4 pt-1">
             <a href={BUSINESS.facebook} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="Facebook">

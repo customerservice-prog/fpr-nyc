@@ -6,14 +6,15 @@ import PlanningContactLinks from './PlanningContactLinks'
 import PlanningPackages from './PlanningPackages'
 import PlanningEstimator from './PlanningEstimator'
 import DesignYourEventCTA from './DesignYourEventCTA'
-import { NYC_SERVICE_AREA_SUMMARY } from '@/lib/nycServiceAreas'
+import { NYC_SERVICE_AREA_SUMMARY, NYC_SERVICE_AREAS } from '@/lib/nycServiceAreas'
+import { NYC_BUSINESS_ID, nycUrl } from '@/lib/nycSeo'
 
 type Service = (typeof planningServices)[number]
 export default function PlanningPage({ service }: { service?: Service }) {
-  const title = service?.title || 'Event Planning & Coordination in Riverdale, NY'
+  const title = service?.title || 'Event Planning & Coordination in Riverdale, Bronx & Lower Westchester'
   const path = '/event-planning' + (service ? '/' + service.slug : '')
   const image = service?.image || '/images/event-planning/tent-patio-setup/image.png'
-  const schema = { '@context': 'https://schema.org', '@type': 'Service', name: title, serviceType: service?.label || 'Event planning and coordination', url: PLANNING_ORIGIN + path, areaServed: { '@type': 'City', name: 'Riverdale' }, provider: { '@type': 'Organization', name: 'Friendly Party Rental NYC', url: PLANNING_ORIGIN, telephone: '+1-315-884-1498' } }
+  const schema = { '@context': 'https://schema.org', '@type': 'Service', '@id': nycUrl(path)+'#service', name: title, serviceType: service?.label || 'Event planning and coordination', url: nycUrl(path), areaServed: NYC_SERVICE_AREAS.map(area=>({ '@type':'Place', name:area.name+', New York' })), provider: { '@id': NYC_BUSINESS_ID } }
   return <div className="bg-slate-50 pb-20 md:pb-0" data-planning-page>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }}/>
     <section className="overflow-hidden bg-blue-950 text-white">

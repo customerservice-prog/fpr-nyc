@@ -70,7 +70,7 @@ test('NYC entity schema exposes the service catalog without fabricating a storef
 
 test('ranking wave strengthens existing NYC authority URLs instead of adding doorway routes',()=>{
   const seo=read('lib/nycSeo.ts')
-  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-10-02-entity-authority-v4'"))
+  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-10-02-event-planner-v5'"))
   for(const bad of [
     '/tent-rentals-greenville-sc',
     '/table-chair-rentals-greenville-sc',
@@ -178,4 +178,16 @@ test('item offer schema covers the real NYC delivery footprint',()=>{
   assert.ok(item.includes("import { NYC_SERVICE_AREAS }"))
   assert.ok(item.includes("areaServed: NYC_SERVICE_AREAS.map"))
   assert.doesNotMatch(item,/areaServed: 'Riverdale, NY'/)
+})
+
+
+test('NYC event planner targets useful informational intent with structured app data',()=>{
+  const page=read('app/(public)/design-your-event/page.tsx')
+  assert.ok(page.includes('2D & 3D Event Layout Planner | Riverdale, Bronx & Lower Westchester'))
+  assert.ok(page.includes("2D &amp; 3D Event Layout Planner for Tents, Tables &amp; Chairs"))
+  assert.ok(page.includes("'@type': 'WebApplication'"))
+  assert.ok(page.includes("applicationCategory: 'DesignApplication'"))
+  assert.ok(page.includes('NYC_BUSINESS_ID'))
+  for(const path of ['/category/tent-rentals','/category/table-chair-rentals','/category/dance-floor-stage-rentals']) assert.ok(page.includes(path),path)
+  assert.doesNotMatch(page,/isAccessibleForFree|price:\s*['"]?0/)
 })

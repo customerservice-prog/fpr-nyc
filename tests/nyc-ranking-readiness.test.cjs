@@ -70,7 +70,7 @@ test('NYC entity schema exposes the service catalog without fabricating a storef
 
 test('ranking wave strengthens existing NYC authority URLs instead of adding doorway routes',()=>{
   const seo=read('lib/nycSeo.ts')
-  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-10-02-organic-link-graph-v3'"))
+  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-10-02-item-longtail-v4'"))
   for(const bad of [
     '/tent-rentals-greenville-sc',
     '/table-chair-rentals-greenville-sc',
@@ -135,4 +135,24 @@ test('NYC trust copy avoids inherited longevity and reputation claims',()=>{
   }
   assert.ok(weddings.includes('What Couples Can Expect'))
   assert.ok(graduation.includes('What Families Can Expect'))
+})
+
+
+test('individual rental pages target the full approved NYC service area',()=>{
+  const item=read('app/(public)/items/[...slug]/page.tsx')
+  assert.ok(item.includes('Bronx & Lower Westchester, NY'))
+  assert.ok(item.includes('selected Bronx neighborhoods and Lower Westchester'))
+  assert.ok(item.includes('NYC_SERVICE_AREA_SUMMARY'))
+  assert.ok(item.includes('NYC_SERVICE_AREAS.map'))
+  assert.doesNotMatch(item,/areaServed:\s*'Riverdale, NY'/)
+})
+
+test('NYC business schema exposes consistent entity and contact signals',()=>{
+  const layout=read('app/layout.tsx')
+  assert.ok(layout.includes('BUSINESS_SAME_AS'))
+  assert.ok(layout.includes('sameAs: BUSINESS_SAME_AS'))
+  assert.ok(layout.includes("'@type': 'ContactPoint'"))
+  assert.ok(layout.includes("contactType: 'customer service'"))
+  assert.ok(layout.includes('knowsAbout:'))
+  assert.ok(!layout.includes('streetAddress:'))
 })

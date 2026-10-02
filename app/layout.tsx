@@ -17,6 +17,8 @@ const INDEXABLE = process.env.PUBLIC_INDEXABLE === 'true'
 const SITE_DESCRIPTION =
   'Friendly Party Rental NYC provides party and event rentals in Riverdale, selected Bronx neighborhoods, Yonkers, Mount Vernon, New Rochelle and nearby Lower Westchester communities.'
 
+const BUSINESS_SAME_AS = [BUSINESS.facebook, BUSINESS.instagram, BUSINESS.youtube, BUSINESS.tiktok, BUSINESS.twitter].filter(Boolean)
+
 const LOCAL_BUSINESS_JSONLD = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
@@ -29,6 +31,15 @@ const LOCAL_BUSINESS_JSONLD = {
   telephone: '+1-' + BUSINESS.phone,
   email: BUSINESS.email,
   url: SITE_URL,
+  sameAs: BUSINESS_SAME_AS,
+  contactPoint: {
+    '@type': 'ContactPoint',
+    contactType: 'customer service',
+    telephone: '+1-' + BUSINESS.phone,
+    email: BUSINESS.email,
+    areaServed: 'NY',
+    availableLanguage: ['English'],
+  },
   openingHoursSpecification: [{
     '@type': 'OpeningHoursSpecification',
     dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
@@ -51,7 +62,8 @@ const LOCAL_BUSINESS_JSONLD = {
       { '@type': 'OfferCatalog', name: 'Dance Floor & Stage Rentals', url: SITE_URL + '/category/dance-floor-stage-rentals' },
     ],
   },
-  priceRange: '$$',
+  knowsAbout: ['Tent rentals','Table and chair rentals','Bounce house rentals','Wedding rentals','Linen rentals','Dance floor rentals','Event lighting','Party rental delivery'],
+  priceRange: '$',
 }
 
 const WEBSITE_JSONLD = {

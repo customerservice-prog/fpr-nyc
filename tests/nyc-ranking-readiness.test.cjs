@@ -114,8 +114,10 @@ test('existing event-intent pages are indexable, canonical and included in sitem
   const eventPage=read('app/(public)/event-planning/page.tsx')
   assert.ok(sitemap.includes("planningServices.forEach(service=>add('/event-planning/'+encodeURIComponent(service.slug)))"))
   assert.ok(servicePage.includes('nycPageMetadata'))
-  assert.ok(servicePage.includes("'@type':'Service'"))
-  assert.ok(servicePage.includes('NYC_BUSINESS_ID'))
+  const planningPage=read('components/public/PlanningPage.tsx')
+  assert.ok(planningPage.includes("'@type': 'Service'"))
+  assert.ok(planningPage.includes('NYC_BUSINESS_ID'))
+  assert.ok(planningPage.includes('NYC_SERVICE_AREAS.map'))
   assert.ok(eventPage.includes('Riverdale, Bronx & Lower Westchester'))
   for(const slug of ['wedding-coordination','corporate-events','private-parties','festivals-fundraisers']){
     assert.ok(read('lib/eventPlanning.ts').includes("slug: '"+slug+"'"),slug)

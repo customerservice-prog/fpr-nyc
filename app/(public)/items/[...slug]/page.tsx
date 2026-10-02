@@ -11,6 +11,7 @@ import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 import { matchesTentLighting } from '@/lib/nycAddonMatching'
 import { itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 import { nycItemImagePath, nycItemPath, nycItemUrlSlug, pickStoredItem, storedItemSlugCandidates } from '@/lib/nycItemPath'
+import { NYC_SERVICE_AREAS, NYC_SERVICE_AREA_SUMMARY } from '@/lib/nycServiceAreas'
 
 export const dynamic = 'force-dynamic'
 // Canonical/Open Graph/JSON-LD origin: the NYC primary domain from NEXT_PUBLIC_SITE_URL.
@@ -66,16 +67,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const item = await findItem((await params).slug)
   if (!item) return { title: 'Rental not found', robots:{index:false,follow:true} }
   const fullDescription = itemDescriptionForNyc(item.name, item.description, Number(item.cost))
-  const desc = nycMetaText(`Rent ${item.name} in Riverdale, NY. ${fullDescription}`)
+  const desc = nycMetaText(`Rent ${item.name} with delivery across Riverdale, selected Bronx neighborhoods and Lower Westchester. ${fullDescription}`)
   const segment = await publicSegment(item)
   const path = '/items/' + encodeURIComponent(segment)
   const canonical = `${BASE_URL}${path}`
   return {
-    ...nycPageMetadata(path, `${item.name} Rental - Riverdale, NY`, desc),
+    ...nycPageMetadata(path, `${item.name} Rental | Bronx & Lower Westchester, NY`, desc),
     description: desc,
     alternates: { canonical },
     openGraph: {
-      title: `${item.name} Rental in Riverdale, NY`,
+      title: `${item.name} Rental | Bronx & Lower Westchester, NY`,
       description: desc,
       url: canonical,
       images: item.picture ? [{ url: `${BASE_URL}/api/item-image/${encodeURIComponent(segment)}?v=${item.updatedAt.getTime()}` }] : undefined,
@@ -151,7 +152,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
       businessFunction: 'http://purl.org/goodrelations/v1#LeaseOut',
       seller: {'@id':NYC_BUSINESS_ID},
       url: nycUrl(itemPath),
-      areaServed: 'Riverdale, NY',
+      areaServed: NYC_SERVICE_AREAS.map((area) => ({ '@type': 'Place', name: area.name + ', New York' })),
     },
   }
 
@@ -185,6 +186,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
           )}
           {item.colorOptions && item.colorOptions.length > 0 && <div className="mb-4"><p className="text-sm font-medium text-gray-700 mb-1">Available colors:</p><div className="flex flex-wrap gap-2">{item.colorOptions.map((c) => <span key={c} className="text-xs bg-gray-100 border rounded-full px-3 py-1 text-gray-700">{c}</span>)}</div><p className="text-xs text-gray-500 mt-1">Choose your color while checking availability and adding the item to your order.</p></div>}
           <p className="text-gray-700 mb-6 whitespace-pre-line leading-7">{description}</p>
+          <p className="mb-6 text-sm leading-6 text-slate-600">Delivery is available by arrangement across {NYC_SERVICE_AREA_SUMMARY}. Enter your actual event date and address to confirm availability, delivery pricing, access and any setup requirements for this rental.</p>
           {(isStandaloneTent || isInflatable) && <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-5"><p className="mb-3 text-sm font-bold text-blue-950">{isInflatable ? 'See this inflatable in your event layout' : 'See this tent in your event layout'}</p><p className="mb-4 text-sm leading-6 text-slate-600">Open the NYC RentSketch planner with this rental as your starting point, then add tables, chairs and other equipment around it. Availability and final setup requirements are confirmed separately.</p><DesignYourEventCTA source="item_page_visual_planner" label={isInflatable ? 'See This Inflatable in a Layout' : 'See This Tent in a Layout'} tent={item.name} tentSlug={segment} productType={isInflatable ? 'inflatable' : 'tent'} /></div>}
           <SuggestedAddons addons={validSuggestedAddons} />
           {validRelatedItems.length > 0 && <div className="mb-6"><h2 className="text-sm font-semibold text-gray-700 mb-2">You Might Also Like</h2><div className="grid grid-cols-2 gap-2">{validRelatedItems.map((ri) => <Link key={ri.id} href={nycItemPath(ri.slug!)} prefetch={false} className="block border rounded-lg p-2 text-sm hover:shadow-md transition"><span className="block font-medium text-gray-900">{ri.name}</span><span className="block text-xs text-gray-500">From ${Number(ri.cost).toFixed(2)}/day</span></Link>)}</div></div>}

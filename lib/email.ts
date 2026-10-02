@@ -714,10 +714,14 @@ export function thankYouEmail(order: {
         <p>Dear ${order.customerName},</p>
         <p>Thank you for choosing ${BUSINESS.name} for your recent event. We hope everything went smoothly and that your celebration was a success.</p>
         <p><strong>Order Number:</strong> ${order.orderNumber}</p>
-        <p>If you have a moment, we would appreciate an honest Google review. Your feedback—positive or critical—helps other Riverdale-area customers know what to expect and helps our local team improve.</p>
-        <p style="margin:24px 0;">
-          <a href="${BUSINESS.googleProfile}" style="background:#1A6FD4;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:bold;">Review ${BUSINESS.name} on Google</a>
-        </p>
+        ${BUSINESS.googleProfile ? `
+          <p>If you have a moment, we would appreciate an honest Google review. Your feedback—positive or critical—helps other Riverdale-area customers know what to expect and helps our local team improve.</p>
+          <p style="margin:24px 0;">
+            <a href="${BUSINESS.googleProfile}" style="background:#1A6FD4;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:bold;">Review ${BUSINESS.name} on Google</a>
+          </p>
+        ` : `
+          <p>If you have feedback about your event, please reply directly to this email. We read customer feedback and use it to improve the NYC / Downstate rental experience.</p>
+        `}
         <p>If anything needs our attention, you can also reply directly to this email or call us at ${BUSINESS.phone}.</p>
         <p>We hope to be part of your next celebration!</p>
         ${emailFooter()}

@@ -11,6 +11,7 @@ import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 import { matchesTentLighting } from '@/lib/nycAddonMatching'
 import { itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 import { nycItemImagePath, nycItemPath, nycItemUrlSlug, pickStoredItem, storedItemSlugCandidates } from '@/lib/nycItemPath'
+import { NYC_SERVICE_AREAS } from '@/lib/nycServiceAreas'
 
 export const dynamic = 'force-dynamic'
 // Canonical/Open Graph/JSON-LD origin: the NYC primary domain from NEXT_PUBLIC_SITE_URL.
@@ -151,7 +152,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
       businessFunction: 'http://purl.org/goodrelations/v1#LeaseOut',
       seller: {'@id':NYC_BUSINESS_ID},
       url: nycUrl(itemPath),
-      areaServed: 'Riverdale, NY',
+      areaServed: NYC_SERVICE_AREAS.map((area) => ({ '@type': 'Place', name: area.name + ', NY' })),
     },
   }
 

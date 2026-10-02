@@ -141,7 +141,7 @@ test('daily IndexNow refresh uses NYC searchable URLs and safely no-ops before l
 
 test('NYC search revision reflects the independent full-location rebuild',()=>{
   const seo=read('lib/nycSeo.ts')
-  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-10-02-organic-link-graph-v3'"))
+  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-10-02-entity-authority-v4'"))
 })
 
 

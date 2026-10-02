@@ -1,0 +1,59 @@
+name: One-off NYC live Lighthouse
+
+on:
+  push:
+    branches:
+      - ops/nyc-live-lighthouse-20261002
+    paths:
+      - '.github/workflows/one-off-nyc-lighthouse.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Audit live NYC pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install -g lighthouse@12
+          for url in \
+            "https://friendlypartyrentalnyc.com/" \
+            "https://friendlypartyrentalnyc.com/category/tent-rentals" \
+            "https://friendlypartyrentalnyc.com/design-your-event"
+          do
+            name="$(echo "$url" | sed 's#https://friendlypartyrentalnyc.com/##;s#[^a-zA-Z0-9]#-#g;s#^$#home#')"
+            lighthouse "$url" \
+              --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
+              --output=json \
+              --output-path="/tmp/$name.json" \
+              --only-categories=performance,seo,best-practices,accessibility \
+              --quiet
+            node - "$url" "/tmp/$name.json" <<'NODE'
+          const fs=require('fs')
+          const [url,path]=process.argv.slice(2)
+          const r=JSON.parse(fs.readFileSync(path,'utf8'))
+          const c=r.categories
+          const a=r.audits
+          console.log(JSON.stringify({
+            url,
+            scores:{
+              performance:Math.round((c.performance?.score||0)*100),
+              seo:Math.round((c.seo?.score||0)*100),
+              bestPractices:Math.round((c['best-practices']?.score||0)*100),
+              accessibility:Math.round((c.accessibility?.score||0)*100),
+            },
+            metrics:{
+              FCP:a['first-contentful-paint']?.displayValue,
+              LCP:a['largest-contentful-paint']?.displayValue,
+              CLS:a['cumulative-layout-shift']?.displayValue,
+              TBT:a['total-blocking-time']?.displayValue,
+              SpeedIndex:a['speed-index']?.displayValue,
+            },
+            failedSeo:Object.values(a).filter(x=>x.score===0&&x.details&&['seo'].includes(x.group)).map(x=>({id:x.id,title:x.title})),
+            diagnostics:Object.values(a).filter(x=>x.score===0&&['uses-responsive-images','uses-optimized-images','modern-image-formats','render-blocking-resources','unused-javascript','unused-css-rules','server-response-time','offscreen-images'].includes(x.id)).map(x=>({id:x.id,title:x.title,displayValue:x.displayValue}))
+          },null,2))
+          NODE
+          done

@@ -106,3 +106,18 @@ test('organic link graph connects services and verified local areas',()=>{
   assert.ok(city.includes('{name} in {area.name}, NY'))
   assert.ok(city.includes('Tents, Tables, Chairs & More'))
 })
+
+
+test('existing event-intent pages are indexable, canonical and included in sitemap',()=>{
+  const sitemap=read('app/sitemap.ts')
+  const servicePage=read('app/(public)/event-planning/[service]/page.tsx')
+  const eventPage=read('app/(public)/event-planning/page.tsx')
+  assert.ok(sitemap.includes("planningServices.forEach(service=>add('/event-planning/'+encodeURIComponent(service.slug)))"))
+  assert.ok(servicePage.includes('nycPageMetadata'))
+  assert.ok(servicePage.includes("'@type':'Service'"))
+  assert.ok(servicePage.includes('NYC_BUSINESS_ID'))
+  assert.ok(eventPage.includes('Riverdale, Bronx & Lower Westchester'))
+  for(const slug of ['wedding-coordination','corporate-events','private-parties','festivals-fundraisers']){
+    assert.ok(read('lib/eventPlanning.ts').includes("slug: '"+slug+"'"),slug)
+  }
+})

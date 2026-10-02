@@ -14,7 +14,7 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - name: Audit live NYC pages
+      - name: Diagnose live NYC LCP
         shell: bash
         run: |
           set -euo pipefail
@@ -25,35 +25,36 @@ jobs:
             "https://friendlypartyrentalnyc.com/design-your-event"
           do
             name="$(echo "$url" | sed 's#https://friendlypartyrentalnyc.com/##;s#[^a-zA-Z0-9]#-#g;s#^$#home#')"
-            lighthouse "$url" \
-              --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" \
-              --output=json \
-              --output-path="/tmp/$name.json" \
-              --only-categories=performance,seo,best-practices,accessibility \
-              --quiet
+            lighthouse "$url" --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --output=json --output-path="/tmp/$name.json" --only-categories=performance,seo --quiet
             node - "$url" "/tmp/$name.json" <<'NODE'
           const fs=require('fs')
           const [url,path]=process.argv.slice(2)
           const r=JSON.parse(fs.readFileSync(path,'utf8'))
-          const c=r.categories
           const a=r.audits
+          const req=(a['network-requests']?.details?.items||[])
+            .filter(x=>x.resourceType==='Image')
+            .sort((x,y)=>(y.transferSize||0)-(x.transferSize||0))
+            .slice(0,12)
+            .map(x=>({url:x.url,transferKB:Math.round((x.transferSize||0)/1024),resourceKB:Math.round((x.resourceSize||0)/1024),mimeType:x.mimeType,status:x.statusCode}))
           console.log(JSON.stringify({
             url,
-            scores:{
-              performance:Math.round((c.performance?.score||0)*100),
-              seo:Math.round((c.seo?.score||0)*100),
-              bestPractices:Math.round((c['best-practices']?.score||0)*100),
-              accessibility:Math.round((c.accessibility?.score||0)*100),
+            performance:Math.round((r.categories.performance?.score||0)*100),
+            LCP:a['largest-contentful-paint']?.displayValue,
+            TBT:a['total-blocking-time']?.displayValue,
+            lcpElement:a['largest-contentful-paint-element']?.details?.items||[],
+            lcpPhases:a['lcp-phases']?.details?.items||a['lcp-breakdown-insight']?.details?.items||[],
+            serverResponse:a['server-response-time']?.displayValue,
+            images:req,
+            imageSavings:{
+              modern:a['modern-image-formats']?.displayValue,
+              responsive:a['uses-responsive-images']?.displayValue,
+              encoding:a['uses-optimized-images']?.displayValue,
             },
-            metrics:{
-              FCP:a['first-contentful-paint']?.displayValue,
-              LCP:a['largest-contentful-paint']?.displayValue,
-              CLS:a['cumulative-layout-shift']?.displayValue,
-              TBT:a['total-blocking-time']?.displayValue,
-              SpeedIndex:a['speed-index']?.displayValue,
-            },
-            failedSeo:Object.values(a).filter(x=>x.score===0&&x.details&&['seo'].includes(x.group)).map(x=>({id:x.id,title:x.title})),
-            diagnostics:Object.values(a).filter(x=>x.score===0&&['uses-responsive-images','uses-optimized-images','modern-image-formats','render-blocking-resources','unused-javascript','unused-css-rules','server-response-time','offscreen-images'].includes(x.id)).map(x=>({id:x.id,title:x.title,displayValue:x.displayValue}))
+            js:{
+              unused:a['unused-javascript']?.displayValue,
+              bootup:a['bootup-time']?.displayValue,
+              mainThread:a['mainthread-work-breakdown']?.displayValue,
+            }
           },null,2))
           NODE
           done

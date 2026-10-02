@@ -9,7 +9,7 @@ test('homepage targets the core Riverdale party-rental query',()=>{
   const seo=read('components/public/NycHomeSeo.tsx')
   assert.ok(page.includes('Party Rentals in Riverdale, NY | Tents, Tables, Chairs & More'))
   assert.ok(hero.includes('Party Rentals'))
-  assert.ok(hero.includes('in Riverdale, NY'))
+  assert.ok(hero.includes('in Riverdale, the Bronx &amp; Lower Westchester'))
   for(const heading of [
     'Tent Rentals in Riverdale, NY',
     'Table &amp; Chair Rentals in Riverdale, NY',
@@ -46,7 +46,7 @@ test('category pages use query-focused Riverdale metadata, H1s and planning dept
 test('wedding hub targets Riverdale wedding intent without indexing the package selector',()=>{
   const weddings=read('app/(public)/weddings/page.tsx')
   const selector=read('app/(public)/wedding-packages/layout.tsx')
-  assert.ok(weddings.includes('Wedding Rentals in Riverdale, NY | Tents, Chairs, Linens & Packages'))
+  assert.ok(weddings.includes('Wedding Rentals | Riverdale, Bronx & Lower Westchester'))
   assert.ok(weddings.includes('Chiavari seating'))
   assert.ok(selector.includes(',false)'))
 })
@@ -70,7 +70,7 @@ test('NYC entity schema exposes the service catalog without fabricating a storef
 
 test('ranking wave strengthens existing NYC authority URLs instead of adding doorway routes',()=>{
   const seo=read('lib/nycSeo.ts')
-  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-10-01-nyc-local-guides-v2'"))
+  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-10-02-organic-link-graph-v3'"))
   for(const bad of [
     '/tent-rentals-greenville-sc',
     '/table-chair-rentals-greenville-sc',
@@ -90,4 +90,49 @@ test('local service-area indexing is earned by verified planning depth',()=>{
   assert.doesNotMatch(resources,/^  (?:'tuckahoe'|tuckahoe|'eastchester'|eastchester):\s*\{/m)
   assert.ok(sitemap.includes("NYC_SERVICE_AREAS.filter(a=>a.href!=='/'&&NYC_LOCAL_PLANNING[a.slug])"))
   assert.ok(city.includes('Official public planning resource'))
+})
+
+
+test('organic link graph connects services and verified local areas',()=>{
+  const home=read('components/public/NycHomeSeo.tsx')
+  const category=read('components/public/CategoryPlanningGuide.tsx')
+  const city=read('components/public/CityRentalGuide.tsx')
+  for(const file of [home,category]){
+    assert.ok(file.includes('NYC_SERVICE_AREAS'))
+    assert.ok(file.includes('NYC_LOCAL_PLANNING'))
+  }
+  assert.ok(home.includes('Party rentals in {area.name}, NY'))
+  assert.ok(category.includes('{name} in {area.name}, NY'))
+  assert.ok(city.includes('{name} in {area.name}, NY'))
+  assert.ok(city.includes('Tents, Tables, Chairs & More'))
+})
+
+
+test('existing event-intent pages are indexable, canonical and included in sitemap',()=>{
+  const sitemap=read('app/sitemap.ts')
+  const servicePage=read('app/(public)/event-planning/[service]/page.tsx')
+  const eventPage=read('app/(public)/event-planning/page.tsx')
+  assert.ok(sitemap.includes("planningServices.forEach(service=>add('/event-planning/'+encodeURIComponent(service.slug)))"))
+  assert.ok(servicePage.includes('nycPageMetadata'))
+  const planningPage=read('components/public/PlanningPage.tsx')
+  assert.ok(planningPage.includes("'@type': 'Service'"))
+  assert.ok(planningPage.includes('NYC_BUSINESS_ID'))
+  assert.ok(planningPage.includes('NYC_SERVICE_AREAS.map'))
+  assert.ok(eventPage.includes('Riverdale, Bronx & Lower Westchester'))
+  for(const slug of ['wedding-coordination','corporate-events','private-parties','festivals-fundraisers']){
+    assert.ok(read('lib/eventPlanning.ts').includes("slug: '"+slug+"'"),slug)
+  }
+})
+
+
+test('NYC trust copy avoids inherited longevity and reputation claims',()=>{
+  const weddings=read('app/(public)/weddings/page.tsx')
+  const graduation=read('app/(public)/graduation-rentals/page.tsx')
+  const chiavari=read('app/(public)/chiavari-chair-rentals/page.tsx')
+  for(const code of [weddings,graduation,chiavari]){
+    assert.doesNotMatch(code,/10\+ Years|10\+ years/)
+    assert.doesNotMatch(code,/Why Riverdale .*Choose/i)
+  }
+  assert.ok(weddings.includes('What Couples Can Expect'))
+  assert.ok(graduation.includes('What Families Can Expect'))
 })

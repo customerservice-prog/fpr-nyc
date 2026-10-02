@@ -7,7 +7,7 @@ export const PLANNING_HELP = ['Rentals', 'Event design / layout', 'Vendor coordi
 export const planningServices = [
   {
     slug: 'wedding-coordination', label: 'Weddings', type: 'Wedding',
-    title: 'Wedding Planning & Coordination in Riverdale, NY',
+    title: 'Wedding Planning & Coordination in Riverdale, Bronx & Lower Westchester',
     summary: 'Enjoy the day you have been planning. Bring the ceremony, reception, rentals and timeline together with one local team.',
     image: '/images/event-planning/ceremony-deck/image.png', alt: 'Outdoor ceremony seating arranged on a deck',
     intro: 'Already have a venue and vendors? Start with coordination. Still deciding how the day should look and feel? Discuss partial or full planning. We will help you choose a scope based on what is already booked and what you still need, rather than treating every wedding as the same project.',
@@ -20,7 +20,7 @@ export const planningServices = [
   },
   {
     slug: 'corporate-events', label: 'Corporate Events', type: 'Corporate event',
-    title: 'Corporate Event Planning in Riverdale, NY',
+    title: 'Corporate Event Planning in Riverdale, Bronx & Lower Westchester',
     summary: 'A clear plan for employee events, company celebrations and business gatherings, from rental layout to event-day coordination.',
     image: '/images/event-planning/tent-patio-setup/image.png', alt: 'Tent and patio seating layout',
     intro: 'Company events need to work for both guests and the people running them. Begin with your event goals, schedule, location and headcount. We can scope planning and rental support around the needs of your gathering and the responsibilities your internal team will retain.',
@@ -33,7 +33,7 @@ export const planningServices = [
   },
   {
     slug: 'private-parties', label: 'Private Parties & Celebrations', type: 'Private party / celebration',
-    title: 'Party Planning in Riverdale, NY',
+    title: 'Party Planning in Riverdale, Bronx & Lower Westchester',
     summary: 'Bring your birthday, graduation, shower or anniversary celebration together without managing every detail yourself.',
     image: '/images/event-planning/outdoor-tent-setup/image.png', alt: 'Outdoor tent with tables and chairs',
     intro: 'Whether you are hosting at home or at a venue, start with the kind of celebration you want, the number of guests and the space you have. We will help you identify what rental equipment and planning support you need, with a scope that fits your actual event.',
@@ -46,7 +46,7 @@ export const planningServices = [
   },
   {
     slug: 'festivals-fundraisers', label: 'Festivals & Fundraisers', type: 'Festival / fundraiser',
-    title: 'Festival & Fundraiser Planning in Riverdale, NY',
+    title: 'Festival & Fundraiser Planning in Riverdale, Bronx & Lower Westchester',
     summary: 'A custom planning conversation for community gatherings, fundraisers and events with multiple activity areas.',
     image: '/images/event-planning/tent-patio-setup/image.png', alt: 'Outdoor tent and adjacent event space',
     intro: 'Larger events rarely fit a single package without discussion. Share your event footprint, schedule, expected attendance and the people or organizations involved. We will review whether our rental and coordination services match your needs before preparing a custom scope.',

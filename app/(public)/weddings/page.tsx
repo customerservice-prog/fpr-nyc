@@ -9,7 +9,7 @@ import { formatCurrency } from '@/lib/utils'
 import { prisma } from '@/lib/prisma'
 import type { Metadata } from 'next'
 import { IMAGE_CACHE_BUST } from '@/lib/imageVersion'
-export const metadata = nycPageMetadata("/weddings","Wedding Rentals in Riverdale, NY | Tents, Chairs, Linens & Packages","Browse Riverdale wedding rentals, tents, tables, chairs, Chiavari seating, linens, lighting, dance floors and wedding packages with delivery and setup options.")
+export const metadata = nycPageMetadata("/weddings","Wedding Rentals | Riverdale, Bronx & Lower Westchester","Browse wedding tents, tables, chairs, Chiavari seating, linens, lighting, dance floors and packages with delivery across Riverdale, selected Bronx neighborhoods and Lower Westchester.")
 export const dynamic = 'force-dynamic'
 
 const faqItems = [
@@ -45,7 +45,7 @@ const whatWeOffer = [
 ]
 
 const whyChooseUs = [
-  { label: 'Family-owned with 10+ years of event-rental experience', icon: '🏡' },
+  { label: 'Family-owned rental company serving the NYC / Downstate market', icon: '🏡' },
   { label: 'Fully insured and professional setup crews', icon: '🛡️' },
   { label: 'Clean, professionally maintained equipment', icon: '✨' },
   { label: 'Flexible packages for different guest counts and budgets', icon: '💝' },
@@ -107,7 +107,7 @@ export default async function WeddingsPage() {
         </div>
         <div className="border-t border-white/10 bg-black/20">
           <div className="max-w-5xl mx-auto px-4 py-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-white/80 text-xs md:text-sm uppercase tracking-wider">
-            <span>Family-Owned &middot; 10+ Years</span>
+            <span>Family-Owned Rental Company</span>
             <span className="hidden md:inline text-primary">•</span>
             <span>Fully Insured</span>
             <span className="hidden md:inline text-primary">•</span>
@@ -175,7 +175,7 @@ export default async function WeddingsPage() {
           </div>
 
           <div>
-            <h2 className={`font-serif text-xl font-bold text-dark mb-6 text-center`}>Why Riverdale Couples Choose Us</h2>
+            <h2 className={`font-serif text-xl font-bold text-dark mb-6 text-center`}>What Couples Can Expect</h2>
             <div className="grid sm:grid-cols-2 gap-5">
               {whyChooseUs.map((item) => (
                 <div key={item.label} className="flex items-center gap-4 bg-white border border-primary/20 p-5 rounded-xl shadow-sm">

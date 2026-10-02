@@ -189,5 +189,8 @@ test('NYC event planner targets useful informational intent with structured app 
   assert.ok(page.includes("applicationCategory: 'DesignApplication'"))
   assert.ok(page.includes('NYC_BUSINESS_ID'))
   for(const path of ['/category/tent-rentals','/category/table-chair-rentals','/category/dance-floor-stage-rentals']) assert.ok(page.includes(path),path)
+  const home=read('components/public/NycHomeSeo.tsx')
+  assert.ok(home.includes('2D &amp; 3D Event Layout Planner'))
+  assert.ok(home.includes('href="/design-your-event"'))
   assert.doesNotMatch(page,/isAccessibleForFree|price:\s*['"]?0/)
 })

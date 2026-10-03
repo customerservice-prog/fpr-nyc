@@ -8,7 +8,7 @@ export default function CategoryPlanningGuide({ slug, name }: { slug: string; na
   const verifiedAreas=NYC_SERVICE_AREAS.filter(area=>Boolean(NYC_LOCAL_PLANNING[area.slug]))
   return <section className="mx-auto max-w-4xl px-4 pb-12" aria-labelledby="nyc-category-planning-heading">
     <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
-      <p className="mb-2 text-xs font-bold uppercase tracking-[.18em] text-secondary">Riverdale rental planning guide</p>
+      <p className="mb-2 text-xs font-bold uppercase tracking-[.18em] text-secondary">Riverdale, Bronx & Lower Westchester rental planning guide</p>
       <h2 id="nyc-category-planning-heading" className="text-2xl font-bold text-dark">{guide.heading}</h2>
       <p className="mt-4 leading-7 text-body">{guide.intro}</p>
 

@@ -10,7 +10,7 @@ import { getHomepagePopularItems } from '@/lib/homepageMerchandising'
 import { IMAGE_CACHE_BUST } from '@/lib/imageVersion'
 import { prisma } from '@/lib/prisma'
 
-export const metadata = nycPageMetadata('/','Party Rentals in Riverdale, NY | Tents, Tables, Chairs & More','Rent tents, tables, chairs, inflatables, linens, lighting and wedding equipment from Friendly Party Rental NYC with delivery across Riverdale, selected Bronx neighborhoods and Lower Westchester.')
+export const metadata = nycPageMetadata('/','Party Rentals | Riverdale, Bronx & Lower Westchester','Rent tents, tables, chairs, inflatables, linens, lighting and wedding equipment with delivery across Riverdale, selected Bronx neighborhoods, Yonkers and Lower Westchester.')
 export const revalidate = 60
 
 export default async function HomePage() {

@@ -11,9 +11,9 @@ export interface CategoryPlanningContent {
 
 const guides: Record<string, CategoryPlanningContent> = {
   'tent-rentals': {
-    title: 'Tent Rentals in Riverdale, NY | Pole & Frame Tents',
-    description: 'Browse tent rentals in Riverdale, NY including pole and frame tents. Compare setup surfaces, tent sizes, prices, delivery, and date availability.',
-    heading: 'Tent rentals for Riverdale weddings, parties and outdoor events',
+    title: 'Tent Rentals | Riverdale, Bronx & Lower Westchester',
+    description: 'Browse tent rentals across Riverdale, selected Bronx neighborhoods and Lower Westchester, including pole tents, frame tents and canopies. Compare setup surfaces, tent sizes, prices, delivery, and date availability.',
+    heading: 'Tent rentals for Riverdale, Bronx and Lower Westchester events',
     intro: 'Start with the setup surface, guest count and how the tent will be used. A seated meal, ceremony, buffet and dance floor all change the amount of space you need. Browse the current tents above, then check your date and delivery area before you build the rest of the order.',
     sections: [
       { heading: 'Pole tents vs. frame tents', body: 'Friendly Party Rental installs pole tents on grass where they can be staked into the ground. Frame tents are reserved for concrete or other approved hard-surface setups and use weights instead of stakes. Tell us the real setup surface before booking so the right tent is scheduled.' },
@@ -29,9 +29,9 @@ const guides: Record<string, CategoryPlanningContent> = {
     ],
   },
   'table-chair-rentals': {
-    title: 'Table & Chair Rentals in Riverdale, NY',
-    description: 'Browse table and chair rentals in Riverdale, NY. Compare banquet, round and cocktail tables plus folding, resin and Chiavari chairs with delivery.',
-    heading: 'Table and chair rentals for Riverdale events',
+    title: 'Table & Chair Rentals | Riverdale, Bronx & Lower Westchester',
+    description: 'Browse table and chair rentals across Riverdale, selected Bronx neighborhoods and Lower Westchester. Compare banquet, round and cocktail tables plus folding, resin and Chiavari chairs with delivery.',
+    heading: 'Table and chair rentals for Riverdale, Bronx and Lower Westchester events',
     intro: 'Build seating around the number of guests who need a seat at the same time, then add separate tables for food, gifts, registration, cake or drinks. Browse the current inventory above and use your event date to check availability.',
     sections: [
       { heading: 'Round, banquet and cocktail tables', body: 'Round tables are useful for grouped guest seating, while banquet tables work well for rows, serving stations and head-table layouts. Cocktail tables create standing social areas. Leave enough space around every table for chairs and guest movement.' },
@@ -47,9 +47,9 @@ const guides: Record<string, CategoryPlanningContent> = {
     ],
   },
   'bounce-house-rentals': {
-    title: 'Bounce House & Water Slide Rentals in Riverdale, NY',
-    description: 'Browse bounce house and water slide rentals in Riverdale, NY. Compare inflatables, setup requirements, current prices, delivery and date availability.',
-    heading: 'Bounce houses and water slides delivered in Riverdale, NY',
+    title: 'Bounce House & Water Slide Rentals | Bronx & Lower Westchester',
+    description: 'Browse bounce house and water slide rentals across Riverdale, selected Bronx neighborhoods and Lower Westchester. Compare inflatables, setup requirements, current prices, delivery and date availability.',
+    heading: 'Bounce houses and water slides delivered across Riverdale, the Bronx and Lower Westchester',
     intro: 'Choose the type of activity first, then make sure the event site has enough clear space, access and power for the exact inflatable you want. Use the current item page for the rental price and choose your event date to check availability.',
     sections: [
       { heading: 'Match the inflatable to the setup space', body: 'Bounce houses, combo units, water slides and obstacle-style inflatables have different footprints and clearance needs. Measure the usable setup area and tell us about gates, fences, slopes, overhead branches or other access limits before the event.' },
@@ -65,9 +65,9 @@ const guides: Record<string, CategoryPlanningContent> = {
     ],
   },
   'linen-rentals': {
-    title: 'Linen & Tablecloth Rentals in Riverdale, NY',
-    description: 'Browse linen and tablecloth rentals in Riverdale, NY for weddings, receptions and parties. Match table sizes, colors and delivery with your event order.',
-    heading: 'Linen rentals for Riverdale weddings and events',
+    title: 'Linen & Tablecloth Rentals | Bronx & Lower Westchester',
+    description: 'Browse linen and tablecloth rentals across Riverdale, selected Bronx neighborhoods and Lower Westchester for weddings, receptions and parties. Match table sizes, colors and delivery with your event order.',
+    heading: 'Linen rentals for Riverdale, Bronx and Lower Westchester events',
     intro: 'Choose linens after you know the table shape and size. The right cloth depends on the table dimensions and how much drop you want around the sides. Browse the available colors and styles above, then coordinate them with your tables, chairs and event design.',
     sections: [
       { heading: 'Match the cloth to the table', body: 'Round, banquet and cocktail tables use different linen dimensions. Confirm the exact table you are renting before choosing a tablecloth so the finished drop matches the look you want.' },
@@ -82,9 +82,9 @@ const guides: Record<string, CategoryPlanningContent> = {
     ],
   },
   'dance-floor-stage-rentals': {
-    title: 'Dance Floor & Stage Rentals in Riverdale, NY',
-    description: 'Browse dance floor and stage rentals in Riverdale, NY for weddings, parties and events. Compare current options, delivery and setup requirements.',
-    heading: 'Dance floor and stage rentals for Riverdale events',
+    title: 'Dance Floor & Stage Rentals | Bronx & Lower Westchester',
+    description: 'Browse dance floor and stage rentals across Riverdale, selected Bronx neighborhoods and Lower Westchester for weddings, parties and events. Compare current options, delivery and setup requirements.',
+    heading: 'Dance floor and stage rentals for Riverdale, Bronx and Lower Westchester events',
     intro: 'A dance floor or stage changes the usable space inside a venue or tent, so plan it with the tables and guest flow rather than adding it at the end. Browse the available sections and sizes above and confirm the event surface with our team.',
     sections: [
       { heading: 'Size the floor around the event', body: 'The right dance-floor size depends on guest count, room layout and how much of the event will use the floor at one time. Keep clear paths to exits, tables and service areas.' },
@@ -99,9 +99,9 @@ const guides: Record<string, CategoryPlanningContent> = {
     ],
   },
   'event-lighting-rentals': {
-    title: 'Event Lighting Rentals in Riverdale, NY',
-    description: 'Browse event lighting rentals in Riverdale, NY including tent and decorative lighting for weddings, parties and evening events.',
-    heading: 'Event lighting for tents, weddings and Riverdale celebrations',
+    title: 'Event Lighting Rentals | Bronx & Lower Westchester',
+    description: 'Browse event lighting rentals across Riverdale, selected Bronx neighborhoods and Lower Westchester including tent and decorative lighting for weddings, parties and evening events.',
+    heading: 'Event lighting for tents, weddings and Bronx/Westchester celebrations',
     intro: 'Lighting is easiest to plan after you know the tent, room and event layout. Browse the current lighting options above, then match the exact add-on to the tent or event area you are using.',
     sections: [
       { heading: 'Match lighting to the tent or space', body: 'Tent lighting is size-specific. Confirm the tent dimensions before adding a lighting package so the correct quantity and configuration are reserved.' },
@@ -116,9 +116,9 @@ const guides: Record<string, CategoryPlanningContent> = {
     ],
   },
   'generator-rentals': {
-    title: 'Generator Rentals in Riverdale, NY',
-    description: 'Browse generator rentals in Riverdale, NY for inflatables, lighting and event equipment when suitable venue power is not available.',
-    heading: 'Generator rentals for Riverdale parties and event sites',
+    title: 'Generator Rentals | Bronx & Lower Westchester',
+    description: 'Browse generator rentals across Riverdale, selected Bronx neighborhoods and Lower Westchester for inflatables, lighting and event equipment when suitable venue power is not available.',
+    heading: 'Generator rentals for Riverdale, Bronx and Lower Westchester event sites',
     intro: 'Use a generator when the event site does not have a suitable power source for the equipment being rented. Tell our team which powered items will be on the order so the generator requirement can be reviewed as one system.',
     sections: [
       { heading: 'Start with the equipment load', body: 'Do not choose a generator only by event size. The important question is which blowers, lights, speakers or other powered rentals must run at the same time.' },
@@ -133,7 +133,7 @@ const guides: Record<string, CategoryPlanningContent> = {
     ],
   },
   'party-rental-packages': {
-    title: 'Party Rental Packages in Riverdale, NY',
+    title: 'Party Rental Packages | Bronx & Lower Westchester',
     description: 'Browse party rental packages in Riverdale, NY that combine tents, tables, chairs, inflatables and other event essentials into one order.',
     heading: 'Party rental packages for Riverdale celebrations',
     intro: 'Packages can simplify an event by grouping commonly rented equipment together. Read the exact included-item list before booking, because package contents and guest counts vary.',

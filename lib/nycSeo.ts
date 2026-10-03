@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { NYC_LOGO_PATH, NYC_LOGO_WIDTH, NYC_LOGO_HEIGHT, NYC_LOGO_ALT } from '@/lib/nycBrand'
 export const NYC_SITE_URL=(process.env.NEXT_PUBLIC_SITE_URL||process.env.PUBLIC_BASE_URL||'http://localhost:3000').replace(/\/$/, '')
 export const NYC_BUSINESS_ID=NYC_SITE_URL+'/#business'
-export const NYC_SEARCH_REVISION='2026-10-02-event-planner-v5'
+export const NYC_SEARCH_REVISION='2026-10-03-local-organic-v6'
 export const NYC_STATIC_SEARCH_PATHS=['/','/about_us','/category','/weddings','/graduation-rentals','/contact_us','/employment','/frequently_asked_questions','/gallery','/order-by-date','/service-area','/chiavari-chair-rentals','/event-planning','/design-your-event','/popular-rentals','/wedding-vendors']
 export const NYC_NON_SEARCH_PATHS=['/items','/wedding-packages','/category/weddings','/pay-now','/unsubscribe','/admin','/driver','/checkout','/pay','/contract','/schedule','/api','/_next','/robots.txt','/sitemap.xml']
 export function isSearchableSlug(value:unknown):value is string{return typeof value==='string'&&value.length>0&&value===value.trim()&&!['null','undefined','.','..'].includes(value.toLowerCase())&&!/[\\/?#\u0000-\u0020\u007f]/.test(value)}

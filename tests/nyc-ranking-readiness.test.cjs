@@ -3,22 +3,23 @@ const assert=require('node:assert/strict')
 const fs=require('node:fs')
 const read=p=>fs.readFileSync(p,'utf8')
 
-test('homepage targets the core Riverdale party-rental query',()=>{
+test('homepage targets Riverdale, Bronx and Lower Westchester party-rental intent',()=>{
   const page=read('app/(public)/page.tsx')
   const hero=read('components/public/HeroSection.tsx')
   const seo=read('components/public/NycHomeSeo.tsx')
-  assert.ok(page.includes('Party Rentals in Riverdale, NY | Tents, Tables, Chairs & More'))
+  assert.ok(page.includes('Party Rentals | Riverdale, Bronx & Lower Westchester'))
   assert.ok(hero.includes('Party Rentals'))
   assert.ok(hero.includes('in Riverdale, the Bronx &amp; Lower Westchester'))
   for(const heading of [
-    'Tent Rentals in Riverdale, NY',
-    'Table &amp; Chair Rentals in Riverdale, NY',
-    'Bounce House &amp; Water Slide Rentals in Riverdale, NY',
-    'Wedding Rentals in Riverdale, NY',
+    'Tent Rentals in Riverdale, NY, the Bronx & Lower Westchester',
+    'Table &amp; Chair Rentals in Riverdale, the Bronx &amp; Lower Westchester',
+    'Bounce House &amp; Water Slide Rentals in Riverdale, the Bronx &amp; Lower Westchester',
+    'Wedding Rentals in Riverdale, the Bronx &amp; Lower Westchester',
+    'Party Rentals for Bronx &amp; Lower Westchester Events',
   ]) assert.ok(seo.includes(heading), heading)
 })
 
-test('category pages use query-focused Riverdale metadata, H1s and planning depth',()=>{
+test('category pages target the real NYC and Lower Westchester delivery footprint',()=>{
   const layout=read('app/(public)/category/[slug]/layout.tsx')
   const page=read('app/(public)/category/[slug]/page.tsx')
   const client=read('app/(public)/category/[slug]/CategoryClient.tsx')
@@ -29,17 +30,17 @@ test('category pages use query-focused Riverdale metadata, H1s and planning dept
   assert.ok(layout.includes('NYC_BUSINESS_ID'))
   assert.ok(page.includes('CategoryPlanningGuide'))
   assert.ok(client.includes('categorySearchName'))
-  assert.ok(client.includes('in Riverdale, NY'))
-  assert.ok(guide.includes('Riverdale rental planning guide'))
+  assert.ok(client.includes('in Riverdale, the Bronx & Lower Westchester'))
+  assert.ok(guide.includes('Riverdale, Bronx & Lower Westchester rental planning guide'))
   for(const term of [
-    'Tent Rentals in Riverdale, NY | Pole & Frame Tents',
-    'Table & Chair Rentals in Riverdale, NY',
-    'Bounce House & Water Slide Rentals in Riverdale, NY',
-    'Linen & Tablecloth Rentals in Riverdale, NY',
-    'Dance Floor & Stage Rentals in Riverdale, NY',
-    'Event Lighting Rentals in Riverdale, NY',
-    'Generator Rentals in Riverdale, NY',
-    'Party Rental Packages in Riverdale, NY',
+    'Tent Rentals | Riverdale, Bronx & Lower Westchester',
+    'Table & Chair Rentals | Riverdale, Bronx & Lower Westchester',
+    'Bounce House & Water Slide Rentals | Bronx & Lower Westchester',
+    'Linen & Tablecloth Rentals | Bronx & Lower Westchester',
+    'Dance Floor & Stage Rentals | Bronx & Lower Westchester',
+    'Event Lighting Rentals | Bronx & Lower Westchester',
+    'Generator Rentals | Bronx & Lower Westchester',
+    'Party Rental Packages | Bronx & Lower Westchester',
   ]) assert.ok(content.includes(term), term)
 })
 
@@ -49,6 +50,16 @@ test('wedding hub targets Riverdale wedding intent without indexing the package 
   assert.ok(weddings.includes('Wedding Rentals | Riverdale, Bronx & Lower Westchester'))
   assert.ok(weddings.includes('Chiavari seating'))
   assert.ok(selector.includes(',false)'))
+})
+
+test('core organic pages connect Bronx and Lower Westchester intent without doorway URLs',()=>{
+  const home=read('components/public/NycHomeSeo.tsx')
+  const client=read('app/(public)/category/[slug]/CategoryClient.tsx')
+  const guide=read('components/public/CategoryPlanningGuide.tsx')
+  assert.ok(home.includes('Party Rentals for Bronx &amp; Lower Westchester Events'))
+  assert.ok(client.includes('Delivered Across Riverdale, the Bronx & Lower Westchester'))
+  assert.ok(guide.includes('selected Bronx neighborhoods and Lower Westchester'))
+  assert.doesNotMatch(read('lib/nycSeo.ts'),/\/tent-rentals-bronx|\/party-rentals-yonkers-tent/)
 })
 
 test('NYC entity schema exposes the service catalog without fabricating a storefront',()=>{
@@ -70,7 +81,7 @@ test('NYC entity schema exposes the service catalog without fabricating a storef
 
 test('ranking wave strengthens existing NYC authority URLs instead of adding doorway routes',()=>{
   const seo=read('lib/nycSeo.ts')
-  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-10-02-event-planner-v5'"))
+  assert.ok(seo.includes("NYC_SEARCH_REVISION='2026-10-03-local-organic-v6'"))
   for(const bad of [
     '/tent-rentals-greenville-sc',
     '/table-chair-rentals-greenville-sc',

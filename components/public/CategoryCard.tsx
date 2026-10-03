@@ -14,7 +14,7 @@ export default function CategoryCard({ name, href, image, displayStyle = 'boxed'
     return (
       <Link href={href} prefetch={false} className="relative block w-full overflow-hidden" style={{ paddingTop: '75%' }}>
         {image ? (
-          <Image src={image} alt={name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-contain bg-gray-50" />
+          <Image src={image} alt={name} fill sizes="(max-width: 768px) 50vw, 33vw" quality={60} className="object-contain bg-gray-50" />
         ) : (
           <div className="absolute inset-0 bg-gray-200" />
         )}
@@ -27,7 +27,7 @@ export default function CategoryCard({ name, href, image, displayStyle = 'boxed'
       <Link href={href} prefetch={false} className="block">
         <div className="relative w-full overflow-hidden rounded" style={{ paddingTop: '75%' }}>
           {image ? (
-            <Image src={image} alt={name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-contain bg-gray-50" />
+            <Image src={image} alt={name} fill sizes="(max-width: 768px) 50vw, 33vw" quality={60} className="object-contain bg-gray-50" />
           ) : (
             <div className="absolute inset-0 bg-gray-200" />
           )}
@@ -42,7 +42,7 @@ export default function CategoryCard({ name, href, image, displayStyle = 'boxed'
       <Link href={href} prefetch={false} className="flex flex-col items-center">
         <div className="relative w-32 h-32 rounded-full overflow-hidden border border-gray-200">
           {image ? (
-            <Image src={image} alt={name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover" />
+            <Image src={image} alt={name} fill sizes="(max-width: 768px) 50vw, 33vw" quality={60} className="object-cover" />
           ) : (
             <div className="absolute inset-0 bg-gray-200" />
           )}
@@ -57,7 +57,7 @@ export default function CategoryCard({ name, href, image, displayStyle = 'boxed'
       <Link href={href} prefetch={false} className="block">
         <div className="relative w-full overflow-hidden" style={{ paddingTop: '75%' }}>
           {image ? (
-            <Image src={image} alt={name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-contain bg-gray-50" />
+            <Image src={image} alt={name} fill sizes="(max-width: 768px) 50vw, 33vw" quality={60} className="object-contain bg-gray-50" />
           ) : (
             <div className="absolute inset-0 bg-gray-100" />
           )}
@@ -77,7 +77,7 @@ export default function CategoryCard({ name, href, image, displayStyle = 'boxed'
     >
       <div data-category-image className="absolute inset-0">
         {image ? (
-          <Image src={image} alt={name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-contain bg-gray-50" />
+          <Image src={image} alt={name} fill sizes="(max-width: 768px) 50vw, 33vw" quality={60} className="object-contain bg-gray-50" />
         ) : (
           <div className="absolute inset-0 bg-gray-200" />
         )}

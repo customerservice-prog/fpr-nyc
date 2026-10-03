@@ -1,3 +1,15 @@
 import Link from 'next/link'
-import {NYC_SERVICE_AREAS,NYC_PRIORITY_AREAS} from '@/lib/nycServiceAreas'
-export default function LocalDeliveryLinks(){return <section className="mt-10 border-t pt-6" aria-label="New York rental delivery areas"><h2 className="text-xl font-bold text-[#0B1F3A]">Rental delivery in Riverdale, the Bronx & Lower Westchester</h2><p className="my-3 text-sm leading-6 text-gray-600">Delivery is available by arrangement for your event address and date. Warehouse customer pickup is not offered. Travel fees are separate from rental prices.</p><nav className="flex flex-wrap gap-x-4 gap-y-2 text-sm">{NYC_SERVICE_AREAS.filter(area=>NYC_PRIORITY_AREAS.includes(area.slug)).map(area=><Link href={area.href} prefetch={false} className="text-blue-800 underline" key={area.slug}>{area.name}, NY rentals</Link>)}<Link href="/service-area#communities" prefetch={false} className="font-bold text-blue-800 underline">All NYC / Lower Westchester delivery communities</Link></nav></section>}
+import {NYC_SERVICE_AREAS} from '@/lib/nycServiceAreas'
+import {NYC_LOCAL_PLANNING} from '@/lib/nycLocalPlanningResources'
+
+export default function LocalDeliveryLinks(){
+  const verifiedAreas=NYC_SERVICE_AREAS.filter(area=>Boolean(NYC_LOCAL_PLANNING[area.slug]))
+  return <section className="mt-10 border-t pt-6" aria-label="New York rental delivery areas">
+    <h2 className="text-xl font-bold text-[#0B1F3A]">Rental delivery in Riverdale, the Bronx & Lower Westchester</h2>
+    <p className="my-3 text-sm leading-6 text-gray-600">Delivery is available by arrangement for your event address and date. Warehouse customer pickup is not offered. Travel fees are separate from rental prices.</p>
+    <nav className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+      {verifiedAreas.map(area=><Link href={area.href} prefetch={false} className="text-blue-800 underline" key={area.slug}>Party rentals in {area.name}, NY</Link>)}
+      <Link href="/service-area#communities" prefetch={false} className="font-bold text-blue-800 underline">All NYC / Lower Westchester delivery communities</Link>
+    </nav>
+  </section>
+}

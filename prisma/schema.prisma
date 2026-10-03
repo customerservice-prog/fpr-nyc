@@ -427,6 +427,8 @@ model GoogleCalendarConnection {
   calendarId String @default("primary")
   encryptedRefreshToken String
   scope String?
+  searchConsoleVerificationFile String?
+  searchConsoleVerifiedAt DateTime?
   connectedAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

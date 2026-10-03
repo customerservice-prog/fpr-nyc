@@ -6,11 +6,13 @@ const policy=load('lib/nycSearchReadiness.ts')
 for(const value of ['sc-domain:friendlypartyrentalnyc.com','https://friendlypartyrentalnyc.com/','https://friendlypartyrentalnyc.com'])test('accept canonical NYC Search Console property: '+value,()=>assert.ok(policy.normalizeNycSearchProperty(value)))
 for(const value of [null,'','sc-domain:friendlypartyrental.com','https://www.friendlypartyrental.com/','sc-domain:friendlypartyrentalsc.com','sc-domain:rentsketch.com','sc-domain:fpr-nyc-production.up.railway.app','https://www.friendlypartyrentalnyc.com/','https://fpr-nyc-production.up.railway.app/','http://friendlypartyrentalnyc.com/','https://friendlypartyrentalnyc.com.evil.test/','https://evil.test/friendlypartyrentalnyc.com','https://name:pass@friendlypartyrentalnyc.com/','https://friendlypartyrentalnyc.com/category/','https://friendlypartyrentalnyc.com/?x=1'])test('reject unrelated/malformed property: '+value,()=>assert.equal(policy.normalizeNycSearchProperty(value),null))
 
-test('Google OAuth request includes Calendar and Search Console read-only scopes',()=>{
+test('Google OAuth request includes Calendar, Search Console and verify-only scopes',()=>{
  const code=fs.readFileSync('lib/googleCalendar.ts','utf8')
  assert.ok(code.includes("SEARCH_CONSOLE_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly'"))
- assert.ok(code.includes("[...PROFILE_SCOPES, CALENDAR_SCOPE, SEARCH_CONSOLE_SCOPE]"))
+ assert.ok(code.includes("SITE_VERIFICATION_SCOPE = 'https://www.googleapis.com/auth/siteverification.verify_only'"))
+ assert.ok(code.includes("[...PROFILE_SCOPES, CALENDAR_SCOPE, SEARCH_CONSOLE_SCOPE, SITE_VERIFICATION_SCOPE]"))
  assert.ok(code.includes('getGoogleSearchConsoleAccessToken'))
+ assert.ok(code.includes('getGoogleSiteVerificationAccessToken'))
 })
 
 test('wrong property never obtains credentials or queries Google',async()=>{
@@ -72,4 +74,40 @@ test('initial fallback links existing catalog and does not fabricate availabilit
 test('search visibility page is admin-only, noindex and uses the shared Google permission refresh flow',()=>{
  const code=fs.readFileSync('app/admin/settings/search-visibility/page.tsx','utf8');assert.ok(code.includes('getServerSession(authOptions)'));assert.ok(code.includes("role!=='admin'"));assert.ok(code.includes('index:false'));assert.ok(!code.includes('method:'));assert.ok(code.includes('/api/admin/google-calendar/connect'))
  const settings=fs.readFileSync('app/admin/settings/google-integration/page.tsx','utf8');assert.ok(!settings.includes("isEnabled ? 'Connected'"));assert.ok(settings.includes('/admin/settings/search-visibility'))
+})
+
+
+test('automatic NYC Google FILE verification is constrained to the canonical root',async()=>{
+ const helper=load('lib/nycSearchVerification.ts',{'@/lib/prisma':{prisma:{}}})
+ assert.equal(helper.NYC_SEARCH_URL_PREFIX,'https://friendlypartyrentalnyc.com/')
+ assert.equal(helper.isGoogleSiteVerificationFile('google123_A-b.html'),true)
+ for(const value of ['google.html','google123_A-b.txt','../google123.html','google123.html/extra','https://friendlypartyrentalnyc.com/google123.html'])assert.equal(helper.isGoogleSiteVerificationFile(value),false,String(value))
+ const config=require('../next.config.js')
+ const rewrites=await config.rewrites()
+ assert.ok(rewrites.some(r=>r.source.includes('google[A-Za-z0-9_-]+')&&r.destination==='/api/google-site-verification?file=:file'))
+ const route=fs.readFileSync('app/api/google-site-verification/route.ts','utf8')
+ assert.ok(route.includes("'google-site-verification: ' + saved"))
+ assert.ok(route.includes("'X-Robots-Tag': 'noindex, nofollow'"))
+})
+
+test('Search Console verification state is persisted and migrations are additive',()=>{
+ const schema=fs.readFileSync('prisma/schema.prisma','utf8')
+ const migration=fs.readFileSync('prisma/migrations/20261001044500_nyc_search_console_verification/migration.sql','utf8')
+ assert.ok(schema.includes('searchConsoleVerificationFile String?'))
+ assert.ok(schema.includes('searchConsoleVerifiedAt DateTime?'))
+ assert.ok(migration.includes('ADD COLUMN IF NOT EXISTS "searchConsoleVerificationFile" TEXT'))
+ assert.ok(migration.includes('ADD COLUMN IF NOT EXISTS "searchConsoleVerifiedAt" TIMESTAMP(3)'))
+})
+
+test('Google reconnect automatically attempts NYC ownership verification and keeps a retry path',()=>{
+ const callback=fs.readFileSync('app/api/admin/google-calendar/callback/route.ts','utf8')
+ const verifyRoute=fs.readFileSync('app/api/admin/search-console/verify/route.ts','utf8')
+ const visibility=fs.readFileSync('app/admin/settings/search-visibility/page.tsx','utf8')
+ assert.ok(callback.includes('ensureNycSearchConsoleVerification(tokens.access_token)'))
+ assert.ok(callback.includes("connected-search-verified"))
+ assert.ok(callback.includes("connected-search-pending"))
+ assert.ok(verifyRoute.includes('getGoogleSiteVerificationAccessToken'))
+ assert.ok(verifyRoute.includes('ensureNycSearchConsoleVerification(auth.accessToken)'))
+ assert.ok(visibility.includes('action="/api/admin/search-console/verify"'))
+ assert.ok(visibility.includes('Google Site Verification'))
 })

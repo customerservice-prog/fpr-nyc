@@ -407,7 +407,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
       )}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-dark">{category ? `${categorySearchName(slug, category.name)} in Riverdale, NY` : slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) + ' in Riverdale, NY'}</h1>
+          <h1 className="text-2xl font-bold text-dark">{category ? `${categorySearchName(slug, category.name)} in Riverdale, the Bronx & Lower Westchester` : slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) + ' in Riverdale, the Bronx & Lower Westchester'}</h1>
         </div>
         <button onClick={() => setCartOpen(true)} className="btn-primary flex items-center gap-2">
           <ShoppingCart size={20} />
@@ -856,11 +856,11 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
 
       <section className="mt-12 border-t pt-8 text-body">
         <h2 className="text-xl font-bold text-dark mb-3">
-          {category?.name || slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} Delivered Throughout Riverdale, NY
+          {category?.name || slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} Delivered Across Riverdale, the Bronx & Lower Westchester
         </h2>
         <p className="mb-3">
           Friendly Party Rental NYC proudly supplies {(category?.name || 'rentals').toLowerCase()} for birthdays, graduations,
-          weddings, corporate events, and backyard parties across Riverdale, NY and the surrounding Downstate New York
+          weddings, corporate events, and backyard parties across Riverdale, selected Bronx neighborhoods, Yonkers and Lower Westchester
           communities. Whether you are planning a small backyard gathering or a large wedding reception, our team
           delivers, sets up, and picks up your rental so you can focus on your event.
         </p>

@@ -1,8 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import DesktopHome from './DesktopHome'
-import MobileHome, { type MobileHomeProps } from './MobileHome'
+import dynamic from 'next/dynamic'
+import type { MobileHomeProps } from './MobileHome'
+
+const DesktopHome = dynamic(() => import('./DesktopHome'))
+const MobileHome = dynamic(() => import('./MobileHome'))
 import type { HomeDevice } from '@/lib/homeDevice'
 
 interface Props extends MobileHomeProps { initialDevice?: HomeDevice }

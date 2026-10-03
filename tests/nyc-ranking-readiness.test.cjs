@@ -205,3 +205,14 @@ test('NYC event planner targets useful informational intent with structured app 
   assert.ok(home.includes('href="/design-your-event"'))
   assert.doesNotMatch(page,/isAccessibleForFree|price:\s*['"]?0/)
 })
+
+
+test('product and contact pages strengthen verified local discovery',()=>{
+  const delivery=read('components/public/LocalDeliveryLinks.tsx')
+  const contact=read('app/(public)/contact_us/layout.tsx')
+  assert.ok(delivery.includes('NYC_LOCAL_PLANNING'))
+  assert.ok(delivery.includes('Party rentals in {area.name}, NY'))
+  assert.doesNotMatch(delivery,/NYC_PRIORITY_AREAS/)
+  assert.ok(contact.includes('Contact Friendly Party Rental NYC | Bronx & Lower Westchester'))
+  assert.ok(contact.includes("'/contact_us'"))
+})

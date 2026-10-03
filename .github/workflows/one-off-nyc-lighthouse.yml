@@ -1,0 +1,44 @@
+name: One-off NYC live Lighthouse
+
+on:
+  push:
+    branches:
+      - audit/nyc-live-lighthouse-20261003
+    paths:
+      - '.github/workflows/one-off-nyc-lighthouse.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Run mobile Lighthouse
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx -y lighthouse@13.0.1 https://friendlypartyrentalnyc.com \
+            --output=json --output-path=/tmp/lighthouse.json \
+            --chrome-flags="--headless --no-sandbox" \
+            --only-categories=performance,accessibility,best-practices,seo \
+            --quiet
+          node - <<'NODE'
+          const r=require('/tmp/lighthouse.json')
+          const cats=r.categories
+          const a=r.audits
+          const out={
+            performance:Math.round(cats.performance.score*100),
+            accessibility:Math.round(cats.accessibility.score*100),
+            bestPractices:Math.round(cats['best-practices'].score*100),
+            seo:Math.round(cats.seo.score*100),
+            fcp:a['first-contentful-paint']?.displayValue,
+            lcp:a['largest-contentful-paint']?.displayValue,
+            tbt:a['total-blocking-time']?.displayValue,
+            cls:a['cumulative-layout-shift']?.displayValue,
+            speedIndex:a['speed-index']?.displayValue,
+            failedSeo:Object.entries(a).filter(([k,v])=>v.score===0 && (v.details?.type==='table'||v.details?.type==='opportunity'||['document-title','meta-description','http-status-code','link-text','crawlable-anchors','robots-txt','is-crawlable','canonical','hreflang','structured-data'].includes(k))).map(([k,v])=>({id:k,title:v.title,displayValue:v.displayValue||null})).slice(0,30)
+          }
+          console.log(JSON.stringify(out,null,2))
+          NODE

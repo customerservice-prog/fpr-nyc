@@ -26,7 +26,7 @@ export default function MobileHome({categories,popularItems,bounceItems,packages
  const savedImage=hero?.mobileImageUrl
  const cleanImage=typeof savedImage==='string'&&!savedImage.includes('mobile-hero-event-scene')?savedImage:undefined
  const product=(item:MobilePopularItem)=><Link key={item.id} href={item.slug?nycItemPath(item.slug):'/category'} prefetch={false} className="home-product">
-  <div className="relative aspect-[4/3] bg-white">{item.picture?<Image src={item.picture} alt={item.name} fill sizes="(max-width:599px) 50vw, (max-width:767px) 33vw, 25vw" className="object-contain p-2"/>:<div className="absolute inset-0 grid place-items-center text-xs text-gray-400">Photo coming soon</div>}</div>
+  <div className="relative aspect-[4/3] bg-white">{item.picture?<Image src={item.picture} alt={item.name} fill sizes="(max-width:599px) 50vw, (max-width:767px) 33vw, 25vw" quality={62} className="object-contain p-2"/>:<div className="absolute inset-0 grid place-items-center text-xs text-gray-400">Photo coming soon</div>}</div>
   <div className="home-product-copy"><p className="font-bold">{item.name}</p><p className="home-product-price">From {formatCurrency(item.cost)}</p></div>
  </Link>
  return <div data-home-layout="mobile" data-sc-parity="20260921" className={`${styles.home} bg-white text-[#0B1F3A]`}>

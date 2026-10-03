@@ -130,7 +130,7 @@ export default function DesktopHome(props: MobileHomeProps) {
           <Link href="/popular-rentals" className="font-bold text-secondary underline">View popular rentals</Link>
         </div>
         <div className="grid grid-cols-4 gap-5">{popularItems.slice(0,8).map(item => <Link key={item.id} href={item.slug ? nycItemPath(item.slug) : '/category'} prefetch={false} className="overflow-hidden rounded-xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-          <div className="relative aspect-[4/3] bg-white">{item.picture ? <Image src={item.picture} alt={item.name} fill sizes="25vw" className="object-contain p-3" /> : <div className="absolute inset-0 grid place-items-center text-sm text-gray-400">Photo coming soon</div>}</div>
+          <div className="relative aspect-[4/3] bg-white">{item.picture ? <Image src={item.picture} alt={item.name} fill sizes="25vw" quality={62} className="object-contain p-3" /> : <div className="absolute inset-0 grid place-items-center text-sm text-gray-400">Photo coming soon</div>}</div>
           <div className="p-4"><h3 className="line-clamp-2 font-bold text-dark">{item.name}</h3><p className="mt-2 font-bold text-secondary">{formatCurrency(item.cost)}</p></div>
         </Link>)}</div>
       </div>

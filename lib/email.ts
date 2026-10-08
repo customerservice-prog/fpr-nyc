@@ -79,6 +79,7 @@ async function sendWithResend({
   const from = String(process.env.RESEND_FROM || '').trim()
   if (!apiKey || !from) return null
 
+  const recipients = to.split(',').map(value => value.trim()).filter(Boolean)
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -87,7 +88,7 @@ async function sendWithResend({
     },
     body: JSON.stringify({
       from,
-      to: [to],
+      to: recipients,
       reply_to: [replyTo],
       subject,
       html,
@@ -106,7 +107,7 @@ async function sendWithResend({
 
   const delivery = await response.json() as { id?: string }
   if (!delivery?.id) throw new Error('Resend did not return an email id')
-  return { success: true as const, simulated: false as const, provider: 'resend' as const, providerId: delivery.id }
+  return { success: true as const, simulated: false as const, provider: 'resend' as const, providerId: delivery.id, messageId: delivery.id }
 }
 
 export async function sendEmail({
@@ -161,7 +162,7 @@ export async function sendEmail({
     if (!Array.isArray(delivery?.accepted) || delivery.accepted.length === 0 || (delivery.rejected?.length || 0) > 0) {
       throw new Error('SMTP did not accept every intended recipient')
     }
-    return { success: true, simulated: false, provider: 'smtp' as const }
+    return { success: true, simulated: false, provider: 'smtp' as const, messageId: typeof delivery.messageId === 'string' ? delivery.messageId : undefined }
   } catch (error) {
     console.error('Riverdale email delivery failed')
     throw new Error('Riverdale email could not be delivered. Check the outgoing email configuration.')

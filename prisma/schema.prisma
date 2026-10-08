@@ -157,6 +157,11 @@ model Order {
   stripeCustomerId String?
   savedPaymentMethodId String?
   autopayEnabled Boolean @default(false)
+  cardSetupTokenHash String?
+  cardSetupTokenExpiresAt DateTime?
+  cardOnFileConsentAt DateTime?
+  cardOnFileConsentIp String?
+  cardOnFileConsentVersion String?
   autoChargeStatus String?
   autoChargeAttemptedAt DateTime?
   notes String?
@@ -194,6 +199,7 @@ model Order {
   updatedAt DateTime @updatedAt
   items OrderItem[]
   payments Payment[]
+  additionalCharges OrderAdditionalCharge[]
   contacts OrderContact[]
   deliveredAt DateTime?
   pickedUpAt DateTime?
@@ -265,6 +271,29 @@ model Payment {
   pendingAmount Float?
   recordedByName String?
   createdAt DateTime @default(now())
+}
+
+model OrderAdditionalCharge {
+  id String @id @default(cuid())
+  orderId String
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type String @default("other")
+  amount Float
+  reason String
+  status String @default("pending")
+  stripePaymentIntentId String? @unique
+  requestKey String? @unique
+  addsToOrderTotal Boolean @default(false)
+  consentVersion String?
+  consentAt DateTime?
+  failureMessage String?
+  createdByName String?
+  customerNotifiedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId, createdAt])
+  @@index([status])
 }
 
 model OrderContact {

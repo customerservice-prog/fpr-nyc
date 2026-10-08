@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma'
 import { describeStripeError, isNycPaymentsUnavailable, requireNycStripe } from '@/lib/stripe'
 import { NYC_LOCATION, NYC_PAYMENT_APP, dollarsToCents, nycIdempotencyKey } from '@/lib/nycPaymentMetadata'
 import { PaymentAssociationError, loadOrderForIntent, reconcileNycRefunds } from '@/lib/nycStripeReconcile'
+import { canIssueRefunds } from '@/lib/staffPermissions'
 
 // Staff refund of an NYC card payment.
 // - NYC account guard runs before the refund is created.
@@ -21,11 +22,12 @@ export async function POST(
 ) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  if ((session.user as any).role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!canIssueRefunds((session.user as { role?: string }).role)) return NextResponse.json({ error: 'This staff role cannot issue refunds.' }, { status: 403 })
 
   try {
     const body = await request.json().catch(() => ({}))
     const paymentId = typeof body?.paymentId === 'string' ? body.paymentId : ''
+    const reason = typeof body?.reason === 'string' ? body.reason.trim().slice(0, 500) : ''
     if (!paymentId) {
       return NextResponse.json({ error: 'paymentId is required' }, { status: 400 })
     }
@@ -75,6 +77,7 @@ export async function POST(
         orderNumber: order.orderNumber,
         paymentId: payment.id,
         requestedBy: (session.user?.name || 'staff').slice(0, 80),
+        ...(reason ? { reason } : {}),
       },
     }, {
       // Same payment, same amount, same prior-refund total => same refund (double-click safe).

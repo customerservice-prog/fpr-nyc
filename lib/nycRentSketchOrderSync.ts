@@ -16,12 +16,14 @@ export async function syncNycRentSketchOrder(input:any){
  const designId=text(input?.designId,100)
  const designRevision=Number(input?.designRevision)
  const mode=input?.mode==='submit'?'submit':'preview'
- const managed=Array.isArray(input?.managedSlugs)?Array.from(new Set(input.managedSlugs.map(slug).filter(Boolean))).slice(0,250):[]
+ const managed:string[]=Array.isArray(input?.managedSlugs)
+  ? Array.from(new Set<string>((input.managedSlugs as unknown[]).map(value=>slug(value)).filter((value):value is string=>Boolean(value)))).slice(0,250)
+  : []
  if(!orderId||!email||!expectedUpdatedAt||!designId||!Number.isInteger(designRevision)||designRevision<1||!managed.length){
   throw new NycRentSketchOrderSyncError(400,'invalid_sync_request','The NYC RentSketch order sync request is incomplete.')
  }
  const desired=new Map<string,number>()
- for(const raw of Array.isArray(input?.desiredItems)?input.desiredItems.slice(0,250):[]){
+ for(const raw of (Array.isArray(input?.desiredItems)?input.desiredItems.slice(0,250):[]) as any[]){
   const s=slug(raw?.slug),q=qty(raw?.quantity)
   if(!s||q===null||!managed.includes(s))throw new NycRentSketchOrderSyncError(400,'invalid_desired_sku','A synchronized NYC rental SKU or quantity is invalid.')
   desired.set(s,q)

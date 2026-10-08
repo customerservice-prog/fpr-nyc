@@ -31,7 +31,7 @@ const FAQ_DATA: FaqEntry[] = [
   { q: 'What if my location has stairs or hills or a tiered yard?', a: 'Please contact our office in advance if your location includes stairs, hills, a tiered backyard, or other obstacles so we can review setup options. If undisclosed obstacles extend setup time, a $50 fee may apply.' },
   { q: 'Should I tip the delivery crew?', a: 'Tipping is optional but appreciated. You will see a tip prompt during checkout if you would like to add one for the delivery team.' },
   { q: 'What happens if there is bad weather?', a: 'We monitor weather closely. Past and fully-booked dates are shown as closed on our calendar. Light rain is generally fine for setups, but severe weather may require pausing inflatables for safety.' },
-  { q: 'Can I see my order status or delivery tracking?', a: 'Once your order is confirmed, our office can give you delivery updates by phone, text, or email.' },
+  { q: 'Can I see my order status or delivery tracking?', a: 'Yes. Use the secure My Order page at /my-order to verify your reservation by email, see your current order details, and send change requests to the NYC team. For live truck timing, call or text ' + BUSINESS.phone + '.' },
   { q: 'Can bounce houses be set up indoors?', a: 'Yes, as long as the space has a minimum 14-16 ft ceiling height.' },
   { q: 'What happens if it rains during my event?', a: 'Light rain is generally okay, but heavy rain, lightning, or high winds require shutting down inflatables for safety.' },
   { q: 'Can you set up at parks?', a: 'Yes. Permits may be required for park setups, and the customer is responsible for obtaining them.' },

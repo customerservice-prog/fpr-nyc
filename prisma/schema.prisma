@@ -200,6 +200,7 @@ model Order {
   items OrderItem[]
   payments Payment[]
   additionalCharges OrderAdditionalCharge[]
+  changeRequests OrderChangeRequest[]
   contacts OrderContact[]
   deliveredAt DateTime?
   pickedUpAt DateTime?
@@ -271,6 +272,50 @@ model Payment {
   pendingAmount Float?
   recordedByName String?
   createdAt DateTime @default(now())
+}
+
+model OrderChangeRequest {
+  id String @id @default(cuid())
+  orderId String
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customerId String
+  requestType String @default("other")
+  itemId String?
+  itemName String
+  quantity Int @default(0)
+  quotedUnitPrice Float @default(0)
+  estimatedSubtotal Float @default(0)
+  status String @default("pending")
+  customerMessage String?
+  decisionNote String?
+  reviewedByName String?
+  decidedAt DateTime?
+  appliedAt DateTime?
+  finalAdditionalTotal Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId, status, createdAt])
+  @@index([status, createdAt])
+  @@index([customerId, createdAt])
+}
+
+model AssistantOrderVerification {
+  id String @id
+  lookupHash String
+  orderId String?
+  customerId String?
+  codeHash String
+  requestIpHash String?
+  status String @default("created")
+  failedAttempts Int @default(0)
+  expiresAt DateTime
+  consumedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([lookupHash, createdAt])
+  @@index([requestIpHash, createdAt])
+  @@index([orderId, createdAt])
 }
 
 model OrderAdditionalCharge {

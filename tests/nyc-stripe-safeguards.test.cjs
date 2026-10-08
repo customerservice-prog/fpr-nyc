@@ -233,7 +233,8 @@ behavior('webhook ledger: duplicates are acknowledged, failures are retried', ()
   assert.deepEqual(ledger.NYC_HANDLED_STRIPE_EVENTS.slice().sort(), [
     'charge.dispute.created', 'charge.refund.updated', 'charge.refunded',
     'payment_intent.canceled', 'payment_intent.payment_failed', 'payment_intent.processing', 'payment_intent.succeeded',
-  ])
+    'setup_intent.succeeded',
+  ].sort())
 })
 
 // Test fixtures only (not approved NYC prices): the policy mirrors the fee values the

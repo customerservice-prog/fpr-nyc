@@ -13,7 +13,7 @@ type RequestRow={
 function typeLabel(type:string){
  return ({
   add_item:'Add rentals',remove_item:'Remove/change rentals',change_address:'Address change',
-  change_schedule:'Schedule change',cancel_order:'Cancellation request',other:'Other request',
+  change_schedule:'Schedule change',cancel_order:'Cancellation request',rentsketch_set_quantity:'RentSketch quantity target',other:'Other request',
  } as Record<string,string>)[type]||type.replace(/_/g,' ')
 }
 

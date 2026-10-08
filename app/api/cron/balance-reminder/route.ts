@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, balanceReminderEmail } from '@/lib/email'
 import { formatDate } from '@/lib/utils'
+import { customerPayUrl } from '@/lib/publicOrderAccess'
 
 // Automatic 3-day-before-event Balance Reminder email.
 // Runs on a schedule (see .github/workflows/balance-reminder-cron.yml).
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
       continue
     }
 
-    const payLink = `${origin}/pay/${order.id}`
+    const payLink = customerPayUrl(origin, order.id, order.eventDate)
     const customerName = `${order.customer.firstName} ${order.customer.lastName}`
     const eventDate = formatDate(order.eventDate)
 

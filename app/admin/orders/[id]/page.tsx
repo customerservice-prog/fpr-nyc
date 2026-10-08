@@ -596,23 +596,30 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     }
   }
 
+  const customerAccessLinks = async () => {
+    const response = await fetch('/api/admin/orders/' + id + '/access-links', { method: 'POST' })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(data.error || 'Could not create secure customer link')
+    return data as { payUrl: string; contractUrl: string }
+  }
+
   const copyPaymentLink = async () => {
-    const link = window.location.origin + '/pay/' + id
     try {
-      await navigator.clipboard.writeText(link)
-      toast.success('Payment link copied to clipboard')
-    } catch {
-      toast.error(link)
+      const links = await customerAccessLinks()
+      await navigator.clipboard.writeText(links.payUrl)
+      toast.success('Secure payment link copied to clipboard')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not copy payment link')
     }
   }
 
   const copyContractLink = async () => {
-    const link = window.location.origin + '/contract/' + id
     try {
-      await navigator.clipboard.writeText(link)
-      toast.success('Contract link copied to clipboard')
-    } catch {
-      toast.error(link)
+      const links = await customerAccessLinks()
+      await navigator.clipboard.writeText(links.contractUrl)
+      toast.success('Secure contract link copied to clipboard')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not copy contract link')
     }
   }
 

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run snapshot:wedding-art && npm run test:nyc-isolation && npm run test:nyc-payments && npm run test:nyc-ranking && npm run test:nyc-discovery && npm run test:nyc-identity && npm run test:nyc-admin-parity && npm run test:nyc-website-builder-parity && npm run test:nyc-settings-wiring && npm run test:nyc-minoa-ops-parity && npm run test:nyc-card-safety-parity && npm run test:nyc-minoa-staff-ux-parity && npm run test:nyc-admin-schedule-parity && next build",
+    "build": "npm run snapshot:wedding-art && npm run test:nyc-isolation && npm run test:nyc-payments && npm run test:nyc-ranking && npm run test:nyc-discovery && npm run test:nyc-identity && npm run test:nyc-admin-parity && npm run test:nyc-website-builder-parity && npm run test:nyc-settings-wiring && npm run test:nyc-minoa-ops-parity && npm run test:nyc-card-safety-parity && npm run test:nyc-minoa-staff-ux-parity && npm run test:nyc-admin-schedule-parity && npm run test:nyc-email-delivery-parity && next build",
     "start": "next start -H 0.0.0.0 -p ${PORT:-3000}",
     "lint": "next lint",
     "db:migrate": "prisma migrate deploy",
@@ -25,7 +25,8 @@
     "test:nyc-minoa-ops-parity": "node --test tests/nyc-minoa-ops-parity.test.cjs",
     "test:nyc-card-safety-parity": "node --test tests/nyc-card-safety-parity.test.cjs",
     "test:nyc-minoa-staff-ux-parity": "node --test tests/nyc-minoa-staff-ux-parity.test.cjs",
-    "test:nyc-admin-schedule-parity": "node --test tests/nyc-admin-schedule-parity.test.cjs"
+    "test:nyc-admin-schedule-parity": "node --test tests/nyc-admin-schedule-parity.test.cjs",
+    "test:nyc-email-delivery-parity": "node --test tests/nyc-email-delivery-parity.test.cjs"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

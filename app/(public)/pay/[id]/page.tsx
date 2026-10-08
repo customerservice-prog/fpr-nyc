@@ -545,7 +545,7 @@ export default function PayOrderPage({ params, searchParams }: { params: Promise
           <PaymentCardAuthorization checked={saveCard} onChange={setSaveCard} required={false} compact />
           {paymentsAvailable === false && (
             <div role="alert" className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-sm text-amber-900">
-              Online payment is temporarily unavailable. Please call Friendly Party Rental NYC at <a href="tel:{BUSINESS.phone}" className="underline">{BUSINESS.phone}</a>. No card has been charged.
+              Online payment is temporarily unavailable. Please call Friendly Party Rental NYC at <a href={'tel:' + BUSINESS.phone} className="underline">{BUSINESS.phone}</a>. No card has been charged.
             </div>
           )}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm text-body">

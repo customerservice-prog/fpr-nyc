@@ -7,11 +7,12 @@ import { sendEmail, incompleteOrderRecaptureEmail } from '@/lib/email'
 import { BUSINESS } from '@/lib/utils'
 import { ownerNotificationRecipients } from '@/lib/orderLifecycleNotifications'
 import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
+import { customerPayUrl } from '@/lib/publicOrderAccess'
 
 const SITE_URL = NYC_PUBLIC_ORIGIN
 
-function resumeLink(orderId: string) {
-    return SITE_URL + '/pay/' + orderId
+function resumeLink(orderId: string, eventDate?: Date | string | null) {
+    return customerPayUrl(SITE_URL, orderId, eventDate)
 }
 
 function buildEmail(stage: 0 | 3 | 7, firstName: string, orderId: string) {
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
     for (const order of (stage0Enabled ? stage0Orders : [])) {
         if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
         const email = stage0Setting
-            ? incompleteOrderRecaptureEmail({ subject: stage0Setting.subject, content: stage0Setting.content }, { firstName: order.customer?.firstName || '', orderId: order.id, resumeLink: resumeLink(order.id) })
+            ? incompleteOrderRecaptureEmail({ subject: stage0Setting.subject, content: stage0Setting.content }, { firstName: order.customer?.firstName || '', orderId: order.id, resumeLink: resumeLink(order.id, order.eventDate) })
             : buildEmail(0, order.customer?.firstName || '', order.id)
         const delivered = await deliverRecoveryEmail(order.customer?.email, email)
         if (!delivered) { results.retryableFailures++; continue }
@@ -103,7 +104,7 @@ export async function GET(request: NextRequest) {
             if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
             if (order.incompleteFollowUpSentAt && order.incompleteFollowUpSentAt > oneDayAgo) { continue }
         const email = stage3Setting
-            ? incompleteOrderRecaptureEmail({ subject: stage3Setting.subject, content: stage3Setting.content }, { firstName: order.customer?.firstName || '', orderId: order.id, resumeLink: resumeLink(order.id) })
+            ? incompleteOrderRecaptureEmail({ subject: stage3Setting.subject, content: stage3Setting.content }, { firstName: order.customer?.firstName || '', orderId: order.id, resumeLink: resumeLink(order.id, order.eventDate) })
             : buildEmail(3, order.customer?.firstName || '', order.id)
         const delivered = await deliverRecoveryEmail(order.customer?.email, email)
         if (!delivered) { results.retryableFailures++; continue }
@@ -124,7 +125,7 @@ export async function GET(request: NextRequest) {
         if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
         if (order.incompleteFollowUp3SentAt && order.incompleteFollowUp3SentAt > oneDayAgo) { continue }
         const email = stage7Setting
-            ? incompleteOrderRecaptureEmail({ subject: stage7Setting.subject, content: stage7Setting.content }, { firstName: order.customer?.firstName || '', orderId: order.id, resumeLink: resumeLink(order.id) })
+            ? incompleteOrderRecaptureEmail({ subject: stage7Setting.subject, content: stage7Setting.content }, { firstName: order.customer?.firstName || '', orderId: order.id, resumeLink: resumeLink(order.id, order.eventDate) })
             : buildEmail(7, order.customer?.firstName || '', order.id)
         const delivered = await deliverRecoveryEmail(order.customer?.email, email)
         if (!delivered) { results.retryableFailures++; continue }

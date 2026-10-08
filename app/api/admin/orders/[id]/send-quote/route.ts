@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma'
 import { sendEmail, quoteEmail, updatedReceiptEmail } from '@/lib/email'
 import { formatDate } from '@/lib/utils'
 import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
+import { customerPayUrl } from '@/lib/publicOrderAccess'
 
 export async function POST(
         request: NextRequest,
@@ -40,7 +41,7 @@ export async function POST(
 	
 
     const origin = NYC_PUBLIC_ORIGIN
-        const payLink = `${origin}/pay/${order.id}`
+        const payLink = customerPayUrl(origin, order.id, order.eventDate)
 
     const amountDue = order.amountPaid > 0
             ? Math.max(order.totalAmount - order.amountPaid, 0)

@@ -37,6 +37,8 @@ export async function POST(req: NextRequest) {
       ok: true,
       accessEmailVersion: 1,
       orderAccessVersion: 1,
+      inventoryVersion: 1,
+      orderSyncVersion: 1,
       ...(payload.type === 'event_pass.order_lookup' ? { order: await lookupNycRentSketchOrder(d) } : {}),
     })
   }

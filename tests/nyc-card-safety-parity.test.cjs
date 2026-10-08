@@ -66,7 +66,7 @@ test('saved-card charges use a database request ledger before Stripe', () => {
   assert.match(helper, /Have the customer complete card authorization/)
   assert.match(helper, /nycIdempotencyKey/)
   assert.match(helper, /buildNycPaymentMetadata/)
-  assert.match(route, /requireNycStripe\('charge'\)/)
+  assert.match(helper, /requireNycStripe\('charge'\)/)
   assert.match(route, /collectNycSavedCardCharge/)
   assert.ok(!route.includes('paymentIntents.create'), 'route must delegate to the replay-safe ledger')
 })

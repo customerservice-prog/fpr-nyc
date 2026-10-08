@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react'
 import { Elements } from '@stripe/react-stripe-js'
 import toast from 'react-hot-toast'
-import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils'
+import { BUSINESS, formatCurrency, formatDate, formatDateTime } from '@/lib/utils'
 import { getStripe } from '@/lib/stripe-client'
 import CardPaymentForm from '@/components/public/CardPaymentForm'
 import PaymentCardAuthorization from '@/components/public/PaymentCardAuthorization'
@@ -36,8 +36,10 @@ interface PublicOrder {
   items: Array<{ itemId: string | null; itemName: string; quantity: number; unitPrice: number; total: number }>
 }
 
-export default function PayOrderPage({ params }: { params: Promise<{ id: string }> }) {
+export default function PayOrderPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ access?: string }> }) {
   const { id } = use(params)
+  const { access: initialAccess } = use(searchParams)
+  const [accessToken, setAccessToken] = useState(initialAccess || '')
   const [order, setOrder] = useState<PublicOrder | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -55,6 +57,11 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
   const [addResults, setAddResults] = useState<{ id: string; name: string; cost: number }[]>([])
   const [savingItems, setSavingItems] = useState(false)
   const [paymentsAvailable, setPaymentsAvailable] = useState<boolean | null>(null)
+  const [verificationRequired, setVerificationRequired] = useState(false)
+  const [verificationBusy, setVerificationBusy] = useState(false)
+  const [challengeId, setChallengeId] = useState('')
+  const [verificationCode, setVerificationCode] = useState('')
+  const [verificationMessage, setVerificationMessage] = useState('')
 
   useEffect(() => {
     let active = true
@@ -65,18 +72,34 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
     return () => { active = false }
   }, [])
 
+  const loadOrder = async () => {
+    const query = accessToken ? '?access=' + encodeURIComponent(accessToken) : ''
+    try {
+      const response = await fetch(`/api/orders/${id}/public${query}`, { cache: 'no-store' })
+      const data = await response.json().catch(() => ({}))
+      if (response.status === 401) {
+        setVerificationRequired(true)
+        setNotFound(false)
+        setOrder(null)
+        return
+      }
+      if (!response.ok || !data.order) {
+        setNotFound(true)
+        setVerificationRequired(false)
+        return
+      }
+      setVerificationRequired(false)
+      setNotFound(false)
+      setOrder(data.order)
+    } catch {
+      setNotFound(true)
+    }
+  }
+
   useEffect(() => {
-    fetch(`/api/orders/${id}/public`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.error) {
-          setNotFound(true)
-          return
-        }
-        setOrder(d.order)
-      })
-      .catch(() => setNotFound(true))
-  }, [id])
+    void loadOrder()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, accessToken])
 
   useEffect(() => {
     if (order && !editInitialized) {
@@ -133,14 +156,14 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
     if (!order) return
     setSavingItems(true)
     try {
-      const res = await fetch(`/api/orders/${order.id}/items`, {
+      const res = await fetch(`/api/orders/${order.id}/items${accessToken ? '?access=' + encodeURIComponent(accessToken) : ''}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: editItems.map((i) => ({ itemId: i.itemId, quantity: i.quantity })) }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Could not save changes')
-      const refreshed = await fetch(`/api/orders/${order.id}/public`).then((r) => r.json())
+      const refreshed = await fetch(`/api/orders/${order.id}/public${accessToken ? '?access=' + encodeURIComponent(accessToken) : ''}`, { cache: 'no-store' }).then((r) => r.json())
       if (refreshed.order) setOrder(refreshed.order)
       setEditInitialized(false)
       toast.success('Your quote has been updated.')
@@ -183,7 +206,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
     const response = await fetch(`/api/orders/${id}/confirm-payment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: amountDue, tipAmount, stripePaymentId, saveCard }),
+      body: JSON.stringify({ amount: amountDue, tipAmount, stripePaymentId, saveCard, accessToken }),
     })
     if (!response.ok) throw new Error('Your payment result needs verification. Please contact us before paying again.')
     const result = await response.json()
@@ -198,7 +221,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
   const handlePay = async () => {
     if (!order) return
     if (paymentsAvailable !== true) {
-      toast.error('Online payment is temporarily unavailable. Please call us at 315-884-1498.')
+      toast.error('Online payment is temporarily unavailable. Please call us at ' + BUSINESS.phone + '.')
       return
     }
     if (amountDue <= 0) {
@@ -210,7 +233,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: order.id, amount: amountDue, tipAmount, saveCard }),
+        body: JSON.stringify({ orderId: order.id, amount: amountDue, tipAmount, saveCard, accessToken }),
       })
       const data = await res.json()
       if (!res.ok || !data.clientSecret) throw new Error(data.error || 'Payment failed')
@@ -222,11 +245,84 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
     }
   }
 
+  const requestVerification = async () => {
+    setVerificationBusy(true)
+    setVerificationMessage('')
+    try {
+      const response = await fetch('/api/chat-assistant/order-access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'request_by_id', orderId: id }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data.error || 'Could not send the verification code.')
+      setChallengeId(data.challengeId || '')
+      setVerificationMessage(data.message || 'Check the email already on the reservation for your verification code.')
+    } catch (error) {
+      setVerificationMessage(error instanceof Error ? error.message : 'Could not send the verification code.')
+    } finally {
+      setVerificationBusy(false)
+    }
+  }
+
+  const verifyOrderCode = async () => {
+    if (!challengeId || !/^\d{6}$/.test(verificationCode)) {
+      setVerificationMessage('Enter the 6-digit code from your email.')
+      return
+    }
+    setVerificationBusy(true)
+    try {
+      const response = await fetch('/api/chat-assistant/order-access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify', challengeId, code: verificationCode }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok || !data.ok) throw new Error(data.error || 'That code is invalid or expired.')
+      setVerificationRequired(false)
+      setVerificationCode('')
+      setVerificationMessage('')
+      await loadOrder()
+    } catch (error) {
+      setVerificationMessage(error instanceof Error ? error.message : 'That code is invalid or expired.')
+    } finally {
+      setVerificationBusy(false)
+    }
+  }
+
+  if (verificationRequired) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-12">
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <h1 className="text-2xl font-bold text-dark">Verify Your Order</h1>
+          <p className="mt-2 text-sm text-body">For your privacy, this payment link needs verification before order details are shown.</p>
+          {!challengeId ? (
+            <button type="button" onClick={requestVerification} disabled={verificationBusy} className="btn-primary mt-5 w-full disabled:opacity-50">
+              {verificationBusy ? 'Sending code…' : 'Email Me a 6-Digit Code'}
+            </button>
+          ) : (
+            <div className="mt-5 space-y-3">
+              <label className="block text-sm font-semibold">Verification code
+                <input inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={verificationCode} onChange={event => setVerificationCode(event.target.value.replace(/\D/g, '').slice(0, 6))} className="mt-1 w-full rounded border px-3 py-3 text-center text-xl tracking-[0.35em]" />
+              </label>
+              <button type="button" onClick={verifyOrderCode} disabled={verificationBusy || verificationCode.length !== 6} className="btn-primary w-full disabled:opacity-50">
+                {verificationBusy ? 'Verifying…' : 'Verify & Open Order'}
+              </button>
+              <button type="button" onClick={requestVerification} disabled={verificationBusy} className="w-full text-sm text-secondary underline">Send a new code</button>
+            </div>
+          )}
+          {verificationMessage && <p role="status" className="mt-4 text-sm text-body">{verificationMessage}</p>}
+          <p className="mt-5 text-xs text-gray-500">The code is sent only to the email already saved on this reservation. Need help? Call or text {BUSINESS.phone}.</p>
+        </div>
+      </div>
+    )
+  }
+
   if (notFound) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <h1 className="text-2xl font-bold text-dark mb-4">Quote Not Found</h1>
-        <p className="text-body">This payment link is invalid or has expired. Please contact us at 315-884-1498.</p>
+        <p className="text-body">This payment link is invalid or has expired. Please contact us at {BUSINESS.phone}.</p>
       </div>
     )
   }
@@ -250,7 +346,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
             ))}
           </div>
         )}
-        <p className="text-body mt-4">If you have any questions, please contact us at 315-884-1498.</p></div>
+        <p className="text-body mt-4">If you have any questions, please contact us at {BUSINESS.phone}.</p></div>
     )
   }
 
@@ -259,7 +355,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <h1 className="text-2xl font-bold text-dark mb-4">Thank You!</h1>
         <p className="text-body mb-4">Your payment has been received for Order #{order.orderNumber}.</p>
-        {receipt ? <PaymentReceiptSummary receipt={receipt} /> : <p className="text-body mt-4">Please contact us at 315-884-1498 if you need a copy of your verified receipt.</p>}
+        {receipt ? <PaymentReceiptSummary receipt={receipt} /> : <p className="text-body mt-4">Please contact us at {BUSINESS.phone} if you need a copy of your verified receipt.</p>}
       </div>
     )
   }
@@ -294,7 +390,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
           ))}
           {!canSelfEdit && (
             <p className="text-sm text-body mt-3">
-              Need to add or change items? Please call us at 315-884-1498.
+              Need to add or change items? Please call us at {BUSINESS.phone}.
             </p>
           )}
           {canSelfEdit && (
@@ -344,7 +440,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
                 {savingItems ? 'Saving...' : 'Save Changes'}
               </button>
               <p className="text-xs text-body mt-2">
-                Changes save immediately and update your total below. Once your order is booked, please call 315-884-1498 for further changes.
+                Changes save immediately and update your total below. Once your order is booked, please call {BUSINESS.phone} for further changes.
               </p>
             </div>
           )}
@@ -449,7 +545,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
           <PaymentCardAuthorization checked={saveCard} onChange={setSaveCard} required={false} compact />
           {paymentsAvailable === false && (
             <div role="alert" className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-sm text-amber-900">
-              Online payment is temporarily unavailable. Please call Friendly Party Rental NYC at <a href="tel:315-884-1498" className="underline">315-884-1498</a>. No card has been charged.
+              Online payment is temporarily unavailable. Please call Friendly Party Rental NYC at <a href="tel:{BUSINESS.phone}" className="underline">{BUSINESS.phone}</a>. No card has been charged.
             </div>
           )}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm text-body">

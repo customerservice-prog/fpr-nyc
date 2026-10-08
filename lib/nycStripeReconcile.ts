@@ -6,6 +6,7 @@ import { ownerNotificationRecipients } from '@/lib/orderLifecycleNotifications'
 import { checkNycPaymentMetadata } from '@/lib/nycPaymentMetadata'
 import { livemodeMatches } from '@/lib/nycStripeGuard'
 import { nycStripeMode } from '@/lib/stripe'
+import { PAYMENT_CARD_AUTHORIZATION_VERSION } from '@/lib/cardAuthorization'
 
 // Shared reconciliation used by the webhook, the confirmation page, and the staff
 // "Sync Payment Status" action. Every path re-reads the PaymentIntent from the
@@ -82,6 +83,25 @@ export async function recordSucceededIntent(intent: Stripe.PaymentIntent, option
     ...(options.recordedByName ? { recordedByName: options.recordedByName } : {}),
     ...(saved ? { savedPaymentMethodId: idOf(intent.payment_method), stripeCustomerId: idOf(intent.customer) || order.stripeCustomerId, autopayEnabled: true } : {}),
   })
+
+  // A save-card checkbox is explicit customer authorization. Persist the current
+  // authorization only from server-generated Stripe metadata, and do it even when
+  // the payment row already existed (webhook/callback replay recovery).
+  if (saved && intent.metadata?.consentVersion === PAYMENT_CARD_AUTHORIZATION_VERSION) {
+    const consentAt = new Date(intent.metadata.consentAt || '')
+    if (Number.isFinite(consentAt.getTime())) {
+      await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          savedPaymentMethodId: idOf(intent.payment_method),
+          stripeCustomerId: idOf(intent.customer) || order.stripeCustomerId,
+          cardOnFileConsentAt: consentAt,
+          cardOnFileConsentVersion: PAYMENT_CARD_AUTHORIZATION_VERSION,
+          cardOnFileConsentIp: (intent.metadata.consentIp || 'unknown').slice(0, 120),
+        },
+      })
+    }
+  }
   return updated
 }
 

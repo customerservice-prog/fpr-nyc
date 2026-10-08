@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isAuthorizedCronRequest } from '@/lib/cronAuth'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, prePaymentReminderEmail } from '@/lib/email'
+import { customerPayUrl } from '@/lib/publicOrderAccess'
 
 // Automatic 3-day-before-event Pre-Payment Reminder email.
 // Runs on a schedule (see .github/workflows/pre-payment-reminders-cron.yml).
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
       continue
     }
 
-    const payLink = `${origin}/pay/${order.id}`
+    const payLink = customerPayUrl(origin, order.id, order.eventDate)
 
         const emailContent = prePaymentReminderEmail(
           { subject: setting.subject, content: setting.content },

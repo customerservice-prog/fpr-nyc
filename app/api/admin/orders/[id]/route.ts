@@ -6,6 +6,10 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { sendEmail } from '@/lib/email'
 import { automaticCancellationEmail, hasDeliverableCustomerEmail, ownerCancellationEmail, ownerNotificationRecipients } from '@/lib/orderLifecycleNotifications'
+import { getNycCheckoutPolicy } from '@/lib/nycCheckoutPricingServer'
+import { exactPickupFeeForPolicy } from '@/lib/nycCheckoutPolicy'
+import { DELIVERY_WINDOWS, timeToMinutes } from '@/lib/nycAdminScheduling'
+import { canProcessPayments, hasStaffPermission } from '@/lib/staffPermissions'
 
 export async function GET(
   _request: NextRequest,
@@ -58,21 +62,118 @@ export async function PUT(
 ) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const isAdmin = (session.user as any)?.role === 'admin'
+  const role = (session.user as { role?: string } | undefined)?.role
+  const isAdmin = role === 'admin'
+  const canEditFinancials = hasStaffPermission(role, 'edit_order_financials')
+  const canPay = canProcessPayments(role)
 
   const body = await request.json()
   if (body.deliveryType !== undefined && !['delivery', 'pickup'].includes(body.deliveryType)) {
     return NextResponse.json({ error: 'Delivery type must be delivery or pickup.' }, { status: 400 })
   }
 
+  const savingStructuredSchedule = body.eventStartTime !== undefined || body.deliveryWindowStart !== undefined || body.exactDeliveryRequested !== undefined || body.pickupType !== undefined
+  let exactDeliveryFee: number | undefined
+  let exactPickupFee: number | undefined
+  if (savingStructuredSchedule) {
+    const method = body.deliveryType === 'pickup' ? 'pickup' : 'delivery'
+    if (method === 'pickup') {
+      exactDeliveryFee = 0
+      exactPickupFee = 0
+    } else {
+      const start = typeof body.eventStartTime === 'string' ? body.eventStartTime : null
+      const end = typeof body.eventEndTimeValue === 'string' ? body.eventEndTimeValue : null
+      if (timeToMinutes(start) < 0 || timeToMinutes(end) <= timeToMinutes(start)) {
+        return NextResponse.json({ error: 'Event start and end times are required, and the event must end after it starts.' }, { status: 400 })
+      }
+
+      const policy = getNycCheckoutPolicy().policy
+      if (body.exactDeliveryRequested === true) {
+        const exactDeliveryMinutes = timeToMinutes(body.exactDeliveryTime)
+        if (!body.exactDeliveryTime || exactDeliveryMinutes < 8 * 60 || exactDeliveryMinutes > 18 * 60 || exactDeliveryMinutes % 30 !== 0 || exactDeliveryMinutes > timeToMinutes(start)) {
+          return NextResponse.json({ error: 'Choose a valid exact delivery time at or before the event starts.' }, { status: 400 })
+        }
+        if (!policy || policy.exactDeliveryFee === null) {
+          return NextResponse.json({ error: 'Guaranteed exact delivery is not currently approved in the NYC checkout policy.' }, { status: 400 })
+        }
+        exactDeliveryFee = policy.exactDeliveryFee
+      } else {
+        const selectedWindow = DELIVERY_WINDOWS.find(window =>
+          window.start === body.deliveryWindowStart && window.end === body.deliveryWindowEnd
+        )
+        if (!selectedWindow || timeToMinutes(selectedWindow.end) > timeToMinutes(start)) {
+          return NextResponse.json({ error: 'Choose a delivery window that ends before the event starts.' }, { status: 400 })
+        }
+        exactDeliveryFee = 0
+      }
+
+      const pickupType = String(body.pickupType || 'flexible')
+      if (!['flexible', 'requiredBy', 'exact'].includes(pickupType)) {
+        return NextResponse.json({ error: 'Choose a valid pickup option.' }, { status: 400 })
+      }
+      if (pickupType === 'requiredBy' && timeToMinutes(body.pickupRequiredByTime) < 0) {
+        return NextResponse.json({ error: 'Choose the customer requested-by pickup time.' }, { status: 400 })
+      }
+      if (pickupType === 'exact') {
+        const exactPickupMinutes = timeToMinutes(body.exactPickupTime)
+        if (exactPickupMinutes < 12 * 60 || exactPickupMinutes > 23 * 60 + 30 || exactPickupMinutes % 30 !== 0) {
+          return NextResponse.json({ error: 'Choose the guaranteed pickup time.' }, { status: 400 })
+        }
+        const fee = exactPickupFeeForPolicy(policy, body.exactPickupTime)
+        if (fee === null) {
+          return NextResponse.json({ error: 'That exact pickup time is not currently approved in the NYC checkout policy.' }, { status: 400 })
+        }
+        exactPickupFee = fee
+      } else {
+        exactPickupFee = 0
+      }
+    }
+  }
+
   const existingOrder = await prisma.order.findUnique({ where: { id: (await params).id }, include: { items: true } })
   if (!existingOrder) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   const allItemsZeroPriced = !!(body.items && body.items.length > 0 && body.items.every((i: any) => !i.unitPrice))
-  const legacyLumpSum = allItemsZeroPriced && !!existingOrder && (existingOrder.subtotal || 0) > 0
-  const safeSubtotal = legacyLumpSum ? existingOrder!.subtotal : body.subtotal
-  const safeTaxAmount = legacyLumpSum ? existingOrder!.taxAmount : body.taxAmount
-  const safeTotalAmount = legacyLumpSum ? existingOrder!.totalAmount : body.totalAmount
-  const safeBalanceDue = legacyLumpSum ? existingOrder!.balanceDue : body.balanceDue
+  const legacyLumpSum = allItemsZeroPriced && (existingOrder.subtotal || 0) > 0
+
+  const previousScheduleFee = Number(existingOrder.exactDeliveryFee || 0) + Number(existingOrder.exactPickupFee || 0)
+  const nextScheduleFee = savingStructuredSchedule
+    ? Number(exactDeliveryFee || 0) + Number(exactPickupFee || 0)
+    : previousScheduleFee
+  const scheduleFeeDelta = Math.round((nextScheduleFee - previousScheduleFee) * 100) / 100
+
+  if (savingStructuredSchedule && Math.abs(scheduleFeeDelta) > 0.001 && !canEditFinancials) {
+    return NextResponse.json(
+      { error: 'This staff role cannot change a schedule option that changes the order price.' },
+      { status: 403 },
+    )
+  }
+
+  const scheduleTaxDelta = savingStructuredSchedule && existingOrder.overrideTaxAmount == null
+    ? Math.round(scheduleFeeDelta * (Number(existingOrder.taxRate || 0) / 100) * 100) / 100
+    : 0
+
+  const requestedSubtotal = canEditFinancials ? body.subtotal : undefined
+  const requestedTaxAmount = canEditFinancials ? body.taxAmount : undefined
+  const requestedTotalAmount = canEditFinancials ? body.totalAmount : undefined
+
+  const safeSubtotal = legacyLumpSum
+    ? existingOrder.subtotal
+    : Number(requestedSubtotal ?? existingOrder.subtotal)
+
+  const safeTaxAmount = savingStructuredSchedule && requestedTaxAmount == null
+    ? Math.round((Number(existingOrder.taxAmount || 0) + scheduleTaxDelta) * 100) / 100
+    : legacyLumpSum
+      ? Number(existingOrder.taxAmount || 0)
+      : Number(requestedTaxAmount ?? existingOrder.taxAmount)
+
+  const safeTotalAmount = savingStructuredSchedule && requestedTotalAmount == null
+    ? Math.round((Number(existingOrder.totalAmount || 0) + scheduleFeeDelta + scheduleTaxDelta) * 100) / 100
+    : legacyLumpSum
+      ? Number(existingOrder.totalAmount || 0)
+      : Number(requestedTotalAmount ?? existingOrder.totalAmount)
+
+  const safeAmountPaid = canPay ? Number(body.amountPaid ?? existingOrder.amountPaid) : Number(existingOrder.amountPaid)
+  const safeBalanceDue = Math.max(Math.round((safeTotalAmount - safeAmountPaid) * 100) / 100, 0)
 
   const order = await prisma.order.update({
     where: { id: (await params).id },
@@ -80,7 +181,7 @@ export async function PUT(
       // Financial totals, pricing overrides, order numbering and line items are
       // admin-only. Non-admin (e.g. staff/VA) sessions may still update core
       // logistics fields below but cannot alter money-affecting data.
-      orderNumber: isAdmin ? body.orderNumber : undefined,
+      orderNumber: canEditFinancials ? body.orderNumber : undefined,
       status: body.status,
       internalNotes: body.internalNotes, followUpsPaused: typeof body.followUpsPaused === 'boolean' ? body.followUpsPaused : undefined,
       eventDate: body.eventDate ? new Date(body.eventDate) : undefined,
@@ -92,29 +193,41 @@ export async function PUT(
       notes: body.notes, deliveryType: body.deliveryType,
       eventTimeSlot: body.eventTimeSlot,
       pickupTimeSlot: body.pickupTimeSlot,
+      eventStartTime: savingStructuredSchedule ? (body.deliveryType === 'pickup' ? null : body.eventStartTime || null) : undefined,
+      eventEndTime: savingStructuredSchedule ? (body.deliveryType === 'pickup' ? null : body.eventEndTimeValue || null) : undefined,
+      deliveryWindowStart: savingStructuredSchedule ? (body.deliveryType === 'pickup' || body.exactDeliveryRequested ? null : body.deliveryWindowStart || null) : undefined,
+      deliveryWindowEnd: savingStructuredSchedule ? (body.deliveryType === 'pickup' || body.exactDeliveryRequested ? null : body.deliveryWindowEnd || null) : undefined,
+      exactDeliveryRequested: savingStructuredSchedule ? (body.deliveryType === 'pickup' ? false : body.exactDeliveryRequested === true) : undefined,
+      exactDeliveryTime: savingStructuredSchedule ? (body.deliveryType === 'pickup' || !body.exactDeliveryRequested ? null : body.exactDeliveryTime || null) : undefined,
+      exactDeliveryFee: savingStructuredSchedule ? exactDeliveryFee : undefined,
+      pickupType: savingStructuredSchedule ? (body.deliveryType === 'pickup' ? 'flexible' : body.pickupType || 'flexible') : undefined,
+      pickupRequiredByTime: savingStructuredSchedule ? (body.deliveryType === 'pickup' || body.pickupType !== 'requiredBy' ? null : body.pickupRequiredByTime || null) : undefined,
+      exactPickupTime: savingStructuredSchedule ? (body.deliveryType === 'pickup' || body.pickupType !== 'exact' ? null : body.exactPickupTime || null) : undefined,
+      exactPickupFee: savingStructuredSchedule ? exactPickupFee : undefined,
+      latePickupApprovalRequired: savingStructuredSchedule ? false : undefined,
       setupSurface: body.setupSurface,
       isPublicPark: body.isPublicPark,
       referenceSource: body.referenceSource,
-      specialRequestFee: isAdmin ? body.specialRequestFee : undefined,
+      specialRequestFee: canEditFinancials ? body.specialRequestFee : undefined,
       specialRequestNames: body.specialRequestNames,
-      balanceDue: isAdmin ? safeBalanceDue : undefined,
-      amountPaid: isAdmin ? body.amountPaid : undefined,
+      balanceDue: (canEditFinancials || savingStructuredSchedule) ? safeBalanceDue : undefined,
+      amountPaid: canPay ? safeAmountPaid : undefined,
 
-      subtotal: isAdmin ? safeSubtotal : undefined,
-      taxRate: isAdmin ? body.taxRate : undefined,
-      taxAmount: isAdmin ? safeTaxAmount : undefined,
-      deliveryFee: isAdmin ? body.deliveryFee : undefined,
-      totalAmount: isAdmin ? safeTotalAmount : undefined,
-      depositAmount: isAdmin ? body.depositAmount : undefined,
-      prePayReminderDisabled: isAdmin ? body.prePayReminderDisabled : undefined,
-      scheduleApprovedUnpaid: isAdmin ? body.scheduleApprovedUnpaid : undefined,
+      subtotal: canEditFinancials ? safeSubtotal : undefined,
+      taxRate: canEditFinancials ? body.taxRate : undefined,
+      taxAmount: (canEditFinancials || savingStructuredSchedule) ? safeTaxAmount : undefined,
+      deliveryFee: canEditFinancials ? body.deliveryFee : undefined,
+      totalAmount: (canEditFinancials || savingStructuredSchedule) ? safeTotalAmount : undefined,
+      depositAmount: canEditFinancials ? body.depositAmount : undefined,
+      prePayReminderDisabled: canEditFinancials ? body.prePayReminderDisabled : undefined,
+      scheduleApprovedUnpaid: canEditFinancials ? body.scheduleApprovedUnpaid : undefined,
       locationName: body.locationName,
-      generalDiscount: isAdmin ? body.generalDiscount : undefined,
-      overrideTravelFee: isAdmin ? body.overrideTravelFee : undefined,
-      overrideDepositAmount: isAdmin ? body.overrideDepositAmount : undefined,
-      overrideTaxAmount: isAdmin ? body.overrideTaxAmount : undefined, overrideDamageWaiverFee: isAdmin ? body.overrideDamageWaiverFee : undefined, damageWaiverFee: isAdmin ? body.damageWaiverFee : undefined,
-      miscellaneousFees: isAdmin ? body.miscellaneousFees : undefined,
-      items: (isAdmin && body.items) ? {
+      generalDiscount: canEditFinancials ? body.generalDiscount : undefined,
+      overrideTravelFee: canEditFinancials ? body.overrideTravelFee : undefined,
+      overrideDepositAmount: canEditFinancials ? body.overrideDepositAmount : undefined,
+      overrideTaxAmount: canEditFinancials ? body.overrideTaxAmount : undefined, overrideDamageWaiverFee: canEditFinancials ? body.overrideDamageWaiverFee : undefined, damageWaiverFee: canEditFinancials ? body.damageWaiverFee : undefined,
+      miscellaneousFees: canEditFinancials ? body.miscellaneousFees : undefined,
+      items: (canEditFinancials && body.items) ? {
         deleteMany: {},
         create: body.items.map((i: any) => ({
           itemId: i.itemId || undefined,
@@ -152,6 +265,7 @@ export async function PUT(
       },
       items: true,
       payments: true,
+      additionalCharges: { orderBy: { createdAt: 'desc' } },
       contacts: { orderBy: { createdAt: 'asc' } },
     },
   })

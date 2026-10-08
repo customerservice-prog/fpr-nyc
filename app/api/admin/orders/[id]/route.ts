@@ -60,6 +60,9 @@ export async function PUT(
   const isAdmin = (session.user as any)?.role === 'admin'
 
   const body = await request.json()
+  if (body.deliveryType !== undefined && !['delivery', 'pickup'].includes(body.deliveryType)) {
+    return NextResponse.json({ error: 'Delivery type must be delivery or pickup.' }, { status: 400 })
+  }
 
   const existingOrder = await prisma.order.findUnique({ where: { id: (await params).id }, include: { items: true } })
   if (!existingOrder) return NextResponse.json({ error: 'Not found' }, { status: 404 })

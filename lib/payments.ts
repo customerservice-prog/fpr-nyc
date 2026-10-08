@@ -115,11 +115,9 @@ export async function finalizePayment(input: {
         const setting = await prisma.automaticMessage.findFirst({ where: { id: 'automsg_order_confirmation' } })
         const content = orderConfirmationEmail({ id: updated.id, orderNumber: updated.orderNumber, customerName, eventDate: formatDate(updated.eventDate), totalAmount: updated.totalAmount, depositAmount: paidAmount, balanceDue: updated.balanceDue, items: updated.items.map(i => ({ name:i.itemName, quantity:i.quantity, unitPrice:i.unitPrice, total:i.total, image:nycItemImage(i.item) })), ...sharedDetails }, setting ?? undefined)
         if (setting?.enabled !== false && canEmailCustomer && !isCanceled && sendReceipt !== false) try { await sendEmail({to:email,subject:content.subject,html:content.html + reasonHtml}) } catch {}
-        try { await sendEmail({to:ownerNotificationRecipients(),subject:'[Copy] '+content.subject,html:content.html + reasonHtml}) } catch {}
       } else {
         const content = paymentReceiptEmail({ id:updated.id, orderNumber:updated.orderNumber, customerName, amountPaid:paidAmount, totalAmount:updated.totalAmount, balanceDue:updated.balanceDue, eventDate:formatDate(updated.eventDate), items:updated.items.map(i=>({name:i.itemName,quantity:i.quantity,unitPrice:i.unitPrice,total:i.total,image:nycItemImage(i.item)})), depositAmount:updated.depositAmount, payments:(updated.payments||[]).map(p=>({amount:p.amount,method:p.method,createdAt:formatDate(p.createdAt),recordedByName:p.recordedByName})), ...sharedDetails })
         if (canEmailCustomer && !isCanceled && sendReceipt !== false) try { await sendEmail({to:email,subject:content.subject,html:content.html + reasonHtml}) } catch {}
-        try { await sendEmail({to:ownerNotificationRecipients(),subject:'[Copy] '+content.subject,html:content.html + reasonHtml}) } catch {}
       }
     }
   } catch (err) { console.error(`[finalizePayment] Payment confirmation email error for order ${orderId}:`, err) }

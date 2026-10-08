@@ -47,6 +47,8 @@ export async function lookupNycRentSketchOrder(input: { orderNumber?: unknown; o
     eligible: access.eligible,
     expiresAt: access.expiresAt.toISOString(),
     eventDate: order.eventDate.toISOString().slice(0, 10),
+    eventEndDate: (order.eventEndDate || order.eventDate).toISOString().slice(0, 10),
+    updatedAt: order.updatedAt.toISOString(),
     customerEmail: order.customer.email.trim().toLowerCase(),
     customerName: (order.customer.firstName + ' ' + order.customer.lastName).trim(),
     deliveryZip: order.eventZip || '',

@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { formatDate, formatCurrency, formatDateTime } from '@/lib/utils'
+import { BUSINESS, formatDate, formatCurrency, formatDateTime } from '@/lib/utils'
 import { formatTaxRatePercent } from '@/lib/nycSalesTax'
 
 interface ContractOrder {
@@ -31,26 +31,49 @@ interface ContractOrder {
   items: Array<{ itemName: string; quantity: number; unitPrice: number; total: number }>
 }
 
-export default function ContractPage({ params }: { params: Promise<{ id: string }> }) {
+export default function ContractPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ access?: string }> }) {
   const { id } = use(params)
+  const { access: initialAccess } = use(searchParams)
+  const [accessToken] = useState(initialAccess || '')
   const [order, setOrder] = useState<ContractOrder | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [signatureName, setSignatureName] = useState('')
   const [agreed, setAgreed] = useState(false)
   const [signing, setSigning] = useState(false)
+  const [verificationRequired, setVerificationRequired] = useState(false)
+  const [verificationBusy, setVerificationBusy] = useState(false)
+  const [challengeId, setChallengeId] = useState('')
+  const [verificationCode, setVerificationCode] = useState('')
+  const [verificationMessage, setVerificationMessage] = useState('')
+
+  const loadContract = async () => {
+    const query = accessToken ? '?access=' + encodeURIComponent(accessToken) : ''
+    try {
+      const response = await fetch(`/api/orders/${id}/contract${query}`, { cache: 'no-store' })
+      const data = await response.json().catch(() => ({}))
+      if (response.status === 401) {
+        setVerificationRequired(true)
+        setNotFound(false)
+        setOrder(null)
+        return
+      }
+      if (!response.ok || !data.order) {
+        setNotFound(true)
+        setVerificationRequired(false)
+        return
+      }
+      setVerificationRequired(false)
+      setNotFound(false)
+      setOrder(data.order)
+    } catch {
+      setNotFound(true)
+    }
+  }
 
   useEffect(() => {
-    fetch(`/api/orders/${id}/contract`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.error) {
-          setNotFound(true)
-          return
-        }
-        setOrder(d.order)
-      })
-      .catch(() => setNotFound(true))
-  }, [id])
+    void loadContract()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, accessToken])
 
   const submitSignature = async () => {
     if (!signatureName.trim()) {
@@ -66,7 +89,7 @@ export default function ContractPage({ params }: { params: Promise<{ id: string 
       const res = await fetch(`/api/orders/${id}/contract`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: signatureName.trim() }),
+        body: JSON.stringify({ name: signatureName.trim(), accessToken }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -84,11 +107,84 @@ export default function ContractPage({ params }: { params: Promise<{ id: string 
     }
   }
 
+  const requestVerification = async () => {
+    setVerificationBusy(true)
+    setVerificationMessage('')
+    try {
+      const response = await fetch('/api/chat-assistant/order-access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'request_by_id', orderId: id }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data.error || 'Could not send the verification code.')
+      setChallengeId(data.challengeId || '')
+      setVerificationMessage(data.message || 'Check the email already on the reservation.')
+    } catch (error) {
+      setVerificationMessage(error instanceof Error ? error.message : 'Could not send the verification code.')
+    } finally {
+      setVerificationBusy(false)
+    }
+  }
+
+  const verifyOrderCode = async () => {
+    if (!challengeId || !/^\d{6}$/.test(verificationCode)) {
+      setVerificationMessage('Enter the 6-digit code from your email.')
+      return
+    }
+    setVerificationBusy(true)
+    try {
+      const response = await fetch('/api/chat-assistant/order-access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify', challengeId, code: verificationCode }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok || !data.ok) throw new Error(data.error || 'That code is invalid or expired.')
+      setVerificationRequired(false)
+      setVerificationCode('')
+      setVerificationMessage('')
+      await loadContract()
+    } catch (error) {
+      setVerificationMessage(error instanceof Error ? error.message : 'That code is invalid or expired.')
+    } finally {
+      setVerificationBusy(false)
+    }
+  }
+
+  if (verificationRequired) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-12">
+        <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <h1 className="text-2xl font-bold text-dark">Verify Your Order</h1>
+          <p className="mt-2 text-sm text-body">For your privacy, verify access before viewing or signing this contract.</p>
+          {!challengeId ? (
+            <button type="button" onClick={requestVerification} disabled={verificationBusy} className="btn-primary mt-5 w-full disabled:opacity-50">
+              {verificationBusy ? 'Sending code…' : 'Email Me a 6-Digit Code'}
+            </button>
+          ) : (
+            <div className="mt-5 space-y-3">
+              <label className="block text-sm font-semibold">Verification code
+                <input inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={verificationCode} onChange={event => setVerificationCode(event.target.value.replace(/\D/g, '').slice(0, 6))} className="mt-1 w-full rounded border px-3 py-3 text-center text-xl tracking-[0.35em]" />
+              </label>
+              <button type="button" onClick={verifyOrderCode} disabled={verificationBusy || verificationCode.length !== 6} className="btn-primary w-full disabled:opacity-50">
+                {verificationBusy ? 'Verifying…' : 'Verify & Open Contract'}
+              </button>
+              <button type="button" onClick={requestVerification} disabled={verificationBusy} className="w-full text-sm text-secondary underline">Send a new code</button>
+            </div>
+          )}
+          {verificationMessage && <p role="status" className="mt-4 text-sm text-body">{verificationMessage}</p>}
+          <p className="mt-5 text-xs text-gray-500">The code is sent only to the email on the reservation. Need help? Call or text {BUSINESS.phone}.</p>
+        </div>
+      </div>
+    )
+  }
+
   if (notFound) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <h1 className="text-2xl font-bold text-dark mb-4">Contract Not Found</h1>
-        <p className="text-body">This contract link is invalid. Please contact us at 315-884-1498.</p>
+        <p className="text-body">This contract link is invalid. Please contact us at {BUSINESS.phone}.</p>
       </div>
     )
   }

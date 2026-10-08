@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getItemAvailability } from '@/lib/availability'
+import { hasPublicOrderAccess } from '@/lib/publicOrderAccess'
 
 // "tables_tents" and "bounce_waterslide" categories can carry special multi-day
 // duration pricing tiers. For single-day quotes (the vast majority - rentalDays
@@ -17,6 +18,11 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+  const token = request.nextUrl.searchParams.get('access')
+  if (!hasPublicOrderAccess(request, id, token)) {
+    return NextResponse.json({ error: 'Verification required' }, { status: 401, headers: { 'Cache-Control': 'private, no-store, max-age=0' } })
+  }
+
   const order = await prisma.order.findUnique({
     where: { id },
     include: { items: true },

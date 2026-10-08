@@ -103,3 +103,15 @@ export function hasPublicOrderAccess(
   const session = verifyAssistantOrderSession(request.cookies.get(ASSISTANT_ORDER_COOKIE)?.value)
   return Boolean(session && session.orderId === orderId)
 }
+
+
+export function customerContractPath(orderId: string, eventDate?: Date | string | null) {
+  const token = createPublicOrderAccessToken(orderId, eventDate)
+  return token
+    ? '/contract/' + encodeURIComponent(orderId) + '?access=' + encodeURIComponent(token)
+    : '/contract/' + encodeURIComponent(orderId)
+}
+
+export function customerContractUrl(origin: string, orderId: string, eventDate?: Date | string | null) {
+  return String(origin || '').replace(/\/$/, '') + customerContractPath(orderId, eventDate)
+}

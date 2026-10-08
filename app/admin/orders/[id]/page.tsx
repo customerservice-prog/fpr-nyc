@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils'
 import { findPoleTentSurfaceIssue, findFrameTentSurfaceIssue } from '@/lib/tentSurfaceRules'
+import NycAdminScheduleFields from '@/components/admin/NycAdminScheduleFields'
+import { EMPTY_STAFF_SCHEDULE, formatScheduleTime, scheduleIsValid, scheduleLegacyLabels, staffScheduleFromOrder, type StaffScheduleState } from '@/lib/nycOrderScheduling'
 
 interface OrderDetail {
   id: string
@@ -21,6 +23,18 @@ interface OrderDetail {
   deliveryType: string
   eventTimeSlot?: string | null
   pickupTimeSlot?: string | null
+  eventStartTime?: string | null
+  eventEndTime?: string | null
+  deliveryWindowStart?: string | null
+  deliveryWindowEnd?: string | null
+  exactDeliveryRequested?: boolean | null
+  exactDeliveryTime?: string | null
+  exactDeliveryFee?: number | null
+  pickupType?: 'flexible' | 'requiredBy' | 'exact' | null
+  pickupRequiredByTime?: string | null
+  exactPickupTime?: string | null
+  exactPickupFee?: number | null
+  latePickupApprovalRequired?: boolean | null
   subtotal: number
   rentalDays?: number | null
   durationLabel?: string | null
@@ -121,19 +135,6 @@ interface EditItem {
   unitPrice: number
 }
 
-const DROPOFF_SLOT_LABELS = [
-  'Morning (8am - 12pm)',
-  'Afternoon (12pm - 4pm)',
-  'Evening (4pm - 7pm)',
-  'Overnight Rental (picked up the next day)',
-]
-
-const PICKUP_SLOT_LABELS = [
-  'Same Day Evening Pickup',
-  'Next Day Morning Pickup',
-  'Next Day Afternoon Pickup',
-]
-
 function formatTimeSlot(slot: string | null | undefined): string {
   if (!slot) return ''
   const m = slot.match(/^exact_(\d{1,2})(\d{2})$/)
@@ -222,8 +223,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const [editEventDate, setEditEventDate] = useState('')
   const [editEventEndDate, setEditEventEndDate] = useState('')
   const [editDeliveryType, setEditDeliveryType] = useState<'delivery' | 'pickup'>('delivery')
-  const [editDropoffSlot, setEditDropoffSlot] = useState('')
-  const [editPickupSlot, setEditPickupSlot] = useState('')
+  const [editSchedule, setEditSchedule] = useState<StaffScheduleState>({ ...EMPTY_STAFF_SCHEDULE })
   const [savingDateTime, setSavingDateTime] = useState(false)
   const [editEventAddress, setEditEventAddress] = useState('')
   const [editEventCity, setEditEventCity] = useState('')
@@ -312,8 +312,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         setEditEventDate(d.order.eventDate ? d.order.eventDate.slice(0, 10) : '')
         setEditEventEndDate(d.order.eventEndDate ? d.order.eventEndDate.slice(0, 10) : '')
         setEditDeliveryType(d.order.deliveryType === 'pickup' ? 'pickup' : 'delivery')
-        setEditDropoffSlot(d.order.eventTimeSlot || '')
-        setEditPickupSlot(d.order.pickupTimeSlot || '')
+        setEditSchedule(staffScheduleFromOrder(d.order))
         setEditEventAddress(d.order.eventAddress || '')
         setEditEventCity(d.order.eventCity || '')
         setEditEventZip(d.order.eventZip || '')
@@ -803,6 +802,13 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
   const saveDateTime = async () => {
     if (!order) return
+    if (!scheduleIsValid(editSchedule, editDeliveryType)) {
+      toast.error(editDeliveryType === 'delivery'
+        ? 'Complete the event time, delivery timing, and pickup timing before saving.'
+        : 'Choose the customer pickup appointment before saving.')
+      return
+    }
+    const labels = scheduleLegacyLabels(editSchedule, editDeliveryType)
     setSavingDateTime(true)
     try {
       const res = await fetch('/api/admin/orders/' + id, {
@@ -812,16 +818,27 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           eventDate: editEventDate || undefined,
           eventEndDate: editEventEndDate || undefined,
           deliveryType: editDeliveryType,
-          eventTimeSlot: editDropoffSlot,
-          pickupTimeSlot: editPickupSlot,
+          eventTimeSlot: labels.eventTimeSlot,
+          pickupTimeSlot: labels.pickupTimeSlot,
+          eventStartTime: editDeliveryType === 'delivery' ? editSchedule.eventStartTime : null,
+          eventEndTimeValue: editDeliveryType === 'delivery' ? editSchedule.eventEndTime : null,
+          deliveryWindowStart: editDeliveryType === 'delivery' && !editSchedule.exactDeliveryRequested ? editSchedule.deliveryWindowStart : null,
+          deliveryWindowEnd: editDeliveryType === 'delivery' && !editSchedule.exactDeliveryRequested ? editSchedule.deliveryWindowEnd : null,
+          exactDeliveryRequested: editDeliveryType === 'delivery' ? editSchedule.exactDeliveryRequested : false,
+          exactDeliveryTime: editDeliveryType === 'delivery' && editSchedule.exactDeliveryRequested ? editSchedule.exactDeliveryTime : null,
+          pickupType: editDeliveryType === 'delivery' ? editSchedule.pickupType : 'flexible',
+          pickupRequiredByTime: editDeliveryType === 'delivery' && editSchedule.pickupType === 'requiredBy' ? editSchedule.pickupRequiredByTime : null,
+          exactPickupTime: editDeliveryType === 'delivery' && editSchedule.pickupType === 'exact' ? editSchedule.exactPickupTime : null,
+          latePickupApprovalRequired: false,
         }),
       })
-      if (!res.ok) throw new Error('Failed to save date/time')
-      loadOrder()
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'Failed to save schedule')
+      await loadOrder()
       toast.success('Schedule updated')
       setScheduleEditing(false)
-    } catch {
-      toast.error('Failed to save date/time changes')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save schedule changes')
     } finally {
       setSavingDateTime(false)
     }
@@ -973,8 +990,18 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
   const liveTotals = recalcTotals()
   const deliveryTypeLabel = order.deliveryType === 'delivery' ? 'Delivery' : order.deliveryType === 'pickup' ? 'Customer Pickup' : (order.deliveryType.charAt(0).toUpperCase() + order.deliveryType.slice(1))
-  const dropoffTimeLabel = formatTimeSlot(order.eventTimeSlot)
-  const pickupTimeLabel = formatTimeSlot(order.pickupTimeSlot)
+  const eventStartLabel = formatScheduleTime(order.eventStartTime)
+  const eventEndLabel = formatScheduleTime(order.eventEndTime)
+  const dropoffTimeLabel = order.exactDeliveryRequested && order.exactDeliveryTime
+    ? 'Guaranteed ' + formatScheduleTime(order.exactDeliveryTime) + (order.exactDeliveryFee ? ' · ' + formatCurrency(order.exactDeliveryFee) : '')
+    : order.deliveryWindowStart && order.deliveryWindowEnd
+      ? formatScheduleTime(order.deliveryWindowStart) + ' - ' + formatScheduleTime(order.deliveryWindowEnd)
+      : formatTimeSlot(order.eventTimeSlot)
+  const pickupTimeLabel = order.pickupType === 'exact' && order.exactPickupTime
+    ? 'Guaranteed ' + formatScheduleTime(order.exactPickupTime) + (order.exactPickupFee ? ' · ' + formatCurrency(order.exactPickupFee) : '')
+    : order.pickupType === 'requiredBy' && order.pickupRequiredByTime
+      ? 'Requested by ' + formatScheduleTime(order.pickupRequiredByTime)
+      : formatTimeSlot(order.pickupTimeSlot)
   const catalogQuery = newItemName.trim().toLowerCase()
   const filteredCatalog = catalogQuery
     ? catalog.filter((c) => (c.name + ' ' + (c.category?.name || '')).toLowerCase().includes(catalogQuery)).slice(0, 50)
@@ -1085,76 +1112,57 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             action={<button onClick={() => setScheduleEditing((v) => !v)} type="button" className="text-secondary text-sm font-medium hover:underline no-print">{scheduleEditing ? 'Cancel' : 'Edit Schedule'}</button>}
           >
             {!scheduleEditing ? (
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="rounded-lg border-l-4 border-admin-green bg-green-50 p-4">
-                  <p className="text-xs font-bold uppercase tracking-wide text-admin-green mb-2">Drop-Off</p>
-                  <p className="text-sm font-semibold text-dark">{formatDate(order.eventDate)}</p>
-                  <p className="text-sm text-body mt-1">{dropoffTimeLabel || 'No time window selected'}</p>
+              order.deliveryType === 'delivery' ? (
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div className="rounded-lg border-l-4 border-purple-500 bg-purple-50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-purple-700 mb-2">Event Time</p>
+                    <p className="text-sm font-semibold text-dark">{formatDate(order.eventDate)}</p>
+                    <p className="text-sm text-body mt-1">{eventStartLabel && eventEndLabel ? eventStartLabel + ' - ' + eventEndLabel : 'Legacy order — event start/end time not recorded'}</p>
+                  </div>
+                  <div className="rounded-lg border-l-4 border-admin-green bg-green-50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-admin-green mb-2">Delivery Time</p>
+                    <p className="text-sm font-semibold text-dark">{formatDate(order.eventDate)}</p>
+                    <p className="text-sm text-body mt-1">{dropoffTimeLabel || 'No delivery timing recorded'}</p>
+                  </div>
+                  <div className="rounded-lg border-l-4 border-secondary bg-blue-50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-2">Pickup From Event</p>
+                    <p className="text-sm font-semibold text-dark">{formatDate(order.eventEndDate || order.eventDate)}</p>
+                    <p className="text-sm text-body mt-1">{pickupTimeLabel || 'Flexible pickup / no guaranteed time'}</p>
+                  </div>
                 </div>
+              ) : (
                 <div className="rounded-lg border-l-4 border-secondary bg-blue-50 p-4">
-                  <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-2">Pickup</p>
-                  <p className="text-sm font-semibold text-dark">{formatDate(order.eventEndDate || order.eventDate)}</p>
-                  <p className="text-sm text-body mt-1">{pickupTimeLabel || 'No time window selected'}</p>
-                  {!order.eventEndDate && /^(Next Day|Same Day)/i.test(order.pickupTimeSlot || '') && (
-<p className="text-xs text-amber-700 mt-1 no-print">Schedule data needs review - pickup is marked "{order.pickupTimeSlot}" but no end date is set, so this is showing the drop-off date. Edit Schedule to set the correct pickup day.</p>
-)}
+                  <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-2">Customer Pickup / Return</p>
+                  <p className="text-sm font-semibold text-dark">{formatDate(order.eventDate)}{order.eventEndDate ? ' - ' + formatDate(order.eventEndDate) : ''}</p>
+                  <p className="text-sm text-body mt-1">{dropoffTimeLabel || 'Appointment not recorded'}</p>
                 </div>
-              </div>
+              )
             ) : (
-              <div className="no-print">
-                <div className="mb-4">
-                  <label className="block text-xs text-body mb-1">Rental Method</label>
-                  <select
-                    value={editDeliveryType}
-                    onChange={(e) => setEditDeliveryType(e.target.value === 'pickup' ? 'pickup' : 'delivery')}
-                    className="w-full border border-gray-300 rounded px-3 py-2"
-                  >
-                    <option value="delivery">Delivery</option>
-                    <option value="pickup">Customer Pickup</option>
-                  </select>
-                  {editDeliveryType !== order.deliveryType && (
-                    <p className="mt-2 rounded border border-amber-200 bg-amber-50 p-2 text-xs text-amber-900">
-                      Changing the rental method updates this order&apos;s fulfillment. Review the delivery fee in Financial Summary separately before sending an updated receipt.
-                    </p>
-                  )}
-                </div>
-                <div className="grid md:grid-cols-2 gap-4 mb-3">
+              <div className="no-print space-y-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <label className="block text-xs text-body mb-1">Event Date</label>
-                    <input type="date" value={editEventDate} onChange={(e) => setEditEventDate(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2" />
+                    <input type="date" value={editEventDate} onChange={(e) => setEditEventDate(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2.5" />
                   </div>
                   <div>
-                    <label className="block text-xs text-body mb-1">End Date (multi-day events)</label>
-                    <input type="date" value={editEventEndDate} onChange={(e) => setEditEventEndDate(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2" />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-body mb-1">Drop-Off Time</label>
-                    <select value={editDropoffSlot} onChange={(e) => setEditDropoffSlot(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2">
-                      <option value="">Select a time window...</option>
-                      {DROPOFF_SLOT_LABELS.map((label) => (
-                        <option key={label} value={label}>{label}</option>
-                      ))}
-                      {editDropoffSlot && !DROPOFF_SLOT_LABELS.includes(editDropoffSlot) && (
-                        <option value={editDropoffSlot}>{formatTimeSlot(editDropoffSlot)}</option>
-                      )}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-body mb-1">Pickup Time</label>
-                    <select value={editPickupSlot} onChange={(e) => { const val = e.target.value; setEditPickupSlot(val); if (/^Next Day/i.test(val) && !editEventEndDate && editEventDate) { const d = new Date(editEventDate + 'T00:00:00'); d.setDate(d.getDate() + 1); setEditEventEndDate(d.toISOString().slice(0, 10)) } }} className="w-full border border-gray-300 rounded px-3 py-2">
-                      <option value="">Select a time window...</option>
-                      {PICKUP_SLOT_LABELS.map((label) => (
-                        <option key={label} value={label}>{label}</option>
-                      ))}
-                      {editPickupSlot && !PICKUP_SLOT_LABELS.includes(editPickupSlot) && (
-                        <option value={editPickupSlot}>{formatTimeSlot(editPickupSlot)}</option>
-                      )}
-                    </select>
+                    <label className="block text-xs text-body mb-1">End Date (multi-day only)</label>
+                    <input type="date" value={editEventEndDate} onChange={(e) => setEditEventEndDate(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2.5" />
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <NycAdminScheduleFields
+                  deliveryType={editDeliveryType}
+                  onDeliveryTypeChange={setEditDeliveryType}
+                  value={editSchedule}
+                  onChange={setEditSchedule}
+                />
+                {editDeliveryType !== order.deliveryType && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                    Changing the rental method updates fulfillment and driver scheduling. Review the Delivery Fee in Financial Summary separately before sending an updated receipt.
+                  </div>
+                )}
+                <div className="flex flex-wrap gap-2">
                   <button onClick={saveDateTime} disabled={savingDateTime} type="button" className="btn-admin">{savingDateTime ? 'Saving...' : 'Save Schedule'}</button>
-                  <button onClick={() => setScheduleEditing(false)} type="button" className="btn-outline">Cancel</button>
+                  <button onClick={() => { setScheduleEditing(false); setEditDeliveryType(order.deliveryType === 'pickup' ? 'pickup' : 'delivery'); setEditSchedule(staffScheduleFromOrder(order)) }} type="button" className="btn-outline">Cancel</button>
                 </div>
               </div>
             )}

@@ -135,19 +135,6 @@ interface EditItem {
   unitPrice: number
 }
 
-const DROPOFF_SLOT_LABELS = [
-  'Morning (8am - 12pm)',
-  'Afternoon (12pm - 4pm)',
-  'Evening (4pm - 7pm)',
-  'Overnight Rental (picked up the next day)',
-]
-
-const PICKUP_SLOT_LABELS = [
-  'Same Day Evening Pickup',
-  'Next Day Morning Pickup',
-  'Next Day Afternoon Pickup',
-]
-
 function formatTimeSlot(slot: string | null | undefined): string {
   if (!slot) return ''
   const m = slot.match(/^exact_(\d{1,2})(\d{2})$/)

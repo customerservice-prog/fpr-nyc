@@ -27,7 +27,7 @@ function remaining(payment: Payment, payments: Payment[]) {
   return Math.max(Math.round((payment.amount-refunded)*100)/100,0)
 }
 
-export default function OrderCardActions({ orderId, orderNumber, status, onUpdated, compact = false, initialAction }: { orderId: string; orderNumber: string; status: string; onUpdated: () => Promise<void>; compact?: boolean; initialAction?: Action | null }) {
+export default function OrderCardActions({ orderId, orderNumber, status, onUpdated, compact = false, initialAction }: { orderId: string; orderNumber: string; status: string; onUpdated: () => Promise<void> | void; compact?: boolean; initialAction?: Action | null }) {
   const { data: session } = useSession()
   const role = (session?.user as { role?: string } | undefined)?.role
   const mayPay = canProcessPayments(role)
@@ -95,7 +95,7 @@ export default function OrderCardActions({ orderId, orderNumber, status, onUpdat
       if (!response.ok || result.success === false) throw new Error(result.error || 'The action could not be completed')
       toast.success(action === 'cancel' ? 'Order canceled. No refund issued.' : action === 'refund' ? (result.pending ? 'Stripe is processing this refund. Track it in payment history.' : 'Refund completed. Order status unchanged.') : action === 'restrict' ? 'Do Not Rent restriction added.' : 'Internal note saved.')
       submitting.current = false; setBusy(false); close()
-      await onUpdated().catch(()=>toast.error('Action saved. Refresh the order to see the latest details.'))
+      try { await Promise.resolve(onUpdated()) } catch { toast.error('Action saved. Refresh the order to see the latest details.') }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not complete this action. Refresh the order to check its latest status before retrying.')
     } finally { submitting.current = false; setBusy(false) }

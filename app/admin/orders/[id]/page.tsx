@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState, type ReactNode } from 'react'
 import Link from 'next/link'
+import OrderCardActions from '@/components/admin/OrderCardActions'
 import CardSetupLink from '@/components/admin/CardSetupLink'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
@@ -1075,6 +1076,13 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             )}
           </div>
         </div>
+        <OrderCardActions
+          compact
+          orderId={id}
+          orderNumber={order.orderNumber}
+          status={order.status}
+          onUpdated={loadOrder}
+        />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6 items-start">

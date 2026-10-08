@@ -309,6 +309,24 @@ model OrderContact {
   updatedAt DateTime @updatedAt
 }
 
+model AssistantOrderVerification {
+  id String @id
+  lookupHash String
+  orderId String?
+  customerId String?
+  codeHash String
+  requestIpHash String?
+  status String @default("created")
+  failedAttempts Int @default(0)
+  expiresAt DateTime
+  consumedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([lookupHash, createdAt])
+  @@index([requestIpHash, createdAt])
+  @@index([orderId, createdAt])
+}
+
 model ClosedDate {
   id String @id @default(cuid())
   date DateTime @unique

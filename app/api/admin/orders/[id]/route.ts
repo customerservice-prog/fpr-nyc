@@ -6,6 +6,9 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { sendEmail } from '@/lib/email'
 import { automaticCancellationEmail, hasDeliverableCustomerEmail, ownerCancellationEmail, ownerNotificationRecipients } from '@/lib/orderLifecycleNotifications'
+import { getNycCheckoutPolicy } from '@/lib/nycCheckoutPricingServer'
+import { exactPickupFeeForPolicy } from '@/lib/nycCheckoutPolicy'
+import { DELIVERY_WINDOWS, timeToMinutes } from '@/lib/nycAdminScheduling'
 
 export async function GET(
   _request: NextRequest,
@@ -65,6 +68,62 @@ export async function PUT(
     return NextResponse.json({ error: 'Delivery type must be delivery or pickup.' }, { status: 400 })
   }
 
+  const savingStructuredSchedule = body.eventStartTime !== undefined || body.deliveryWindowStart !== undefined || body.exactDeliveryRequested !== undefined || body.pickupType !== undefined
+  let exactDeliveryFee: number | undefined
+  let exactPickupFee: number | undefined
+  if (savingStructuredSchedule) {
+    const method = body.deliveryType === 'pickup' ? 'pickup' : 'delivery'
+    if (method === 'pickup') {
+      exactDeliveryFee = 0
+      exactPickupFee = 0
+    } else {
+      const start = typeof body.eventStartTime === 'string' ? body.eventStartTime : null
+      const end = typeof body.eventEndTimeValue === 'string' ? body.eventEndTimeValue : null
+      if (timeToMinutes(start) < 0 || timeToMinutes(end) <= timeToMinutes(start)) {
+        return NextResponse.json({ error: 'Event start and end times are required, and the event must end after it starts.' }, { status: 400 })
+      }
+
+      const policy = getNycCheckoutPolicy().policy
+      if (body.exactDeliveryRequested === true) {
+        if (!body.exactDeliveryTime || timeToMinutes(body.exactDeliveryTime) < 0 || timeToMinutes(body.exactDeliveryTime) > timeToMinutes(start)) {
+          return NextResponse.json({ error: 'Choose a valid exact delivery time at or before the event starts.' }, { status: 400 })
+        }
+        if (!policy || policy.exactDeliveryFee === null) {
+          return NextResponse.json({ error: 'Guaranteed exact delivery is not currently approved in the NYC checkout policy.' }, { status: 400 })
+        }
+        exactDeliveryFee = policy.exactDeliveryFee
+      } else {
+        const selectedWindow = DELIVERY_WINDOWS.find(window =>
+          window.start === body.deliveryWindowStart && window.end === body.deliveryWindowEnd
+        )
+        if (!selectedWindow || timeToMinutes(selectedWindow.end) > timeToMinutes(start)) {
+          return NextResponse.json({ error: 'Choose a delivery window that ends before the event starts.' }, { status: 400 })
+        }
+        exactDeliveryFee = 0
+      }
+
+      const pickupType = String(body.pickupType || 'flexible')
+      if (!['flexible', 'requiredBy', 'exact'].includes(pickupType)) {
+        return NextResponse.json({ error: 'Choose a valid pickup option.' }, { status: 400 })
+      }
+      if (pickupType === 'requiredBy' && timeToMinutes(body.pickupRequiredByTime) < 0) {
+        return NextResponse.json({ error: 'Choose the customer requested-by pickup time.' }, { status: 400 })
+      }
+      if (pickupType === 'exact') {
+        if (timeToMinutes(body.exactPickupTime) < 0) {
+          return NextResponse.json({ error: 'Choose the guaranteed pickup time.' }, { status: 400 })
+        }
+        const fee = exactPickupFeeForPolicy(policy, body.exactPickupTime)
+        if (fee === null) {
+          return NextResponse.json({ error: 'That exact pickup time is not currently approved in the NYC checkout policy.' }, { status: 400 })
+        }
+        exactPickupFee = fee
+      } else {
+        exactPickupFee = 0
+      }
+    }
+  }
+
   const existingOrder = await prisma.order.findUnique({ where: { id: (await params).id }, include: { items: true } })
   if (!existingOrder) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   const allItemsZeroPriced = !!(body.items && body.items.length > 0 && body.items.every((i: any) => !i.unitPrice))
@@ -92,6 +151,18 @@ export async function PUT(
       notes: body.notes, deliveryType: body.deliveryType,
       eventTimeSlot: body.eventTimeSlot,
       pickupTimeSlot: body.pickupTimeSlot,
+      eventStartTime: savingStructuredSchedule ? (body.deliveryType === 'pickup' ? null : body.eventStartTime || null) : undefined,
+      eventEndTime: savingStructuredSchedule ? (body.deliveryType === 'pickup' ? null : body.eventEndTimeValue || null) : undefined,
+      deliveryWindowStart: savingStructuredSchedule ? (body.deliveryType === 'pickup' || body.exactDeliveryRequested ? null : body.deliveryWindowStart || null) : undefined,
+      deliveryWindowEnd: savingStructuredSchedule ? (body.deliveryType === 'pickup' || body.exactDeliveryRequested ? null : body.deliveryWindowEnd || null) : undefined,
+      exactDeliveryRequested: savingStructuredSchedule ? (body.deliveryType === 'pickup' ? false : body.exactDeliveryRequested === true) : undefined,
+      exactDeliveryTime: savingStructuredSchedule ? (body.deliveryType === 'pickup' || !body.exactDeliveryRequested ? null : body.exactDeliveryTime || null) : undefined,
+      exactDeliveryFee: savingStructuredSchedule ? exactDeliveryFee : undefined,
+      pickupType: savingStructuredSchedule ? (body.deliveryType === 'pickup' ? 'flexible' : body.pickupType || 'flexible') : undefined,
+      pickupRequiredByTime: savingStructuredSchedule ? (body.deliveryType === 'pickup' || body.pickupType !== 'requiredBy' ? null : body.pickupRequiredByTime || null) : undefined,
+      exactPickupTime: savingStructuredSchedule ? (body.deliveryType === 'pickup' || body.pickupType !== 'exact' ? null : body.exactPickupTime || null) : undefined,
+      exactPickupFee: savingStructuredSchedule ? exactPickupFee : undefined,
+      latePickupApprovalRequired: savingStructuredSchedule ? false : undefined,
       setupSurface: body.setupSurface,
       isPublicPark: body.isPublicPark,
       referenceSource: body.referenceSource,
@@ -152,6 +223,7 @@ export async function PUT(
       },
       items: true,
       payments: true,
+      additionalCharges: { orderBy: { createdAt: 'desc' } },
       contacts: { orderBy: { createdAt: 'asc' } },
     },
   })

@@ -2,6 +2,7 @@ import type Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import { buildNycPaymentMetadata, dollarsToCents, nycIdempotencyKey } from '@/lib/nycPaymentMetadata'
 import { recordSucceededIntent } from '@/lib/nycStripeReconcile'
+import { requireNycStripe } from '@/lib/stripe'
 
 export class NycSavedCardChargeError extends Error {
   constructor(message: string, public status = 400) {
@@ -116,10 +117,9 @@ export async function reserveNycSavedCardCharge(input: NycSavedCardChargeInput) 
   }, { timeout: 15000 })
 }
 
-export async function collectNycSavedCardCharge(
-  stripe: Stripe,
-  input: NycSavedCardChargeInput,
-) {
+export async function collectNycSavedCardCharge(input: NycSavedCardChargeInput) {
+  // The actual Stripe writer owns the account guard so callers cannot bypass it.
+  const stripe: Stripe = await requireNycStripe('charge')
   const { order, charge } = await reserveNycSavedCardCharge(input)
 
   if (charge.status === 'succeeded') {

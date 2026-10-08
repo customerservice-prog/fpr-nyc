@@ -9,6 +9,7 @@ export const NYC_HANDLED_STRIPE_EVENTS: string[] = [
   'payment_intent.processing',
   'payment_intent.payment_failed',
   'payment_intent.canceled',
+  'setup_intent.succeeded',
   'charge.refunded',
   'charge.refund.updated',
   'charge.dispute.created',

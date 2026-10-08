@@ -82,7 +82,7 @@ test('No simulated payment path remains', () => {
 })
 
 test('Every PaymentIntent is created with server metadata and an idempotency key', () => {
-  for (const file of ['app/api/checkout/route.ts', 'app/api/admin/orders/[id]/charge-saved-card/route.ts', 'app/api/cron/auto-charge/route.ts']) {
+  for (const file of ['app/api/checkout/route.ts', 'lib/nycSavedCardCharges.ts', 'app/api/cron/auto-charge/route.ts']) {
     const code = read(file)
     const create = code.slice(code.indexOf('paymentIntents.create('))
     const metadataInline = /buildNycPaymentMetadata\(/.test(create.slice(0, 1400))

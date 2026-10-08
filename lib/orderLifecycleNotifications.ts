@@ -1,5 +1,6 @@
 import { BUSINESS, formatDate } from '@/lib/utils'
 import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
+import { customerPayUrl } from '@/lib/publicOrderAccess'
 
 export function ownerNotificationRecipients() {
   const configured = String(process.env.OWNER_NOTIFICATION_EMAIL || '').trim()
@@ -56,7 +57,7 @@ export function orderReceivedEmail(order: {
       </table>
       <p><strong>Order total:</strong> ${money(order.totalAmount)}<br>
       <strong>Required payment now:</strong> ${money(dueNow)}</p>
-      <p style="margin:24px 0"><a href="${NYC_PUBLIC_ORIGIN}/pay/${encodeURIComponent(order.id)}" style="background:#1A6FD4;color:#fff;padding:12px 20px;border-radius:7px;text-decoration:none;font-weight:bold">Complete Payment</a></p>
+      <p style="margin:24px 0"><a href="${customerPayUrl(NYC_PUBLIC_ORIGIN, order.id, order.eventDate)}" style="background:#1A6FD4;color:#fff;padding:12px 20px;border-radius:7px;text-decoration:none;font-weight:bold">Complete Payment</a></p>
       <p style="font-size:13px;color:#555">After your payment succeeds, we will automatically email your confirmed-order receipt. Keep your order number for reference.</p>
       <p>Questions? Call or text ${esc(BUSINESS.phone)} or reply to this email.</p>
     </div>`

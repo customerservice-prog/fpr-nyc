@@ -29,8 +29,37 @@ function normalizedRecipient(to: string) {
   return to.toLowerCase() === 'customerservice@fpr-nyc-production.up.railway.app' ? NYC_EMAIL_ADDRESS : to
 }
 
+function likelyMistypedRecipient(address: string) {
+  const obviousTypoDomains = new Set([
+    'gamil.com', 'gmial.com', 'gmal.com', 'gmail.co',
+    'yaho.com', 'yahooo.com', 'yahho.com',
+    'hotmal.com', 'hotmai.com',
+    'outlok.com', 'outllook.com',
+  ])
+  const recipients = address.split(',').map(value => value.trim()).filter(Boolean)
+  return recipients.find(value => {
+    const domain = value.toLowerCase().split('@')[1]
+    return !!domain && obviousTypoDomains.has(domain)
+  }) || null
+}
+
 function plainTextBody(text: string | undefined, html: string) {
-  return 'NYC / DOWNSTATE NEW YORK | ' + NYC_EMAIL_SITE_HOST + '\n\n' + (text || html.replace(/<[^>]*>/g, ''))
+  const fallback = html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<\/t[dh]>/gi, '\t')
+    .replace(/<\/tr>/gi, '\n')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+  return 'NYC / DOWNSTATE NEW YORK | ' + NYC_EMAIL_SITE_HOST + '\n\n' + (text || fallback)
 }
 
 async function sendWithResend({
@@ -94,6 +123,10 @@ export async function sendEmail({
   replyTo?: string
 }) {
   const recipient = normalizedRecipient(to)
+  const typoRecipient = likelyMistypedRecipient(recipient)
+  if (typoRecipient) {
+    throw new Error('Likely mistyped customer email address: ' + typoRecipient)
+  }
   const finalReplyTo = replyTo || NYC_EMAIL_ADDRESS
   const finalSubject = nycEmailSubject(subject)
   const finalHtml = nycEmailHtml(html)
@@ -215,8 +248,7 @@ function itemsTableHtml(
   const rows = items
     .map((i) => {
       const unit = typeof i.unitPrice === 'number' && i.unitPrice > 0 ? i.unitPrice : i.quantity > 0 ? i.total / i.quantity : i.total
-      const imgTag = (i.image && /^https?:\/\//.test(i.image)) ? '<img src="' + i.image + '" width="40" height="40" style="object-fit:cover;border-radius:4px;vertical-align:middle;margin-right:8px;" />' : ''
-      return '<tr><td style="padding:8px; border-bottom:1px solid #eee;">' + imgTag + i.name + '</td><td style="padding:8px; border-bottom:1px solid #eee; text-align:center;">' + i.quantity + '</td><td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">$' + unit.toFixed(2) + '</td><td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">$' + i.total.toFixed(2) + '</td></tr>'
+      return '<tr><td style="padding:8px; border-bottom:1px solid #eee;">' + i.name + '</td><td style="padding:8px; border-bottom:1px solid #eee; text-align:center;">' + i.quantity + '</td><td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">$' + unit.toFixed(2) + '</td><td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">$' + i.total.toFixed(2) + '</td></tr>'
     })
     .join('')
 
@@ -550,8 +582,7 @@ export function selfServiceQuoteEmail(data: {
 }) {
   const itemsHtml = data.items
     .map((i) => {
-      const imgTag = (i.image && /^https?:\/\//.test(i.image)) ? '<img src="' + i.image + '" width="40" height="40" style="object-fit:cover;border-radius:4px;vertical-align:middle;margin-right:8px;" />' : ''
-      return '<tr><td style="padding:8px; border-bottom:1px solid #eee;">' + imgTag + i.name + '</td><td style="padding:8px; border-bottom:1px solid #eee; text-align:center;">' + i.quantity + '</td><td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">$' + i.total.toFixed(2) + '</td></tr>'
+      return '<tr><td style="padding:8px; border-bottom:1px solid #eee;">' + i.name + '</td><td style="padding:8px; border-bottom:1px solid #eee; text-align:center;">' + i.quantity + '</td><td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">$' + i.total.toFixed(2) + '</td></tr>'
     })
     .join('')
 

@@ -12,6 +12,8 @@ import {
   type ReconcileOutcome,
 } from '@/lib/nycStripeReconcile'
 import { checkNycPaymentMetadata } from '@/lib/nycPaymentMetadata'
+import { CARD_AUTHORIZATION_VERSION } from '@/lib/cardAuthorization'
+import { completeNycCardSetup } from '@/lib/cardSetup'
 import { decideWebhookClaim, NYC_HANDLED_STRIPE_EVENTS, type WebhookLedgerRow } from '@/lib/nycWebhookLedger'
 
 export { NYC_HANDLED_STRIPE_EVENTS }
@@ -121,6 +123,16 @@ async function handlePaymentIntentEvent(event: Stripe.Event, stripe: Stripe): Pr
   }
 }
 
+async function handleSetupIntentEvent(event: Stripe.Event, stripe: Stripe): Promise<ReconcileOutcome> {
+  const fromEvent = event.data.object as Stripe.SetupIntent
+  if (fromEvent.metadata?.consentVersion !== CARD_AUTHORIZATION_VERSION) {
+    return { status: 'ignored', note: 'not_an_nyc_card_setup' }
+  }
+  const intent = await stripe.setupIntents.retrieve(fromEvent.id)
+  const result = await completeNycCardSetup(intent)
+  return { status: 'processed', orderId: result.orderId, note: 'card_setup:' + intent.id }
+}
+
 async function handleRefundEvent(event: Stripe.Event, stripe: Stripe): Promise<ReconcileOutcome> {
   const object = event.data.object as Stripe.Charge | Stripe.Refund
   const paymentIntentId = idOf(object.payment_intent as string | Stripe.PaymentIntent | null)
@@ -168,6 +180,7 @@ export async function processNycStripeEvent(event: Stripe.Event): Promise<Reconc
   if (!NYC_HANDLED_STRIPE_EVENTS.includes(event.type)) return { status: 'ignored', note: 'unhandled_event_type' }
   const stripe = await requireNycStripe('webhook')
   if (event.type.startsWith('payment_intent.')) return handlePaymentIntentEvent(event, stripe)
+  if (event.type === 'setup_intent.succeeded') return handleSetupIntentEvent(event, stripe)
   if (event.type === 'charge.dispute.created') return handleDispute(event, stripe)
   return handleRefundEvent(event, stripe)
 }

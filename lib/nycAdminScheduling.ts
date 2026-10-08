@@ -125,3 +125,26 @@ export function scheduleIsValid(schedule: NycAdminScheduleState, deliveryType: s
     (schedule.pickupType === 'requiredBy' ? !!schedule.pickupRequiredByTime : !!schedule.exactPickupTime)
   return eventValid && deliveryValid && pickupValid
 }
+
+
+function legacyTimeTo24(value: string) {
+  const match = value.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+  if (!match) return ''
+  let hour = Number(match[1])
+  const minute = Number(match[2])
+  const period = match[3].toUpperCase()
+  if (hour < 1 || hour > 12 || minute < 0 || minute > 59) return ''
+  if (period === 'AM' && hour === 12) hour = 0
+  if (period === 'PM' && hour !== 12) hour += 12
+  return String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0')
+}
+
+export function appointmentFromLegacyLabel(label?: string | null) {
+  const text = String(label || '').trim()
+  const known = APPOINTMENT_SLOTS.find(option => option.label === text)
+  if (known) return { appointmentSlot: known.value, appointmentSpecificTime: '' }
+  const specific = text.match(/^Specific Time:\s*(.+)$/i)
+  return specific
+    ? { appointmentSlot: 'specific', appointmentSpecificTime: legacyTimeTo24(specific[1]) }
+    : { appointmentSlot: '', appointmentSpecificTime: '' }
+}

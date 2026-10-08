@@ -2,6 +2,8 @@ import { createHmac, randomUUID, timingSafeEqual } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { lookupNycRentSketchOrder } from '@/lib/nycRentSketchOrderAccess'
+import { NycRentSketchInventoryError, nycRentSketchInventorySnapshot } from '@/lib/nycRentSketchInventory'
+import { NycRentSketchOrderSyncError, syncNycRentSketchOrder } from '@/lib/nycRentSketchOrderSync'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -37,6 +39,32 @@ export async function POST(req: NextRequest) {
       orderAccessVersion: 1,
       ...(payload.type === 'event_pass.order_lookup' ? { order: await lookupNycRentSketchOrder(d) } : {}),
     })
+  }
+
+  if (payload?.type === 'event_pass.inventory_snapshot') {
+    if (!fresh(payload.createdAt)) return NextResponse.json({ error: 'Expired inventory request' }, { status: 401 })
+    try {
+      return NextResponse.json({ ok: true, ...(await nycRentSketchInventorySnapshot(d)) })
+    } catch (error) {
+      if (error instanceof NycRentSketchInventoryError) {
+        return NextResponse.json({ error: error.message, code: error.code, inventoryVersion: 1 }, { status: error.status })
+      }
+      console.error('NYC RentSketch inventory snapshot failed', error)
+      return NextResponse.json({ error: 'NYC inventory could not be checked just now.', inventoryVersion: 1 }, { status: 503 })
+    }
+  }
+
+  if (payload?.type === 'event_pass.order_sync') {
+    if (!fresh(payload.createdAt)) return NextResponse.json({ error: 'Expired order sync request' }, { status: 401 })
+    try {
+      return NextResponse.json({ orderAccessVersion: 1, orderSyncVersion: 1, ...(await syncNycRentSketchOrder(d)) })
+    } catch (error) {
+      if (error instanceof NycRentSketchOrderSyncError) {
+        return NextResponse.json({ error: error.message, code: error.code, orderSyncVersion: 1 }, { status: error.status })
+      }
+      console.error('NYC RentSketch order sync failed', error)
+      return NextResponse.json({ error: 'NYC reservation could not be synchronized just now.', orderSyncVersion: 1 }, { status: 503 })
+    }
   }
 
   if (payload?.type !== 'quote_request.created') return NextResponse.json({ ok: true, ignored: true })

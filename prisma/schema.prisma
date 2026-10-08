@@ -195,6 +195,18 @@ model Order {
   overrideTaxAmount Float?
   overrideDamageWaiverFee Float?
   miscellaneousFees Float @default(0)
+
+  // Latest customer-facing quote / receipt delivery state.
+  emailDeliveryProvider String?
+  emailDeliveryMessageId String? @unique
+  emailDeliveryStatus String?
+  emailDeliveryRecipient String?
+  emailDeliverySubject String?
+  emailDeliveryLastEvent String?
+  emailDeliveryDetail String?
+  emailDeliverySentAt DateTime?
+  emailDeliveryUpdatedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   items OrderItem[]

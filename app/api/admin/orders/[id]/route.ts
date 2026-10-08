@@ -43,6 +43,7 @@ export async function GET(
       },
       items: true,
       payments: { orderBy: { createdAt: 'desc' } },
+      additionalCharges: { orderBy: { createdAt: 'desc' } },
       contacts: { orderBy: { createdAt: 'asc' } },
     },
   })

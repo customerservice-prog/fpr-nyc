@@ -6,6 +6,7 @@ import { ownerNotificationRecipients } from '@/lib/orderLifecycleNotifications'
 import { checkNycPaymentMetadata } from '@/lib/nycPaymentMetadata'
 import { livemodeMatches } from '@/lib/nycStripeGuard'
 import { nycStripeMode } from '@/lib/stripe'
+import { PAYMENT_CARD_AUTHORIZATION_VERSION } from '@/lib/cardAuthorization'
 
 // Shared reconciliation used by the webhook, the confirmation page, and the staff
 // "Sync Payment Status" action. Every path re-reads the PaymentIntent from the
@@ -45,6 +46,18 @@ export async function alertOwner(subject: string, lines: string[]): Promise<void
   }
 }
 
+async function additionalChargeForIntent(intent: Stripe.PaymentIntent, orderId: string) {
+  const chargeId = intent.metadata?.chargeRecordId
+  if (!chargeId) return null
+  const charge = await prisma.orderAdditionalCharge.findUnique({ where: { id: chargeId } })
+  if (!charge || charge.orderId !== orderId) throw new PaymentAssociationError('charge_record_mismatch')
+  if (Math.round(charge.amount * 100) !== intent.amount) throw new PaymentAssociationError('charge_amount_mismatch')
+  if (charge.stripePaymentIntentId && charge.stripePaymentIntentId !== intent.id) {
+    throw new PaymentAssociationError('charge_intent_mismatch')
+  }
+  return charge
+}
+
 /** Loads the order a PaymentIntent claims to belong to and checks every association field. */
 export async function loadOrderForIntent(intent: Stripe.PaymentIntent) {
   const locationCheck = checkNycPaymentMetadata(intent.metadata, null)
@@ -67,6 +80,7 @@ export async function recordSucceededIntent(intent: Stripe.PaymentIntent, option
   if (!Number.isSafeInteger(intent.amount_received) || intent.amount_received <= 0) throw new PaymentAssociationError('amount_unverified')
   const { order, check } = await loadOrderForIntent(intent)
   if (!check.ok) throw new PaymentAssociationError('metadata_invalid')
+  const charge = await additionalChargeForIntent(intent, order.id)
   const saved = intent.setup_future_usage === 'off_session'
   const principal = check.principalCents === null ? 0 : check.principalCents / 100
   const updated = await finalizePayment({
@@ -76,18 +90,53 @@ export async function recordSucceededIntent(intent: Stripe.PaymentIntent, option
     stripePaymentId: intent.id,
     method: 'card',
     allowOverpayment: true,
-    increaseTotalBy: check.kind === 'saved_card' ? principal : 0,
+    increaseTotalBy: charge ? 0 : check.kind === 'saved_card' ? principal : 0,
     sendReceipt: options.sendReceipt !== false,
-    ...(options.notes ? { notes: options.notes } : {}),
-    ...(options.recordedByName ? { recordedByName: options.recordedByName } : {}),
+    ...(charge ? {
+      notes: (charge.addsToOrderTotal ? 'Additional charge' : 'Balance collection') + ' — ' + charge.reason,
+      receiptReason: charge.reason,
+      recordedByName: charge.createdByName || options.recordedByName || undefined,
+    } : options.notes ? { notes: options.notes, ...(options.recordedByName ? { recordedByName: options.recordedByName } : {}) } : options.recordedByName ? { recordedByName: options.recordedByName } : {}),
     ...(saved ? { savedPaymentMethodId: idOf(intent.payment_method), stripeCustomerId: idOf(intent.customer) || order.stripeCustomerId, autopayEnabled: true } : {}),
   })
+
+  // A save-card checkbox is explicit customer authorization. Persist the current
+  // authorization only from server-generated Stripe metadata, and do it even when
+  // the payment row already existed (webhook/callback replay recovery).
+  if (saved && intent.metadata?.consentVersion === PAYMENT_CARD_AUTHORIZATION_VERSION) {
+    const consentAt = new Date(intent.metadata.consentAt || '')
+    if (Number.isFinite(consentAt.getTime())) {
+      await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          savedPaymentMethodId: idOf(intent.payment_method),
+          stripeCustomerId: idOf(intent.customer) || order.stripeCustomerId,
+          cardOnFileConsentAt: consentAt,
+          cardOnFileConsentVersion: PAYMENT_CARD_AUTHORIZATION_VERSION,
+          cardOnFileConsentIp: (intent.metadata.consentIp || 'unknown').slice(0, 120),
+        },
+      })
+    }
+  }
+  if (charge) {
+    await prisma.orderAdditionalCharge.update({
+      where: { id: charge.id },
+      data: { status: 'succeeded', stripePaymentIntentId: intent.id, failureMessage: null },
+    })
+  }
   return updated
 }
 
 /** Records a "processing" placeholder so staff can see a pending payment (no balance change). */
 export async function recordProcessingIntent(intent: Stripe.PaymentIntent) {
   const { order } = await loadOrderForIntent(intent)
+  const charge = await additionalChargeForIntent(intent, order.id)
+  if (charge) {
+    await prisma.orderAdditionalCharge.updateMany({
+      where: { id: charge.id, status: { not: 'succeeded' } },
+      data: { status: 'processing', stripePaymentIntentId: intent.id, failureMessage: null },
+    })
+  }
   const pendingId = intent.id + '_pending'
   const alreadyRecorded = await prisma.payment.findUnique({ where: { stripePaymentId: intent.id } })
   if (alreadyRecorded) return order
@@ -104,6 +153,17 @@ export async function recordProcessingIntent(intent: Stripe.PaymentIntent) {
 
 export async function recordFailedIntent(intent: Stripe.PaymentIntent, eventId: string) {
   const { order } = await loadOrderForIntent(intent)
+  const charge = await additionalChargeForIntent(intent, order.id)
+  if (charge) {
+    await prisma.orderAdditionalCharge.updateMany({
+      where: { id: charge.id, status: { not: 'succeeded' } },
+      data: {
+        status: 'failed',
+        stripePaymentIntentId: intent.id,
+        failureMessage: (intent.last_payment_error?.message || 'Saved-card payment failed.').slice(0, 500),
+      },
+    })
+  }
   const failedId = intent.id + '_failed_' + eventId
   await prisma.payment.updateMany({ where: { orderId: order.id, stripePaymentId: intent.id + '_pending', status: 'pending' }, data: { status: 'failed' } })
   const existing = await prisma.payment.findUnique({ where: { stripePaymentId: failedId } })
@@ -120,6 +180,13 @@ export async function recordFailedIntent(intent: Stripe.PaymentIntent, eventId: 
 
 export async function recordCanceledIntent(intent: Stripe.PaymentIntent) {
   const { order } = await loadOrderForIntent(intent)
+  const charge = await additionalChargeForIntent(intent, order.id)
+  if (charge) {
+    await prisma.orderAdditionalCharge.updateMany({
+      where: { id: charge.id, status: { not: 'succeeded' } },
+      data: { status: 'failed', stripePaymentIntentId: intent.id, failureMessage: 'Stripe payment was canceled.' },
+    })
+  }
   await prisma.payment.updateMany({ where: { orderId: order.id, stripePaymentId: intent.id + '_pending', status: 'pending' }, data: { status: 'canceled' } })
   return order
 }

@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState, type ReactNode } from 'react'
 import Link from 'next/link'
+import CardSetupLink from '@/components/admin/CardSetupLink'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils'
@@ -81,7 +82,22 @@ interface OrderDetail {
     recordedByName?: string | null
     createdAt: string
   }>
-  stripeCustomerId?: string | null; savedPaymentMethodId?: string | null; contacts?: Array<{
+  stripeCustomerId?: string | null
+  savedPaymentMethodId?: string | null
+  cardOnFileConsentAt?: string | null
+  cardOnFileConsentVersion?: string | null
+  additionalCharges?: Array<{
+    id: string
+    type: string
+    amount: number
+    reason: string
+    status: string
+    stripePaymentIntentId?: string | null
+    failureMessage?: string | null
+    createdByName?: string | null
+    createdAt: string
+  }>
+  contacts?: Array<{
       id: string
       name: string
       role: string
@@ -227,7 +243,14 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const [scheduleEditing, setScheduleEditing] = useState(false)
   const [addressEditing, setAddressEditing] = useState(false)
   const [itemsEditing, setItemsEditing] = useState(false)
-  const [addPaymentOpen, setAddPaymentOpen] = useState(false); const [chargeCardOpen, setChargeCardOpen] = useState(false); const [chargeCardAmount, setChargeCardAmount] = useState(''); const [chargeCardReason, setChargeCardReason] = useState(''); const [chargingCard, setChargingCard] = useState(false)
+  const [addPaymentOpen, setAddPaymentOpen] = useState(false)
+  const [chargeCardOpen, setChargeCardOpen] = useState(false)
+  const [chargeCardAmount, setChargeCardAmount] = useState('')
+  const [chargeCardReason, setChargeCardReason] = useState('')
+  const [chargeCardAddsToTotal, setChargeCardAddsToTotal] = useState(false)
+  const [chargeCardType, setChargeCardType] = useState('damage')
+  const [chargingCard, setChargingCard] = useState(false)
+  const [refreshingCard, setRefreshingCard] = useState(false)
   const [paymentMenuOpenId, setPaymentMenuOpenId] = useState<string | null>(null)
   const [internalNotesEditing, setInternalNotesEditing] = useState(false)
   const [customerNotesEditing, setCustomerNotesEditing] = useState(false)
@@ -455,7 +478,59 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     } else toast.error('Failed')
   }
 
-  const chargeSavedCard = async () => { const amt = parseFloat(chargeCardAmount); if (isNaN(amt) || amt <= 0) { toast.error('Enter a valid amount'); return }; if (!chargeCardReason.trim()) { toast.error('Enter a reason (e.g. damage, item not returned)'); return }; if (!window.confirm('Charge the card on file $' + amt.toFixed(2) + ' for: ' + chargeCardReason.trim() + '?')) return; setChargingCard(true); try { const res = await fetch('/api/admin/orders/' + id + '/charge-saved-card', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amt, reason: chargeCardReason.trim() }) }); const data = await res.json(); if (res.ok) { toast.success('Card charged successfully'); setChargeCardAmount(''); setChargeCardReason(''); setChargeCardOpen(false); const d = await fetch('/api/admin/orders/' + id).then((r) => r.json()); setOrder(d.order) } else { toast.error(data.error || 'Failed to charge card') } } catch { toast.error('Failed to charge card') } finally { setChargingCard(false) } }; const removePayment = async (paymentId: string) => {
+  const chargeSavedCard = async () => {
+    if (chargingCard || !order) return
+    const amount = Math.round(Number(chargeCardAmount) * 100) / 100
+    const reason = chargeCardReason.trim()
+    if (!Number.isFinite(amount) || amount <= 0) { toast.error('Enter a valid amount'); return }
+    if (!reason) { toast.error('Enter the reason and documentation'); return }
+    if (chargeCardAddsToTotal && (!order.cardOnFileConsentAt || !order.cardOnFileConsentVersion)) {
+      toast.error('Customer authorization is required before adding a new fee.')
+      return
+    }
+
+    const payload = {
+      amount,
+      reason,
+      addToOrderTotal: chargeCardAddsToTotal,
+      chargeType: chargeCardAddsToTotal ? chargeCardType : 'balance',
+    }
+    const storageKey = 'nyc-saved-card-attempt-' + id
+    const fingerprint = JSON.stringify(payload)
+    if (!window.confirm('Charge the card on file $' + amount.toFixed(2) + ' for: ' + reason + '?')) return
+
+    setChargingCard(true)
+    try {
+      const stored = JSON.parse(sessionStorage.getItem(storageKey) || 'null')
+      const requestKey = stored?.fingerprint === fingerprint ? stored.requestKey : crypto.randomUUID()
+      sessionStorage.setItem(storageKey, JSON.stringify({ fingerprint, requestKey }))
+      const response = await fetch('/api/admin/orders/' + id + '/charge-saved-card', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...payload, requestKey }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        sessionStorage.removeItem(storageKey)
+        toast.success('Card charged successfully')
+        setChargeCardAmount('')
+        setChargeCardReason('')
+        setChargeCardAddsToTotal(false)
+        setChargeCardType('damage')
+        setChargeCardOpen(false)
+      } else {
+        toast.error(data.error || data.message || 'Payment is awaiting confirmation. Do not add the fee again.')
+      }
+      const refreshed = await fetch('/api/admin/orders/' + id)
+      if (refreshed.ok) setOrder((await refreshed.json()).order)
+    } catch {
+      toast.error('The result is unknown. Retry the same details to check this attempt; do not create another charge.')
+    } finally {
+      setChargingCard(false)
+    }
+  }
+
+  const removePayment = async (paymentId: string) => {
     if (!window.confirm('Remove this payment record? This will update the balance due and cannot be undone.')) return
     const res = await fetch('/api/admin/payments/' + paymentId, { method: 'DELETE' })
     if (res.ok) {
@@ -1275,7 +1350,107 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             )}
           </Section>
 
-          <Section title="Payment History" accent="border-accent" action={<button onClick={() => setAddPaymentOpen((v) => !v)} type="button" className="text-secondary text-sm font-medium hover:underline no-print">{addPaymentOpen ? 'Cancel' : 'Add Manual Payment'}</button>}>{order.stripeCustomerId && order.savedPaymentMethodId && (<div className="mb-3 no-print"><button onClick={() => setChargeCardOpen((v) => !v)} type="button" className="text-secondary text-sm font-medium hover:underline">{chargeCardOpen ? 'Cancel' : 'Charge Saved Card (damage / unreturned item)'}</button>{chargeCardOpen && (<div className="mt-3 border border-gray-200 rounded p-4 bg-gray-50/50"><p className="text-xs text-body mb-2">Charges the customer's card on file. The card number is never shown or entered - only Stripe's saved token is used.</p><div className="flex flex-wrap gap-2"><input type="number" placeholder="Amount" value={chargeCardAmount} onChange={(e) => setChargeCardAmount(e.target.value)} className="border border-gray-300 rounded px-3 py-2 text-sm w-32" /><input type="text" placeholder="Reason (e.g. damage, item not returned)" value={chargeCardReason} onChange={(e) => setChargeCardReason(e.target.value)} className="border border-gray-300 rounded px-3 py-2 text-sm flex-1 min-w-[220px]" /><button onClick={chargeSavedCard} disabled={chargingCard} type="button" className="btn-admin text-sm">{chargingCard ? 'Charging...' : 'Charge Card'}</button></div></div>)}</div>)}
+          <Section title="Payment History" accent="border-accent" action={<button onClick={() => setAddPaymentOpen((v) => !v)} type="button" className="text-secondary text-sm font-medium hover:underline no-print">{addPaymentOpen ? 'Cancel' : 'Add Manual Payment'}</button>}><div className="mb-4 no-print rounded-lg border border-gray-200 bg-gray-50/50 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-dark">Card on file</p>
+                  <p className="text-xs text-body">
+                    {order.stripeCustomerId && order.savedPaymentMethodId
+                      ? (order.cardOnFileConsentAt && order.cardOnFileConsentVersion
+                          ? 'Payment method saved with Stripe · post-rental authorization recorded.'
+                          : 'Payment method saved with Stripe · new-fee authorization not yet recorded.')
+                      : 'No payment method is currently saved for this order.'}
+                  </p>
+                </div>
+                {order.stripeCustomerId && order.savedPaymentMethodId && (
+                  <button onClick={() => {
+                    if (!chargeCardOpen && !chargeCardAmount) {
+                      const balance = Math.max(Math.round((order.totalAmount - order.amountPaid) * 100) / 100, 0)
+                      setChargeCardAmount(balance > 0 ? balance.toFixed(2) : '')
+                      setChargeCardReason(balance > 0 ? 'Outstanding rental balance' : '')
+                      setChargeCardAddsToTotal(balance === 0)
+                    }
+                    setChargeCardOpen(v => !v)
+                  }} type="button" className="text-secondary text-sm font-semibold">
+                    {chargeCardOpen ? 'Close charge panel' : 'Charge Card on File'}
+                  </button>
+                )}
+              </div>
+
+              {chargeCardOpen && order.stripeCustomerId && order.savedPaymentMethodId && (
+                <div className="mt-4 space-y-4 border-t border-gray-200 pt-4">
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <label className="flex items-start gap-2 rounded-lg border bg-white p-3 text-sm">
+                      <input className="mt-1" type="radio" name="nyc-card-purpose" checked={!chargeCardAddsToTotal} onChange={() => {
+                        const balance = Math.max(Math.round((order.totalAmount - order.amountPaid) * 100) / 100, 0)
+                        setChargeCardAddsToTotal(false)
+                        setChargeCardAmount(balance > 0 ? balance.toFixed(2) : '')
+                        setChargeCardReason('Outstanding rental balance')
+                      }} />
+                      <span><strong>Existing unpaid balance</strong><span className="block text-body">{formatCurrency(Math.max(order.totalAmount - order.amountPaid, 0))} remaining. Does not add a fee.</span></span>
+                    </label>
+                    <label className="flex items-start gap-2 rounded-lg border bg-white p-3 text-sm">
+                      <input className="mt-1" type="radio" name="nyc-card-purpose" checked={chargeCardAddsToTotal} onChange={() => {
+                        setChargeCardAddsToTotal(true)
+                        setChargeCardAmount('')
+                        setChargeCardReason('')
+                      }} />
+                      <span><strong>New documented fee</strong><span className="block text-body">Damage, missing item, cleaning, late fee, or another allowed charge.</span></span>
+                    </label>
+                  </div>
+
+                  {chargeCardAddsToTotal && (
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Charge type</label>
+                      <select value={chargeCardType} onChange={e => setChargeCardType(e.target.value)} className="w-full sm:w-auto border rounded px-3 py-2 text-sm">
+                        <option value="damage">Damage</option>
+                        <option value="missing_item">Missing item</option>
+                        <option value="unreturned_item">Unreturned item</option>
+                        <option value="cleaning">Cleaning</option>
+                        <option value="late_fee">Late / extra fee</option>
+                        <option value="other">Other documented charge</option>
+                      </select>
+                      {(!order.cardOnFileConsentAt || !order.cardOnFileConsentVersion) && (
+                        <p className="mt-2 rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                          Customer authorization is required before charging a new fee. Create the authorization link below and have the customer complete it first.
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="grid sm:grid-cols-[10rem_1fr] gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Amount ($)</label>
+                      <input type="number" min="0.01" step="0.01" value={chargeCardAmount} onChange={e => setChargeCardAmount(e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Reason / documentation</label>
+                      <input type="text" value={chargeCardReason} onChange={e => setChargeCardReason(e.target.value)} placeholder="Describe the balance or rental issue" className="w-full border rounded px-3 py-2 text-sm" />
+                    </div>
+                  </div>
+                  <button onClick={chargeSavedCard} disabled={chargingCard || (chargeCardAddsToTotal && (!order.cardOnFileConsentAt || !order.cardOnFileConsentVersion))} type="button" className="btn-admin disabled:opacity-50">
+                    {chargingCard ? 'Checking payment…' : chargeCardAddsToTotal ? 'Review New Fee & Charge Card' : 'Review & Collect Balance'}
+                  </button>
+                </div>
+              )}
+
+              <div className="mt-4 border-t border-gray-200 pt-3">
+                <CardSetupLink orderId={id} />
+                <button type="button" disabled={refreshingCard} className="text-xs font-semibold text-secondary disabled:opacity-50" onClick={async () => {
+                  setRefreshingCard(true)
+                  try {
+                    const response = await fetch('/api/admin/orders/' + id)
+                    if (!response.ok) throw new Error('Could not refresh card status')
+                    setOrder((await response.json()).order)
+                    toast.success('Saved payment method status refreshed')
+                  } catch {
+                    toast.error('Could not refresh the card status')
+                  } finally {
+                    setRefreshingCard(false)
+                  }
+                }}>{refreshingCard ? 'Refreshing…' : 'Refresh Card Status'}</button>
+              </div>
+            </div>
             {order.payments.length === 0 && <p className="text-sm text-body">No payments recorded yet.</p>}
             <div className="divide-y divide-gray-100">
               {order.payments.map((p) => {
@@ -1318,6 +1493,22 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                 )
               })}
             </div>
+            {!!order.additionalCharges?.length && (
+              <div className="mt-4 rounded-lg border border-gray-200 p-3 no-print">
+                <p className="text-xs font-bold uppercase tracking-wide text-gray-500">Saved-card charge attempts</p>
+                <div className="mt-2 space-y-2">
+                  {order.additionalCharges.slice(0, 8).map(charge => (
+                    <div key={charge.id} className="flex flex-wrap items-start justify-between gap-2 text-xs">
+                      <div>
+                        <strong className="text-dark">{charge.type.replace(/_/g, ' ')}</strong> · {charge.reason}
+                        {charge.failureMessage && <span className="block text-red-700">{charge.failureMessage}</span>}
+                      </div>
+                      <span className="font-semibold">{formatCurrency(charge.amount)} · {charge.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             {addPaymentOpen && (
               <div className="mt-3 border border-gray-200 rounded p-4 no-print bg-gray-50/50">
                 <p className="text-sm font-medium mb-2">Add Manual Payment</p>

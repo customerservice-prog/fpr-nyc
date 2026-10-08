@@ -12,6 +12,7 @@ import { prisma } from '@/lib/prisma'
 import { exactSlotConflict, findInventoryShortfalls, lockNycCapacity, rentalPeriod, shortfallMessage } from '@/lib/nycInventory'
 import { evaluateRentalRestrictions } from '@/lib/rentalRestrictions'
 import { DeliveryQuoteError, getDeliveryQuote, requireDeliveryMethod, requireMatchingDeliveryFee } from '@/lib/delivery'
+import { PAYMENT_CARD_AUTHORIZATION_VERSION } from '@/lib/cardAuthorization'
 
 // Creates (or safely reuses) the Stripe PaymentIntent for an NYC order.
 // Amounts are validated against the order record on the server; the browser only
@@ -22,6 +23,10 @@ const REUSABLE_STATUSES = new Set(['requires_payment_method', 'requires_confirma
 
 function isStripeMissingResource(error: unknown): boolean {
   return (error as { code?: string })?.code === 'resource_missing'
+}
+
+function requestIp(request: NextRequest) {
+  return (request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown').split(',')[0].trim().slice(0, 120)
 }
 
 export async function POST(request: NextRequest) {
@@ -146,6 +151,11 @@ export async function POST(request: NextRequest) {
       kind: paidCents === 0 ? 'checkout' : 'balance',
       principalCents,
       tipCents,
+      extra: saveCard ? {
+        consentVersion: PAYMENT_CARD_AUTHORIZATION_VERSION,
+        consentAt: new Date().toISOString(),
+        consentIp: requestIp(request),
+      } : undefined,
     })
 
     // Duplicate submission / retry protection: reuse the open PaymentIntent for the
@@ -178,6 +188,7 @@ export async function POST(request: NextRequest) {
             && previousCheck.tipCents === tipCents
             && previousCheck.principalCents === principalCents
             && (previous.setup_future_usage === 'off_session') === saveCard
+            && (!saveCard || previous.metadata?.consentVersion === PAYMENT_CARD_AUTHORIZATION_VERSION)
           if (sameRequest && previous.client_secret) {
             return NextResponse.json({ clientSecret: previous.client_secret, paymentIntentId: previous.id, reused: true })
           }

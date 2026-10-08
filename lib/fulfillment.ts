@@ -1,5 +1,3 @@
-import { rentalSchedule } from './riverdaleSchedule'
-
 /** Rental dates are stored as calendar dates; do not shift them through the viewer's timezone. */
 export interface FulfillmentOrder {
   deliveryType?: string | null
@@ -26,8 +24,19 @@ export function isRiverdalePickup(order: Pick<FulfillmentOrder, 'deliveryType'>)
   return order.deliveryType === 'pickup'
 }
 
+function calendarDate(value: string) {
+  const match = String(value || '').match(/^(\d{4}-\d{2}-\d{2})/)
+  return match ? match[1] : ''
+}
+
 export function rentalDates(order: FulfillmentOrder) {
-  return rentalSchedule(order)
+  const start = calendarDate(order.eventDate)
+  if (!start) return { start: '', end: '' }
+  if (order.eventEndDate) return { start, end: calendarDate(order.eventEndDate) || start }
+  const days = Math.max(Math.floor(Number(order.rentalDays) || 1), 1)
+  const date = new Date(start + 'T00:00:00Z')
+  date.setUTCDate(date.getUTCDate() + days - 1)
+  return { start, end: date.toISOString().slice(0, 10) }
 }
 
 export function calendarMovements(order: FulfillmentOrder, day: string) {

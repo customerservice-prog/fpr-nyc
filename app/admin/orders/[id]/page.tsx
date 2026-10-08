@@ -80,6 +80,15 @@ interface OrderDetail {
   overrideDepositAmount?: number | null
   overrideTaxAmount?: number | null; overrideDamageWaiverFee?: number | null
   miscellaneousFees?: number | null
+  emailDeliveryProvider?: string | null
+  emailDeliveryMessageId?: string | null
+  emailDeliveryStatus?: string | null
+  emailDeliveryRecipient?: string | null
+  emailDeliverySubject?: string | null
+  emailDeliveryLastEvent?: string | null
+  emailDeliveryDetail?: string | null
+  emailDeliverySentAt?: string | null
+  emailDeliveryUpdatedAt?: string | null
   customer: {
     firstName: string
     lastName: string
@@ -1010,8 +1019,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             })
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || 'Failed to send')
-            toast.success((order && order.amountPaid > 0 ? 'Receipt' : 'Quote') + ' sent to ' + emails.length + ' recipient' + (emails.length === 1 ? '' : 's'))
+            toast.success((order && order.amountPaid > 0 ? 'Receipt' : 'Quote') + ' accepted for ' + emails.length + ' recipient' + (emails.length === 1 ? '' : 's'))
             setReceiptRecipientsOpen(false)
+            await loadOrder()
       } catch (err) {
             toast.error(err instanceof Error ? err.message : 'Failed to send receipt')
       } finally {
@@ -1075,6 +1085,33 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         <p className="text-sm text-body mb-4">
           {order.customer.firstName} {order.customer.lastName} · {formatDate(order.eventDate)}{order.eventEndDate ? (' – ' + formatDate(order.eventEndDate)) : ''} · {deliveryTypeLabel}
         </p>
+
+        {order.emailDeliveryStatus && (
+          <div className={
+            'mb-4 rounded-lg border px-3 py-2 text-sm ' +
+            (['bounced','failed','complained','suppressed'].includes(order.emailDeliveryStatus)
+              ? 'border-red-200 bg-red-50 text-red-800'
+              : order.emailDeliveryStatus === 'delivered'
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                : order.emailDeliveryStatus === 'delayed'
+                  ? 'border-amber-200 bg-amber-50 text-amber-800'
+                  : 'border-blue-200 bg-blue-50 text-blue-800')
+          }>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <strong>
+                Email: {order.emailDeliveryStatus === 'sent_untracked'
+                  ? 'sent through SMTP · delivery tracking unavailable'
+                  : order.emailDeliveryStatus.replace(/_/g, ' ')}
+              </strong>
+              {order.emailDeliveryUpdatedAt && <span className="text-xs">{formatDateTime(order.emailDeliveryUpdatedAt)}</span>}
+            </div>
+            {order.emailDeliveryRecipient && <p className="mt-1 text-xs">To: {order.emailDeliveryRecipient}</p>}
+            {order.emailDeliveryDetail && <p className="mt-1 text-xs">{order.emailDeliveryDetail}</p>}
+            {['bounced','failed','complained','suppressed'].includes(order.emailDeliveryStatus) && (
+              <p className="mt-1 text-xs font-semibold">Check the customer email address before sending again.</p>
+            )}
+          </div>
+        )}
 
         {order.restrictionMatchedIds && order.restrictionMatchedIds.length > 0 && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm no-print">

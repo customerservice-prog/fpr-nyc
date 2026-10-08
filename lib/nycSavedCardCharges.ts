@@ -1,3 +1,4 @@
+import type Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import { buildNycPaymentMetadata, dollarsToCents, nycIdempotencyKey } from '@/lib/nycPaymentMetadata'
 import { recordSucceededIntent } from '@/lib/nycStripeReconcile'

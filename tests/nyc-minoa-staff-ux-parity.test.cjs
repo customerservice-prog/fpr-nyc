@@ -1,0 +1,72 @@
+const test = require('node:test')
+const assert = require('node:assert/strict')
+const fs = require('node:fs')
+
+const read = file => fs.readFileSync(file, 'utf8')
+
+test('NYC quick order actions are wired to order, refund and Do Not Rent workflows', () => {
+  const component = read('components/admin/OrderCardActions.tsx')
+  const order = read('app/admin/orders/[id]/page.tsx')
+  const dashboard = read('app/admin/page.tsx')
+  const refund = read('app/api/admin/orders/[id]/refund/route.ts')
+  const restrictions = read('app/api/admin/rental-restrictions/route.ts')
+
+  assert.match(component, /Cancel/)
+  assert.match(component, /Refund/)
+  assert.match(component, /Do Not Rent/)
+  assert.match(component, /Note/)
+  assert.match(component, /canIssueRefunds/)
+  assert.match(component, /hasStaffPermission\(role, 'override_restrictions'\)/)
+  assert.match(order, /<OrderCardActions/)
+  assert.match(dashboard, /<OrderCardActions/)
+  assert.match(refund, /canIssueRefunds/)
+  assert.match(restrictions, /override_restrictions/)
+})
+
+test('NYC item editor uses ordered multi-photo upload management', () => {
+  const page = read('app/admin/items/[id]/page.tsx')
+  const editor = read('components/admin/ItemPhotosEditor.tsx')
+  const helper = read('lib/itemPhotoUploads.ts')
+
+  assert.match(page, /ItemPhotosEditor/)
+  assert.match(page, /additionalImages: \[\] as string\[\]/)
+  assert.doesNotMatch(page, /additionalImages\.split\(','\)/)
+  assert.match(editor, /Upload Additional Photos/)
+  assert.match(editor, /moveItemPhoto/)
+  assert.match(editor, /Remove/)
+  assert.match(helper, /ITEM_PHOTO_MAX_BYTES = 5 \* 1024 \* 1024/)
+  assert.match(helper, /image\/jpeg,image\/png,image\/webp,image\/gif/)
+})
+
+test('NYC admin reloads stale tabs after a newer Railway deployment', () => {
+  const layout = read('app/admin/layout.tsx')
+  const guard = read('components/admin/AdminDeploymentRefreshGuard.tsx')
+  const route = read('app/api/deployment-version/route.ts')
+  const config = read('next.config.js')
+
+  assert.match(layout, /AdminDeploymentRefreshGuard/)
+  assert.match(guard, /CHECK_INTERVAL_MS = 30_000/)
+  assert.match(guard, /visibilitychange/)
+  assert.match(guard, /window\.location\.reload\(\)/)
+  assert.match(route, /RAILWAY_GIT_COMMIT_SHA/)
+  assert.match(route, /no-store/)
+  assert.match(config, /source: '\/admin\/:path\*'/)
+  assert.match(config, /no-store, no-cache, must-revalidate/)
+})
+
+test('fulfillment logic is adapted to Riverdale and never labels NYC work as Minoa', () => {
+  const fulfillment = read('lib/fulfillment.ts')
+  const badge = read('components/admin/FulfillmentBadge.tsx')
+  const dashboard = read('app/admin/page.tsx')
+  const api = read('app/api/admin/dashboard/route.ts')
+
+  assert.match(fulfillment, /isRiverdalePickup/)
+  assert.match(fulfillment, /Customer pickup — Riverdale/)
+  assert.match(badge, /Riverdale counter/)
+  assert.match(badge, /Customer pickup \/ return — Riverdale/)
+  assert.doesNotMatch(fulfillment, /Minoa|minoa/)
+  assert.doesNotMatch(badge, /Minoa|minoa/)
+  assert.match(dashboard, /FulfillmentBadge/)
+  assert.match(api, /deliveredAt/)
+  assert.match(api, /pickedUpAt/)
+})

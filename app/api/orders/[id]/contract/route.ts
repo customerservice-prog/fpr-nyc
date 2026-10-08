@@ -2,18 +2,35 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { hasPublicOrderAccess } from '@/lib/publicOrderAccess'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { hasStaffPermission } from '@/lib/staffPermissions'
+
+const privateHeaders = { 'Cache-Control': 'private, no-store, max-age=0', Pragma: 'no-cache' }
+
+async function authorizedOrderAccess(request: NextRequest, id: string, suppliedToken?: string | null) {
+  if (hasPublicOrderAccess(request, id, suppliedToken)) return true
+  const session = await getServerSession(authOptions).catch(() => null)
+  return hasStaffPermission((session?.user as { role?: string } | undefined)?.role, 'orders')
+}
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const id = (await params).id
   const order = await prisma.order.findUnique({
-    where: { id: (await params).id },
+    where: { id },
     include: { customer: true, items: true, payments: true },
   })
 
   if (!order) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
+  if (!await authorizedOrderAccess(request, id, request.nextUrl.searchParams.get('access'))) {
+    return NextResponse.json({ error: 'Verification required' }, { status: 401, headers: privateHeaders })
   }
 
 const refundedAmount = (order.payments || []).filter((p) => p.amount < 0).reduce((sum, p) => sum + Math.abs(p.amount), 0)
@@ -49,7 +66,7 @@ const refundedAmount = (order.payments || []).filter((p) => p.amount < 0).reduce
         total: i.total,
       })),
     },
-  })
+  }, { headers: privateHeaders })
 }
 
 export async function POST(
@@ -57,22 +74,27 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const body = await request.json()
+  const id = (await params).id
   const name = (body?.name || '').trim()
 
   if (!name) {
     return NextResponse.json({ error: 'Signature name is required' }, { status: 400 })
   }
 
-  const order = await prisma.order.findUnique({ where: { id: (await params).id } })
+  const order = await prisma.order.findUnique({ where: { id } })
   if (!order) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
+  if (!await authorizedOrderAccess(request, id, typeof body?.accessToken === 'string' ? body.accessToken : request.nextUrl.searchParams.get('access'))) {
+    return NextResponse.json({ error: 'Verification required' }, { status: 401, headers: privateHeaders })
   }
 
   const forwardedFor = request.headers.get('x-forwarded-for')
   const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : 'unknown'
 
   const updated = await prisma.order.update({
-    where: { id: (await params).id },
+    where: { id },
     data: {
       contractSignedAt: new Date(),
       contractSignatureName: name,

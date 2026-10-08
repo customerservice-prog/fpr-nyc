@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, prePaymentReminderEmail } from '@/lib/email'
+import { customerPayUrl } from '@/lib/publicOrderAccess'
 
 // One-time, manually-triggered batch sender for the 3-day pre-payment reminder.
 // Only processes the exact orderIds passed in the request body. Never runs on a schedule.
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
                       continue
               }
 
-const payLink = `${origin}/pay/${order.id}`
+const payLink = customerPayUrl(origin, order.id, order.eventDate)
                   const customerName = `${order.customer.firstName} ${order.customer.lastName}`
 
                   const emailContent = prePaymentReminderEmail(

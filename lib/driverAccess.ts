@@ -14,16 +14,18 @@ export async function resolveDriverAccess(request: NextRequest) {
     }
   }
 
-  if (auth.isAuthenticated && auth.role === 'driver' && auth.userId) {
+  if (auth.isAuthenticated && auth.userId) {
     const staff = await prisma.user.findUnique({
       where: { id: auth.userId },
       select: {
+        role: true,
         driverProfile: { select: { id: true, name: true, isActive: true } },
       },
     })
-    const driver = staff?.driverProfile
-    if (!driver?.isActive) return null
-    return { isAdmin: false, driverId: driver.id, name: driver.name, authMode: 'staff' as const }
+    const driver = staff?.role === 'driver' ? staff.driverProfile : null
+    if (driver?.isActive) {
+      return { isAdmin: false, driverId: driver.id, name: driver.name, authMode: 'staff' as const }
+    }
   }
 
   const driverId = verifyDriverToken(request.cookies.get(DRIVER_COOKIE_NAME)?.value)

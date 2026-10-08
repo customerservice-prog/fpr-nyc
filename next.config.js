@@ -70,6 +70,11 @@ const nextConfig = {
     const privatePaths=['/admin/:path*','/driver/:path*','/checkout/:path*','/pay/:path*','/pay-now','/contract/:path*','/schedule/:path*','/unsubscribe','/items']
     return [
       { source: '/:path*', headers: globalHeaders },
+      { source: '/admin/:path*', headers: [
+        { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, max-age=0' },
+        { key: 'Pragma', value: 'no-cache' },
+        { key: 'Expires', value: '0' },
+      ] },
       // The Railway service address stays usable for staff but is never indexed;
       // canonical URLs always point at https://friendlypartyrentalnyc.com.
       { source: '/:path*', has: [{ type: 'host', value: 'fpr-nyc-production.up.railway.app' }], headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] },

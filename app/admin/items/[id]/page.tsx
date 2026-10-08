@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
+import ItemPhotosEditor from '@/components/admin/ItemPhotosEditor'
 
 interface Category {
   id: string
@@ -20,6 +21,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
   const [categories, setCategories] = useState<Category[]>([])
   const [allItems, setAllItems] = useState<AddonItem[]>([])
   const [addonSearch, setAddonSearch] = useState('')
+  const [photoBusy, setPhotoBusy] = useState(false)
   const [form, setForm] = useState({
     name: '',
     specialDisplayName: '',
@@ -29,7 +31,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
     quantity: '',
     categoryId: '',
     picture: '',
-    additionalImages: '', colorOptions: '',
+    additionalImages: [] as string[], colorOptions: '',
     displayToCustomer: true,
     status: 'Available',
     attentionNotes: '',
@@ -72,7 +74,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
           attentionNotes: item.attentionNotes || '',
           lastInspectedAt: item.lastInspectedAt ? String(item.lastInspectedAt).slice(0, 10) : '',
           picture: item.picture || '',
-          additionalImages: (item.additionalImages || []).join(', '), colorOptions: (item.colorOptions || []).join(', '),
+          additionalImages: Array.isArray(item.additionalImages) ? item.additionalImages : [], colorOptions: (item.colorOptions || []).join(', '),
           displayToCustomer: item.displayToCustomer,
           bookableAfter: item.bookableAfter ? String(item.bookableAfter).slice(0, 10) : '',
           bookableAfterMessage: item.bookableAfterMessage || '',
@@ -105,10 +107,8 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...form,
-        additionalImages: form.additionalImages
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean), colorOptions: form.colorOptions.split(',').map((s) => s.trim()).filter(Boolean),
+        additionalImages: form.additionalImages,
+        colorOptions: form.colorOptions.split(',').map((s) => s.trim()).filter(Boolean),
       }),
     })
     if (res.ok) {
@@ -137,52 +137,20 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
           <label className="block text-sm font-medium mb-1">Description</label>
           <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} className="w-full border rounded px-3 py-2" />
         </div>
+        <ItemPhotosEditor
+          picture={form.picture}
+          additionalImages={form.additionalImages}
+          onPictureChange={(picture) => setForm((current) => ({ ...current, picture }))}
+          onAdditionalImagesChange={(next) => setForm((current) => ({
+            ...current,
+            additionalImages: typeof next === 'function' ? next(current.additionalImages) : next,
+          }))}
+          onBusyChange={setPhotoBusy}
+        />
         <div>
-          <label className="block text-sm font-medium mb-1">Image URL</label>
-          <input value={form.picture} onChange={(e) => setForm({ ...form, picture: e.target.value })} placeholder="https://example.com/image.jpg" className="w-full border rounded px-3 py-2" />
-          {form.picture && (
-            <img src={form.picture} alt="Preview" className="mt-2 h-32 w-32 object-cover rounded border" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-          )}
-          <div className="mt-2">
-            <label className="inline-block text-xs font-medium bg-gray-100 hover:bg-gray-200 border rounded px-3 py-1.5 cursor-pointer">
-              Upload Photo
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0]
-                  if (!file) return
-                  if (file.size > 5 * 1024 * 1024) {
-                    alert('Please choose an image smaller than 5MB')
-                    return
-                  }
-                  // Upload to object storage and store the hosted URL. Falls
-                  // back to an inline data URL if storage is not configured.
-                  try {
-                    const body = new FormData()
-                    body.append('file', file)
-                    const res = await fetch('/api/admin/upload', { method: 'POST', body })
-                    if (res.ok) {
-                      const data = await res.json()
-                      setForm((f) => ({ ...f, picture: data.url }))
-                      return
-                    }
-                  } catch {
-                    // fall through to inline data URL below
-                  }
-                  const reader = new FileReader()
-                  reader.onload = () => setForm((f) => ({ ...f, picture: reader.result as string }))
-                  reader.readAsDataURL(file)
-                }}
-              />
-            </label>
-            <span className="text-xs text-body ml-2">Uploads are saved directly to your item — no external link needed</span>
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Additional Image URLs (optional)</label>
-          <textarea value={form.additionalImages} onChange={(e) => setForm({ ...form, additionalImages: e.target.value })} rows={2} placeholder="Comma-separated list of extra photo URLs" className="w-full border rounded px-3 py-2" /><div className="mt-3"><label className="block text-sm font-medium mb-1">Color Options (optional)</label><input value={form.colorOptions} onChange={(e) => setForm({ ...form, colorOptions: e.target.value })} placeholder="Comma-separated list of colors, e.g. Black, White, Red" className="w-full border rounded px-3 py-2" /><p className="text-xs text-body mt-1">If set, customers pick a color from this list instead of needing a separate photo per color.</p></div>
+          <label className="block text-sm font-medium mb-1">Color Options (optional)</label>
+          <input value={form.colorOptions} onChange={(e) => setForm({ ...form, colorOptions: e.target.value })} placeholder="Comma-separated list of colors, e.g. Black, White, Red" className="w-full border rounded px-3 py-2" />
+          <p className="text-xs text-body mt-1">If set, customers pick a color from this list instead of needing a separate photo per color.</p>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -287,7 +255,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
           <label className="block text-sm font-medium mb-1">Restriction Message (optional)</label>
           <input value={form.bookableAfterMessage} onChange={(e) => setForm({ ...form, bookableAfterMessage: e.target.value })} placeholder="e.g. Back in stock August 5th" className="w-full border rounded px-3 py-2" />
         </div>
-        <button type="submit" className="btn-admin">Save Changes</button>
+        <button type="submit" disabled={photoBusy} className="btn-admin disabled:opacity-50">{photoBusy ? 'Uploading Photos…' : 'Save Changes'}</button>
       </form>
     </div>
   )

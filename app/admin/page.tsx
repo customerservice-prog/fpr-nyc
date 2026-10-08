@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import OrderCalendar from '@/components/admin/OrderCalendar'
+import OrderCardActions from '@/components/admin/OrderCardActions'
+import { FulfillmentBadge } from '@/components/admin/FulfillmentBadge'
 import BestSellersChart from '@/components/admin/BestSellersChart'
 import WeatherWidget from '@/components/admin/WeatherWidget'
 import RevenueChart from '@/components/admin/RevenueChart'
@@ -34,6 +36,9 @@ interface DashboardData {
     customerEmail?: string | null
     eventDate: string
     eventEndDate?: string | null
+    rentalDays?: number | null
+    deliveredAt?: string | null
+    pickedUpAt?: string | null
     eventTimeSlot?: string | null
     pickupTimeSlot?: string | null
     eventAddress?: string | null
@@ -400,13 +405,22 @@ export default function AdminDashboard() {
                             )}
                           </div>
 
+                          <div className="mb-2">
+                            <FulfillmentBadge order={o} day={format(selectedDate, 'yyyy-MM-dd')} />
+                          </div>
                           {o.internalNotes && <p className="text-xs bg-yellow-50 border border-yellow-200 rounded p-2 mb-2"><span className="font-semibold">Internal Notes:</span> {o.internalNotes}</p>}
                           {o.notes && <p className="text-xs bg-teal-50 border border-teal-200 rounded p-2 mb-2"><span className="font-semibold">Customer Comments:</span> {o.notes}</p>}
 
-                          <div className="flex items-center gap-3 pt-2 border-t text-xs">
-                            <Link href={`/admin/orders/${o.id}`} className="text-secondary hover:underline font-medium">View / Edit Order</Link>
-                            <span className="capitalize text-gray-400">{o.status}</span>
-                          </div>
+                          <OrderCardActions
+                            orderId={o.id}
+                            orderNumber={o.orderNumber}
+                            status={o.status}
+                            onUpdated={async () => {
+                              const response = await fetch(`/api/admin/dashboard?month=${currentMonth.getMonth()}&year=${currentMonth.getFullYear()}`, { cache: 'no-store' })
+                              if (!response.ok) throw new Error('Could not refresh the order calendar')
+                              setData(await response.json())
+                            }}
+                          />
                         </div>
                       </div>
                     )

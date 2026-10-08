@@ -13,6 +13,10 @@ import { exactSlotConflict, findInventoryShortfalls, lockNycCapacity, rentalPeri
 import { evaluateRentalRestrictions } from '@/lib/rentalRestrictions'
 import { DeliveryQuoteError, getDeliveryQuote, requireDeliveryMethod, requireMatchingDeliveryFee } from '@/lib/delivery'
 import { PAYMENT_CARD_AUTHORIZATION_VERSION } from '@/lib/cardAuthorization'
+import { hasPublicOrderAccess } from '@/lib/publicOrderAccess'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { hasStaffPermission } from '@/lib/staffPermissions'
 
 // Creates (or safely reuses) the Stripe PaymentIntent for an NYC order.
 // Amounts are validated against the order record on the server; the browser only
@@ -36,6 +40,7 @@ export async function POST(request: NextRequest) {
     const amountCents = dollarsToCents(body?.amount)
     const tipCents = body?.tipAmount === undefined || body?.tipAmount === null || body?.tipAmount === '' ? 0 : dollarsToCents(body.tipAmount)
     const saveCard = body?.saveCard === true
+    const accessToken = typeof body?.accessToken === 'string' ? body.accessToken : null
 
     if (!orderId || !Number.isSafeInteger(amountCents) || amountCents <= 0) {
       return NextResponse.json({ error: 'orderId and a valid amount are required' }, { status: 400 })
@@ -58,6 +63,22 @@ export async function POST(request: NextRequest) {
     if (order.status === 'canceled' || order.status === 'cancelled') {
       return NextResponse.json({ error: 'This order has been canceled. Please contact us.' }, { status: 409 })
     }
+
+    // A raw order ID is not authorization. Existing quote/active payment links
+    // require a signed access token, a verified customer cookie, or staff payment access.
+    // Fresh website checkout orders remain status=incomplete and continue without
+    // an extra verification step.
+    if (order.status !== 'incomplete') {
+      let authorized = hasPublicOrderAccess(request, order.id, accessToken)
+      if (!authorized) {
+        const session = await getServerSession(authOptions).catch(() => null)
+        authorized = hasStaffPermission((session?.user as { role?: string } | undefined)?.role, 'payments')
+      }
+      if (!authorized) {
+        return NextResponse.json({ error: 'Secure order verification is required before payment.' }, { status: 401 })
+      }
+    }
+
     if (order.source === 'online' && !NYC_SERVER_PRICED_VERSIONS.includes(order.pricingVersion || '')) {
       // Totals on this online order were not computed by the server pricing engine.
       return NextResponse.json({ error: 'We need to confirm your total before payment. Please restart checkout or contact us.' }, { status: 409 })

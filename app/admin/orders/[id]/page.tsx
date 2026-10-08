@@ -205,6 +205,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const [editItems, setEditItems] = useState<EditItem[]>([])
   const [editEventDate, setEditEventDate] = useState('')
   const [editEventEndDate, setEditEventEndDate] = useState('')
+  const [editDeliveryType, setEditDeliveryType] = useState<'delivery' | 'pickup'>('delivery')
   const [editDropoffSlot, setEditDropoffSlot] = useState('')
   const [editPickupSlot, setEditPickupSlot] = useState('')
   const [savingDateTime, setSavingDateTime] = useState(false)
@@ -287,6 +288,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         )
         setEditEventDate(d.order.eventDate ? d.order.eventDate.slice(0, 10) : '')
         setEditEventEndDate(d.order.eventEndDate ? d.order.eventEndDate.slice(0, 10) : '')
+        setEditDeliveryType(d.order.deliveryType === 'pickup' ? 'pickup' : 'delivery')
         setEditDropoffSlot(d.order.eventTimeSlot || '')
         setEditPickupSlot(d.order.pickupTimeSlot || '')
         setEditEventAddress(d.order.eventAddress || '')
@@ -369,8 +371,10 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         miscellaneousFees: parseFloat(miscellaneousFees) || 0,
       }),
     })
-    if (res.ok) toast.success('Order updated')
-    else toast.error('Failed to update')
+    if (res.ok) {
+      await loadOrder()
+      toast.success('Order updated')
+    } else toast.error('Failed to update')
   }
 
   const applyRaincheck = async () => {
@@ -732,13 +736,14 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         body: JSON.stringify({
           eventDate: editEventDate || undefined,
           eventEndDate: editEventEndDate || undefined,
+          deliveryType: editDeliveryType,
           eventTimeSlot: editDropoffSlot,
           pickupTimeSlot: editPickupSlot,
         }),
       })
       if (!res.ok) throw new Error('Failed to save date/time')
       loadOrder()
-      toast.success('Date & time updated')
+      toast.success('Schedule updated')
       setScheduleEditing(false)
     } catch {
       toast.error('Failed to save date/time changes')
@@ -1022,6 +1027,22 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               </div>
             ) : (
               <div className="no-print">
+                <div className="mb-4">
+                  <label className="block text-xs text-body mb-1">Rental Method</label>
+                  <select
+                    value={editDeliveryType}
+                    onChange={(e) => setEditDeliveryType(e.target.value === 'pickup' ? 'pickup' : 'delivery')}
+                    className="w-full border border-gray-300 rounded px-3 py-2"
+                  >
+                    <option value="delivery">Delivery</option>
+                    <option value="pickup">Customer Pickup</option>
+                  </select>
+                  {editDeliveryType !== order.deliveryType && (
+                    <p className="mt-2 rounded border border-amber-200 bg-amber-50 p-2 text-xs text-amber-900">
+                      Changing the rental method updates this order&apos;s fulfillment. Review the delivery fee in Financial Summary separately before sending an updated receipt.
+                    </p>
+                  )}
+                </div>
                 <div className="grid md:grid-cols-2 gap-4 mb-3">
                   <div>
                     <label className="block text-xs text-body mb-1">Event Date</label>
@@ -1057,7 +1078,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={saveDateTime} disabled={savingDateTime} type="button" className="btn-admin">{savingDateTime ? 'Saving...' : 'Save Date & Time'}</button>
+                  <button onClick={saveDateTime} disabled={savingDateTime} type="button" className="btn-admin">{savingDateTime ? 'Saving...' : 'Save Schedule'}</button>
                   <button onClick={() => setScheduleEditing(false)} type="button" className="btn-outline">Cancel</button>
                 </div>
               </div>
@@ -1408,10 +1429,6 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                     <input type="number" step="0.01" value={miscellaneousFees} onChange={(e) => setMiscellaneousFees(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Override Travel Fee ($)</label>
-                    <input type="number" step="0.01" placeholder="Leave blank to use calculated fee" value={overrideTravelFee} onChange={(e) => setOverrideTravelFee(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
-                  </div>
-                  <div>
                     <label className="block text-sm font-medium mb-1">Override Tax Amount ($)</label>
                     <input type="number" step="0.01" placeholder="Leave blank to use calculated tax" value={overrideTaxAmount} onChange={(e) => setOverrideTaxAmount(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
                   </div>
@@ -1424,7 +1441,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                     <input type="number" step="0.01" placeholder="Leave blank to use calculated deposit" value={overrideDepositAmount} onChange={(e) => setOverrideDepositAmount(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
                   </div>
                 </div>
-                <button onClick={saveOrder} type="button" className="btn-admin text-sm">Save Overrides</button>
+                <button onClick={saveOrder} type="button" className="btn-admin text-sm">Save Billing Changes</button>
               </div>
             </Advanced>
 
@@ -1628,7 +1645,26 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                 <div className="flex justify-between"><span className="text-body">Damage Waiver{overrideDamageWaiverFee !== '' ? ' (override)' : ''}</span><span className="tabular-nums">{formatCurrency(liveTotals.damageWaiverFee || 0)}</span></div>
               )}
               {order.deliveryType === 'delivery' && (
-                <div className="flex justify-between"><span className="text-body">Travel Fee{overrideTravelFee !== '' ? ' (override)' : ''}</span><span className="tabular-nums">{formatCurrency(liveTotals.deliveryFee || 0)}</span></div>
+                <div className="border-y border-gray-100 py-2 my-2 no-print">
+                  <label className="block text-xs font-semibold text-dark mb-1">Delivery Fee ($)</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      inputMode="decimal"
+                      value={overrideTravelFee}
+                      onChange={(e) => setOverrideTravelFee(e.target.value)}
+                      placeholder={(order.deliveryFee || 0).toFixed(2)}
+                      className="min-w-0 flex-1 rounded border border-gray-300 px-2.5 py-2 text-sm"
+                    />
+                    <button onClick={saveOrder} type="button" className="btn-admin whitespace-nowrap text-xs">Save Fee</button>
+                  </div>
+                  <p className="mt-1 text-[11px] text-gray-500">Type the exact delivery fee you want. The order total and tax update with it.</p>
+                </div>
+              )}
+              {order.deliveryType === 'delivery' && (
+                <div className="hidden print:flex justify-between"><span>Delivery Fee</span><span>{formatCurrency(liveTotals.deliveryFee || 0)}</span></div>
               )}
               {parseFloat(miscellaneousFees) > 0 && (
                 <div className="flex justify-between"><span className="text-body">Miscellaneous Fees</span><span className="tabular-nums">{formatCurrency(parseFloat(miscellaneousFees) || 0)}</span></div>

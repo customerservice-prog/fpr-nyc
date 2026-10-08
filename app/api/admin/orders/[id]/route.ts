@@ -6,6 +6,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { sendEmail } from '@/lib/email'
 import { automaticCancellationEmail, hasDeliverableCustomerEmail, ownerCancellationEmail, ownerNotificationRecipients } from '@/lib/orderLifecycleNotifications'
+import { exactPickupFeeForPolicy, parseNycCheckoutPolicy, timeToMinutes } from '@/lib/nycCheckoutPolicy'
 
 export async function GET(
   _request: NextRequest,
@@ -74,6 +75,97 @@ export async function PUT(
   const safeTotalAmount = legacyLumpSum ? existingOrder!.totalAmount : body.totalAmount
   const safeBalanceDue = legacyLumpSum ? existingOrder!.balanceDue : body.balanceDue
 
+  // Structured scheduling is operational, but any fee attached to it is derived
+  // from NYC_CHECKOUT_POLICY_JSON on the server. The browser never chooses an
+  // exact-time dollar amount.
+  const scheduleTouched = [
+    'deliveryType', 'eventStartTime', 'eventEndTimeValue',
+    'deliveryWindowStart', 'deliveryWindowEnd',
+    'exactDeliveryRequested', 'exactDeliveryTime',
+    'pickupType', 'pickupRequiredByTime', 'exactPickupTime',
+  ].some((key) => Object.prototype.hasOwnProperty.call(body, key))
+
+  const effectiveDeliveryType = body.deliveryType ?? existingOrder.deliveryType
+  const effectiveEventStart = body.eventStartTime !== undefined ? body.eventStartTime : existingOrder.eventStartTime
+  const effectiveEventEnd = body.eventEndTimeValue !== undefined ? body.eventEndTimeValue : existingOrder.eventEndTime
+  const effectiveWindowStart = body.deliveryWindowStart !== undefined ? body.deliveryWindowStart : existingOrder.deliveryWindowStart
+  const effectiveWindowEnd = body.deliveryWindowEnd !== undefined ? body.deliveryWindowEnd : existingOrder.deliveryWindowEnd
+  const effectiveExactDeliveryRequested = typeof body.exactDeliveryRequested === 'boolean' ? body.exactDeliveryRequested : existingOrder.exactDeliveryRequested
+  const effectiveExactDeliveryTime = body.exactDeliveryTime !== undefined ? body.exactDeliveryTime : existingOrder.exactDeliveryTime
+  const effectivePickupType = body.pickupType !== undefined ? body.pickupType : existingOrder.pickupType
+  const effectivePickupRequiredBy = body.pickupRequiredByTime !== undefined ? body.pickupRequiredByTime : existingOrder.pickupRequiredByTime
+  const effectiveExactPickupTime = body.exactPickupTime !== undefined ? body.exactPickupTime : existingOrder.exactPickupTime
+
+  let nextExactDeliveryFee = Number(existingOrder.exactDeliveryFee || 0)
+  let nextExactPickupFee = Number(existingOrder.exactPickupFee || 0)
+  let scheduleTaxAmount = Number(existingOrder.taxAmount || 0)
+  let scheduleTotalAmount = Number(existingOrder.totalAmount || 0)
+  let scheduleBalanceDue = Number(existingOrder.balanceDue || 0)
+
+  if (scheduleTouched) {
+    const parsedPolicy = parseNycCheckoutPolicy(process.env.NYC_CHECKOUT_POLICY_JSON)
+    const policy = parsedPolicy.policy
+
+    if (effectiveDeliveryType === 'delivery') {
+      const startMinutes = timeToMinutes(effectiveEventStart)
+      const endMinutes = timeToMinutes(effectiveEventEnd)
+      if (startMinutes < 0 || endMinutes <= startMinutes) {
+        return NextResponse.json({ error: 'Event end time must be after a valid event start time.' }, { status: 400 })
+      }
+
+      if (effectiveExactDeliveryRequested) {
+        const exactMinutes = timeToMinutes(effectiveExactDeliveryTime)
+        if (exactMinutes < 0 || exactMinutes > startMinutes) {
+          return NextResponse.json({ error: 'Exact delivery must be at or before the event start time.' }, { status: 400 })
+        }
+        if (!policy || policy.exactDeliveryFee == null) {
+          return NextResponse.json({ error: 'Guaranteed exact delivery is not enabled in the NYC checkout policy.' }, { status: 409 })
+        }
+        nextExactDeliveryFee = policy.exactDeliveryFee
+      } else {
+        const windowStart = timeToMinutes(effectiveWindowStart)
+        const windowEnd = timeToMinutes(effectiveWindowEnd)
+        if (windowStart < 0 || windowEnd <= windowStart || windowEnd > startMinutes) {
+          return NextResponse.json({ error: 'Choose a valid delivery window that ends before the event starts.' }, { status: 400 })
+        }
+        nextExactDeliveryFee = 0
+      }
+
+      if (!['flexible', 'requiredBy', 'exact'].includes(String(effectivePickupType || ''))) {
+        return NextResponse.json({ error: 'Choose a valid pickup type.' }, { status: 400 })
+      }
+      if (effectivePickupType === 'requiredBy' && timeToMinutes(effectivePickupRequiredBy) < 0) {
+        return NextResponse.json({ error: 'Choose the requested pickup-by time.' }, { status: 400 })
+      }
+      if (effectivePickupType === 'exact') {
+        if (timeToMinutes(effectiveExactPickupTime) < 0) {
+          return NextResponse.json({ error: 'Choose the guaranteed pickup time.' }, { status: 400 })
+        }
+        const fee = exactPickupFeeForPolicy(policy, effectiveExactPickupTime)
+        if (fee == null) {
+          return NextResponse.json({ error: 'That guaranteed pickup time is not enabled in the NYC checkout policy.' }, { status: 409 })
+        }
+        nextExactPickupFee = fee
+      } else {
+        nextExactPickupFee = 0
+      }
+    } else {
+      nextExactDeliveryFee = 0
+      nextExactPickupFee = 0
+    }
+
+    const previousScheduleFee = Number(existingOrder.exactDeliveryFee || 0) + Number(existingOrder.exactPickupFee || 0)
+    const nextScheduleFee = nextExactDeliveryFee + nextExactPickupFee
+    const feeDelta = Math.round((nextScheduleFee - previousScheduleFee) * 100) / 100
+    const taxDelta = existingOrder.overrideTaxAmount == null
+      ? Math.round(feeDelta * (Number(existingOrder.taxRate || 0) / 100) * 100) / 100
+      : 0
+
+    scheduleTaxAmount = Math.round((Number(existingOrder.taxAmount || 0) + taxDelta) * 100) / 100
+    scheduleTotalAmount = Math.round((Number(existingOrder.totalAmount || 0) + feeDelta + taxDelta) * 100) / 100
+    scheduleBalanceDue = Math.max(Math.round((scheduleTotalAmount - Number(existingOrder.amountPaid || 0)) * 100) / 100, 0)
+  }
+
   const order = await prisma.order.update({
     where: { id: (await params).id },
     data: {
@@ -92,19 +184,31 @@ export async function PUT(
       notes: body.notes, deliveryType: body.deliveryType,
       eventTimeSlot: body.eventTimeSlot,
       pickupTimeSlot: body.pickupTimeSlot,
+      eventStartTime: body.eventStartTime !== undefined ? body.eventStartTime : undefined,
+      eventEndTime: body.eventEndTimeValue !== undefined ? body.eventEndTimeValue : undefined,
+      deliveryWindowStart: body.deliveryWindowStart !== undefined ? body.deliveryWindowStart : undefined,
+      deliveryWindowEnd: body.deliveryWindowEnd !== undefined ? body.deliveryWindowEnd : undefined,
+      exactDeliveryRequested: typeof body.exactDeliveryRequested === 'boolean' ? body.exactDeliveryRequested : undefined,
+      exactDeliveryTime: body.exactDeliveryTime !== undefined ? body.exactDeliveryTime : undefined,
+      exactDeliveryFee: scheduleTouched ? nextExactDeliveryFee : undefined,
+      pickupType: body.pickupType !== undefined ? body.pickupType : undefined,
+      pickupRequiredByTime: body.pickupRequiredByTime !== undefined ? body.pickupRequiredByTime : undefined,
+      exactPickupTime: body.exactPickupTime !== undefined ? body.exactPickupTime : undefined,
+      exactPickupFee: scheduleTouched ? nextExactPickupFee : undefined,
+      latePickupApprovalRequired: typeof body.latePickupApprovalRequired === 'boolean' ? body.latePickupApprovalRequired : undefined,
       setupSurface: body.setupSurface,
       isPublicPark: body.isPublicPark,
       referenceSource: body.referenceSource,
       specialRequestFee: isAdmin ? body.specialRequestFee : undefined,
       specialRequestNames: body.specialRequestNames,
-      balanceDue: isAdmin ? safeBalanceDue : undefined,
+      balanceDue: scheduleTouched ? scheduleBalanceDue : (isAdmin ? safeBalanceDue : undefined),
       amountPaid: isAdmin ? body.amountPaid : undefined,
 
       subtotal: isAdmin ? safeSubtotal : undefined,
       taxRate: isAdmin ? body.taxRate : undefined,
-      taxAmount: isAdmin ? safeTaxAmount : undefined,
+      taxAmount: scheduleTouched ? scheduleTaxAmount : (isAdmin ? safeTaxAmount : undefined),
       deliveryFee: isAdmin ? body.deliveryFee : undefined,
-      totalAmount: isAdmin ? safeTotalAmount : undefined,
+      totalAmount: scheduleTouched ? scheduleTotalAmount : (isAdmin ? safeTotalAmount : undefined),
       depositAmount: isAdmin ? body.depositAmount : undefined,
       prePayReminderDisabled: isAdmin ? body.prePayReminderDisabled : undefined,
       scheduleApprovedUnpaid: isAdmin ? body.scheduleApprovedUnpaid : undefined,
@@ -152,6 +256,7 @@ export async function PUT(
       },
       items: true,
       payments: true,
+      additionalCharges: { orderBy: { createdAt: 'desc' } },
       contacts: { orderBy: { createdAt: 'asc' } },
     },
   })

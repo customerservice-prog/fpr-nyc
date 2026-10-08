@@ -12,6 +12,7 @@ import { Pencil } from 'lucide-react'
 import { useCheckoutPolicy } from '@/components/public/useCheckoutPolicy'
 import { exactPickupFeeForPolicy, isLateExactPickupTime } from '@/lib/nycCheckoutPolicy'
 import { formatTaxRatePercent } from '@/lib/nycSalesTax'
+import { APPOINTMENT_SLOTS, APPOINTMENT_TIME_OPTIONS, DELIVERY_WINDOWS, EVENT_TIME_OPTIONS, EXACT_DELIVERY_TIME_OPTIONS as EXACT_DELIVERY_TIME_OPTIONS_FULL, EXACT_PICKUP_TIME_OPTIONS, formatScheduleTime as fmtT, getRecommendedWindow, getValidDeliveryWindows, timeToMinutes } from '@/lib/nycOrderScheduling'
 
 interface CheckoutForm {
   firstName: string
@@ -44,74 +45,6 @@ interface SpecialRequestFee {
   id: string
   name: string
   amount: number
-}
-
-function fmtT(t?: string | null): string {
-  if (!t) return ''
-  const parts = t.split(':')
-  const h24 = Number(parts[0])
-  const m = Number(parts[1])
-  if (isNaN(h24) || isNaN(m)) return ''
-  const period = h24 >= 12 ? 'PM' : 'AM'
-  let h12 = h24 % 12
-  if (h12 === 0) h12 = 12
-  return h12 + ':' + String(m).padStart(2, '0') + ' ' + period
-}
-
-const DELIVERY_WINDOWS: { start: string; end: string; label: string }[] = [
-  { start: '08:00', end: '10:00', label: '8:00 AM - 10:00 AM' },
-  { start: '10:00', end: '12:00', label: '10:00 AM - 12:00 PM' },
-  { start: '12:00', end: '14:00', label: '12:00 PM - 2:00 PM' },
-  { start: '14:00', end: '16:00', label: '2:00 PM - 4:00 PM' },
-  { start: '16:00', end: '18:00', label: '4:00 PM - 6:00 PM' },
-]
-
-const APPOINTMENT_SLOTS = [
-  { value: 'morning', label: 'Morning (9am - 12pm)' },
-  { value: 'afternoon', label: 'Afternoon (12pm - 4pm)' },
-  { value: 'evening', label: 'Evening (4pm - 6pm)' },
-  { value: 'specific', label: 'Specific Time' },
-]
-
-function timeToMinutes(t: string): number {
-  if (!t) return -1
-  const parts = t.split(':')
-  const h = Number(parts[0])
-  const m = Number(parts[1])
-  if (isNaN(h) || isNaN(m)) return -1
-  return h * 60 + m
-}
-
-function buildTimeOptions(startMins: number, endMins: number): { value: string; label: string }[] {
-  const options: { value: string; label: string }[] = []
-  for (let mins = startMins; mins <= endMins; mins += 30) {
-    const h24 = Math.floor(mins / 60)
-    const m = mins % 60
-    const value = String(h24).padStart(2, '0') + ':' + String(m).padStart(2, '0')
-    options.push({ value, label: fmtT(value) })
-  }
-  return options
-}
-
-const EVENT_TIME_OPTIONS = buildTimeOptions(7 * 60, 23 * 60 + 30)
-const EXACT_DELIVERY_TIME_OPTIONS_FULL = buildTimeOptions(8 * 60, 18 * 60)
-const EXACT_PICKUP_TIME_OPTIONS = buildTimeOptions(12 * 60, 23 * 60 + 30)
-const APPOINTMENT_TIME_OPTIONS = buildTimeOptions(9 * 60, 17 * 60)
-
-function getValidDeliveryWindows(eventStartTime: string): { start: string; end: string; label: string }[] {
-  const eventMins = timeToMinutes(eventStartTime)
-  if (eventMins < 0) return DELIVERY_WINDOWS
-  return DELIVERY_WINDOWS.filter((w) => timeToMinutes(w.end) <= eventMins)
-}
-
-function getRecommendedWindow(eventStartTime: string): { start: string; end: string; label: string } | null {
-  const valid = getValidDeliveryWindows(eventStartTime)
-  if (valid.length === 0) return null
-  const eventMins = timeToMinutes(eventStartTime)
-  if (eventMins < 0) return valid[valid.length - 1]
-  const withBuffer = valid.filter((w) => eventMins - timeToMinutes(w.end) >= 60)
-  if (withBuffer.length > 0) return withBuffer[withBuffer.length - 1]
-  return valid[valid.length - 1]
 }
 
 export default function CheckoutPage() {

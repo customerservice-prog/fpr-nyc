@@ -4,14 +4,18 @@ const fs = require('node:fs')
 
 const read = file => fs.readFileSync(file, 'utf8')
 
-test('NYC admin can change an existing order between delivery and customer pickup', () => {
+test('NYC admin can change an existing order between delivery and Riverdale customer pickup', () => {
   const page = read('app/admin/orders/[id]/page.tsx')
+  const fields = read('components/admin/NycAdminScheduleFields.tsx')
   const api = read('app/api/admin/orders/[id]/route.ts')
   assert.match(page, /editDeliveryType/)
-  assert.match(page, /<option value="delivery">Delivery<\/option>/)
-  assert.match(page, /<option value="pickup">Customer Pickup<\/option>/)
+  assert.match(page, /NycAdminScheduleFields/)
+  assert.match(fields, /onDeliveryTypeChange\('delivery'\)/)
+  assert.match(fields, /onDeliveryTypeChange\('pickup'\)/)
+  assert.match(fields, /Delivery to Event/)
+  assert.match(fields, /Customer Pickup — Riverdale/)
   assert.match(page, /deliveryType: editDeliveryType/)
-  assert.match(page, /Changing the rental method updates this order/)
+  assert.match(page, /Changing the rental method updates fulfillment/)
   assert.match(api, /Delivery type must be delivery or pickup/)
 })
 

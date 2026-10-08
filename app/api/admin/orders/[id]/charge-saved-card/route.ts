@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { describeStripeError, isNycPaymentsUnavailable, requireNycStripe } from '@/lib/stripe'
+import { describeStripeError, isNycPaymentsUnavailable } from '@/lib/stripe'
 import { canProcessPayments } from '@/lib/staffPermissions'
 import { collectNycSavedCardCharge, NycSavedCardChargeError } from '@/lib/nycSavedCardCharges'
 
@@ -29,8 +29,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Choose a valid charge type.' }, { status: 400 })
     }
 
-    const stripe = await requireNycStripe('charge')
-    const result = await collectNycSavedCardCharge(stripe, {
+    const result = await collectNycSavedCardCharge({
       orderId: id,
       requestKey,
       amount,

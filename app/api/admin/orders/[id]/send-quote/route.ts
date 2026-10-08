@@ -1,4 +1,3 @@
-import { NYC_EMAIL_ADDRESS } from '@/lib/nycEmail'
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -102,7 +101,7 @@ export async function POST(
                                 ...sharedDetails,
                 })
 
-    let result: { success: boolean; simulated?: boolean }
+    let result: { success: boolean; simulated?: boolean; provider?: string; providerId?: string; messageId?: string }
     try {
       result = await sendEmail({
                 to: toAddress,
@@ -119,23 +118,38 @@ export async function POST(
 		return NextResponse.json({ error: 'Failed to send email. Please check email configuration (EMAIL_USER/EMAIL_PASS) and try again.' }, { status: 500 })
 	}
 
-    try {
-                const companySettings = await prisma.companySettings.findFirst()
-                const notifyEmail = NYC_EMAIL_ADDRESS
-                if (notifyEmail) {
-                                await sendEmail({
-                                                    to: notifyEmail,
-                                                    subject: '[Copy] ' + emailContent.subject,
-                                                    html: emailContent.html,
-                                })
-                }
-    } catch (notifyError) {
-                console.error('Failed to send business notification email:', notifyError)
+    const resultMeta = result as { simulated?: boolean; provider?: string; providerId?: string; messageId?: string }
+    if (!resultMeta.simulated) {
+      const provider = resultMeta.provider || 'unknown'
+      const messageId = resultMeta.messageId || resultMeta.providerId || null
+      try {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: {
+            emailDeliveryProvider: provider,
+            emailDeliveryMessageId: messageId,
+            emailDeliveryStatus: provider === 'resend' ? 'sent' : 'sent_untracked',
+            emailDeliveryRecipient: toAddress,
+            emailDeliverySubject: emailContent.subject,
+            emailDeliveryLastEvent: provider === 'resend' ? 'email.sent' : null,
+            emailDeliveryDetail: provider === 'resend'
+              ? 'Accepted by Resend; awaiting delivery confirmation.'
+              : 'Accepted by SMTP; provider delivery events are not available.',
+            emailDeliverySentAt: new Date(),
+            emailDeliveryUpdatedAt: new Date(),
+          },
+        })
+      } catch (trackingError) {
+        console.error('Quote/receipt sent, but NYC delivery tracking could not be recorded:', trackingError)
+      }
     }
+
 
     return NextResponse.json({
                 success: true,
-                simulated: (result as { simulated?: boolean }).simulated || false,
+                simulated: result.simulated || false,
                 payLink,
+                emailProvider: result.provider || 'unknown',
+                messageId: result.messageId || result.providerId || null,
     })
 }

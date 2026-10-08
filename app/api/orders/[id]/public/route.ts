@@ -2,18 +2,35 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { hasPublicOrderAccess } from '@/lib/publicOrderAccess'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { hasStaffPermission } from '@/lib/staffPermissions'
+
+const privateHeaders = { 'Cache-Control': 'private, no-store, max-age=0', Pragma: 'no-cache' }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const id = (await params).id
   const order = await prisma.order.findUnique({
-    where: { id: (await params).id },
+    where: { id },
     include: { customer: true, items: true, payments: true },
   })
 
   if (!order) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
+  const token = request.nextUrl.searchParams.get('access')
+  let authorized = hasPublicOrderAccess(request, id, token)
+  if (!authorized) {
+    const session = await getServerSession(authOptions).catch(() => null)
+    authorized = hasStaffPermission((session?.user as { role?: string } | undefined)?.role, 'payments')
+  }
+  if (!authorized) {
+    return NextResponse.json({ error: 'Verification required' }, { status: 401, headers: privateHeaders })
   }
 
   const refundedAmount = (order.payments || []).filter((p) => p.amount < 0).reduce((sum, p) => sum + Math.abs(p.amount), 0)
@@ -48,5 +65,5 @@ export async function GET(
         total: i.total,
       })),
     },
-  })
+  }, { headers: privateHeaders })
 }

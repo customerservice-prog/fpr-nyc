@@ -61,30 +61,30 @@ export async function renderNycWeddingArtwork(id: string, item: { name: string; 
     const height = lines.length * 26 + 12
     if (cursor + height > 772) break
     rows.push(`<circle cx="46" cy="${cursor - 7}" r="12" fill="#1e4938"/><path d="M40 ${cursor - 7}l4 4 8-9" fill="none" stroke="#fff" stroke-width="2.5"/>`)
-    rows.push(`<text x="68" y="${cursor}" font-family="Arial,Helvetica,sans-serif" font-size="21" fill="#243d32">${lines.map((line, index) => `<tspan x="68" dy="${index ? 26 : 0}">${xml(line)}</tspan>`).join('')}</text>`)
+    rows.push(`<text x="68" y="${cursor}" font-family="DejaVu Sans,sans-serif" font-size="21" fill="#243d32">${lines.map((line, index) => `<tspan x="68" dy="${index ? 26 : 0}">${xml(line)}</tspan>`).join('')}</text>`)
     cursor += height
   }
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="${xml(item.name)} — ${xml(price)}">
     <defs><clipPath id="photo"><rect x="486" y="122" width="686" height="502" rx="24"/></clipPath></defs>
     <rect width="1200" height="900" fill="#f8f5ed"/><rect width="1200" height="91" fill="#183d2d"/>
-    <text x="36" y="39" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700" letter-spacing="3" fill="#edc677">WEDDING PACKAGE ${info.number}</text>
-    <text x="36" y="68" font-family="Arial,Helvetica,sans-serif" font-size="21" fill="#fff">Friendly Party Rental NYC · Riverdale</text>
+    <text x="36" y="39" font-family="DejaVu Sans,sans-serif" font-size="16" font-weight="700" letter-spacing="3" fill="#edc677">WEDDING PACKAGE ${info.number}</text>
+    <text x="36" y="68" font-family="DejaVu Sans,sans-serif" font-size="21" fill="#fff">Friendly Party Rental NYC · Riverdale</text>
     <path d="M464 120v665" stroke="#d8c693" stroke-width="2"/>
-    <text x="34" y="172" font-family="Georgia,Times New Roman,serif" font-size="${id === 'pkg-elite' ? 44 : 57}" font-weight="700" fill="#173d2c">${xml(info.title[0])}</text>
-    <text x="34" y="233" font-family="Georgia,Times New Roman,serif" font-size="57" font-style="italic" fill="#173d2c">${xml(info.title[1])}</text>
-    <text x="34" y="338" font-family="Georgia,Times New Roman,serif" font-size="${priceFont}" font-weight="700" fill="#173d2c">${xml(price)}</text>
-    <text x="37" y="377" font-family="Arial,Helvetica,sans-serif" font-size="23" fill="#536153">${details.guests > 0 ? `UP TO ${details.guests} GUESTS` : 'SEE PACKAGE DETAILS'}</text>
+    <text x="34" y="172" font-family="DejaVu Serif,serif" font-size="${id === 'pkg-elite' ? 44 : 57}" font-weight="700" fill="#173d2c">${xml(info.title[0])}</text>
+    <text x="34" y="233" font-family="DejaVu Serif,serif" font-size="57" font-style="italic" fill="#173d2c">${xml(info.title[1])}</text>
+    <text x="34" y="338" font-family="DejaVu Serif,serif" font-size="${priceFont}" font-weight="700" fill="#173d2c">${xml(price)}</text>
+    <text x="37" y="377" font-family="DejaVu Sans,sans-serif" font-size="23" fill="#536153">${details.guests > 0 ? `UP TO ${details.guests} GUESTS` : 'SEE PACKAGE DETAILS'}</text>
     <path d="M36 404h394" stroke="#c6aa66" stroke-width="2"/>
     ${rows.join('')}
     <rect x="486" y="122" width="686" height="502" rx="24" fill="#fff"/>
     <image x="496" y="132" width="666" height="482" preserveAspectRatio="xMidYMid meet" clip-path="url(#photo)" xlink:href="data:image/jpeg;base64,${photo.toString('base64')}"/>
-    <text x="829" y="650" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#5b665d">Actual rental-equipment photo · Setup varies by venue</text>
+    <text x="829" y="650" text-anchor="middle" font-family="DejaVu Sans,sans-serif" font-size="18" fill="#5b665d">Actual rental-equipment photo · Setup varies by venue</text>
     <image x="509" y="670" width="225" height="113" preserveAspectRatio="xMidYMid meet" xlink:href="data:image/png;base64,${logo.toString('base64')}"/>
-    <text x="763" y="708" font-family="Georgia,Times New Roman,serif" font-size="31" font-weight="700" fill="#173d2c">Riverdale, Bronx, NY</text>
-    <text x="763" y="746" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#6b5733">718-283-4593</text>
+    <text x="763" y="708" font-family="DejaVu Serif,serif" font-size="31" font-weight="700" fill="#173d2c">Riverdale, Bronx, NY</text>
+    <text x="763" y="746" font-family="DejaVu Sans,sans-serif" font-size="24" fill="#6b5733">718-283-4593</text>
     <rect y="815" width="1200" height="85" fill="#183d2d"/>
-    <text x="600" y="850" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="22" fill="#fff">Travel fee &amp; applicable sales tax additional.</text>
-    <text x="600" y="879" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#dfdccb">Review package details for the complete inclusions and exclusions.</text>
+    <text x="600" y="850" text-anchor="middle" font-family="DejaVu Sans,sans-serif" font-size="22" fill="#fff">Travel fee &amp; applicable sales tax additional.</text>
+    <text x="600" y="879" text-anchor="middle" font-family="DejaVu Sans,sans-serif" font-size="18" fill="#dfdccb">Review package details for the complete inclusions and exclusions.</text>
   </svg>`
   return { bytes: await sharp(Buffer.from(svg)).png().toBuffer(), contentType: 'image/png' }
 }

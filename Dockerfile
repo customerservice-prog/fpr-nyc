@@ -5,6 +5,8 @@ ENV HOSTNAME=0.0.0.0
 COPY package*.json .npmrc ./
 RUN npm ci --legacy-peer-deps --ignore-scripts
 COPY . .
+# Package SVG cards need real fonts when sharp rasterizes them on Alpine.
+RUN apk add --no-cache font-dejavu
 RUN npx prisma generate
 ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY

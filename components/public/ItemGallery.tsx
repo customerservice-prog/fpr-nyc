@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { IMAGE_CACHE_BUST } from '@/lib/imageVersion'
 
 interface ItemGalleryProps {
   slug: string
@@ -17,8 +18,8 @@ export default function ItemGallery({ slug, name, hasPicture, additionalImageCou
   const base = `/api/item-image/${encodeURIComponent(slug)}`
   const v = encodeURIComponent(version)
   const images = [
-    ...(hasPicture ? [`${base}?v=${v}`] : []),
-    ...Array.from({ length: Math.max(0, additionalImageCount) }, (_, index) => `${base}?index=${index}&v=${v}`),
+    ...(hasPicture ? [`${base}?v=${v}&media=${IMAGE_CACHE_BUST}`] : []),
+    ...Array.from({ length: Math.max(0, additionalImageCount) }, (_, index) => `${base}?index=${index}&v=${v}&media=${IMAGE_CACHE_BUST}`),
   ]
   const [activeImage, setActiveImage] = useState<string | null>(images[0] || null)
   const [failedImage, setFailedImage] = useState<string | null>(null)

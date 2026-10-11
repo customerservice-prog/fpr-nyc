@@ -12,6 +12,7 @@ import { getSmartAddonSearchTerms, isSmartAddonCompatible, rankSmartAddons, supp
 import { itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 import { nycItemImagePath, nycItemPath, nycItemUrlSlug, pickStoredItem, storedItemSlugCandidates } from '@/lib/nycItemPath'
 import { NYC_SERVICE_AREAS } from '@/lib/nycServiceAreas'
+import { isNycOneTimePhotoboothUpgrade, nycRentalPriceSuffix } from '@/lib/nycRentalPricing'
 
 export const dynamic = 'force-dynamic'
 // Canonical/Open Graph/JSON-LD origin: the NYC primary domain from NEXT_PUBLIC_SITE_URL.
@@ -129,7 +130,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
   const recommendedAddons = (item.category.slug === 'photobooth-rentals'
     ? [...pinnedAddons, ...smartAddons].filter(addon => nycItemUrlSlug(addon.slug) === 'photobooth-custom-image-layout-upgrade' || (/with attendant/i.test(item.name) && nycItemUrlSlug(addon.slug) === 'photobooth-custom-backdrop-upgrade'))
     : [...pinnedAddons, ...smartAddons]).slice(0, 4)
-  const isPhotoBoothUpgrade = (slug: string | null) => ['photobooth-custom-image-layout-upgrade', 'photobooth-custom-backdrop-upgrade'].includes(nycItemUrlSlug(slug))
+  const isPhotoBoothUpgrade = isNycOneTimePhotoboothUpgrade
   // Main-site recommendation rules, rendered only from NYC catalog prices and photos.
   const validSuggestedAddons = recommendedAddons.map(addon => ({
     ...addon,
@@ -180,7 +181,8 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
         <ItemGallery slug={segment} name={item.name} hasPicture={!!item.picture} additionalImageCount={(item.additionalImages || []).length} version={String(item.updatedAt.getTime())} />
         <div>
           <h1 className="text-3xl font-bold mb-4 text-gray-900">{item.name}</h1>
-          <p className="text-xl font-semibold mb-4 text-gray-900">Starting at ${Number(item.cost).toFixed(2)}<span className="text-sm font-normal text-gray-500">{isOneTimeUpgrade ? ' one-time upgrade fee' : '/day'}</span></p>
+          <p className="text-xl font-semibold mb-4 text-gray-900">Starting at ${Number(item.cost).toFixed(2)}<span className="text-sm font-normal text-gray-500">{isOneTimeUpgrade ? ' one-time upgrade fee' : nycRentalPriceSuffix(item)}</span></p>
+          {nycRentalPriceSuffix(item) === '/event' && <p className="mb-4 text-sm text-gray-600">The rate covers the hours listed above. Additional rental days, delivery and sales tax are calculated at checkout.</p>}
           {isStandaloneTent && (
             <figure className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
               <div className="bg-white p-3">
@@ -203,7 +205,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
           <p className="text-gray-700 mb-6 whitespace-pre-line leading-7">{description}</p>
           {(isStandaloneTent || isInflatable) && <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-5"><p className="mb-3 text-sm font-bold text-blue-950">{isInflatable ? 'See this inflatable in your event layout' : 'See this tent in your event layout'}</p><p className="mb-4 text-sm leading-6 text-slate-600">Open the NYC RentSketch planner with this rental as your starting point, then add tables, chairs and other equipment around it. Availability and final setup requirements are confirmed separately.</p><DesignYourEventCTA source="item_page_visual_planner" label={isInflatable ? 'See This Inflatable in a Layout' : 'See This Tent in a Layout'} tent={item.name} tentSlug={segment} productType={isInflatable ? 'inflatable' : 'tent'} /></div>}
           {!showPremiumAddons && <SuggestedAddons addons={validSuggestedAddons} />}
-          {!showPremiumAddons && validRelatedItems.length > 0 && <div className="mb-6"><h2 className="text-sm font-semibold text-gray-700 mb-2">You Might Also Like</h2><div className="grid grid-cols-2 gap-2">{validRelatedItems.map((ri) => <Link key={ri.id} href={nycItemPath(ri.slug!)} prefetch={false} className="block border rounded-lg p-2 text-sm hover:shadow-md transition"><span className="block font-medium text-gray-900">{ri.name}</span><span className="block text-xs text-gray-500">From ${Number(ri.cost).toFixed(2)}/day</span></Link>)}</div></div>}
+          {!showPremiumAddons && validRelatedItems.length > 0 && <div className="mb-6"><h2 className="text-sm font-semibold text-gray-700 mb-2">You Might Also Like</h2><div className="grid grid-cols-2 gap-2">{validRelatedItems.map((ri) => <Link key={ri.id} href={nycItemPath(ri.slug!)} prefetch={false} className="block border rounded-lg p-2 text-sm hover:shadow-md transition"><span className="block font-medium text-gray-900">{ri.name}</span><span className="block text-xs text-gray-500">From ${Number(ri.cost).toFixed(2)}{nycRentalPriceSuffix(ri)}</span></Link>)}</div></div>}
           <Link href={`/category/${item.category.slug}`} className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">Check Availability & Book</Link>
         </div>
       </div>

@@ -28,7 +28,7 @@ const FAQ_DATA: FaqEntry[] = [
   { q: 'When do you set up and pick up?', a: 'Setup is coordinated in advance based on your event schedule, and pickup is typically the same day or the following morning for evening events.' },
   { q: 'Does setup time count toward my rental period?', a: 'No, setup time does not count toward your rental period.' },
   { q: 'What if my event starts early in the morning?', a: 'Early setups are available - just let us know your event time when booking.' },
-  { q: 'What if my location has stairs or hills or a tiered yard?', a: 'Please contact our office in advance if your location includes stairs, hills, a tiered backyard, or other obstacles so we can review setup options. If undisclosed obstacles extend setup time, a $50 fee may apply.' },
+  { q: 'What if my location has stairs or hills or a tiered yard?', a: 'Please contact our office in advance if your location includes stairs, hills, a tiered backyard, or other obstacles so we can review setup options and confirm any additional costs before booking.' },
   { q: 'Should I tip the delivery crew?', a: 'Tipping is optional but appreciated. You will see a tip prompt during checkout if you would like to add one for the delivery team.' },
   { q: 'What happens if there is bad weather?', a: 'We monitor weather closely. Past and fully-booked dates are shown as closed on our calendar. Light rain is generally fine for setups, but severe weather may require pausing inflatables for safety.' },
   { q: 'Can I see my order status or delivery tracking?', a: 'Yes. Use the secure My Order page at /my-order to verify your reservation by email, see your current order details, and send change requests to the NYC team. For live truck timing, call or text ' + BUSINESS.phone + '.' },

@@ -5,7 +5,8 @@ import type Stripe from 'stripe'
 import { describeStripeError, isNycPaymentsUnavailable, requireNycStripe } from '@/lib/stripe'
 import { NYC_PAYMENTS_UNAVAILABLE_MESSAGE } from '@/lib/nycStripeGuard'
 import { buildNycPaymentMetadata, checkNycPaymentMetadata, dollarsToCents, nycIdempotencyKey } from '@/lib/nycPaymentMetadata'
-import { NYC_SERVER_PRICED_VERSIONS, toCents } from '@/lib/nycCheckoutPricing'
+import { NYC_PRICING_VERSION, NYC_SERVER_PRICED_VERSIONS, toCents } from '@/lib/nycCheckoutPricing'
+import { isNycOneTimePhotoboothUpgrade } from '@/lib/nycRentalPricing'
 import { aggregateQuantities } from '@/lib/nycCheckoutPricingServer'
 import { recordSucceededIntent } from '@/lib/nycStripeReconcile'
 import { prisma } from '@/lib/prisma'
@@ -88,10 +89,15 @@ export async function POST(request: NextRequest) {
       requireMatchingDeliveryFee(order.deliveryFee, deliveryQuote)
       // Catalog prices must still match what the customer was quoted.
       const lineIds = Array.from(new Set(order.items.map(line => line.itemId).filter((id): id is string => !!id)))
-      const catalog = await prisma.item.findMany({ where: { id: { in: lineIds } }, select: { id: true, cost: true } })
+      const catalog = await prisma.item.findMany({ where: { id: { in: lineIds } }, select: { id: true, slug: true, cost: true } })
       const catalogCents = new Map(catalog.map(item => [item.id, toCents(Number(item.cost))]))
       if (order.items.some(line => !line.itemId || catalogCents.get(line.itemId) !== toCents(Number(line.unitPrice)))) {
         return NextResponse.json({ error: 'Prices in this saved checkout have changed. Please restart checkout to see the current total before paying.' }, { status: 409 })
+      }
+      // Earlier online pricing added multi-day fees to these one-time upgrades.
+      // Leave historical totals intact, but require a fresh quote before first payment.
+      if (order.pricingVersion !== NYC_PRICING_VERSION && Number(order.durationFee || 0) > 0 && catalog.some(item => isNycOneTimePhotoboothUpgrade(item.slug))) {
+        return NextResponse.json({ error: 'Pricing for a one-time Photo Booth upgrade has changed. Please restart checkout to review the corrected total before paying.', code: 'pricing_changed' }, { status: 409 })
       }
       const exactSettings = (order.exactDeliveryRequested && order.exactDeliveryTime) || (order.pickupType === 'exact' && order.exactPickupTime)
         ? await prisma.exactTimeSettings.findFirst()

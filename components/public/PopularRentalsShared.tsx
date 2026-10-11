@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { nycItemPath } from '@/lib/nycItemPath'
+import { nycRentalPriceSuffix } from '@/lib/nycRentalPricing'
 import { getHomepagePopularItems } from '@/lib/homepageMerchandising'
 
 export default async function PopularRentalsShared() {
@@ -26,7 +27,7 @@ export default async function PopularRentalsShared() {
         </div>
         <div className="p-3">
           <div className="text-sm font-semibold leading-snug text-dark">{item.specialDisplayName || item.name}</div>
-          <div className="mt-1 text-sm text-body">${Number(item.cost || 0).toFixed(2)} / day</div>
+          <div className="mt-1 text-sm text-body">${Number(item.cost || 0).toFixed(2)}{nycRentalPriceSuffix(item)}</div>
         </div>
       </Link>)}
     </div> : <div className="rounded-xl border bg-gray-50 p-6 text-sm text-body">

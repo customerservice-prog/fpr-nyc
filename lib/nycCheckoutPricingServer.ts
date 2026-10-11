@@ -3,6 +3,7 @@ import { getDeliveryQuote } from '@/lib/delivery'
 import { BUSINESS } from '@/lib/utils'
 import { parseNycCheckoutPolicy, type ParsedCheckoutPolicy } from '@/lib/nycCheckoutPolicy'
 import { resolveNycSalesTax } from '@/lib/nycSalesTax'
+import { isNycOneTimePhotoboothUpgrade } from '@/lib/nycRentalPricing'
 import {
   computeNycCheckoutPricing,
   normalizeCouponCode,
@@ -75,7 +76,7 @@ export async function priceNycCheckout(body: any, now: Date = new Date()): Promi
   const [catalog, tiers, fees, coupon, depositRule] = await Promise.all([
     prisma.item.findMany({
       where: { id: { in: ids } },
-      select: { id: true, name: true, cost: true, displayToCustomer: true, status: true, bookableAfter: true },
+      select: { id: true, name: true, slug: true, cost: true, displayToCustomer: true, status: true, bookableAfter: true },
     }),
     prisma.pricingTier.findMany({ orderBy: { sortOrder: 'asc' } }),
     prisma.specialRequestFee.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
@@ -90,6 +91,7 @@ export async function priceNycCheckout(body: any, now: Date = new Date()): Promi
       id: item.id,
       name: item.name,
       cost: Number(item.cost),
+      oneTimeFee: isNycOneTimePhotoboothUpgrade(item.slug),
       purchasable: item.displayToCustomer && item.status === 'Available' && bookable,
     }
   }

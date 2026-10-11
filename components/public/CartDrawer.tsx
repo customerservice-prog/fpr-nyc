@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { cartQuantityForItem, useCart } from './CartContext'
 import { formatCurrency } from '@/lib/utils'
 import CartDeliveryFeeEstimator from './CartDeliveryFeeEstimator'
+import { nycRentalPriceSuffix } from '@/lib/nycRentalPricing'
 
 interface CartDrawerProps {
   isOpen: boolean
@@ -49,7 +50,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-dark text-sm">{item.name}</h3>
                     {item.eventDate && item.eventDate !== eventDate && (<p className="text-xs text-amber-600 mt-1">Added for {item.eventDate} - different from your currently selected date</p>)}
-                    <p className="text-secondary font-bold">{formatCurrency(item.price)}{item.name === 'Photobooth Custom Image Layout Upgrade' ? ' one-time' : '/day'}</p>
+                    <p className="text-secondary font-bold">{formatCurrency(item.price)}{nycRentalPriceSuffix(item)}</p>
                     <div className="flex items-center gap-2 mt-2">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedColor)}

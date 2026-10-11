@@ -20,6 +20,7 @@ export function itemDescriptionForNyc(name: string, value?: string | null, price
     localized = localized
       .replace(/unlimited digital photo sharing\s*(?:\(text\s*&\s*email\))?/gi, 'digital photos')
       .replace(/a custom backdrop/gi, 'a standard backdrop')
+      .replace(/(Starting at\s*\$\s?\d[\d,]*(?:\.\d{1,2})?)\s*\/\s*day\b/gi, '$1/event')
   }
   if (localized) return localized
   return `Rent the ${name} from Friendly Party Rental NYC for events in Riverdale, selected Bronx neighborhoods, and Lower Westchester. Check your date online for current availability and pricing.`

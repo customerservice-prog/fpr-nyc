@@ -25,10 +25,10 @@
 import type { NycCheckoutPolicy } from './nycCheckoutPolicy'
 import type { SalesTaxResolution } from './nycSalesTax'
 
-export const NYC_PRICING_VERSION = 'nyc-server-pricing-v2'
+export const NYC_PRICING_VERSION = 'nyc-server-pricing-v3'
 export const NYC_QUOTE_EDIT_PRICING_VERSION = 'nyc-quote-self-edit-v1'
 /** Pricing versions whose stored totals were computed by the server (safe to charge online). */
-export const NYC_SERVER_PRICED_VERSIONS = [NYC_PRICING_VERSION, NYC_QUOTE_EDIT_PRICING_VERSION]
+export const NYC_SERVER_PRICED_VERSIONS = [NYC_PRICING_VERSION, 'nyc-server-pricing-v2', NYC_QUOTE_EDIT_PRICING_VERSION]
 
 export const NYC_MAX_TIP_RATIO = 1
 const MINIMUM_LEAD_HOURS = 24
@@ -59,6 +59,8 @@ export interface PricingCatalogItem {
   name: string
   cost: number
   purchasable: boolean
+  /** Catalog-derived upgrades keep their base price regardless of rental duration. */
+  oneTimeFee?: boolean
 }
 
 export interface PricingTierConfig {
@@ -244,6 +246,7 @@ export function computeNycCheckoutPricing(request: CheckoutPricingRequest, confi
 
   // All money math runs in integer cents; results are converted to dollars once.
   let cartSubtotalCents = 0
+  let durationSubtotalCents = 0
   const lines: CheckoutPricingLine[] = []
   for (const entry of request.items) {
     const item = config.items[entry.id]
@@ -254,6 +257,7 @@ export function computeNycCheckoutPricing(request: CheckoutPricingRequest, confi
     const quantity = Number(entry.quantity)
     const lineCents = toCents(item.cost) * quantity
     cartSubtotalCents += lineCents
+    if (!item.oneTimeFee) durationSubtotalCents += lineCents
     lines.push({ itemId: item.id, itemName: item.name, quantity, unitPrice: fromCents(toCents(item.cost)), total: fromCents(lineCents) })
   }
 
@@ -263,7 +267,7 @@ export function computeNycCheckoutPricing(request: CheckoutPricingRequest, confi
 
   const tierId = typeof request.durationTierId === 'string' ? request.durationTierId : null
   const durationTier = config.tiers.find(tier => tier.id === tierId) || config.tiers[0] || null
-  const durationFeeCents = durationTier && Number.isFinite(durationTier.percent) && durationTier.percent > 0 ? percentOfCents(cartSubtotalCents, durationTier.percent) : 0
+  const durationFeeCents = durationTier && Number.isFinite(durationTier.percent) && durationTier.percent > 0 ? percentOfCents(durationSubtotalCents, durationTier.percent) : 0
   const adjustedSubtotalCents = cartSubtotalCents + durationFeeCents
 
   // Only currently active special-request fees are applied; an ID that is no

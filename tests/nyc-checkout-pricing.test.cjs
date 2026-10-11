@@ -10,7 +10,7 @@ const path = require('node:path')
 const root = path.join(__dirname, '..')
 const read = file => fs.readFileSync(path.join(root, file), 'utf8')
 
-function loadTs(file) {
+function loadTs(file, mocks = {}, runtimeProcess = process) {
   const ts = require('typescript')
   const output = ts.transpileModule(read(file), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, esModuleInterop: true },
@@ -18,20 +18,98 @@ function loadTs(file) {
   }).outputText
   const module = { exports: {} }
   const localRequire = spec => {
+    if (Object.prototype.hasOwnProperty.call(mocks, spec)) return mocks[spec]
     if (spec.startsWith('@/') || spec.startsWith('.')) {
       const base = spec.startsWith('@/') ? spec.slice(2) : path.join(path.dirname(file), spec)
-      return loadTs(fs.existsSync(path.join(root, base + '.ts')) ? base + '.ts' : base)
+      return loadTs(fs.existsSync(path.join(root, base + '.ts')) ? base + '.ts' : base, mocks, runtimeProcess)
     }
     return require(spec)
   }
   // eslint-disable-next-line no-new-func
-  new Function('module', 'exports', 'require', output)(module, module.exports, localRequire)
+  new Function('module', 'exports', 'require', 'process', output)(module, module.exports, localRequire, runtimeProcess)
   return module.exports
 }
 
 let hasTypescript = true
 try { require.resolve('typescript') } catch { hasTypescript = false }
 const behavior = hasTypescript ? test : test.skip
+
+function checkoutServerFixture(catalog) {
+  const mocks = {
+    '@/lib/prisma': { prisma: {
+      item: { findMany: async ({ where, select }) => catalog
+        .filter(item => where.id.in.includes(item.id))
+        .map(item => Object.fromEntries(Object.keys(select).map(field => [field, item[field]]))) },
+      pricingTier: { findMany: async () => [
+        { id: 'one', label: '1 Day', minDays: 1, maxDays: 1, percent: 0 },
+        { id: 'two', label: '2 Days', minDays: 2, maxDays: 2, percent: 60 },
+      ] },
+      specialRequestFee: { findMany: async () => [] },
+      depositRule: { findFirst: async () => ({ type: 'percentage', amount: 25 }) },
+    } },
+    '@/lib/delivery': { getDeliveryQuote: async () => ({ zip: '10471', fee: 100 }) },
+    '@/lib/utils': { BUSINESS: { phone: '718-283-4593' } },
+  }
+  const policy = { minimumOrderSubtotal: 750, approvedOn: '2026-10-01' }
+  return loadTs('lib/nycCheckoutPricingServer.ts', mocks, { env: { NYC_CHECKOUT_POLICY_JSON: JSON.stringify(policy) } })
+}
+
+const pricedCatalogRow = (id, slug, cost, name = id) => ({ id, slug, name, cost, displayToCustomer: true, status: 'Available', bookableAfter: null })
+
+behavior('one-time photobooth upgrades keep catalog prices while rentals and packages retain multi-day pricing', async () => {
+  const server = checkoutServerFixture([
+    pricedCatalogRow('booth', 'photobooth-3-hour-with-attendant', 930),
+    pricedCatalogRow('package', '20x20-tent-package-4-tables-32-chairs', 645),
+    pricedCatalogRow('chair', 'white-plastic-folding-chair', 5),
+    pricedCatalogRow('layout', 'photobooth-custom-image-layout-upgrade-syracuse-ny', 145),
+    pricedCatalogRow('backdrop', 'photobooth-custom-backdrop-upgrade', 145),
+  ])
+  const body = {
+    eventDate: '2026-11-20', eventZip: '10471',
+    items: [{ id: 'booth', quantity: 1 }, { id: 'package', quantity: 1 }, { id: 'chair', quantity: 40 }, { id: 'layout', quantity: 1 }, { id: 'backdrop', quantity: 1 }],
+  }
+  const now = new Date('2026-10-11T12:00:00Z')
+  const one = await server.priceNycCheckout({ ...body, durationTierId: 'one' }, now)
+  const two = await server.priceNycCheckout({ ...body, durationTierId: 'two' }, now)
+  assert.equal(one.cartSubtotal, 2065)
+  assert.equal(one.durationFee, 0)
+  assert.equal(one.adjustedSubtotal, 2065)
+  assert.equal(one.taxAmount, 192.14)
+  assert.equal(one.grandTotal, 2357.14)
+  assert.equal(one.requiredDeposit, 589.29)
+  assert.deepEqual(two.lines, one.lines, 'rental length changes no base catalog line price')
+  assert.equal(two.cartSubtotal, 2065)
+  assert.equal(two.durationFee, 1065, '60% applies to the $1,775 in rentals and package, excluding both $145 upgrades')
+  assert.equal(two.adjustedSubtotal, 3130)
+  assert.equal(two.taxAmount, 286.66, 'upgrades stay in the taxable subtotal once')
+  assert.equal(two.grandTotal, 3516.66)
+  assert.equal(two.requiredDeposit, 879.17)
+  assert.equal(two.rentalDays, 2)
+  assert.deepEqual(two.lines.slice(-2).map(line => [line.unitPrice, line.total]), [[145, 145], [145, 145]])
+})
+
+behavior('catalog identity controls one-time pricing, and upgrades remain fully charged per quantity', async () => {
+  const server = checkoutServerFixture([
+    pricedCatalogRow('booth', 'photobooth-3-hour-with-attendant', 930),
+    pricedCatalogRow('layout', 'photobooth-custom-image-layout-upgrade', 145),
+    pricedCatalogRow('lookalike', 'photobooth-custom-backdrop-upgrade-deluxe', 70, 'Photobooth Custom Backdrop Upgrade'),
+    pricedCatalogRow('missing-slug', null, 50, 'Photobooth Custom Image Layout Upgrade'),
+  ])
+  const two = await server.priceNycCheckout({
+    eventDate: '2026-11-20', eventZip: '10471', durationTierId: 'two',
+    items: [
+      { id: 'booth', quantity: 1, slug: 'photobooth-custom-image-layout-upgrade', oneTimeFee: true, unitPrice: 1 },
+      { id: 'layout', quantity: 2, oneTimeFee: false },
+      { id: 'layout', quantity: 1 },
+      { id: 'lookalike', quantity: 1 },
+      { id: 'missing-slug', quantity: 1 },
+    ],
+  }, new Date('2026-10-11T12:00:00Z'))
+  assert.equal(two.cartSubtotal, 1485, 'all three upgrade units remain charged at the catalog price')
+  assert.equal(two.durationFee, 630, 'ordinary rentals, near-match slugs and matching names remain duration-priced')
+  assert.equal(two.adjustedSubtotal, 2115)
+  assert.deepEqual(two.lines.map(line => line.total), [930, 290, 145, 70, 50])
+})
 
 function serviceAreaZips() {
   const source = read('lib/nycServiceAreas.ts')
@@ -149,6 +227,14 @@ test('payment page shows the server quote and never recomputes prices itself', (
   assert.match(quote, /priceNycCheckout\(body\)/)
   assert.doesNotMatch(quote, /prisma\.(order|customer)\.(create|update|upsert)/, 'a quote never writes orders or customers')
   assert.doesNotMatch(quote, /requireNycStripe|sendEmail/)
+})
+
+test('quote, checkout draft and order creation use the same server pricing', () => {
+  for (const file of ['app/api/checkout/quote/route.ts', 'app/api/checkout/draft/route.ts', 'app/api/orders/route.ts']) {
+    const source = read(file)
+    assert.match(source, /import\s*\{[^}]*priceNycCheckout[^}]*\}\s*from\s*['"]@\/lib\/nycCheckoutPricingServer['"]/, file)
+    assert.match(source, /await priceNycCheckout\(body\)/, file)
+  }
 })
 
 test('storefront offers optional fees only from the approved policy', () => {

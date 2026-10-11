@@ -20,7 +20,7 @@ function resolveProjectModule(fromFile, spec) {
   throw new Error('Cannot resolve ' + spec + ' from ' + fromFile)
 }
 
-function loadTs(file) {
+function loadTs(file, mocks = {}) {
   const ts = require('typescript')
   const source = read(file)
   const output = ts.transpileModule(source, {
@@ -28,7 +28,9 @@ function loadTs(file) {
     fileName: file,
   }).outputText
   const module = { exports: {} }
-  const localRequire = spec => (spec.startsWith('@/') || spec.startsWith('.') ? loadTs(resolveProjectModule(file, spec)) : require(spec))
+  const localRequire = spec => Object.prototype.hasOwnProperty.call(mocks, spec)
+    ? mocks[spec]
+    : (spec.startsWith('@/') || spec.startsWith('.') ? loadTs(resolveProjectModule(file, spec), mocks) : require(spec))
   // eslint-disable-next-line no-new-func
   new Function('module', 'exports', 'require', output)(module, module.exports, localRequire)
   return module.exports
@@ -154,6 +156,115 @@ test('Environment template documents the NYC account and payments switch', () =>
 let hasTypescript = true
 try { require.resolve('typescript') } catch { hasTypescript = false }
 const behavior = hasTypescript ? test : test.skip
+
+function checkoutRouteHarness(overrides = {}) {
+  const catalog = overrides.catalog || [
+    { id: 'booth', slug: 'photobooth-3-hour-with-attendant', cost: 930 },
+    { id: 'upgrade', slug: 'photobooth-custom-image-layout-upgrade', cost: 145 },
+  ]
+  const { catalog: _catalog, ...orderOverrides } = overrides
+  const order = {
+    id: 'test-order', orderNumber: 'TEST-1', source: 'online', status: 'quote',
+    pricingVersion: 'nyc-server-pricing-v2', durationFee: 645,
+    amountPaid: 0, totalAmount: 2000, depositAmount: 500,
+    deliveryType: 'delivery', deliveryFee: 100, eventZip: '10471',
+    eventDate: new Date('2100-11-20T12:00:00Z'), rentalDays: 2,
+    customerId: 'test-customer', customer: { email: 'guest@example.test', phone: '555-0100' },
+    items: catalog.map(item => ({ itemId: item.id, unitPrice: item.cost, quantity: 1 })),
+    ...orderOverrides,
+  }
+  const calls = { orderWrites: [], intentCreates: [], transactions: 0, capacityChecks: 0, catalogReads: 0 }
+  const prisma = {
+    order: {
+      findUnique: async () => ({ ...order }),
+      findUniqueOrThrow: async () => ({ ...order }),
+      update: async ({ data }) => { calls.orderWrites.push(data); Object.assign(order, data); return { ...order } },
+    },
+    item: { findMany: async ({ select }) => {
+      calls.catalogReads++
+      return catalog.map(item => Object.fromEntries(Object.keys(select).map(field => [field, item[field]])))
+    } },
+    $transaction: async callback => { calls.transactions++; return callback(prisma) },
+  }
+  const stripe = { paymentIntents: { create: async params => {
+    calls.intentCreates.push(params)
+    return { id: 'pi_test', client_secret: 'test-secret' }
+  } } }
+  const mocks = {
+    'next/server': { NextResponse: { json: (data, options) => ({ data, status: options?.status || 200 }) } },
+    '@/lib/prisma': { prisma },
+    '@/lib/stripe': { requireNycStripe: async () => stripe, isNycPaymentsUnavailable: () => false, describeStripeError: String },
+    '@/lib/nycCheckoutPricingServer': { aggregateQuantities: items => new Map(items.map(item => [item.id, item.quantity])) },
+    '@/lib/nycStripeReconcile': { recordSucceededIntent: async () => { throw new Error('Unexpected reconciliation') } },
+    '@/lib/nycInventory': {
+      lockNycCapacity: async () => {}, rentalPeriod: () => ({}),
+      findInventoryShortfalls: async () => { calls.capacityChecks++; return [] },
+      exactSlotConflict: async () => null,
+    },
+    '@/lib/rentalRestrictions': { evaluateRentalRestrictions: async () => ({ matched: false }) },
+    '@/lib/delivery': {
+      DeliveryQuoteError: class extends Error {},
+      getDeliveryQuote: async () => ({ fee: 100 }),
+      requireDeliveryMethod: () => {}, requireMatchingDeliveryFee: () => {},
+    },
+  }
+  const route = loadTs('app/api/checkout/route.ts', mocks)
+  return {
+    order, calls,
+    pay: (amount = 500) => route.POST({ json: async () => ({ orderId: order.id, amount }), headers: { get: () => null } }),
+  }
+}
+
+behavior('checkout: legacy unpaid multi-day upgrade quotes require corrected pricing before any payment write', async () => {
+  for (const pricingVersion of ['nyc-server-pricing-v2', 'nyc-quote-self-edit-v1']) {
+    for (const slug of ['photobooth-custom-image-layout-upgrade', 'photobooth-custom-backdrop-upgrade-syracuse-ny']) {
+      const h = checkoutRouteHarness({ pricingVersion, catalog: [{ id: 'upgrade', slug, cost: 145 }] })
+      const response = await h.pay()
+      assert.equal(response.status, 409, pricingVersion + ': ' + slug)
+      assert.equal(response.data.code, 'pricing_changed')
+      assert.match(response.data.error, /restart checkout.*corrected total/)
+      assert.deepEqual(h.calls.orderWrites, [])
+      assert.deepEqual(h.calls.intentCreates, [])
+      assert.equal(h.calls.transactions, 0)
+      assert.equal(h.calls.capacityChecks, 0)
+      assert.equal(h.order.durationFee, 645, 'historical pricing is never changed by the guard')
+    }
+  }
+})
+
+behavior('checkout: unaffected legacy quotes and corrected current quotes remain payable', async () => {
+  const currentVersion = loadTs('lib/nycCheckoutPricing.ts').NYC_PRICING_VERSION
+  assert.equal(currentVersion, 'nyc-server-pricing-v3')
+  for (const overrides of [
+    { catalog: [{ id: 'package', slug: '20x20-tent-package-4-tables-32-chairs', cost: 645 }] },
+    { catalog: [{ id: 'other', slug: 'photobooth-custom-backdrop-upgrade-deluxe', cost: 145 }] },
+    { durationFee: 0 },
+    { pricingVersion: currentVersion },
+  ]) {
+    const h = checkoutRouteHarness(overrides)
+    const response = await h.pay()
+    assert.equal(response.status, 200)
+    assert.equal(response.data.clientSecret, 'test-secret')
+    assert.equal(h.calls.intentCreates.length, 1)
+    assert.equal(h.calls.intentCreates[0].amount, 50000)
+    assert.equal(h.calls.capacityChecks, 1)
+  }
+})
+
+behavior('checkout: legacy paid orders keep their remaining-balance payment path', async () => {
+  for (const pricingVersion of ['nyc-server-pricing-v2', 'nyc-quote-self-edit-v1']) {
+    const h = checkoutRouteHarness({ pricingVersion, status: 'active', amountPaid: 500 })
+    const response = await h.pay(1500)
+    assert.equal(response.status, 200)
+    assert.equal(h.calls.intentCreates.length, 1)
+    assert.equal(h.calls.intentCreates[0].amount, 150000)
+    assert.equal(h.calls.intentCreates[0].metadata.paymentKind, 'balance')
+    assert.equal(h.calls.catalogReads, 0, 'paid orders bypass the first-payment freshness guard')
+    assert.equal(h.calls.capacityChecks, 0)
+    assert.equal(h.order.totalAmount, 2000)
+    assert.equal(h.order.amountPaid, 500)
+  }
+})
 
 const LIVE_SK = 'sk_live_' + 'a'.repeat(40)
 const TEST_SK = 'sk_test_' + 'b'.repeat(40)
@@ -306,9 +417,28 @@ behavior('pricing: server total uses catalog prices, tiers, fees, coupon, jurisd
   assert.equal(result.rentalDays, 2)
   assert.equal(result.lines[1].unitPrice, 2.5)
   assert.equal(result.lines[1].total, 100)
-  assert.equal(result.version, 'nyc-server-pricing-v2')
+  assert.equal(result.version, 'nyc-server-pricing-v3')
   assert.equal(pricing.sameCents(919.99, result.grandTotal), true)
   assert.equal(pricing.sameCents(1, result.grandTotal), false, 'a tampered browser total is detected')
+})
+
+behavior('pricing: one-time upgrades stay in coupon, waiver, tax and deposit totals without duration surcharge', () => {
+  const pricing = loadTs('lib/nycCheckoutPricing.ts')
+  const config = pricingConfig()
+  config.items.layout = { id: 'layout', name: 'Custom image layout', cost: 85, purchasable: true, oneTimeFee: true }
+  config.items.backdrop = { id: 'backdrop', name: 'Custom backdrop', cost: 125, purchasable: true, oneTimeFee: true }
+  const items = [...baseRequest.items, { id: 'layout', quantity: 1 }, { id: 'backdrop', quantity: 1 }]
+  const one = pricing.computeNycCheckoutPricing({ ...baseRequest, items, durationTierId: 'one' }, config)
+  const two = pricing.computeNycCheckoutPricing({ ...baseRequest, items }, config)
+  for (const result of [one, two]) {
+    assert.equal(result.cartSubtotal, 610)
+    assert.equal(result.couponDiscount, 61)
+    assert.deepEqual(result.lines.slice(-2).map(line => [line.unitPrice, line.total]), [[85, 85], [125, 125]])
+  }
+  assert.deepEqual([one.durationFee, one.adjustedSubtotal, one.damageWaiverFee, one.taxAmount, one.grandTotal, one.requiredDeposit, one.totalWithTip],
+    [0, 610, 61, 74.11, 909.11, 227.28, 929.11])
+  assert.deepEqual([two.durationFee, two.adjustedSubtotal, two.damageWaiverFee, two.taxAmount, two.grandTotal, two.requiredDeposit, two.totalWithTip],
+    [200, 810, 81, 93.63, 1148.63, 287.16, 1168.63])
 })
 
 behavior('pricing: fails closed when tax, policy, deposit, or delivery pricing is missing', () => {

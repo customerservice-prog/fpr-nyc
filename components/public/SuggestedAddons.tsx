@@ -9,6 +9,7 @@ import { cartQuantityForItem, useCart } from './CartContext'
 import { bookingDateKey } from '@/lib/rentsketchBooking'
 import { nycCalendarDay } from '@/lib/nycCustomerHelp'
 import { nycItemPath } from '@/lib/nycItemPath'
+import { nycRentalPriceSuffix } from '@/lib/nycRentalPricing'
 import toast from 'react-hot-toast'
 
 export interface SuggestedAddon {
@@ -299,7 +300,7 @@ export default function SuggestedAddons({
                     {presentation.badge}
                   </div>
                   <span className="absolute bottom-2 right-2.5 rounded-full bg-white/95 px-2 py-0.5 text-[10px] font-black text-slate-900 shadow-sm">
-                    ${addon.cost.toFixed(2)}{addon.oneTimeFee ? ' one-time' : '/day'}
+                    ${addon.cost.toFixed(2)}{addon.oneTimeFee ? ' one-time' : nycRentalPriceSuffix(addon)}
                   </span>
                 </Link>
 

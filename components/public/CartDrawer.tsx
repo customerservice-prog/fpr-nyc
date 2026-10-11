@@ -4,6 +4,7 @@ import { X, Plus, Minus, ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
 import { cartQuantityForItem, useCart } from './CartContext'
 import { formatCurrency } from '@/lib/utils'
+import CartDeliveryFeeEstimator from './CartDeliveryFeeEstimator'
 
 interface CartDrawerProps {
   isOpen: boolean
@@ -24,14 +25,14 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             <ShoppingCart size={20} />
             Cart ({itemCount})
           </h2>
-          <button onClick={onClose} className="p-1 hover:bg-primary/50 rounded">
+          <button type="button" aria-label="Close cart" onClick={onClose} className="p-1 hover:bg-primary/50 rounded">
             <X size={24} />
           </button>
         </div>
 
         {eventDate && (
-          <div className="px-4 py-2 bg-blue-50 text-sm text-secondary font-medium">
-            Event Date: {eventDate}
+          <div className="px-4 py-3 bg-blue-50 text-sm text-secondary font-medium">
+            Your Event: {eventDate}
           </div>
         )}
 
@@ -43,23 +44,27 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               {items.map((item) => (
                 <li key={item.id + '|' + (item.selectedColor || '')} className="flex gap-3 border-b pb-4">
                               {item.picture && (
-              <img src={item.picture} alt={item.name} className="w-16 h-16 object-cover rounded flex-shrink-0" />
+              <img src={item.picture} alt={item.name} className="w-16 h-16 object-contain rounded flex-shrink-0" />
             )}
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-dark text-sm">{item.name}</h3>
                     {item.eventDate && item.eventDate !== eventDate && (<p className="text-xs text-amber-600 mt-1">Added for {item.eventDate} - different from your currently selected date</p>)}
-                    <p className="text-secondary font-bold">{formatCurrency(item.price)}/day</p>
+                    <p className="text-secondary font-bold">{formatCurrency(item.price)}{item.name === 'Photobooth Custom Image Layout Upgrade' ? ' one-time' : '/day'}</p>
                     <div className="flex items-center gap-2 mt-2">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedColor)}
-                        className="p-1 border rounded hover:bg-gray-100"
+                        type="button"
+                        aria-label={'Remove one ' + item.name}
+                        className="p-2 border rounded hover:bg-gray-100"
                       >
                         <Minus size={14} />
                       </button>
                       <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedColor)}
-                        className="p-1 border rounded hover:bg-gray-100"
+                        type="button"
+                        aria-label={'Add one ' + item.name}
+                        className="p-2 border rounded hover:bg-gray-100"
                         disabled={cartQuantityForItem(items, item.id) >= item.maxQuantity}
                       >
                         <Plus size={14} />
@@ -83,16 +88,18 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
         {items.length > 0 && (
           <div className="border-t p-4 space-y-3">
+            <CartDeliveryFeeEstimator />
             <div className="flex justify-between font-bold text-lg">
-              <span>Subtotal</span>
+              <span>Rental Subtotal</span>
               <span>{formatCurrency(subtotal)}</span>
             </div>
+            <p className="text-xs text-slate-500">Next: confirm event times, delivery details, contact information, and payment.</p>
             <Link
               href="/checkout"
               className="btn-primary block text-center w-full"
               onClick={onClose}
             >
-              Proceed to Checkout
+              START CHECKOUT →
             </Link>
           </div>
         )}

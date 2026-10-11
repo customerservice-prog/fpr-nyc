@@ -56,6 +56,7 @@ const HEADER_CONFIG: Record<number, HeaderCfg> = {
 }
 export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLinkItem[]; headerStyle?: number }) {
   const pathname = usePathname()
+  const isPhotoBoothLanding = pathname === '/category/photobooth-rentals'
   const [rentalsOpen, setRentalsOpen] = useState(false)
   const navLinks = navItems && navItems.length > 0
     ? navItems.map((item) => ({ name: item.label, href: item.url, hasDropdown: item.url === '/category' }))
@@ -77,16 +78,16 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
     </div>
   )
   function renderNav(textCls: string, justifyCls: string) {
-    return <ul className={'flex flex-wrap items-center gap-x-1 lg:gap-x-0 py-2 ' + justifyCls}>
+    return <ul className={'flex items-center ' + (isPhotoBoothLanding ? 'py-1 flex-nowrap gap-x-0 justify-between' : 'flex-wrap gap-x-1 lg:gap-x-0 ' + justifyCls)}>
       {navLinks.map((link) => <li key={link.name} className="relative">
-        {link.hasDropdown ? <button type="button" aria-expanded={rentalsOpen} aria-controls="desktop-rental-navigation" onClick={() => setRentalsOpen(!rentalsOpen)} className={'flex items-center gap-0.5 px-2 lg:px-3 py-2 font-medium text-sm whitespace-nowrap hover:opacity-80 ' + textCls}>{link.name}<ChevronDown size={14}/></button> : <Link href={link.href} prefetch={false} className={'px-2 lg:px-3 py-2 font-medium text-sm block whitespace-nowrap hover:opacity-80 ' + textCls}>{link.name}</Link>}
+        {link.hasDropdown ? <button type="button" aria-expanded={rentalsOpen} aria-controls="desktop-rental-navigation" onClick={() => setRentalsOpen(!rentalsOpen)} className={'flex items-center gap-0.5 font-medium whitespace-nowrap hover:opacity-80 ' + (isPhotoBoothLanding ? 'py-1 px-1 text-[11px] ' : 'py-2 px-2 lg:px-3 text-sm ') + textCls}>{link.name}<ChevronDown size={14}/></button> : <Link href={link.href} prefetch={false} className={'font-medium block whitespace-nowrap hover:opacity-80 ' + (isPhotoBoothLanding ? 'py-1 px-1 text-[11px] ' : 'py-2 px-2 lg:px-3 text-sm ') + textCls}>{link.name}</Link>}
         {link.hasDropdown && rentalsOpen && <><div className="fixed inset-0 z-40" onClick={() => setRentalsOpen(false)}/>{dropdown}</>}
       </li>)}
     </ul>
   }
   // The logo is the exact 2:1 artwork: the box is sized around it (full width of its
   // column, capped) and the height follows the ratio, so it is never cropped or squashed.
-  const logo = <Link href="/" prefetch={false} className={'block w-full ' + (cfg.logoLarge ? 'max-w-[340px]' : 'max-w-[300px]')}><img src={LOGO_URL} alt={BUSINESS.name} width={NYC_LOGO_WIDTH} height={NYC_LOGO_HEIGHT} className={(cfg.grayscale ? 'grayscale ' : '') + 'block w-full h-auto'}/></Link>
+  const logo = <Link href="/" prefetch={false} className={'block w-full ' + (isPhotoBoothLanding ? 'max-w-[180px]' : cfg.logoLarge ? 'max-w-[340px]' : 'max-w-[300px]')}><img src={LOGO_URL} alt={BUSINESS.name} width={NYC_LOGO_WIDTH} height={NYC_LOGO_HEIGHT} className={(cfg.grayscale ? 'grayscale ' : '') + 'block w-full h-auto'}/></Link>
   if (cfg.mode === 'cover') {
     const fgClass = cfg.coverFg === 'black' ? 'text-dark' : 'text-white'
     return <header className="w-full bg-gradient-to-r from-secondary via-primary to-secondary"><div className="max-w-7xl mx-auto px-4 py-6 flex flex-col items-center gap-3"><Link href="/" prefetch={false} className="block w-[240px] max-w-full"><img src={LOGO_URL} alt={BUSINESS.name} width={NYC_LOGO_WIDTH} height={NYC_LOGO_HEIGHT} className="block w-full h-auto"/></Link>{renderNav(fgClass, 'justify-center')}</div></header>
@@ -99,21 +100,21 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
   }
   const navJustify = cfg.align === 'center' ? 'justify-center' : cfg.align === 'end' ? 'justify-center lg:justify-end' : cfg.align === 'start' ? 'justify-center lg:justify-start' : 'justify-center lg:justify-between'
   return <header className="w-full bg-white border-b border-gray-200" data-nyc-header="20260927">
-    {cfg.topBar && <div className="max-w-7xl mx-auto px-4 py-2"><div className={'grid grid-cols-1 gap-3 items-center ' + (cfg.logoLarge ? 'md:grid-cols-[minmax(0,1fr)_280px_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_340px_minmax(0,1fr)]' : 'md:grid-cols-[minmax(0,1fr)_260px_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_300px_minmax(0,1fr)]')}>
-      <div className="min-w-0 text-[13px] text-gray-700 leading-relaxed">
+    {cfg.topBar && <div className={'max-w-7xl mx-auto px-4 ' + (isPhotoBoothLanding ? 'py-1' : 'py-3')}><div className={'grid grid-cols-1 items-center ' + (isPhotoBoothLanding ? 'gap-2 ' : 'gap-4 ') + (cfg.logoLarge ? 'md:grid-cols-[minmax(0,1fr)_280px_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_340px_minmax(0,1fr)]' : 'md:grid-cols-[minmax(0,1fr)_260px_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_300px_minmax(0,1fr)]')}>
+      <div className={'min-w-0 text-gray-700 ' + (isPhotoBoothLanding ? 'text-[10px] leading-[1.25]' : 'text-sm leading-relaxed')}>
         <p><a href={`tel:${BUSINESS.phone}`} className="font-bold text-dark hover:underline">{BUSINESS.phone}</a>{' | '}<a href={`sms:${BUSINESS.text}`} className="font-bold text-dark hover:underline">Text Us</a></p>
         <p className="break-all"><a href={BUSINESS.emailHref} className="hover:underline">{BUSINESS.email}</a></p>
-        <p>{BUSINESS.address}</p><p className="text-xs text-gray-600 mt-0.5">{BUSINESS.hours}</p><p>Serving {BUSINESS.serviceArea}</p>
+        <p>{BUSINESS.address}</p><p className={isPhotoBoothLanding ? 'text-[9px] text-gray-600' : 'text-xs text-gray-600 mt-0.5'}>{BUSINESS.hours}</p><p>Serving {BUSINESS.serviceArea}</p>
       </div>
       <div className={'min-w-0 flex justify-center' + (cfg.grayscale ? ' grayscale' : '')}>{logo}</div>
-      <div className="flex flex-col items-center md:items-end gap-2"><div className={'flex items-center gap-3' + (cfg.grayscale ? ' grayscale' : '')}>
-        <a href={BUSINESS.facebook} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="Facebook"><Facebook size={24} fill="currentColor"/></a>
-        <a href={BUSINESS.youtube} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="YouTube"><Youtube size={24}/></a>
-        {BUSINESS.yelp && <a href={BUSINESS.yelp} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold" aria-label="Yelp" title="Yelp">Y</a>}
-      </div><Link href="/order-by-date" className="btn-primary text-sm py-2 px-5 whitespace-nowrap" prefetch={false}>Book Now &#9658;</Link></div>
+      <div className={'flex flex-col items-center md:items-end ' + (isPhotoBoothLanding ? 'gap-1' : 'gap-2')}><div className={'flex items-center gap-3' + (cfg.grayscale ? ' grayscale' : '')}>
+        <a href={BUSINESS.facebook} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="Facebook"><Facebook size={isPhotoBoothLanding ? 16 : 24} fill="currentColor"/></a>
+        <a href={BUSINESS.youtube} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="YouTube"><Youtube size={isPhotoBoothLanding ? 16 : 24}/></a>
+        {BUSINESS.yelp && <a href={BUSINESS.yelp} target="_blank" rel="noopener noreferrer" className={'flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold ' + (isPhotoBoothLanding ? 'w-4 h-4' : 'w-6 h-6')} aria-label="Yelp" title="Yelp">Y</a>}
+      </div><Link href="/order-by-date" className={'btn-primary whitespace-nowrap ' + (isPhotoBoothLanding ? 'text-xs py-1 px-3' : 'text-sm py-2 px-5')} prefetch={false}>Book Now &#9658;</Link></div>
     </div></div>}
     {cfg.mode === 'logoOnly' && <div className="flex justify-center py-3">{logo}</div>}
     <nav className={cfg.mode === 'blackbar' ? 'bg-black border-t border-black' : 'bg-white border-t border-gray-200'} aria-label="Main navigation"><div className="max-w-7xl mx-auto px-4">{renderNav(cfg.mode === 'blackbar' ? 'text-white' : 'text-dark', navJustify)}</div></nav>
-    <HeaderSearch/>
+    {!isPhotoBoothLanding && <HeaderSearch/>}
   </header>
 }

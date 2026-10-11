@@ -99,7 +99,7 @@ export default async function WeddingsPage() {
             From intimate backyard ceremonies to larger Bronx and Lower Westchester receptions, choose individual rentals, a complete package, or build your layout visually before you book.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/category/weddings" className="btn-accent inline-block px-8 uppercase text-sm tracking-wide">Shop Wedding Rentals</Link>
+            <Link href={decorItems.length ? '#wedding-rentals' : '/category/weddings'} className="btn-accent inline-block px-8 uppercase text-sm tracking-wide">Shop Wedding Rentals</Link>
             <Link href="#packages" className="btn-primary inline-block px-8 uppercase text-sm tracking-wide">View Wedding Packages</Link>
             <DesignYourEventCTA source="weddings_hero" label="Design My Reception" variant="outline" className="uppercase text-sm tracking-wide px-8" />
             <Link href="/contact_us" className="btn-gold inline-block px-8 uppercase text-sm tracking-wide">Request a Custom Quote</Link>
@@ -118,7 +118,7 @@ export default async function WeddingsPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-16">
         {decorItems.length > 0 && (
-          <div className="mb-16">
+          <div id="wedding-rentals" className="mb-16 scroll-mt-24">
             <div className="text-center mb-8">
               <p className="text-secondary uppercase tracking-[0.3em] text-xs font-bold mb-3">Details That Delight</p>
               <h2 className={`font-serif text-2xl md:text-3xl font-bold text-dark mb-2`}>Shop Wedding Rentals</h2>
@@ -137,7 +137,7 @@ export default async function WeddingsPage() {
                 </Link>
               ))}
             </div>
-            <div className="text-center"><Link href="/category/weddings" className="btn-accent inline-block px-8 uppercase text-sm tracking-wide">Browse All Wedding Rentals</Link></div>
+            <div className="text-center"><Link href="#packages" className="btn-accent inline-block px-8 uppercase text-sm tracking-wide">Compare Wedding Packages</Link></div>
           </div>
         )}
 

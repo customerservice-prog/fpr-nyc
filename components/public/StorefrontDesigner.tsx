@@ -1,8 +1,44 @@
 import Link from 'next/link'
-import { LayoutGrid, Armchair, Send } from 'lucide-react'
+import { Armchair, LayoutGrid, Send } from 'lucide-react'
 import DesignYourEventCTA from './DesignYourEventCTA'
-import EventDesignVideo from './EventDesignVideo'
 import { nycOrderAccessUrl } from '@/lib/nycRentSketch'
+import styles from './StorefrontDesigner.module.css'
+
+const features = [
+  { icon: LayoutGrid, title: 'Plan the space', body: 'Work through placement, seating and room to move.' },
+  { icon: Armchair, title: 'Picture the details', body: 'Explore the look of tents, furniture, linens and lighting.' },
+  { icon: Send, title: 'Confirm the setup', body: 'Our Riverdale team confirms rentals, availability and final pricing.' },
+]
+
 export default function StorefrontDesigner() {
- return <section className="bg-[#0B1F3A] py-10 text-white md:py-14" data-home-section="designer"><div className="mx-auto max-w-6xl px-4 md:px-6"><div className="mb-7 grid gap-6 md:grid-cols-[1.3fr_1fr] md:items-center"><div><p className="mb-3 text-xs font-extrabold uppercase tracking-[.2em] text-[#F4C542]">RentSketch · See it before you book</p><h2 className="font-serif text-3xl font-bold md:text-4xl">Not Sure What Fits Your Event?</h2><p className="mt-4 max-w-2xl leading-7 text-white/80">Explore how tents, tables, chairs and event details work together in 2D and 3D. Watch the walkthrough, then talk with our NYC / Downstate team about your layout.</p></div><div className="space-y-3">{nycOrderAccessUrl?<a href={nycOrderAccessUrl} className="block rounded-xl bg-[#F4C542] px-5 py-3 text-center font-bold text-[#0B1F3A]">Existing Order Login →</a>:<div className="rounded-xl border border-white/20 p-4"><p className="font-bold">Already have a NYC / Downstate order?</p><p className="mt-1 text-sm leading-6 text-white/80">Contact our team with your order number for layout help. Online NYC / Downstate order access is not available yet.</p><Link href="/contact_us" className="mt-3 inline-block font-bold text-[#F4C542] underline">Get help with my order</Link></div>}<DesignYourEventCTA source="home_designer_section" label="Design My Event" className="w-full"/><Link href="/design-your-event" prefetch={false} className="block text-center text-sm font-bold text-white underline">See how event planning works</Link></div></div><EventDesignVideo/><div className="mt-7 grid gap-5 md:grid-cols-3">{[{Icon:LayoutGrid,title:'Build your layout',body:'Explore placement, seating and room to move.'},{Icon:Armchair,title:'Make it your style',body:'See how furniture, linens and lighting shape a space.'},{Icon:Send,title:'Plan with our team',body:'Confirm availability, site requirements and the final quote.'}].map(({Icon,title,body})=><div key={title} className="flex gap-3"><Icon className="mt-1 shrink-0 text-[#F4C542]" size={24}/><div><h3 className="font-bold">{title}</h3><p className="mt-1 text-sm leading-6 text-white/75">{body}</p></div></div>)}</div></div></section>
+  return <section className={styles.section} id="design-your-event" aria-labelledby="home-designer-heading" data-home-section="designer">
+    <div className={styles.container}>
+      <div className={styles.intro}>
+        <p className={styles.eyebrow}><span>RentSketch</span> See it before you book</p>
+        <h2 id="home-designer-heading" className={styles.heading}>Not Sure What Fits Your Event?</h2>
+        <p className={styles.body}>Explore the live RentSketch demonstration, then plan the real rental setup with our Riverdale team.</p>
+        <div className={styles.quickProof} aria-label="RentSketch demo highlights"><span>2D floor plan</span><span>3D event preview</span><span>Evening lighting</span><span>Reception setup</span></div>
+      </div>
+
+      <div className={styles.productStage}>
+        <div className={styles.livePreview} data-rentsketch-live-home-preview>
+          <iframe title="Public RentSketch wedding reception build demonstration" src="https://rentsketch.com/embed/wedding-build/" loading="lazy" allow="fullscreen" referrerPolicy="strict-origin-when-cross-origin" />
+          <div className={styles.livePreviewFooter}>
+            <p>A public RentSketch demonstration of a reception build, 2D layout and evening lighting. The scene illustrates the software; our team confirms your NYC rentals and site requirements.</p>
+            <a href="https://rentsketch.com/demo/" target="_blank" rel="noopener noreferrer">Open full RentSketch demo ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.accessWrap}>
+        <div className={styles.accessCard}>
+          <div><p className={styles.accessEyebrow}>Your Riverdale celebration</p><h3>Turn the idea into a rental plan.</h3><p>Share your date, guest count and usable space. We’ll help confirm the equipment for your event.</p></div>
+          <div className={styles.accessActions}><Link href="/contact_us" className={styles.helpButton}>Get Riverdale Layout Help →</Link><Link href="/order-by-date" className={styles.dateButton}>Check My Event Date</Link><DesignYourEventCTA source="home_designer_section" label="Open NYC Planner" variant="outline" className={styles.plannerButton} />{nycOrderAccessUrl ? <a href={nycOrderAccessUrl} className={styles.orderLink}>Existing NYC order access ↗</a> : <Link href="/contact_us" className={styles.orderLink}>Get help with my existing order →</Link>}</div>
+        </div>
+      </div>
+
+      <div className={styles.features}>{features.map(({ icon: Icon, title, body }) => <div key={title} className={styles.feature}><span className={styles.icon}><Icon size={22} aria-hidden="true" /></span><div><h3>{title}</h3><p>{body}</p></div></div>)}</div>
+      <p className={styles.note}>A preview is a starting point. Friendly Party Rental NYC confirms availability, delivery, setup requirements and final pricing. <Link href="/design-your-event">Explore event planning →</Link></p>
+    </div>
+  </section>
 }

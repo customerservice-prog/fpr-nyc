@@ -7,6 +7,9 @@ import { prisma } from '@/lib/prisma'
 import { PUBLIC_ITEM_SELECT } from '@/lib/availability'
 import CategoryClient from './CategoryClient'
 import CategoryPlanningGuide from '@/components/public/CategoryPlanningGuide'
+import TentRentalPaidSearchHero from '@/components/public/TentRentalPaidSearchHero'
+import TableChairPaidSearchHero from '@/components/public/TableChairPaidSearchHero'
+import BounceHousePaidSearchHero from '@/components/public/BounceHousePaidSearchHero'
 import { safeJsonLd } from '@/lib/jsonLd'
 import { categoryDescriptionForNyc, itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 import { nycUrl } from '@/lib/nycSeo'
@@ -179,6 +182,9 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
   return createElement(
     Fragment,
     null,
+    slug === 'tent-rentals' ? createElement(TentRentalPaidSearchHero) : null,
+    slug === 'table-chair-rentals' ? createElement(TableChairPaidSearchHero) : null,
+    slug === 'bounce-house-rentals' ? createElement(BounceHousePaidSearchHero) : null,
     createElement(
       Suspense,
       { fallback: createElement(CategoryCatalogFallback, {name: category.name, items: initialItems}) },
@@ -188,7 +194,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
         initialItems,
       })
     ),
-    createElement(CategoryPlanningGuide, { slug, name: categoryLabel }),
-    seoSection
+    slug === 'photobooth-rentals' ? null : createElement(CategoryPlanningGuide, { slug, name: categoryLabel }),
+    slug === 'photobooth-rentals' ? itemListSchemaEl : seoSection
   )
 }

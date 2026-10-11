@@ -64,17 +64,15 @@ export default function ContactPage() {
     startTimeRef.current = Date.now()
   }
 
-  return <div data-nyc-customer-help="contact" className="mx-auto max-w-7xl px-4 py-12">
-    <h1 className="mb-3 text-center text-3xl font-bold text-dark">Contact the NYC Team</h1>
-    <p className="mx-auto mb-8 max-w-2xl text-center leading-7 text-body">Tell us about your event in Riverdale, the Bronx or Lower Westchester. We can review your date, site and rental needs with you.</p>
-    <div className="grid gap-10 md:grid-cols-2 md:gap-12">
+  return <div data-nyc-customer-help="contact" className="max-w-7xl mx-auto px-4 py-12">
+    <h1 className="text-3xl font-bold text-dark mb-8 text-center">Contact the NYC Team</h1>
+    <div className="grid md:grid-cols-2 gap-12">
       <div className="min-w-0 space-y-8">
         <section aria-labelledby="contact-options">
-          <h2 id="contact-options" className="mb-4 text-xl font-bold text-dark">Get in Touch</h2>
-          <div className="mb-4 flex flex-wrap gap-3">
-            <a href={`tel:${BUSINESS.phone}`} className="btn-primary inline-flex min-h-12 items-center justify-center px-5">Call {BUSINESS.phone}</a>
-            <a href={`sms:${BUSINESS.text}`} className="inline-flex min-h-12 items-center justify-center rounded border px-5 font-semibold text-dark">Text the NYC team</a>
-          </div>
+          <h2 id="contact-options" className="text-xl font-bold text-dark mb-4">Get in Touch</h2>
+          <p className="text-body mb-4">Tell us about your event in Riverdale, the Bronx or Lower Westchester. We can review your date, site and rental needs with you.</p>
+          <p className="text-body mb-2">Phone: <a href={`tel:${BUSINESS.phone}`} className="text-secondary">{BUSINESS.phone}</a></p>
+          <p className="text-body mb-2"><a href={`sms:${BUSINESS.text}`} className="text-secondary">Text the NYC team</a></p>
           <p className="mb-2 break-words text-body">Email: <a href={BUSINESS.emailHref} className="break-all text-secondary underline">{BUSINESS.email}</a></p>
           <p className="mb-2 text-body">Hours: {BUSINESS.hours}</p>
           {profileHref && <p className="mb-2 text-body"><a href={profileHref} target="_blank" rel="noopener noreferrer" className="text-secondary underline">View Friendly Party Rental NYC on Google</a></p>}
@@ -84,7 +82,7 @@ export default function ContactPage() {
         <section aria-labelledby="contact-map">
           <h2 id="contact-map" className="mb-3 text-xl font-bold text-dark">Riverdale, Bronx Service Area</h2>
           <p className="mb-3 text-sm leading-6 text-body">This map highlights Riverdale in the Bronx, New York. It is not a customer pickup or showroom address. Send your exact event address and ZIP code for review.</p>
-          <div className="overflow-hidden rounded-xl border"><iframe title="Riverdale, Bronx, New York service-area map" src={NYC_SERVICE_MAP_EMBED_URL} width="100%" height="250" style={{ border: 0 }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" /></div>
+          <div className="rounded-lg overflow-hidden border"><iframe title="Riverdale, Bronx, New York service-area map" src={NYC_SERVICE_MAP_EMBED_URL} width="100%" height="250" style={{ border: 0 }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" /></div>
         </section>
         <section aria-labelledby="contact-plan">
           <h2 id="contact-plan" className="mb-3 text-xl font-bold text-dark">Plan Before You Book</h2>
@@ -92,8 +90,8 @@ export default function ContactPage() {
           <div className="mt-2 flex flex-wrap gap-x-5"><Link href="/category" className="py-2 font-semibold text-secondary underline">Browse rentals</Link><Link href="/frequently_asked_questions" className="py-2 font-semibold text-secondary underline">Rental questions</Link></div>
         </section>
       </div>
-      <section aria-labelledby="contact-form-title" className="min-w-0 rounded-xl border bg-gray-50 p-5 sm:p-6">
-        <h2 id="contact-form-title" className="mb-3 text-xl font-bold text-dark">Send an Event Inquiry</h2>
+      <section aria-labelledby="contact-form-title" className="min-w-0 bg-gray-50 p-6 rounded-lg">
+        <h2 id="contact-form-title" className="text-xl font-bold text-dark mb-6">Send an Event Inquiry</h2>
         <p className="mb-3 text-sm leading-6 text-body">Include your exact event address and ZIP code, requested items and quantities, setup surface, measurements and any access restrictions. For an existing NYC order, include your order number.</p>
         <p className="mb-6 text-sm leading-6 text-body">Contact our Riverdale team using the form below or our NYC email address. For time-sensitive requests, please call.</p>
         {receipt ? <div ref={receiptRef} tabIndex={-1} data-testid="contact-receipt" className="rounded-xl border bg-white p-5 focus:outline-none" role="status">
@@ -105,12 +103,12 @@ export default function ContactPage() {
         </div> : <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {submitError && <div role="alert" data-testid="contact-submit-error" className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm leading-6">{submitError}<a href={BUSINESS.emailHref} className="mt-2 block font-semibold underline">Email the NYC team directly</a></div>}
           <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }} aria-hidden="true"><label htmlFor="website">Website</label><input type="text" id="website" tabIndex={-1} autoComplete="off" {...register('website')} /></div>
-          <div><label htmlFor="contact-name" className="mb-1 block text-sm font-medium text-dark">Name *</label><input id="contact-name" autoComplete="name" aria-invalid={!!errors.name} aria-describedby={errors.name ? 'contact-name-error' : undefined} {...register('name', { required: true, validate: value => value.trim().length >= 2 })} className="w-full rounded border px-3 py-3" />{errors.name && <p id="contact-name-error" className="mt-1 text-sm text-red-700">Please enter your name.</p>}</div>
-          <div><label htmlFor="contact-email" className="mb-1 block text-sm font-medium text-dark">Email *</label><input id="contact-email" type="email" autoComplete="email" aria-invalid={!!errors.email} aria-describedby={errors.email ? 'contact-email-error' : undefined} {...register('email', { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ })} className="w-full rounded border px-3 py-3" />{errors.email && <p id="contact-email-error" className="mt-1 text-sm text-red-700">Please enter a valid email address.</p>}</div>
-          <div><label htmlFor="contact-phone" className="mb-1 block text-sm font-medium text-dark">Phone</label><input id="contact-phone" type="tel" autoComplete="tel" aria-invalid={!!errors.phone} aria-describedby={errors.phone ? 'contact-phone-error' : undefined} {...register('phone', { pattern: /^[0-9+()\-.\s]{7,20}$/ })} className="w-full rounded border px-3 py-3" />{errors.phone && <p id="contact-phone-error" className="mt-1 text-sm text-red-700">Please enter a valid phone number.</p>}</div>
-          <div><label htmlFor="contact-date" className="mb-1 block text-sm font-medium text-dark">Event Date</label><input id="contact-date" type="date" min={today || undefined} aria-invalid={!!errors.eventDate} aria-describedby="contact-date-help" {...register('eventDate', { validate: value => !value || value >= nycCalendarDay() || 'Choose today or a future date in New York.' })} className="min-w-0 max-w-full w-full rounded border px-3 py-3" /><p id="contact-date-help" className={`mt-1 text-sm ${errors.eventDate ? 'text-red-700' : 'text-body'}`}>{errors.eventDate?.message || 'Event dates use New York local time.'}</p></div>
-          <div><label htmlFor="contact-message" className="mb-1 block text-sm font-medium text-dark">Event Details *</label><textarea id="contact-message" aria-invalid={!!errors.message} aria-describedby={errors.message ? 'contact-message-error' : undefined} {...register('message', { required: true, validate: value => value.trim().length >= 10 })} rows={6} className="w-full rounded border px-3 py-3" />{errors.message && <p id="contact-message-error" className="mt-1 text-sm text-red-700">Please include at least 10 characters of event details.</p>}</div>
-          <button type="submit" disabled={isSubmitting || !isValid} className="btn-primary min-h-12 w-full disabled:cursor-not-allowed disabled:opacity-50">{isSubmitting ? 'Saving inquiry...' : 'Send inquiry'}</button>
+          <div><label htmlFor="contact-name" className="mb-1 block text-sm font-medium text-dark">Name *</label><input id="contact-name" autoComplete="name" aria-invalid={!!errors.name} aria-describedby={errors.name ? 'contact-name-error' : undefined} {...register('name', { required: true, validate: value => value.trim().length >= 2 })} className="w-full border rounded px-3 py-2" />{errors.name && <p id="contact-name-error" className="mt-1 text-sm text-red-700">Please enter your name.</p>}</div>
+          <div><label htmlFor="contact-email" className="mb-1 block text-sm font-medium text-dark">Email *</label><input id="contact-email" type="email" autoComplete="email" aria-invalid={!!errors.email} aria-describedby={errors.email ? 'contact-email-error' : undefined} {...register('email', { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ })} className="w-full border rounded px-3 py-2" />{errors.email && <p id="contact-email-error" className="mt-1 text-sm text-red-700">Please enter a valid email address.</p>}</div>
+          <div><label htmlFor="contact-phone" className="mb-1 block text-sm font-medium text-dark">Phone</label><input id="contact-phone" type="tel" autoComplete="tel" aria-invalid={!!errors.phone} aria-describedby={errors.phone ? 'contact-phone-error' : undefined} {...register('phone', { pattern: /^[0-9+()\-.\s]{7,20}$/ })} className="w-full border rounded px-3 py-2" />{errors.phone && <p id="contact-phone-error" className="mt-1 text-sm text-red-700">Please enter a valid phone number.</p>}</div>
+          <div><label htmlFor="contact-date" className="mb-1 block text-sm font-medium text-dark">Event Date</label><input id="contact-date" type="date" min={today || undefined} aria-invalid={!!errors.eventDate} aria-describedby="contact-date-help" {...register('eventDate', { validate: value => !value || value >= nycCalendarDay() || 'Choose today or a future date in New York.' })} className="min-w-0 max-w-full w-full border rounded px-3 py-2" /><p id="contact-date-help" className={`mt-1 text-sm ${errors.eventDate ? 'text-red-700' : 'text-body'}`}>{errors.eventDate?.message || 'Event dates use New York local time.'}</p></div>
+          <div><label htmlFor="contact-message" className="mb-1 block text-sm font-medium text-dark">Event Details *</label><textarea id="contact-message" aria-invalid={!!errors.message} aria-describedby={errors.message ? 'contact-message-error' : undefined} {...register('message', { required: true, validate: value => value.trim().length >= 10 })} rows={6} className="w-full border rounded px-3 py-2" />{errors.message && <p id="contact-message-error" className="mt-1 text-sm text-red-700">Please include at least 10 characters of event details.</p>}</div>
+          <button type="submit" disabled={isSubmitting || !isValid} className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed">{isSubmitting ? 'Saving inquiry...' : 'Send inquiry'}</button>
         </form>}
       </section>
     </div>

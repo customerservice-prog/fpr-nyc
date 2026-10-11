@@ -96,9 +96,9 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
   const description = itemDescriptionForNyc(item.name, item.description, Number(item.cost))
   const relatedItems = await prisma.item.findMany({ where: { categoryId: item.categoryId, id: { not: item.id }, displayToCustomer: true }, orderBy: { name: 'asc' }, take: 4 })
   const validRelatedItems = relatedItems.filter((ri) => { const slug = typeof ri.slug === 'string' ? ri.slug.trim() : ''; return slug.length > 0 && slug.toLowerCase() !== 'null' && slug.toLowerCase() !== 'undefined' })
-  let suggestedAddons = item.suggestedAddonIds && item.suggestedAddonIds.length > 0 ? await prisma.item.findMany({ where: { id: { in: item.suggestedAddonIds }, displayToCustomer: true }, select: { id: true, name: true, slug: true, description: true, cost: true, picture: true, quantity: true } }) : []
+  let suggestedAddons = item.suggestedAddonIds && item.suggestedAddonIds.length > 0 ? await prisma.item.findMany({ where: { id: { in: item.suggestedAddonIds }, displayToCustomer: true }, select: { id: true, name: true, slug: true, description: true, cost: true, picture: true, quantity: true, type: true, colorOptions: true, category: { select: { slug: true, pricingProfile: true } } } }) : []
   if (!suggestedAddons.length && item.category.slug === 'tent-rentals') {
-    const lighting=await prisma.item.findMany({where:{displayToCustomer:true,status:'Available',quantity:{gt:0},name:{contains:'Tent Lighting',mode:'insensitive'}},select:{id:true,name:true,slug:true,description:true,cost:true,picture:true,quantity:true},take:100})
+    const lighting=await prisma.item.findMany({where:{displayToCustomer:true,status:'Available',quantity:{gt:0},name:{contains:'Tent Lighting',mode:'insensitive'}},select:{id:true,name:true,slug:true,description:true,cost:true,picture:true,quantity:true,type:true,colorOptions:true,category:{select:{slug:true,pricingProfile:true}}},take:100})
     suggestedAddons=lighting.filter(addon=>matchesTentLighting(item.name,addon.name))
   }
   if (!suggestedAddons.length) {
@@ -123,7 +123,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
       const fallback=await prisma.item.findMany({
         where:{id:{not:item.id},displayToCustomer:true,status:'Available',quantity:{gt:0},type:'Regular',category:{slug:{in:categorySlugs}}},
         orderBy:[{sortOrder:'asc'},{name:'asc'}],
-        select:{id:true,name:true,slug:true,description:true,cost:true,picture:true,quantity:true},
+        select:{id:true,name:true,slug:true,description:true,cost:true,picture:true,quantity:true,type:true,colorOptions:true,category:{select:{slug:true,pricingProfile:true}}},
         take:12,
       })
       suggestedAddons=fallback.filter(addon=>!/\b(fee|replacement|upgrade|extra hour|delivery|travel)\b/i.test(addon.name)).slice(0,3)
@@ -132,7 +132,22 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
   // Add-on cards show NYC copy and the NYC photo proxy (never another store's URL or wording).
   const validSuggestedAddons = suggestedAddons
     .filter((addon) => { const slug = typeof addon.slug === 'string' ? addon.slug.trim() : ''; return slug.length > 0 && slug.toLowerCase() !== 'null' && slug.toLowerCase() !== 'undefined' })
-    .map((addon) => ({ ...addon, description: itemDescriptionForNyc(addon.name, addon.description, Number(addon.cost)), picture: addon.picture ? nycItemImagePath(addon.slug) : null }))
+    .map((addon) => ({
+      ...addon,
+      description: itemDescriptionForNyc(addon.name, addon.description, Number(addon.cost)),
+      picture: addon.picture ? nycItemImagePath(addon.slug) : null,
+      categorySlug: addon.category.slug,
+      pricingProfile: addon.category.pricingProfile,
+      colorOptions: addon.colorOptions,
+      isPackage: addon.type === 'Package',
+      oneTimeFee: nycItemUrlSlug(addon.slug) === 'photobooth-custom-image-layout-upgrade' && /\bone[-\s]time\b/i.test(addon.description || ''),
+    }))
+
+  const showPremiumAddons = validSuggestedAddons.length > 0
+  const isOneTimeLayout = segment === 'photobooth-custom-image-layout-upgrade' && /\bone[-\s]time\b/i.test(description)
+  const includedCopy = `${item.name} ${description}`
+  const knownIncludedItems = /20\s*(?:x|×)\s*30/i.test(includedCopy) && /\b8\s*tables\b/i.test(includedCopy) && /\b64\s*chairs\b/i.test(includedCopy)
+    ? ['20x30 tent', '8 tables', '64 chairs'] : []
 
   const isStandaloneTent = /\btent\b/i.test(item.name) && /\b\d+\s*(?:x|×)\s*\d+\b/i.test(item.name) && !/(?:side\s*wall|sidewall|package|accessor)/i.test(item.name)
   const isInflatable = item.category.slug === 'bounce-house-rentals' && !/\b(package|blower|sandbag|extension cord|accessor)\b/i.test(item.name)
@@ -157,15 +172,15 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
+    <div className={`${showPremiumAddons ? 'max-w-7xl' : 'max-w-4xl'} mx-auto px-4 py-10`}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{__html:safeJsonLd(nycBreadcrumbs([{name:"Home",path:"/"},{name:item.category.name,path:`/category/${item.category.slug}`},{name:item.name,path:itemPath}]))}}/>
-      <nav className="text-sm text-gray-500 mb-4"><Link href="/">Home</Link>{' / '}<Link href={`/category/${item.category.slug}`}>{item.category.name}</Link>{' / '}<span>{item.name}</span></nav>
-      <div className="grid md:grid-cols-2 gap-8 items-start">
+      <nav className={`${showPremiumAddons ? 'mx-auto max-w-4xl ' : ''}mb-4 text-sm text-gray-500`}><Link href="/">Home</Link>{' / '}<Link href={`/category/${item.category.slug}`}>{item.category.name}</Link>{' / '}<span>{item.name}</span></nav>
+      <div className={`${showPremiumAddons ? 'mx-auto max-w-4xl ' : ''}grid items-start gap-8 md:grid-cols-2`}>
         <ItemGallery slug={segment} name={item.name} hasPicture={!!item.picture} additionalImageCount={(item.additionalImages || []).length} version={String(item.updatedAt.getTime())} />
         <div>
           <h1 className="text-3xl font-bold mb-4 text-gray-900">{item.name}</h1>
-          <p className="text-xl font-semibold mb-4 text-gray-900">Starting at ${Number(item.cost).toFixed(2)}<span className="text-sm font-normal text-gray-500">/day</span></p>
+          <p className="text-xl font-semibold mb-4 text-gray-900">Starting at ${Number(item.cost).toFixed(2)}<span className="text-sm font-normal text-gray-500">{isOneTimeLayout ? ' one-time upgrade fee' : '/day'}</span></p>
           {isStandaloneTent && (
             <figure className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
               <div className="bg-white p-3">
@@ -187,11 +202,12 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
           {item.colorOptions && item.colorOptions.length > 0 && <div className="mb-4"><p className="text-sm font-medium text-gray-700 mb-1">Available colors:</p><div className="flex flex-wrap gap-2">{item.colorOptions.map((c) => <span key={c} className="text-xs bg-gray-100 border rounded-full px-3 py-1 text-gray-700">{c}</span>)}</div><p className="text-xs text-gray-500 mt-1">Choose your color while checking availability and adding the item to your order.</p></div>}
           <p className="text-gray-700 mb-6 whitespace-pre-line leading-7">{description}</p>
           {(isStandaloneTent || isInflatable) && <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-5"><p className="mb-3 text-sm font-bold text-blue-950">{isInflatable ? 'See this inflatable in your event layout' : 'See this tent in your event layout'}</p><p className="mb-4 text-sm leading-6 text-slate-600">Open the NYC RentSketch planner with this rental as your starting point, then add tables, chairs and other equipment around it. Availability and final setup requirements are confirmed separately.</p><DesignYourEventCTA source="item_page_visual_planner" label={isInflatable ? 'See This Inflatable in a Layout' : 'See This Tent in a Layout'} tent={item.name} tentSlug={segment} productType={isInflatable ? 'inflatable' : 'tent'} /></div>}
-          <SuggestedAddons addons={validSuggestedAddons} />
-          {validRelatedItems.length > 0 && <div className="mb-6"><h2 className="text-sm font-semibold text-gray-700 mb-2">You Might Also Like</h2><div className="grid grid-cols-2 gap-2">{validRelatedItems.map((ri) => <Link key={ri.id} href={nycItemPath(ri.slug!)} prefetch={false} className="block border rounded-lg p-2 text-sm hover:shadow-md transition"><span className="block font-medium text-gray-900">{ri.name}</span><span className="block text-xs text-gray-500">From ${Number(ri.cost).toFixed(2)}/day</span></Link>)}</div></div>}
+          {!showPremiumAddons && <SuggestedAddons addons={validSuggestedAddons} />}
+          {!showPremiumAddons && validRelatedItems.length > 0 && <div className="mb-6"><h2 className="text-sm font-semibold text-gray-700 mb-2">You Might Also Like</h2><div className="grid grid-cols-2 gap-2">{validRelatedItems.map((ri) => <Link key={ri.id} href={nycItemPath(ri.slug!)} prefetch={false} className="block border rounded-lg p-2 text-sm hover:shadow-md transition"><span className="block font-medium text-gray-900">{ri.name}</span><span className="block text-xs text-gray-500">From ${Number(ri.cost).toFixed(2)}/day</span></Link>)}</div></div>}
           <Link href={`/category/${item.category.slug}`} className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700">Check Availability & Book</Link>
         </div>
       </div>
+      {showPremiumAddons && <SuggestedAddons addons={validSuggestedAddons} contextName={item.name} variant="premium" includedItems={knownIncludedItems} />}
       <LocalDeliveryLinks/>
     </div>
   )

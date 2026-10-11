@@ -58,21 +58,23 @@ function ItemsContent() {
     return (
       <div className="text-center py-12">
         <p className="text-body mb-4">Please select an event date first.</p>
-        <a href="/order-by-date" className="btn-primary inline-block">Select Date</a>
+        <a href="/order-by-date" className="btn-primary inline-block">Pick My Date</a>
       </div>
     )
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+      <div className="mb-6 rounded-xl border border-blue-100 bg-blue-50 p-4 sm:flex sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-dark">Available Rentals</h1>
-          <p className="text-body">Event Date: {date}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Your Event</p>
+          <h1 className="mt-1 text-2xl font-bold text-dark">Pick Your Rentals</h1>
+          <p className="mt-1 text-sm text-body"><strong>{date}</strong> • Showing rentals available for your date</p>
+          <a href="/order-by-date" className="mt-2 inline-block text-sm font-semibold text-blue-700 underline">Change Date</a>
         </div>
         <button
           onClick={() => setCartOpen(true)}
-          className="btn-primary flex items-center gap-2"
+          className="btn-primary mt-4 flex w-full items-center justify-center gap-2 sm:mt-0 sm:w-auto"
         >
           <ShoppingCart size={20} />
           Cart ({itemCount})
@@ -80,11 +82,11 @@ function ItemsContent() {
       </div>
 
       {loading ? (
-        <p className="text-center text-body py-12">Loading items...</p>
+        <p className="text-center text-body py-12">Loading rentals...</p>
       ) : items.length === 0 ? (
         <p className="text-center text-body py-12">No items available for this date.</p>
       ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 min-[520px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {Object.entries(
             items.reduce((groups: Record<string, { slug: string }>, item) => {
               const catName = item.category?.name || 'Other Rentals'

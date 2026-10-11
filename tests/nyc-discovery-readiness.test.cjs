@@ -190,9 +190,10 @@ test('NYC parity wave keeps RentSketch, trust and local content isolated and lau
   assert.match(vendors,/independent businesses/i)
   assert.match(vendors,/Catering/)
   assert.match(vendors,/Photography/)
-  assert.match(design,/dedicated Friendly Party Rental NYC RentSketch workspace/)
-  assert.match(design,/NYC checkout remains the authority for event-date availability/)
-  assert.match(design,/synced NYC rental catalog and prices as a planning reference/)
+  assert.match(design,/public RentSketch demonstration/)
+  assert.match(design,/Our team confirms the rentals, site details and delivery/)
+  assert.match(design,/It does not reserve equipment or determine your NYC rental total/)
+  assert.doesNotMatch(design,/synced NYC rental catalog and prices/)
   assert.doesNotMatch(design,/prices are intentionally hidden until/i)
 })
 

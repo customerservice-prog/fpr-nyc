@@ -16,18 +16,15 @@ export default function FAQPage() {
     }))),
   }
   return (
-    <div data-nyc-customer-help="faq" className="mx-auto max-w-3xl px-4 py-12">
+    <div data-nyc-customer-help="faq" className="max-w-3xl mx-auto px-4 py-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }} />
-      <h1 className="mb-3 text-center text-3xl font-bold text-dark">Frequently Asked Questions</h1>
-      <p className="mx-auto mb-6 max-w-2xl text-center leading-7 text-body">Planning an event in Riverdale, the Bronx or Lower Westchester? Start here, then confirm the details for your exact date, location and equipment with our NYC team.</p>
-      <nav aria-label="FAQ topics" className="mb-8 flex flex-wrap justify-center gap-2">
-        {NYC_FAQ_SECTIONS.map(section => <a key={section.id} href={`#faq-${section.id}`} className="rounded-full border px-4 py-2 text-sm font-semibold text-dark hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-secondary">{section.title}</a>)}
-      </nav>
-      <p className="mb-10 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-dark">Your confirmed NYC quote and rental agreement control pricing, payment deadlines and cancellation terms. This page does not promise an available item, a delivery time or a free service.</p>
+      <h1 className="text-3xl font-bold text-dark mb-2 text-center">Frequently Asked Questions</h1>
+      <p className="text-body text-center mb-10">Planning an event in Riverdale, the Bronx or Lower Westchester? Start here, then confirm the details for your exact date, location and equipment with our NYC team.</p>
+      <p className="text-body text-center mb-10 text-sm">Your confirmed NYC quote and rental agreement control pricing, payment deadlines and cancellation terms. This page does not promise an available item, a delivery time or a free service.</p>
       <div className="space-y-10">
         {NYC_FAQ_SECTIONS.map(section => (
           <section key={section.id} id={`faq-${section.id}`} aria-labelledby={`faq-heading-${section.id}`} className="scroll-mt-28">
-            <h2 id={`faq-heading-${section.id}`} className="mb-4 border-b border-primary pb-2 text-xl font-bold text-dark">{section.title}</h2>
+            <h2 id={`faq-heading-${section.id}`} className="text-lg font-bold text-dark mb-4 border-b border-primary pb-2">{section.title}</h2>
             <Accordion items={section.items} />
           </section>
         ))}

@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
 import { useSearchParams, notFound } from 'next/navigation'
 import ItemCard from '@/components/public/ItemCard'
+import PhotoboothRentalSelector from '@/components/public/PhotoboothRentalSelector'
 import BookingCalendar from '@/components/public/BookingCalendar'
 import CartDrawer from '@/components/public/CartDrawer'
 import { useCart, DEFAULT_SCHEDULING_DETAILS } from '@/components/public/CartContext'
@@ -12,6 +13,8 @@ import { NYC_SERVICE_AREA_SUMMARY } from '@/lib/nycServiceAreas'
 import { useCheckoutPolicy } from '@/components/public/useCheckoutPolicy'
 import { exactPickupFeeForPolicy, isLateExactPickupTime } from '@/lib/nycCheckoutPolicy'
 import { categorySearchName } from '@/lib/nycSearchReadiness'
+import { bookingDateKey } from '@/lib/rentsketchBooking'
+import { nycCalendarDay } from '@/lib/nycCustomerHelp'
 import { ShoppingCart, CalendarDays, Pencil, Truck, MapPin } from 'lucide-react'
 
 const APPOINTMENT_SLOTS = [
@@ -100,8 +103,9 @@ function getRecommendedWindow(eventStartTime: string): { start: string; end: str
 export default function CategoryClient({ slug, initialCategory, initialItems }: { slug: string; initialCategory: { name: string; description?: string; bookableAfter?: string | null; bookableAfterMessage?: string | null } | null; initialItems: Array<{ id: string; slug?: string | null; name: string; cost: number; picture?: string | null; available: number; category?: { pricingProfile?: string | null } | null; bookableAfter?: string | null; bookableAfterMessage?: string | null; description?: string | null; colorOptions?: string[]; updatedAt?: string | null }> }) {
   const searchParams = useSearchParams()
   const dateParam = searchParams.get('date')
+  const restoredCartDate = useRef(false)
   const [selectedDate, setSelectedDate] = useState<Date | null>(
-    dateParam ? new Date(dateParam) : null
+    dateParam && bookingDateKey(dateParam) >= nycCalendarDay() ? new Date(bookingDateKey(dateParam) + 'T12:00:00') : null
   )
   const [category, setCategory] = useState<{ name: string; description?: string; bookableAfter?: string | null; bookableAfterMessage?: string | null } | null>(initialCategory)
   const [notFoundTriggered, setNotFoundTriggered] = useState(false)
@@ -144,8 +148,10 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
     }
   }, [])
   useEffect(() => {
-    if (!dateParam && !selectedDate && cartLoaded && cartEventDate) {
-      setSelectedDate(new Date(cartEventDate))
+    if (!cartLoaded || restoredCartDate.current) return
+    restoredCartDate.current = true
+    if (!dateParam && !selectedDate && cartEventDate && bookingDateKey(cartEventDate) >= nycCalendarDay()) {
+      setSelectedDate(new Date(bookingDateKey(cartEventDate) + 'T12:00:00'))
       setBrowseWithoutDate(false)
     }
   }, [dateParam, selectedDate, cartLoaded, cartEventDate])
@@ -339,6 +345,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
   }
 
   const handleChangeDate = () => {
+    setBrowseWithoutDate(false)
     setSelectedDate(null)
     setTimeConfirmed(false)
     resetTimeSelections()
@@ -375,8 +382,17 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
     notFound()
   }
 
+  if (slug === 'photobooth-rentals' && showItems && !isBookingBlocked) {
+    return <PhotoboothRentalSelector
+      items={items}
+      bookingReady={!!selectedDate && timeConfirmed}
+      onChooseDate={handleChangeDate}
+      onChangeDate={handleChangeDate}
+    />
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div id={slug === 'tent-rentals' ? 'tent-rental-inventory' : slug === 'table-chair-rentals' ? 'table-chair-rental-inventory' : slug === 'bounce-house-rentals' ? 'bounce-house-rental-inventory' : undefined} className="max-w-7xl mx-auto px-4 py-8">
       {slug === 'tent-rentals' && showTentGuide && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => dismissTentGuide()}>
           <div className="bg-white rounded-lg max-w-2xl w-full p-6 relative shadow-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -407,7 +423,9 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
       )}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-dark">{category ? `${categorySearchName(slug, category.name)} in Riverdale, the Bronx & Lower Westchester` : slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) + ' in Riverdale, the Bronx & Lower Westchester'}</h1>
+          {['tent-rentals', 'table-chair-rentals', 'bounce-house-rentals'].includes(slug)
+            ? <h2 className="text-2xl font-bold text-dark">Browse {categorySearchName(slug, category?.name || slug)}</h2>
+            : <h1 className="text-2xl font-bold text-dark">{categorySearchName(slug, category?.name || slug)}</h1>}
         </div>
         <button onClick={() => setCartOpen(true)} className="btn-primary flex items-center gap-2">
           <ShoppingCart size={20} />

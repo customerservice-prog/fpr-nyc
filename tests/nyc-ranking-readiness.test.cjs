@@ -9,7 +9,7 @@ test('homepage targets Riverdale, Bronx and Lower Westchester party-rental inten
   const seo=read('components/public/NycHomeSeo.tsx')
   assert.ok(page.includes('Party Rentals | Riverdale, Bronx & Lower Westchester'))
   assert.ok(hero.includes('Party Rentals'))
-  assert.ok(hero.includes('in Riverdale, the Bronx &amp; Lower Westchester'))
+  assert.match(hero,/Riverdale.*Bronx.*Lower Westchester/)
   for(const heading of [
     'Tent Rentals in Riverdale, NY, the Bronx & Lower Westchester',
     'Table &amp; Chair Rentals in Riverdale, the Bronx &amp; Lower Westchester',
@@ -30,8 +30,13 @@ test('category pages target the real NYC and Lower Westchester delivery footprin
   assert.ok(layout.includes('NYC_BUSINESS_ID'))
   assert.ok(page.includes('CategoryPlanningGuide'))
   assert.ok(client.includes('categorySearchName'))
-  assert.ok(client.includes('in Riverdale, the Bronx & Lower Westchester'))
-  assert.ok(guide.includes('Riverdale, Bronx & Lower Westchester rental planning guide'))
+  for(const name of ['TentRentalPaidSearchHero','TableChairPaidSearchHero','BounceHousePaidSearchHero']) {
+    const hero=read(`components/public/${name}.tsx`)
+    assert.match(hero,/Riverdale/)
+    assert.match(hero,/718-283-4593/)
+    assert.doesNotMatch(hero,/Syracuse|315-/,name)
+  }
+  assert.match(guide,/Riverdale.*Bronx.*Lower Westchester/)
   for(const term of [
     'Tent Rentals | Riverdale, Bronx & Lower Westchester',
     'Table & Chair Rentals | Riverdale, Bronx & Lower Westchester',
@@ -195,7 +200,8 @@ test('item offer schema covers the real NYC delivery footprint',()=>{
 test('NYC event planner targets useful informational intent with structured app data',()=>{
   const page=read('app/(public)/design-your-event/page.tsx')
   assert.ok(page.includes('2D & 3D Event Layout Planner | Riverdale, Bronx & Lower Westchester'))
-  assert.ok(page.includes("2D &amp; 3D Event Layout Planner for Tents, Tables &amp; Chairs"))
+  assert.match(page,/2D \+ 3D previews/)
+  assert.match(page,/public RentSketch demonstration/)
   assert.ok(page.includes("'@type': 'WebApplication'"))
   assert.ok(page.includes("applicationCategory: 'DesignApplication'"))
   assert.ok(page.includes('NYC_BUSINESS_ID'))

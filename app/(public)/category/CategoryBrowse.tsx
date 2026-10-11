@@ -21,7 +21,7 @@ export default function CategoryBrowse({ pictures, categories }: {
       </label>
     </div>
     <p className="mb-4 text-sm text-gray-500" role="status">{filtered.length} {filtered.length === 1 ? 'category' : 'categories'}</p>
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+    <div className="grid grid-cols-2 gap-4 max-w-4xl">
       {filtered.map(category => <CategoryCard
         key={category.slug}
         name={category.name}

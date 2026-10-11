@@ -7,7 +7,6 @@ import { initialHomeDevice } from '@/lib/homeDevice'
 import { PUBLIC_CATEGORIES } from '@/lib/utils'
 import { DEFAULT_HOME_CONTENT } from '@/lib/homeContent'
 import { getSyncedWeddingPackages } from '@/lib/wedding-packages'
-import { getHomepagePopularItems } from '@/lib/homepageMerchandising'
 import { IMAGE_CACHE_BUST } from '@/lib/imageVersion'
 import { prisma } from '@/lib/prisma'
 
@@ -15,9 +14,8 @@ export const metadata = nycPageMetadata('/','Party Rentals | Riverdale, Bronx & 
 export const revalidate = 60
 
 export default async function HomePage() {
-  const [categoriesResult, popularResult, bounceResult, packagesResult, revisionResult, requestHeaders] = await Promise.all([
+  const [categoriesResult, bounceResult, packagesResult, revisionResult, requestHeaders] = await Promise.all([
     prisma.category.findMany({ select: { slug: true, name: true, picture: true, updatedAt: true, displayToCustomer: true, sortOrder: true } }).catch(() => []),
-    getHomepagePopularItems(8).catch(() => []),
     prisma.item.findMany({
       where: { displayToCustomer: true, status: 'Available', category: { slug: 'bounce-house-rentals' } },
       orderBy: { sortOrder: 'asc' },
@@ -66,15 +64,6 @@ export default async function HomePage() {
     signature: 'signature' in pkg ? Boolean(pkg.signature) : false,
   }))
 
-  const popularItems = popularResult.map((item:any) => ({
-    id: item.id,
-    name: item.specialDisplayName || item.name,
-    slug: item.slug,
-    cost: item.cost,
-    picture: item.picture || (item.slug ? `/api/item-image/${item.slug}?v=${IMAGE_CACHE_BUST}` : null),
-    status: null,
-    category: item.category,
-  }))
   const bounceItems = bounceResult.map((item:any) => ({
     id: item.id,
     name: item.specialDisplayName || item.name,
@@ -102,7 +91,7 @@ export default async function HomePage() {
     initialDevice={initialHomeDevice(requestHeaders.get('user-agent'))}
     categories={categories}
     desktopCategories={desktopCategories}
-    popularItems={popularItems}
+    popularItems={[]}
     bounceItems={bounceItems}
     packages={packages}
     weddingImage={packages[0]?.image || null}

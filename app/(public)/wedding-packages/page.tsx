@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/utils'
 import { getSyncedWeddingPackages } from '@/lib/wedding-packages'
@@ -34,7 +35,9 @@ export default async function WeddingPackagesPage({
 
       <div className="bg-white rounded-lg shadow-lg border-2 border-primary overflow-hidden">
         {pkg.image && (
-          <img src={pkg.image} alt={pkg.name} className="w-full h-auto object-contain bg-gray-50" />
+          <div className="relative aspect-[4/3] w-full bg-gray-50">
+            <Image src={pkg.image} alt={pkg.name} fill sizes="(max-width: 767px) calc(100vw - 2rem), 768px" quality={70} className="object-contain" priority />
+          </div>
         )}
         <div className="p-8">
           {pkg.popular && (
@@ -90,7 +93,9 @@ export default async function WeddingPackagesPage({
               className="border border-primary/30 rounded-lg overflow-hidden hover:bg-primary/10 transition-colors flex items-center gap-3"
             >
               {p.image && (
-                <img src={p.image} alt={p.name} className="w-20 h-20 object-cover flex-shrink-0" />
+                <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden bg-gray-50">
+                  <Image src={p.image} alt={p.name} fill sizes="80px" quality={60} className="object-cover" />
+                </div>
               )}
               <div className="p-4">
                 <h3 className="font-bold text-dark">{p.name}</h3>

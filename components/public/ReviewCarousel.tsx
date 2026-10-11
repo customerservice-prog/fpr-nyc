@@ -14,7 +14,7 @@ function avatarColor(name: string) {
 
 // Only reviews from NYC customers are shown. Another location's reviews are never
 // presented on the NYC site, so the section stays hidden until NYC reviews exist.
-export default function ReviewCarousel() {
+export default function ReviewCarousel({ showHeading = true }: { showHeading?: boolean }) {
   const reviews = REVIEWS
   if (!reviews.length) return (
     <section className="bg-gray-50 py-12" aria-label="Friendly Party Rental NYC trust">
@@ -28,11 +28,10 @@ export default function ReviewCarousel() {
       </div>
     </section>
   )
-  const shared = false
   return (
     <div className="bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-2xl font-bold text-center mb-2 text-dark">{shared ? "" : "What Our Customers Say"}</h2><div className="md:hidden flex gap-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory">{reviews.map((review) => (<div key={`m-${review.id}`} className="flex-shrink-0 w-[85%] snap-start bg-white p-5 rounded-lg shadow border border-primary/30"><div className="flex items-center gap-3 mb-3"><div className="flex items-center justify-center rounded-full text-white font-semibold flex-shrink-0" style={{ backgroundColor: avatarColor(review.author), width: 36, height: 36, fontSize: 15 }} aria-hidden="true">{review.author.trim().charAt(0).toUpperCase()}</div><div><span className="font-bold text-dark block text-sm">{review.author}</span><span className="text-yellow-500 text-xs">{'⭐'.repeat(review.rating)}</span></div></div><p className="text-body text-sm">{review.text}</p></div>))}</div>
+        {showHeading && <h2 className="text-2xl font-bold text-center mb-2 text-dark">What Our Customers Say</h2>}<div className="md:hidden flex gap-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory">{reviews.map((review) => (<div key={`m-${review.id}`} className="flex-shrink-0 w-[85%] snap-start bg-white p-5 rounded-lg shadow border border-primary/30"><div className="flex items-center gap-3 mb-3"><div className="flex items-center justify-center rounded-full text-white font-semibold flex-shrink-0" style={{ backgroundColor: avatarColor(review.author), width: 36, height: 36, fontSize: 15 }} aria-hidden="true">{review.author.trim().charAt(0).toUpperCase()}</div><div><span className="font-bold text-dark block text-sm">{review.author}</span><span className="text-yellow-500 text-xs">{'⭐'.repeat(review.rating)}</span></div></div><p className="text-body text-sm">{review.text}</p></div>))}</div>
         <div className="hidden md:grid md:grid-cols-2 gap-6">
           {reviews.map((review) => (
             <div key={review.id} className="bg-white p-6 rounded-lg shadow border border-primary/30">

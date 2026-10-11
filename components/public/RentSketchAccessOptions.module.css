@@ -1,0 +1,108 @@
+.choices { container-type:inline-size; width:100%; min-width:0; margin:22px 0 28px; color:#173d30; font-family:inherit; }
+.choices * { box-sizing:border-box; }
+.grid { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; }
+.card { display:flex; flex-direction:column; gap:10px; min-width:0; border:1px solid #d5e4d8; border-radius:18px; padding:22px; background:#fff; text-align:left; }
+.paid { border:2px solid #e6b760; background:#fffbef; }
+.booked { background:#f0f7ef; }
+.card .eyebrow { margin:0; color:#3e6450; font-size:12px; font-weight:800; line-height:1.5; letter-spacing:.04em; text-transform:uppercase; }
+.card h3 { margin:0; color:#173d30; font-size:23px; font-weight:800; line-height:1.2; }
+.card .price { margin:2px 0; color:#173d30; font-size:38px; font-weight:850; line-height:1.1; }
+.price span { display:block; margin-top:7px; color:#456451; font-size:13px; font-weight:600; line-height:1.45; }
+.card .term { margin:0; color:#173d30; font-size:15px; font-weight:750; line-height:1.5; }
+.card .copy { margin:0 0 5px; color:#456451; font-size:14px; line-height:1.65; }
+.buy,.login { display:flex; align-items:center; justify-content:center; min-height:54px; width:100%; margin-top:auto; padding:13px 12px; border-radius:11px; font-size:15px; font-weight:800; line-height:1.45; text-align:center; text-decoration:none; white-space:normal; overflow-wrap:anywhere; }
+.buy { background:#edc16e; color:#193c2e; }
+.login { background:#20543c; color:#fff; }
+.buy:hover { background:#f4d595; }.login:hover { background:#153e2b; }
+.card .fine { margin:0; color:#506754; font-size:12px; line-height:1.6; text-align:center; }
+.links { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4px 18px; margin-top:12px; }
+.links a,.links .preview { display:inline-flex; align-items:center; justify-content:center; min-height:44px; max-width:100%; border:0; padding:8px 4px; border-radius:4px; background:transparent; color:inherit; font-size:13px; font-weight:650; line-height:1.5; text-decoration:underline; text-underline-offset:4px; text-align:center; white-space:normal; }
+.links,.separation { color:inherit; }
+.choices .separation { margin:8px 0 0; color:inherit; font-size:12px; line-height:1.65; text-align:center; }
+.choices a:focus-visible { outline:3px solid #2473c1; outline-offset:4px; }
+
+.compact { margin:0; }
+.compact .grid { gap:12px; }
+.compact .card { display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"eyebrow price" "heading price" "term price" "button button";align-items:center;column-gap:20px;row-gap:4px;padding:17px 18px;border-radius:15px; }
+.compact .card .eyebrow { grid-area:eyebrow;font-size:10px; }
+.compact .card h3 { grid-area:heading;font-size:20px; }
+.compact .card .price { grid-area:price;align-self:center;margin:0;font-size:34px;text-align:right;white-space:nowrap; }
+.compact .price span { margin-top:4px;font-size:10px;white-space:normal;max-width:130px; }
+.compact .card .term { grid-area:term;font-size:12px; }
+.compact .card .copy,.compact .card .fine { display:none; }
+.compact .buy,.compact .login { grid-area:button;min-height:46px;margin-top:8px;padding:10px 12px;font-size:13px;border-radius:10px; }
+.compact .links { justify-content:flex-end;gap:8px 16px;margin-top:6px; }
+.compact .links a { min-height:34px;padding:4px 0;font-size:11px; }
+.compact .separation { margin-top:2px!important;font-size:10px!important;text-align:right!important;opacity:.86; }
+
+@container(max-width:700px) {
+  .compact .card { grid-template-columns:minmax(0,1fr);grid-template-areas:"eyebrow" "heading" "price" "term" "button";row-gap:6px; }
+  .compact .card .price { text-align:left; }
+  .compact .price span { display:inline;margin:0 0 0 8px;max-width:none; }
+  .compact .links { justify-content:center; }
+  .compact .separation { text-align:center!important; }
+}
+@container(max-width:350px) { .card { padding:18px 16px; }.card h3 { font-size:21px; }.buy,.login { font-size:14px; } }
+
+
+/* Compact homepage access cards on phones 2026-09-28 */
+@container(max-width:700px) {
+  .compact { margin:0; }
+  .compact .grid { gap:9px; }
+  .compact .card {
+    padding:14px;
+    border-radius:14px;
+    row-gap:5px;
+  }
+  .compact .card .eyebrow { font-size:9px;letter-spacing:.035em; }
+  .compact .card h3 { font-size:17px;line-height:1.15; }
+  .compact .card .price {
+    display:flex;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:6px;
+    font-size:28px;
+    line-height:1;
+  }
+  .compact .price span {
+    display:inline;
+    margin:0;
+    max-width:none;
+    font-size:9.5px;
+    line-height:1.25;
+  }
+  .compact .card .term { font-size:11px;line-height:1.35; }
+  .compact .buy,.compact .login {
+    min-height:46px;
+    margin-top:4px;
+    padding:10px 11px;
+    border-radius:10px;
+    font-size:12.5px;
+    line-height:1.3;
+  }
+  .compact .links {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+    margin-top:8px;
+  }
+  .compact .links a {
+    min-height:38px;
+    padding:7px 6px;
+    border:1px solid #ffffff26;
+    border-radius:10px;
+    color:#e8f0ea;
+    font-size:9.5px;
+    line-height:1.25;
+    text-decoration:none;
+  }
+  .compact .separation {
+    margin-top:6px!important;
+    font-size:9px!important;
+    line-height:1.4;
+    opacity:.76;
+  }
+}
+@container(max-width:340px) {
+  .compact .links { grid-template-columns:minmax(0,1fr); }
+}

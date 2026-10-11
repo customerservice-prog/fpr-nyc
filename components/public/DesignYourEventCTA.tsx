@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import { NYC_RENTSKETCH_TENANT } from '@/lib/nycRentSketch'
+import { NYC_RENTSKETCH_TENANT, nycRentSketchEmbedUrl } from '@/lib/nycRentSketch'
 
 export type DesignYourEventSource = string
 
@@ -13,6 +13,9 @@ interface DesignYourEventCTAProps {
   className?: string
   tent?: string
   tentSlug?: string
+  product?: string
+  productSlug?: string
+  view?: '2d' | '3d'
   productType?: 'tent' | 'inflatable'
 }
 
@@ -24,6 +27,9 @@ export default function DesignYourEventCTA({
   className = '',
   tent,
   tentSlug,
+  product,
+  productSlug,
+  view = '3d',
   productType = 'tent',
 }: DesignYourEventCTAProps) {
   const [tentPhotoOpen, setTentPhotoOpen] = useState(false)
@@ -49,10 +55,12 @@ export default function DesignYourEventCTA({
     outline: 'border-2 border-white text-white hover:bg-white/10',
   }
 
-  const handleClick = () => {
+  const previewHref = nycRentSketchEmbedUrl({ source, name: product || tent, slug: productSlug || tentSlug, productType, view })
+  const handleClick = (event: { preventDefault: () => void }) => {
     if (typeof window === 'undefined') return
+    event.preventDefault()
     window.dispatchEvent(new CustomEvent('open-design-your-event', {
-      detail: { source, ...(tent ? { tent } : {}), ...(tentSlug ? { tentSlug } : {}), productType },
+      detail: { source, product, productSlug, view, ...(tent ? { tent } : {}), ...(tentSlug ? { tentSlug } : {}), productType },
     }))
   }
 
@@ -89,16 +97,17 @@ export default function DesignYourEventCTA({
         <div className="my-5 overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-lg">
           <img src="/images/design-your-event-3d-preview.png" alt="RentSketch 3D event layout preview with tent, tables, chairs and dance floor" className="h-auto w-full" />
         </div>
-        <button type="button" onClick={handleClick} className="inline-flex w-full items-center justify-center rounded-xl bg-[#E07B00] px-6 py-3.5 text-center text-sm font-extrabold text-white shadow-lg transition-colors hover:bg-[#c96d00]">
+        <a href={previewHref} onClick={handleClick} className="inline-flex w-full items-center justify-center rounded-xl bg-[#E07B00] px-6 py-3.5 text-center text-sm font-extrabold text-white shadow-lg transition-colors hover:bg-[#c96d00]">
           DESIGN MY EVENT
-        </button>
+        </a>
+        <p className="mt-3 text-xs text-white/80">Free planning · No card · No order number required</p>
       </div>
     )
   }
 
   return (
-    <button type="button" onClick={handleClick} className={`${base} ${variants[variant] || variants.primary} ${className}`}>
+    <a href={previewHref} onClick={handleClick} className={`${base} ${variants[variant] || variants.primary} ${className}`}>
       {label}
-    </button>
+    </a>
   )
 }

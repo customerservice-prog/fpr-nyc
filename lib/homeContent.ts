@@ -43,8 +43,8 @@ export const DEFAULT_HOME_CONTENT: Record<string, string> = {
   eventPlanningHeading: 'Full-Service Event Planning',
   eventPlanningBody: 'We plan it and provide it, so there is no need to hire a separate event planner.',
   eventPlanningButton: 'Learn About Event Planning',
-  youtubeEyebrow: 'As Seen In Action',
-  youtubeHeading: 'Watch Us on YouTube',
+  youtubeEyebrow: 'Your Riverdale Rental Guide',
+  youtubeHeading: 'Plan Your Riverdale Event',
 }
 
 export const HOME_CONTENT_KEYS = Object.keys(DEFAULT_HOME_CONTENT)

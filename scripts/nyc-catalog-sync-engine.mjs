@@ -6,7 +6,7 @@
 // or settings.
 //
 // Rules live in lib/nycCatalogCore.mjs (shared with the storefront and tests):
-// exact Syracuse quantities, packages at the Syracuse price, every other item at
+// exact Syracuse quantities, approved independent NYC package prices, other items at
 // clean(Syracuse x 1.70), NYC-localized copy, Syracuse photos served through the
 // NYC /api/item-image proxy, and Syracuse suggested add-ons re-linked by slug.
 //

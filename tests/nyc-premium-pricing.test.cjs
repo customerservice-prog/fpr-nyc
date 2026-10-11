@@ -69,7 +69,7 @@ test('price apply script only updates cost on existing matching slugs from the l
   assert.match(script, /Dry run only/)
 })
 
-test('all package prices remain excluded and unchanged by the NYC premium snapshot', () => {
+test('historical package exclusions stay outside the ordinary premium snapshot', () => {
   assert.equal(snapshot.packageExclusion.excluded.length, 18)
   for (const row of snapshot.packageExclusion.excluded) {
     const text = `${row.name} ${row.slug} ${row.categorySlug || ''}`.toLowerCase()
@@ -87,4 +87,17 @@ test('NYC quantities mirror Syracuse exactly by slug (owner decision 2026-09-30,
   const engine = fs.readFileSync(path.join(root, 'scripts/nyc-catalog-sync-engine.mjs'), 'utf8')
   assert.doesNotMatch(engine, /method: 'POST'|method: 'PUT'|method: 'DELETE'|method: 'PATCH'/, 'Syracuse is only read')
   assert.match(fs.readFileSync(path.join(root, 'lib/nycCatalogCore.mjs'), 'utf8'), /quantity: Number\(source\.quantity\)/)
+})
+
+
+test('current package pricing is owner-approved and ordinary premium application cannot reset it', async () => {
+  const { NYC_APPROVED_PACKAGE_PRICES } = await import('../lib/nycPackagePricing.mjs')
+  const { nycPriceForSyracuseItem } = await import('../lib/nycCatalogCore.mjs')
+  assert.equal(Object.keys(NYC_APPROVED_PACKAGE_PRICES).length, 17)
+  for (const [slug, price] of Object.entries(NYC_APPROVED_PACKAGE_PRICES)) {
+    assert.ok(Number.isInteger(price) && price > 0, slug)
+    assert.equal(nycPriceForSyracuseItem({ slug, name: 'Package', cost: 1 }), price, slug)
+  }
+  assert.equal(nycPriceForSyracuseItem({ slug: '20x20-tent-package-4-tables-32-chairs', name: '20x20 Tent Package', cost: 325 }), 645)
+  assert.equal(nycPriceForSyracuseItem({ slug: 'new-owner-unlisted-package', name: 'New Package', cost: 100 }), 170)
 })

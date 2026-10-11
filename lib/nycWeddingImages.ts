@@ -1,13 +1,11 @@
-// These URLs are served by the NYC app itself.
-// The build makes a best-effort snapshot of the five public NY package-image
-// endpoints for visual parity. If a snapshot is unavailable, the image route
-// falls back to the NYC package image stored in this location's database.
+// Native NYC package cards use price-free rental photos and current Item.cost.
+// This version retires cached Syracuse brochures with baked-in old prices.
 export const NYC_WEDDING_IMAGES: Record<string,string> = {
-  "pkg-basic": "/api/wedding-art/pkg-basic",
-  "pkg-standard": "/api/wedding-art/pkg-standard",
-  "pkg-premium": "/api/wedding-art/pkg-premium",
-  "pkg-luxury": "/api/wedding-art/pkg-luxury",
-  "pkg-elite": "/api/wedding-art/pkg-elite",
+  "pkg-basic": "/api/wedding-art/pkg-basic?v=nyc-package-art-20261011-v1",
+  "pkg-standard": "/api/wedding-art/pkg-standard?v=nyc-package-art-20261011-v1",
+  "pkg-premium": "/api/wedding-art/pkg-premium?v=nyc-package-art-20261011-v1",
+  "pkg-luxury": "/api/wedding-art/pkg-luxury?v=nyc-package-art-20261011-v1",
+  "pkg-elite": "/api/wedding-art/pkg-elite?v=nyc-package-art-20261011-v1",
 }
 
 export const NYC_WEDDING_ITEM_TO_PACKAGE: Record<string,string> = {

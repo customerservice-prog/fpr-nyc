@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     })
     return NextResponse.json(
       { items: items.map((item) => localizeItem(withCategoryImage(item))) },
-      { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=3600' } }
+      { headers: { 'Cache-Control': 'private, no-store' } }
     )
   }
 
@@ -37,5 +37,5 @@ export async function GET(request: NextRequest) {
     search || undefined
   )
 
-  return NextResponse.json({ items: items.map(localizeItem) })
+  return NextResponse.json({ items: items.map(localizeItem) }, { headers: { 'Cache-Control': 'private, no-store' } })
 }

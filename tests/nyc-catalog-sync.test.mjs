@@ -33,19 +33,62 @@ test('clean NYC prices follow the owner examples and never show cents', () => {
   assert.throws(() => cleanNycPrice(-5))
 })
 
-test('NYC price = clean(Syracuse x 1.70); packages keep the Syracuse price exactly', () => {
+const APPROVED_PACKAGES = [
+  ['20x20-tent-package-4-tables-32-chairs', 325, 645],
+  ['wedding-package-backyard-elopement', 345, 595],
+  ['20x30-tent-8-tables-64-chairs-package-syracuse-ny', 530, 1045],
+  ['wedding-package-classic-ceremony', 520, 995],
+  ['30x30-tent-package-8-tables-80-chairs', 820, 1495],
+  ['wedding-package-garden-reception', 2295, 3295],
+  ['linen-tent-package-tent-tables-chairs-tablecloths-syracuse-ny', 425, 745],
+  ['wedding-package-luxury-estate', 4995, 7495],
+  ['bounce-house-package-4-tables-24-chairs', 275, 525],
+  ['wedding-package-all-inclusive-premium', 7495, 12995],
+  ['bounce-house-water-slide-combo-package', 500, 725],
+  ['summer-splash-package-waterslide-tables-chairs-syracuse-ny', 350, 595],
+  ['kids-birthday-party-package-bounce-house-cotton-candy-tables-chairs', 350, 695],
+  ['graduation-party-package-small-seats-64-syracuse-ny', 665, 1045],
+  ['graduation-party-package-large-seats-100-syracuse-ny', 875, 1595],
+  ['backyard-bbq-party-package-tent-tables-chairs-popcorn-machine', 415, 725],
+  ['corporate-event-package-tent-tables-chairs-concessions-syracuse-ny', 800, 1145],
+]
+
+function packageSource(slug, sourcePrice, index = 0) {
+  return {
+    id: 'source-package-' + index, slug, name: 'Rental Package ' + index,
+    cost: sourcePrice, quantity: 10, displayToCustomer: true, type: 'Regular',
+    description: `Package — $${sourcePrice}. Starting at $${sourcePrice.toFixed(2)}/day.`,
+    category: { slug: 'party-rental-packages', name: 'Party Rental Packages' },
+  }
+}
+
+test('all 17 approved Riverdale package prices survive source changes and stored/public slug aliases', () => {
+  for (const [slug, sourcePrice, approved] of APPROVED_PACKAGES) {
+    const source = packageSource(slug, sourcePrice)
+    assert.equal(nycPriceForSyracuseItem(source), approved, slug)
+    assert.equal(nycPriceForSyracuseItem({ ...source, cost: sourcePrice + 100 }), approved, 'source changes cannot overwrite approval: ' + slug)
+    assert.equal(nycPriceForSyracuseItem({ ...source, slug: slug.replace(/-syracuse-ny$/, '') }), approved, 'short public alias: ' + slug)
+    const desired = desiredNycItem(source, 0)
+    assert.equal(desired.cost, approved, slug)
+    assert.ok(desired.description.includes('Starting at $' + approved.toLocaleString('en-US') + '.00/day'), slug)
+    assert.ok(desired.description.includes('Package — $' + approved.toLocaleString('en-US')), slug)
+    assert.equal(desired.quantity, source.quantity, 'pricing never changes stock')
+    assert.throws(() => nycPriceForSyracuseItem({ ...source, cost: 0 }), /Invalid Syracuse price/)
+  }
+})
+
+test('ordinary items and future unlisted packages use clean(Syracuse x 1.70)', () => {
   const chair = { slug: 'white-plastic-folding-chair', name: 'White Plastic Folding Chair', cost: 2.5, category: { slug: 'table-chair-rentals', name: 'Table and Chair Rentals' } }
-  assert.equal(nycPriceForSyracuseItem(chair), 5)
-  assert.equal(nycPriceForSyracuseItem({ ...chair, cost: 11.99 }), 20)
-  assert.equal(nycPriceForSyracuseItem({ ...chair, cost: 250 }), 425)
-  assert.equal(nycPriceForSyracuseItem({ ...chair, cost: 275 }), 470)
-  assert.equal(nycPriceForSyracuseItem({ ...chair, cost: 549 }), 930)
-  const byCategory = { slug: 'summer-splash', name: 'Summer Splash', cost: 350, category: { slug: 'party-rental-packages', name: 'Party Rental Packages' } }
-  const byName = { slug: 'wedding-package-classic-ceremony', name: 'Wedding Package - Classic Ceremony', cost: 520, category: { slug: 'weddings', name: 'Wedding Rentals' } }
-  const bySlug = { slug: 'linen-tent-package-tent', name: 'Linen Tent Bundle', cost: 425.5, category: { slug: 'tents', name: 'Tents' } }
+  for (const [cost, expected] of [[2.5, 5], [11.99, 20], [250, 425], [275, 470], [549, 930]]) {
+    assert.equal(nycPriceForSyracuseItem({ ...chair, cost }), expected)
+  }
+  const byCategory = { slug: 'new-summer-splash', name: 'Summer Splash', cost: 350, category: { slug: 'party-rental-packages', name: 'Party Rental Packages' } }
+  const byName = { slug: 'new-wedding-bundle', name: 'Wedding Package - New Bundle', cost: 520, category: { slug: 'weddings', name: 'Wedding Rentals' } }
+  const bySlug = { slug: 'new-linen-tent-package', name: 'Linen Tent Bundle', cost: 425.5, category: { slug: 'tents', name: 'Tents' } }
   for (const pkg of [byCategory, byName, bySlug]) {
     assert.equal(isPackageItem(pkg), true, pkg.slug)
-    assert.equal(nycPriceForSyracuseItem(pkg), pkg.cost, pkg.slug)
+    assert.equal(nycPriceForSyracuseItem(pkg), cleanNycPrice(pkg.cost * 1.7), pkg.slug)
+    assert.notEqual(nycPriceForSyracuseItem(pkg), pkg.cost, 'new packages cannot inherit the old package exemption')
   }
   assert.equal(isPackageItem(chair), false)
 })
@@ -208,7 +251,7 @@ test('catalog sync mirrors Syracuse exactly, verifies itself and is idempotent',
   for (const source of syracuseItems) assert.equal(by(source.slug).quantity, source.quantity, source.slug)
   assert.equal(by('20x20-pole-tent').cost, 425)
   assert.equal(by('white-plastic-folding-chair').cost, 5)
-  assert.equal(by('20x20-tent-package-4-tables-32-chairs').cost, 325, 'package keeps the Syracuse price')
+  assert.equal(by('20x20-tent-package-4-tables-32-chairs').cost, 645, 'package keeps its approved Riverdale price')
   assert.equal(by('30-x-60-pole-tent').cost, 1445, '850 x 1.70 is already a whole-dollar price')
   assert.equal(by('20x20-pole-tent').attendants, null)
   assert.equal(by('20x20-pole-tent').description, 'Pole tent. Starting at $425.00/day. Serving Riverdale, the Bronx and Lower Westchester — reserve yours online today!')
@@ -234,6 +277,20 @@ test('catalog sync mirrors Syracuse exactly, verifies itself and is idempotent',
   assert.equal(second.plan.itemsToUpdate, 0)
   assert.equal(second.plan.itemsToCreate.length, 0)
   assert.equal(db.writes, writesAfterFirstRun, 'second run writes nothing')
+})
+
+test('full catalog sync applies all approved packages and remains idempotent after Syracuse reprices them', async () => {
+  const db = nycStartingDb()
+  const packages = APPROVED_PACKAGES.map(([slug, price], index) => packageSource(slug, price, index))
+  await runCatalogSync({ prisma: db, fetchImpl: fakeSyracuse({ items: packages }).impl, origin: ORIGIN, apply: true, log: () => {} })
+  for (const [slug, , approved] of APPROVED_PACKAGES) assert.equal(db.items.find(row => row.slug === slug).cost, approved, slug)
+  const repriced = packages.map(item => ({ ...item, cost: item.cost + 50, description: item.description.replaceAll(String(item.cost), String(item.cost + 50)) }))
+  await runCatalogSync({ prisma: db, fetchImpl: fakeSyracuse({ items: repriced }).impl, origin: ORIGIN, apply: true, log: () => {} })
+  for (const [slug, , approved] of APPROVED_PACKAGES) assert.equal(db.items.find(row => row.slug === slug).cost, approved, 'source price changed: ' + slug)
+  const writes = db.writes
+  const repeated = await runCatalogSync({ prisma: db, fetchImpl: fakeSyracuse({ items: repriced }).impl, origin: ORIGIN, apply: true, log: () => {} })
+  assert.equal(repeated.plan.itemsToUpdate, 0)
+  assert.equal(db.writes, writes, 'same full source performs no additional writes')
 })
 
 test('catalog sync changes nothing when Syracuse is unreachable or returns a partial catalog', async () => {

@@ -120,6 +120,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Run before descendant passive effects read bookingMethod or checkout_data.
   // Otherwise a category can rehydrate a retired warehouse-pickup appointment.
   useLayoutEffect(() => {
+    const priceRefresh = new AbortController()
     try {
       migrateDeliveryOnlySession(localStorage, sessionStorage)
       const savedBooking = localStorage.getItem(RENTSKETCH_ATTRIBUTION_KEY)
@@ -131,7 +132,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const savedPickupTime = localStorage.getItem(PICKUP_TIME_KEY)
       const savedExactTime = localStorage.getItem(EXACT_TIME_KEY)
       const savedScheduling = localStorage.getItem(SCHEDULING_KEY)
-      if (saved) setItems(JSON.parse(saved))
+      if (saved) {
+        const restoredItems = JSON.parse(saved)
+        if (Array.isArray(restoredItems)) {
+          setItems(restoredItems)
+          if (restoredItems.length > 0) {
+            // Refresh display prices only. Checkout still calculates the authoritative total.
+            fetch('/api/items', { method: 'GET', cache: 'no-store', signal: priceRefresh.signal })
+              .then(response => response.ok ? response.json() : null)
+              .then(data => {
+                if (priceRefresh.signal.aborted || !Array.isArray(data?.items)) return
+                const prices = new Map<string, number>()
+                for (const rental of data.items) {
+                  if (rental && typeof rental.id === 'string' && typeof rental.cost === 'number' && Number.isFinite(rental.cost) && rental.cost > 0) prices.set(rental.id, rental.cost)
+                }
+                setItems(current => current.map(line => {
+                  const price = prices.get(line.id)
+                  return price !== undefined && price !== line.price ? { ...line, price } : line
+                }))
+              })
+              .catch(() => { /* Retain the cart if the read-only refresh is unavailable. */ })
+          }
+        }
+      }
       if (savedDate) setEventDateState(savedDate)
       if (savedDuration) setDurationTierIdState(savedDuration)
       if (savedTimeSlot) setEventTimeSlotState(savedTimeSlot)
@@ -149,6 +172,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Browser storage may be unavailable. The server still enforces delivery-only.
     }
     setLoaded(true)
+    return () => priceRefresh.abort()
   }, [])
 
   useEffect(() => {

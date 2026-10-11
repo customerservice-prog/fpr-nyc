@@ -165,11 +165,15 @@ test('cart colors are separate lines that share one stock count', () => {
   assert.match(read('components/public/ItemCard.tsx'), /cartQuantityForItem\(items,id\)/)
 })
 
-test('item photos are the Syracuse photos through the NYC proxy, including additional photos', () => {
+test('item photos preserve source galleries and wedding cards use current NYC catalog prices', () => {
   const route = read('app/api/item-image/[slug]/route.ts')
   assert.match(route, /searchParams\.get\('index'\)/)
   assert.match(route, /additionalImages/)
-  assert.doesNotMatch(route, /NYC_ITEM_MEDIA|NYC_WEDDING_ITEM_TO_PACKAGE|sc-12x12/)
+  assert.doesNotMatch(route, /NYC_ITEM_MEDIA|sc-12x12/)
+  assert.match(route, /readNycWeddingArtwork\(weddingPackageId\)/)
+  const artwork = read('lib/nycWeddingArtworkServer.ts')
+  assert.match(artwork, /const cost = Number\(item\.cost\)/)
+  assert.doesNotMatch(artwork, /ny-parity.*weddings|pkg\.price/)
   const gallery = read('components/public/ItemGallery.tsx')
   assert.match(gallery, /\?index=\$\{index\}/)
   assert.doesNotMatch(gallery, /Reference preview/)
@@ -241,7 +245,8 @@ behavior('public item URLs never show a Syracuse place suffix but still reach th
   assert.match(page, /permanentRedirect\(itemPath\)/)
   assert.doesNotMatch(page, /\/items\/\$\{item\.slug\}|\/api\/item-image\/\$\{item\.slug\}/)
   assert.match(read('app/api/item-image/[slug]/route.ts'), /pickStoredItem\(slug, rows\)/)
-  for (const file of ['components/public/ItemCard.tsx', 'components/public/SuggestedAddons.tsx', 'components/public/MobileHome.tsx', 'components/public/DesktopHome.tsx', 'components/public/PopularRentalsShared.tsx', 'components/public/CategoryCatalogFallback.tsx', 'components/public/PlanningEstimator.tsx', 'app/sitemap.ts', 'lib/nycIndexNow.ts', 'app/(public)/weddings/page.tsx', 'app/(public)/weddings/layout.tsx']) {
+  // The desktop homepage no longer renders the owner-removed product grid.
+  for (const file of ['components/public/ItemCard.tsx', 'components/public/SuggestedAddons.tsx', 'components/public/MobileHome.tsx', 'components/public/PopularRentalsShared.tsx', 'components/public/CategoryCatalogFallback.tsx', 'components/public/PlanningEstimator.tsx', 'app/sitemap.ts', 'lib/nycIndexNow.ts', 'app/(public)/weddings/page.tsx', 'app/(public)/weddings/layout.tsx']) {
     const source = read(file)
     assert.match(source, /nycItemPath\(/, file + ' links items through nycItemPath')
     assert.doesNotMatch(source, /['"`]\/items\/['"`]?\s*\+|`\/items\/\$\{/, file + ' builds no raw item URLs')

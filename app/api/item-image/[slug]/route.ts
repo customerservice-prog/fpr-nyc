@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import sharp from 'sharp'
 import { prisma } from '@/lib/prisma'
 import { pickStoredItem, storedItemSlugCandidates } from '@/lib/nycItemPath'
+import { nycItemUrlSlug } from '@/lib/nycItemPath'
+import { NYC_WEDDING_ITEM_TO_PACKAGE } from '@/lib/nycWeddingImages'
+import { readNycWeddingArtwork } from '@/lib/nycWeddingArtworkServer'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,6 +63,20 @@ export async function GET(
   const index = indexParam === null ? null : Number(indexParam)
   if (index !== null && (!Number.isInteger(index) || index < 0 || index > MAX_ADDITIONAL_INDEX)) {
     return new NextResponse('Not found', { status: 404 })
+  }
+
+  // The wedding catalog and brochure must show the same current NYC price.
+  // Never proxy an inherited price-bearing brochure for the primary photo.
+  const weddingPackageId = NYC_WEDDING_ITEM_TO_PACKAGE[nycItemUrlSlug(slug)]
+  if (index === null && weddingPackageId) {
+    const artwork = await readNycWeddingArtwork(weddingPackageId)
+    if (!artwork) return new NextResponse('Not found', { status: 404 })
+    return new NextResponse(artwork.bytes, { headers: {
+      'Content-Type': artwork.contentType,
+      'Cache-Control': 'public, max-age=0, must-revalidate',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Image-Reference': 'native-NYC-package-current-catalog',
+    } })
   }
 
   // Exact stored slug first, then the stored slug behind a short NYC URL (lib/nycItemPath).

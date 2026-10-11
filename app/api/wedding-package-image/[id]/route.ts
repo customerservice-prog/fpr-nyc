@@ -1,26 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { readNycWeddingArtwork } from '@/lib/nycWeddingArtworkServer'
+import { isNycWeddingArtworkId, readNycWeddingArtwork } from '@/lib/nycWeddingArtworkServer'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
+    if (isNycWeddingArtworkId(id)) {
+      const artwork = await readNycWeddingArtwork(id)
+      if (!artwork) return new NextResponse('Not found', { status: 404 })
+      return new NextResponse(artwork.bytes, { headers: {
+        'Content-Type': artwork.contentType,
+        'Cache-Control': 'public, max-age=0, must-revalidate',
+        'X-Image-Reference': 'native-NYC-package-current-catalog',
+        'X-Content-Type-Options': 'nosniff',
+      } })
+    }
     const pkg = await prisma.weddingPackage.findUnique({ where: { id }, select: { image: true } })
     if (!pkg) return new NextResponse('Not found', { status: 404 })
-
-    const exactArtwork = await readNycWeddingArtwork(id)
-    if (exactArtwork) {
-      return new NextResponse(exactArtwork.bytes, {
-        headers: {
-          'Content-Type': exactArtwork.contentType,
-          'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
-          'X-Image-Reference': 'exact-public-NY-artwork-local-NYC-snapshot',
-          'X-Content-Type-Options': 'nosniff',
-        },
-      })
-    }
 
     if (!pkg.image) return new NextResponse('Not found', { status: 404 })
     const match = pkg.image.match(/^data:(image\/(?:png|jpeg|webp|gif|avif));base64,([\s\S]*)$/)

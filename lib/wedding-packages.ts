@@ -7,9 +7,9 @@ import { weddingPackageCatalogDetails } from '@/lib/weddingPackageCatalog'
 
 const fallbackById = new Map(WEDDING_PACKAGES.map((pkg) => [pkg.id, pkg]))
 
-// The five canonical package visuals are locked to the shared public Friendly
-// Party Rental artwork. No other location's customer, order, payment, account,
-// or runtime storefront data is used here.
+// The five package visuals are generated from price-free catalog photos with
+// live NYC price and inclusion text. No other location's price-bearing brochure
+// or customer, order, payment or account data is used here.
 //
 // Prices: a package price is shown only from its published, priced NYC catalog
 // item ("Wedding Package - <name>", the item checkout sells). WeddingPackage.price
@@ -24,19 +24,19 @@ export async function getSyncedWeddingPackages() {
 
   const items = await prisma.item.findMany({
     where: { name: { in: packages.map((p) => `Wedding Package - ${p.name}`) } },
-    select: { name: true, cost: true, description: true, displayToCustomer: true, status: true },
+    select: { name: true, cost: true, description: true, updatedAt: true, displayToCustomer: true, status: true },
   })
 
-  const approvedCatalogByName = new Map<string, { cost: number; description: string | null }>()
+  const approvedCatalogByName = new Map<string, { cost: number; description: string | null; updatedAt: Date }>()
   for (const item of items) {
     const cost = Number(item.cost)
-    if (item.displayToCustomer && item.status === 'Available' && Number.isFinite(cost) && cost > 0) approvedCatalogByName.set(item.name, { cost, description: item.description })
+    if (item.displayToCustomer && item.status === 'Available' && Number.isFinite(cost) && cost > 0) approvedCatalogByName.set(item.name, { cost, description: item.description, updatedAt: item.updatedAt })
   }
 
   return packages.map((p) => {
     const fallback = fallbackById.get(p.id)
     const approvedCatalog = approvedCatalogByName.get(`Wedding Package - ${p.name}`)
-    const image = NYC_WEDDING_IMAGES[p.id] || (p.image
+    const image = (NYC_WEDDING_IMAGES[p.id] ? `${NYC_WEDDING_IMAGES[p.id]}&catalog=${encodeURIComponent(`${approvedCatalog?.updatedAt?.getTime() || 'unpriced'}-${approvedCatalog?.cost || 0}`)}` : '') || (p.image
       ? `/api/wedding-package-image/${p.id}?v=${p.updatedAt ? new Date(p.updatedAt).toISOString() : IMAGE_CACHE_BUST}`
       : fallback?.image || null)
     // WeddingPackage rows were copied with older package scopes. Use the published

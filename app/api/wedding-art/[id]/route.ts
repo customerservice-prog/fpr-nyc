@@ -11,9 +11,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     return new NextResponse(artwork.bytes, {
       headers: {
         'Content-Type': artwork.contentType,
-        'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600',
+        'Cache-Control': 'public, max-age=0, must-revalidate',
         'X-Content-Type-Options': 'nosniff',
-        'X-Image-Reference': 'exact-public-NY-artwork-local-SC-snapshot',
+        'X-Image-Reference': 'native-NYC-package-current-catalog',
       },
     })
   } catch {

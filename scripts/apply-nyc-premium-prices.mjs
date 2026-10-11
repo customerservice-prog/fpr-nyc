@@ -1,6 +1,6 @@
 // Railway pre-deploy step 2: NYC prices from the LIVE Syracuse catalog.
-//   - packages (name/slug/category contains "package"): exactly the Syracuse price
-//   - everything else: cleanNycPrice(Syracuse price x 1.70) -> no customer-facing cents
+//   - the 17 owner-approved packages: independent fixed Riverdale prices
+//   - other items and future unlisted packages: cleanNycPrice(Syracuse price x 1.70)
 // Dry run by default; --apply writes only Item.cost for matching slugs, then verifies.
 // Syracuse unreachable: prices are left unchanged (use --strict to fail instead).
 import { PrismaClient } from '@prisma/client'
@@ -21,7 +21,7 @@ async function main() {
   console.log(JSON.stringify({
     apply: APPLY,
     multiplier: 1.7,
-    pricing: 'packages unchanged from Syracuse; every other item = clean whole-dollar Syracuse x 1.70',
+    pricing: '17 owner-approved Riverdale package prices; other items and unlisted packages = clean whole-dollar Syracuse x 1.70',
     syracuseItems: syracuseItems.length,
     matchedNycItems: rows.length,
     packages: [...expected.values()].filter((row) => row.isPackage).length,

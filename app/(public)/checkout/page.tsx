@@ -199,10 +199,15 @@ export default function CheckoutPage() {
   const returnDateInfo = selectedTier && eventDate ? calculateReturnDateInfo(eventDate, selectedTier.minDays, selectedTier.maxDays) : ''
   const schedulingFeeTotal = hasNewScheduling ? (schedulingDetails.exactDeliveryFee || 0) + (schedulingDetails.exactPickupFee || 0) : 0
 
+  if (!loaded) {
+    return <div className="max-w-2xl mx-auto px-4 py-12 text-center"><p role="status" className="text-body">Loading your cart...</p></div>
+  }
+
   if (!items.length || !eventDate) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-        <p className="text-body mb-4">Your cart is empty or no event date selected.</p>
+        <h1 className="mb-3 text-2xl font-bold text-dark">Start Your Reservation</h1>
+        <p className="text-body mb-4">{!items.length ? 'Choose your event date and rentals to begin.' : 'Choose an event date for the rentals in your cart.'}</p>
         <a href="/order-by-date" className="btn-primary inline-block">Start Booking</a>
       </div>
     )
@@ -477,8 +482,9 @@ export default function CheckoutPage() {
                 <h3 className="font-bold text-dark mb-2 text-sm">Your Event</h3>
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Event starts</label>
+                    <label htmlFor="checkout-event-start" className="block text-xs text-gray-500 mb-1">Event starts</label>
                     <select
+                      id="checkout-event-start"
                       value={editEventStartTime}
                       onChange={(e) => setEditEventStartTime(e.target.value)}
                       className="w-full border rounded px-3 py-2"
@@ -490,8 +496,9 @@ export default function CheckoutPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Event ends</label>
+                    <label htmlFor="checkout-event-end" className="block text-xs text-gray-500 mb-1">Event ends</label>
                     <select
+                      id="checkout-event-end"
                       value={editEventEndTime}
                       onChange={(e) => setEditEventEndTime(e.target.value)}
                       className="w-full border rounded px-3 py-2"
@@ -553,6 +560,7 @@ export default function CheckoutPage() {
                   </label>
                   {editWantsExactDelivery && (
                     <select
+                      aria-label="Exact delivery time"
                       value={editExactDeliveryTime}
                       onChange={(e) => setEditExactDeliveryTime(e.target.value)}
                       className="w-full border rounded px-3 py-2 mt-3"
@@ -596,6 +604,7 @@ export default function CheckoutPage() {
                   </label>
                   {editPickupType === 'requiredBy' && (
                     <select
+                      aria-label="Requested event collection time"
                       value={editPickupRequiredByTime}
                       onChange={(e) => setEditPickupRequiredByTime(e.target.value)}
                       className="w-full border rounded px-3 py-2"
@@ -622,6 +631,7 @@ export default function CheckoutPage() {
                   {exactPickupOffered && editPickupType === 'exact' && (
                     <>
                       <select
+                        aria-label="Guaranteed exact event collection time"
                         value={editExactPickupTime}
                         onChange={(e) => setEditExactPickupTime(e.target.value)}
                         className="w-full border rounded px-3 py-2"
@@ -657,6 +667,7 @@ export default function CheckoutPage() {
                 </div>
                 {editAppointmentSlot === 'specific' && (
                   <select
+                    aria-label="Specific appointment time"
                     value={editAppointmentSpecificTime}
                     onChange={(e) => setEditAppointmentSpecificTime(e.target.value)}
                     className="w-full border rounded px-3 py-2 mb-4"
@@ -751,40 +762,40 @@ export default function CheckoutPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-dark mb-1">First Name *</label>
-            <input {...register('firstName', { required: true })} className="w-full border rounded px-3 py-2" />
+            <label htmlFor="checkout-firstName" className="block text-sm font-medium text-dark mb-1">First Name *</label>
+            <input id="checkout-firstName" autoComplete="given-name" aria-invalid={!!errors.firstName} {...register('firstName', { required: true })} className="w-full border rounded px-3 py-2" />
             {errors.firstName && <span className="text-red-500 text-xs">Required</span>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-dark mb-1">Last Name *</label>
-            <input {...register('lastName', { required: true })} className="w-full border rounded px-3 py-2" />
+            <label htmlFor="checkout-lastName" className="block text-sm font-medium text-dark mb-1">Last Name *</label>
+            <input id="checkout-lastName" autoComplete="family-name" aria-invalid={!!errors.lastName} {...register('lastName', { required: true })} className="w-full border rounded px-3 py-2" />
             {errors.lastName && <span className="text-red-500 text-xs">Required</span>}
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-dark mb-1">Email *</label>
-          <input type="email" {...register('email', { required: true })} className="w-full border rounded px-3 py-2" />
+          <label htmlFor="checkout-email" className="block text-sm font-medium text-dark mb-1">Email *</label>
+          <input id="checkout-email" autoComplete="email" aria-invalid={!!errors.email} type="email" {...register('email', { required: true })} className="w-full border rounded px-3 py-2" />
           {errors.email && <span className="text-red-500 text-xs">Required</span>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-dark mb-1">Phone</label>
-          <input type="tel" {...register('phone')} className="w-full border rounded px-3 py-2" />
+          <label htmlFor="checkout-phone" className="block text-sm font-medium text-dark mb-1">Phone</label>
+          <input id="checkout-phone" autoComplete="tel" type="tel" {...register('phone')} className="w-full border rounded px-3 py-2" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-dark mb-1">Event Address *</label>
-          <input {...register('eventAddress', { required: true })} className="w-full border rounded px-3 py-2" />
+          <label htmlFor="checkout-eventAddress" className="block text-sm font-medium text-dark mb-1">Event Address *</label>
+          <input id="checkout-eventAddress" autoComplete="street-address" {...register('eventAddress', { required: true })} className="w-full border rounded px-3 py-2" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-dark mb-1">City {watch('deliveryType') !== 'pickup' ? '*' : ''}</label>
-            <input {...register('eventCity', { required: watch('deliveryType') !== 'pickup' })} className="w-full border rounded px-3 py-2" />
+            <label htmlFor="checkout-eventCity" className="block text-sm font-medium text-dark mb-1">City {watch('deliveryType') !== 'pickup' ? '*' : ''}</label>
+            <input id="checkout-eventCity" autoComplete="address-level2" {...register('eventCity', { required: watch('deliveryType') !== 'pickup' })} className="w-full border rounded px-3 py-2" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-dark mb-1">State {watch('deliveryType') !== 'pickup' ? '*' : ''}</label>
-            <input {...register('eventState', { required: watch('deliveryType') !== 'pickup' })} defaultValue="NY" className="w-full border rounded px-3 py-2" /></div>
+            <label htmlFor="checkout-eventState" className="block text-sm font-medium text-dark mb-1">State {watch('deliveryType') !== 'pickup' ? '*' : ''}</label>
+            <input id="checkout-eventState" autoComplete="address-level1" {...register('eventState', { required: watch('deliveryType') !== 'pickup' })} defaultValue="NY" className="w-full border rounded px-3 py-2" /></div>
           <div>
-            <label className="block text-sm font-medium text-dark mb-1">Zip {watch('deliveryType') !== 'pickup' ? '*' : ''}</label>
-            <input {...register('eventZip', { required: watch('deliveryType') !== 'pickup' })} className="w-full border rounded px-3 py-2" />
+            <label htmlFor="checkout-eventZip" className="block text-sm font-medium text-dark mb-1">Zip {watch('deliveryType') !== 'pickup' ? '*' : ''}</label>
+            <input id="checkout-eventZip" autoComplete="postal-code" inputMode="numeric" {...register('eventZip', { required: watch('deliveryType') !== 'pickup' })} className="w-full border rounded px-3 py-2" />
           </div>
         </div>
         {(hasTablesTentsItem || hasBounceItem) && (
@@ -793,8 +804,8 @@ export default function CheckoutPage() {
               <>
                 <p className="text-sm font-medium text-dark">Tent Setup Details</p>
                 <div>
-                  <label className="block text-sm font-medium text-dark mb-1">Surface Type</label>
-                  <select {...register('tentSurfaceType')} className="w-full border rounded px-3 py-2">
+                  <label htmlFor="checkout-tentSurfaceType" className="block text-sm font-medium text-dark mb-1">Surface Type</label>
+                  <select id="checkout-tentSurfaceType" {...register('tentSurfaceType')} className="w-full border rounded px-3 py-2">
                     <option value="">Select surface type</option>
                     <option value="grass">Grass</option>
                     <option value="concrete">Concrete / Pavement</option>
@@ -804,8 +815,8 @@ export default function CheckoutPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-dark mb-1">Tent Setup Area / Dimensions</label>
-                  <input {...register('tentSurfaceArea')} placeholder="e.g. 20ft x 20ft" className="w-full border rounded px-3 py-2" />
+                  <label htmlFor="checkout-tentSurfaceArea" className="block text-sm font-medium text-dark mb-1">Tent Setup Area / Dimensions</label>
+                  <input id="checkout-tentSurfaceArea" {...register('tentSurfaceArea')} placeholder="e.g. 20ft x 20ft" className="w-full border rounded px-3 py-2" />
                 </div>
               </>
             )}
@@ -825,8 +836,8 @@ export default function CheckoutPage() {
           </div>
         )}
         <div>
-          <label className="block text-sm font-medium text-dark mb-1">Coupon Code</label>
-          <input {...register('couponCode')} placeholder="Optional" className="w-full border rounded px-3 py-2" />
+          <label htmlFor="checkout-couponCode" className="block text-sm font-medium text-dark mb-1">Coupon Code</label>
+          <input id="checkout-couponCode" {...register('couponCode')} placeholder="Optional" className="w-full border rounded px-3 py-2" />
         </div>
         {damageWaiverPercent !== null && <div className="flex items-start gap-2 bg-gray-50 p-3 rounded">
           <input type="checkbox" id="damageWaiver" {...register('damageWaiver')} className="mt-1" />
@@ -835,8 +846,8 @@ export default function CheckoutPage() {
           </label>
         </div>}
         <div>
-          <label className="block text-sm font-medium text-dark mb-1">Notes</label>
-          <textarea {...register('notes')} rows={3} className="w-full border rounded px-3 py-2" />
+          <label htmlFor="checkout-notes" className="block text-sm font-medium text-dark mb-1">Notes</label>
+          <textarea id="checkout-notes" {...register('notes')} rows={3} className="w-full border rounded px-3 py-2" />
         </div>
         <button type="submit" disabled={loading} className="btn-primary w-full">
           {loading ? 'Processing...' : 'Continue to Payment'}

@@ -60,7 +60,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
 
   const whyChooseUs = [
     'Family-owned rental company serving the NYC / Downstate market',
-    'Fully insured with professional delivery and setup crews',
+    'Coordinated delivery and setup for your event site',
     'Clean, professionally maintained equipment',
     'Riverdale-area delivery and event-site collection; no warehouse customer pickup',
   ]

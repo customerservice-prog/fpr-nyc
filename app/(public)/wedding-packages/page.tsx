@@ -52,8 +52,9 @@ export default async function WeddingPackagesPage({
           )}
           <h1 className="text-3xl font-bold text-dark mb-2">{pkg.name}</h1>
           <p className="text-4xl font-bold text-secondary mb-2">{pkg.price !== null ? formatCurrency(pkg.price) : 'Price on request'}</p>
-          <p className="text-body mb-6">Up to {pkg.guests} guests</p>
+          <p className="text-body mb-6">{pkg.guests > 0 ? `Up to ${pkg.guests} guests` : 'Guest count confirmed in your quote'}</p>
 
+          <p className="text-body text-xs mb-6">Package contents are listed below. Styled photography may show additional décor.</p>
           <h2 className="font-bold text-dark mb-4">Package Includes:</h2>
           <ul className="space-y-3 mb-8">
             {pkg.items.map((item: string) => (
@@ -88,7 +89,7 @@ export default async function WeddingPackagesPage({
           {packages.map((p) => (
             <Link
               key={p.id}
-              href={`/wedding-packages?package=${p.id}`}
+              href={`/wedding-packages?package=${encodeURIComponent(p.id)}`}
               prefetch={false}
               className="border border-primary/30 rounded-lg overflow-hidden hover:bg-primary/10 transition-colors flex items-center gap-3"
             >

@@ -14,7 +14,13 @@ export function localizeNycPublicCopy(value?: string | null, price?: number | nu
 }
 
 export function itemDescriptionForNyc(name: string, value?: string | null, price?: number | null): string {
-  const localized = localizeNycPublicCopy(value, price)
+  let localized = localizeNycPublicCopy(value, price)
+  const photoboothRental = /^photobooth\d+hour(?:with|no)attendant$/.test(name.toLowerCase().replace(/[^a-z0-9]/g, ''))
+  if (photoboothRental) {
+    localized = localized
+      .replace(/unlimited digital photo sharing\s*(?:\(text\s*&\s*email\))?/gi, 'digital photos')
+      .replace(/a custom backdrop/gi, 'a standard backdrop')
+  }
   if (localized) return localized
   return `Rent the ${name} from Friendly Party Rental NYC for events in Riverdale, selected Bronx neighborhoods, and Lower Westchester. Check your date online for current availability and pricing.`
 }

@@ -6,10 +6,9 @@ export const dynamic = 'force-dynamic'
 export default async function PayNowPage({
   searchParams,
 }: {
-  searchParams: { on?: string; ln?: string }
+  searchParams: Promise<{ on?: string; ln?: string }>
 }) {
-  const orderNumber = searchParams.on
-  const lastName = searchParams.ln
+  const { on: orderNumber, ln: lastName } = await searchParams
 
   if (orderNumber && lastName) {
     const order = await prisma.order.findFirst({
@@ -30,7 +29,7 @@ export default async function PayNowPage({
     <div className="max-w-2xl mx-auto px-4 py-12 text-center">
       <h1 className="text-2xl font-bold text-dark mb-4">Link Not Found</h1>
       <p className="text-body">
-        This payment link is invalid or has expired. Please contact us at 718-283-4593.
+        This payment link is invalid or has expired. Please contact us at <a href="tel:7182834593" className="text-secondary underline">718-283-4593</a>.
       </p>
     </div>
   )

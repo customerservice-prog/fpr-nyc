@@ -74,6 +74,17 @@ export default function PlanningEstimator({ initialType = '' }: { initialType?: 
   })
   const chairOptions = currentItems.filter(item => /\bchair\b/i.test(item.name) && !/cover|sash|package|table|throne/i.test(item.name))
   const tableOptions = currentItems.filter(item => /\btable\b/i.test(item.name) && !/cocktail|cover|linen|package|chill|chair/i.test(item.name))
+  const selectedRentalUnits = Object.values(selections).reduce((sum, quantity) => sum + quantity, 0)
+  const selectedRentalTypes = estimate.lines.length
+  const visualRentals = estimate.lines.slice(0, 4)
+  const liveDeliveryLabel = estimate.deliveryCents !== null
+    ? money(estimate.deliveryCents / 100)
+    : currentDelivery.status === 'loading'
+      ? 'Checking…'
+      : currentDelivery.status === 'ready' && currentDelivery.estimate?.needsConfirmation
+        ? 'Office review'
+        : 'Not checked'
+  const liveLocationLabel = details.location.trim() || (details.zip ? `ZIP ${details.zip}` : 'Location undecided')
 
   function update<K extends keyof EstimateDetails>(key: K, value: EstimateDetails[K]) {
     setDetails(previous => ({ ...previous, [key]: value }))
@@ -172,6 +183,20 @@ export default function PlanningEstimator({ initialType = '' }: { initialType?: 
         <div className={styles.panel} data-estimator-step={step}>
           <p className={styles.eyebrow}>Step {step + 1} of 4 · {steps[step]}</p>
           <h3 ref={headingRef} tabIndex={-1} style={{ scrollMarginTop: 110 }}>{['What are we celebrating?', 'The right support for your day.', 'Make the space your own.', 'Your event, at a glance.'][step]}</h3>
+          {step < 3 && <section className={styles.livePlan} data-estimator-live-plan aria-label="Live event blueprint">
+            <div className={styles.livePlanVisual}><Photo src={selectedEvent.image} alt={selectedEvent.alt} sizes="(max-width: 767px) 100vw, 220px"/><span className={styles.livePlanTag}>Live event blueprint</span></div>
+            <div className={styles.livePlanBody}>
+              <div className={styles.livePlanHeader}><div><p className={styles.livePlanKicker}>Updates with every choice</p><h4>{selectedEvent.label} for {details.guests} guests</h4></div><p className={styles.livePlanTotal}>{subtotalLabel}<small>known charges so far</small></p></div>
+              <div className={styles.livePlanStats}>
+                <div><span>Event date</span><strong>{details.eventDate || 'Still deciding'}</strong></div>
+                <div><span>Planning</span><strong>{estimate.pkg?.name || 'Custom quote'}</strong></div>
+                <div><span>Seating start</span><strong>{details.guests} chairs · {estimate.tableCount} tables</strong></div>
+                <div><span>Rentals added</span><strong>{selectedRentalUnits ? `${selectedRentalUnits} units · ${selectedRentalTypes} types` : 'None yet'}</strong></div>
+              </div>
+              <div className={styles.livePlanFooter}><span><MapPin size={13} aria-hidden="true"/>{liveLocationLabel}</span><span><CheckCircle2 size={13} aria-hidden="true"/>Delivery: {liveDeliveryLabel}</span></div>
+              {visualRentals.length > 0 && <div className={styles.liveRentalStrip} aria-label="Selected rental preview">{visualRentals.map(line => <div className={styles.liveRentalThumb} key={line.item.id}><Photo src={line.item.image} alt="" contain sizes="54px"/><span>{line.quantity}×</span></div>)}{selectedRentalTypes > visualRentals.length && <span className={styles.liveRentalMore}>+{selectedRentalTypes - visualRentals.length} more</span>}</div>}
+            </div>
+          </section>}
           {step === 0 && <>
             <p className={styles.intro}>Start with your vision. Your choices stay with you as you explore planning and rentals.</p><div className={styles.infoGrid}><div className={styles.infoCard}><Users size={18}/><strong>Guest count drives quantities</strong><span>We use it to suggest seating and tables. It does not raise your planning-package price by itself.</span></div><div className={styles.infoCard}><CalendarDays size={18}/><strong>Your date checks inventory</strong><span>Add a date to see date-based availability context for rentals. Nothing is held until an order is booked.</span></div><div className={styles.infoCard}><MapPin size={18}/><strong>Location affects logistics</strong><span>Your ZIP can estimate delivery/travel. Exact site access, setup and pickup still need office confirmation.</span></div></div>
             <div className={styles.eventGrid}>{planningServices.map(service => <button key={service.slug} type="button" className={styles.eventCard} aria-pressed={details.eventType === service.type} onClick={() => { update('eventType', service.type); if (service.type === 'Festival / fundraiser') update('packageNumber', 0) }}>
@@ -204,7 +229,7 @@ export default function PlanningEstimator({ initialType = '' }: { initialType?: 
             {details.styling && details.packageNumber !== 2 && <p className={styles.photoNote}>Styling is a request, not an automatic inclusion. Discuss its scope and price with our team.</p>}
           </>}
           {step === 2 && <>
-            <p className={styles.intro}>Browse real catalog photos and add only what you need. These are base rental prices, separate from your planning service.</p><div className={styles.infoGrid}><div className={styles.infoCard}><CheckCircle2 size={18}/><strong>What is counted</strong><span>Selected rental quantity × current base catalog rate, plus the planning package and any extra planning hours you choose.</span></div><div className={styles.infoCard}><Sparkles size={18}/><strong>What is not automatic</strong><span>Tax, damage waiver, setup/installation, exact-time service, special site conditions and third-party vendors are not silently added.</span></div><div className={styles.infoCard}><Save size={18}/><strong>No reservation yet</strong><span>This estimator helps you plan. Inventory, staffing, site fit and final fees are confirmed before an order is booked.</span></div></div>
+            <p className={styles.intro}>Browse real catalog photos and add only what you need. These are base rental prices, separate from your planning service.</p><div className={styles.infoGrid}><div className={styles.infoCard}><CheckCircle2 size={18}/><strong>What is counted</strong><span>Selected rental quantity × current base catalog rate, plus your ZIP delivery estimate when checked. Planning support and extra planning hours are quoted separately.</span></div><div className={styles.infoCard}><Sparkles size={18}/><strong>What is not automatic</strong><span>Tax, damage waiver, setup/installation, exact-time service, special site conditions and third-party vendors are not silently added.</span></div><div className={styles.infoCard}><Save size={18}/><strong>No reservation yet</strong><span>This estimator helps you plan. Inventory, staffing, site fit and final fees are confirmed before an order is booked.</span></div></div>
             <div className={styles.deliveryRow}><label className={styles.field}><span>Event ZIP code</span><input aria-label="Event ZIP code" className={styles.input} type="text" inputMode="numeric" autoComplete="postal-code" maxLength={5} placeholder="e.g. 10471" value={details.zip} onChange={e => update('zip', e.target.value.replace(/\D/g, ''))}/></label><button className={styles.secondary} type="button" disabled={currentDelivery.status === 'loading'} onClick={checkDelivery}>{currentDelivery.status === 'loading' ? <Loader2 size={14} className={styles.spinner}/> : <MapPin size={14}/>}Check delivery</button></div>
             <div aria-live="polite">{currentDelivery.status === 'error' && <p className={styles.error}>{currentDelivery.error}</p>}{currentDelivery.status === 'ready' && <p className={currentDelivery.estimate?.needsConfirmation ? styles.notice : styles.status}>{currentDelivery.estimate?.needsConfirmation ? 'This ZIP is outside the usual service range. Delivery needs office confirmation and is not included in the subtotal.' : `${money(currentDelivery.estimate?.fee || 0)} estimated delivery / travel fee added.`}</p>}</div>
             <p className={styles.photoNote}>Uses the same ZIP-based rates as checkout, not exact street-address driving mileage. Pickup and special delivery arrangements must be confirmed separately.</p>

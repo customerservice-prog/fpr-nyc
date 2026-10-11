@@ -120,7 +120,7 @@ export default function MobileHome({ categories, desktopCategories, bounceItems,
       {heading('packagesHeading','Wedding & Event Packages')}<p className="mt-2 mb-5 text-gray-600">{editable('packagesBody','Compare the listed equipment and services. Delivery fees and tax are separate.')}</p>
       <div className="home-grid">{packages.map(pkg => <Link key={pkg.id} href={`/wedding-packages?package=${encodeURIComponent(pkg.id)}`} prefetch={false} className="overflow-hidden rounded-2xl border bg-white shadow-sm">
         {pkg.image && <div className="relative aspect-[4/3]"><Image src={pkg.image} alt={pkg.name} fill sizes="(max-width:767px) 90vw, 30vw" className="object-cover" /></div>}
-        <div className="p-5"><h3 className="text-lg font-bold">{pkg.name}</h3><p className="mt-2 text-sm">Up to {pkg.guests} guests</p><p className="mt-2 text-xl font-bold">{pkg.price === null ? 'Request a quote' : formatCurrency(pkg.price)}</p>{pkg.items && <ul className="mt-3 list-disc pl-4 text-sm text-gray-600">{pkg.items.slice(0,5).map((item,index) => <li key={index}>{item}</li>)}</ul>}</div>
+        <div className="p-5"><h3 className="text-lg font-bold">{pkg.name}</h3><p className="mt-2 text-sm">{pkg.guests > 0 ? `Up to ${pkg.guests} guests` : 'Confirm guest count with our team'}</p><p className="mt-2 text-xl font-bold">{pkg.price === null ? 'Request a quote' : formatCurrency(pkg.price)}</p>{pkg.items && <ul className="mt-3 list-disc pl-4 text-sm text-gray-600">{pkg.items.slice(0,5).map((item,index) => <li key={index}>{item}</li>)}</ul>}</div>
       </Link>)}</div>
       <div className="mt-5">{action('packagesButton','VIEW ALL WEDDING PACKAGES','packagesUrl','/weddings')}</div>
     </section>}

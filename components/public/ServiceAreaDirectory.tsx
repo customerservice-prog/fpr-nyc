@@ -11,7 +11,7 @@ export default function ServiceAreaDirectory(){
  const filtered=NYC_SERVICE_AREAS.filter(area=>(area.name+' '+area.zips.join(' ')).toLowerCase().includes(term))
  return <section id="communities" className={`${styles.wrap} ${styles.directory}`} data-sc-service-directory aria-labelledby="communities-heading">
   <div className={styles.directoryHeader}>
-   <div><p className={styles.eyebrow}>Close to your event</p><h2 id="communities-heading">Find your community</h2><p>Search the existing Riverdale delivery directory by city or ZIP code.</p></div>
+   <div><p className={styles.eyebrow}>Close to your event</p><h2 id="communities-heading">Find your community</h2><p>Explore delivery areas around Riverdale, the Bronx and Lower Westchester.</p></div>
    <div className={styles.citySearch}><label htmlFor="service-area-search">Search city or ZIP code</label><div><Search size={18}/><input id="service-area-search" type="search" placeholder="Try Yonkers or 10471" value={query} onChange={e=>setQuery(e.target.value)}/>{query&&<button type="button" onClick={()=>setQuery('')} aria-label="Clear community search"><X size={17}/></button>}</div></div>
   </div>
   <p className={styles.directoryCount} role="status">{term?`${filtered.length} ${filtered.length===1?'community matches':'communities match'} your search`:`${NYC_SERVICE_AREAS.length} listed communities`}</p>

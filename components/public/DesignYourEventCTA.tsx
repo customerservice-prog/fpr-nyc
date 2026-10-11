@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NYC_RENTSKETCH_TENANT } from '@/lib/nycRentSketch'
 
 export type DesignYourEventSource = string
@@ -27,13 +27,19 @@ export default function DesignYourEventCTA({
   productType = 'tent',
 }: DesignYourEventCTAProps) {
   const [tentPhotoOpen, setTentPhotoOpen] = useState(false)
+  const photoDialog = useRef<HTMLDialogElement>(null)
   useEffect(() => {
-    if (!tentPhotoOpen) return
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setTentPhotoOpen(false) }
-    document.addEventListener('keydown', onKey)
+    const dialog = photoDialog.current
+    if (!tentPhotoOpen || !dialog) return
+    const returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
     const old = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = old }
+    dialog.showModal()
+    return () => {
+      if (dialog.open) dialog.close()
+      document.body.style.overflow = old
+      if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true })
+    }
   }, [tentPhotoOpen])
 
   const base = 'inline-flex items-center justify-center rounded-full font-semibold px-6 py-3 transition-colors text-center'
@@ -50,20 +56,23 @@ export default function DesignYourEventCTA({
     }))
   }
 
-  if ((tent || tentSlug) && !NYC_RENTSKETCH_TENANT) {
+  if ((tent || tentSlug) && (source === 'tent_item_card' || !NYC_RENTSKETCH_TENANT)) {
     const slug = tentSlug || ''
     const image = slug ? '/api/item-image/' + encodeURIComponent(slug) : ''
+    const rentalType = productType === 'inflatable' ? 'inflatable' : 'tent'
     return <>
       <button type="button" onClick={() => setTentPhotoOpen(true)} className={`${base} ${variants[variant] || variants.primary} ${className}`}>
-        {label.replace(/3D|layout/gi, 'Tent').replace(/\s+/g, ' ').trim()}
+        {productType === 'inflatable' ? 'View Inflatable Photo' : 'View Tent Photo'}
       </button>
-      {tentPhotoOpen && <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-label={(tent || 'Tent') + ' photo'} onClick={() => setTentPhotoOpen(false)}>
-        <div className="w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={event => event.stopPropagation()}>
-          <div className="flex items-center justify-between border-b px-5 py-4"><div><p className="text-xs font-bold uppercase tracking-[.16em] text-gray-500">Rental tent photo</p><h2 className="mt-1 text-xl font-bold text-gray-900">{tent || 'Tent preview'}</h2></div><button type="button" onClick={() => setTentPhotoOpen(false)} aria-label="Close tent photo" className="rounded-full px-3 py-2 text-2xl leading-none text-gray-500 hover:bg-gray-100">×</button></div>
-          <div className="bg-slate-50 p-4 sm:p-6">{image ? <img src={image} alt={(tent || 'Tent') + ' rental photo'} className="mx-auto max-h-[70vh] w-full object-contain" /> : <p className="py-12 text-center text-gray-600">Open the tent listing to view its rental photo.</p>}</div>
-          <div className="flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-gray-600">This shows the tent itself. Event layouts are available separately in Design Your Event.</p><button type="button" onClick={() => setTentPhotoOpen(false)} className="rounded-lg bg-[#0B1F3A] px-5 py-2.5 text-sm font-bold text-white">Done</button></div>
+      {tentPhotoOpen && <dialog ref={photoDialog} className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none overflow-y-auto border-0 bg-black/70 p-4" aria-label={(tent || 'Rental') + ' photo'} onCancel={event => { event.preventDefault(); setTentPhotoOpen(false) }} onClick={() => setTentPhotoOpen(false)}>
+        <div className="flex min-h-full items-center justify-center">
+          <div className="w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={event => event.stopPropagation()}>
+          <div className="flex items-center justify-between border-b px-5 py-4"><div><p className="text-xs font-bold uppercase tracking-[.16em] text-gray-500">{productType === 'inflatable' ? 'Rental inflatable photo' : 'Rental tent photo'}</p><h2 className="mt-1 text-xl font-bold text-gray-900">{tent || 'Rental preview'}</h2></div><button type="button" onClick={() => setTentPhotoOpen(false)} aria-label={`Close ${rentalType} photo`} className="rounded-full px-3 py-2 text-2xl leading-none text-gray-500 hover:bg-gray-100">×</button></div>
+          <div className="bg-slate-50 p-4 sm:p-6">{image ? <img src={image} alt={(tent || 'Rental') + ' rental photo'} className="mx-auto max-h-[65vh] w-full object-contain" /> : <p className="py-12 text-center text-gray-600">Open the rental listing to view its photo.</p>}</div>
+          <div className="flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-gray-600">This shows the {rentalType} itself. Visit Design Your Event for layout planning.</p><button type="button" onClick={() => setTentPhotoOpen(false)} className="rounded-lg bg-[#0B1F3A] px-5 py-2.5 text-sm font-bold text-white">Done</button></div>
+          </div>
         </div>
-      </div>}
+      </dialog>}
     </>
   }
 

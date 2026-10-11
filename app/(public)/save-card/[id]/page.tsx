@@ -78,7 +78,7 @@ export default function SaveCardPage({ params }: { params: Promise<{ id: string 
       ) : (
         <>
           {error && <p role="alert" className="rounded-lg bg-red-50 p-4 text-red-800">{error}</p>}
-          {!info && !error && <p>Loading your authorization…</p>}
+          {!info && !error && <p role="status">Loading your authorization…</p>}
           {info && (
             <>
               <p>Order #{info.orderNumber}</p>
@@ -125,6 +125,7 @@ export default function SaveCardPage({ params }: { params: Promise<{ id: string 
           )}
         </>
       )}
+      <p className="text-sm text-body">Need help with this NYC reservation? <a href="tel:7182834593" className="text-secondary underline">Call 718-283-4593</a>.</p>
     </main>
   )
 }

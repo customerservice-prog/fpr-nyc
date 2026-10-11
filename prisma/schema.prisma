@@ -936,7 +936,7 @@ model DriverTimeEntry {
 model ThemeSettings {
   id String @id @default(cuid())
   headerStyle Int @default(1)
-  footerStyle String @default("dark")
+  footerStyle String @default("light-links")
   storeBackgroundImage String?
   storeBackgroundTint String @default("none")
   categoryDisplayStyle String @default("boxed")

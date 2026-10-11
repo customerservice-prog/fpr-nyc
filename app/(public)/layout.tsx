@@ -19,7 +19,7 @@ export default async function PublicLayout({ children }: { children: React.React
     <ConfettiIntro />
     <div className="hidden md:block"><Header navItems={navItems} headerStyle={theme?.headerStyle??1}/></div><div className="md:hidden"><MobileHeader/></div>
     <main className="min-h-screen pb-20">{children}</main>
-    <Footer footerStyle={theme?.footerStyle??'dark'}/>
+    <Footer footerStyle={theme?.footerStyle??'light-links'}/>
     <div className="hidden md:block"><StickyBar/></div><div className="md:hidden"><MobileBottomNav/><div style={{height:'calc(60px + env(safe-area-inset-bottom))'}}/></div>
     <ChatWidget />
     <DesignYourEventLauncher />

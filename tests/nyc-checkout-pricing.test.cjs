@@ -300,7 +300,7 @@ test('static rental pages publish no inherited prices', () => {
 
 test('wedding package prices come only from the published, priced NYC catalog item', () => {
   const lib = read('lib/wedding-packages.ts')
-  assert.match(lib, /price: approvedPrice \?\? null/)
+  assert.match(lib, /price: approvedCatalog\?\.cost \?\? null/)
   assert.doesNotMatch(lib, /: p\.price|fallback\?\.price|liveCost/)
   assert.match(lib, /item\.displayToCustomer && item\.status === 'Available' && Number\.isFinite\(cost\) && cost > 0/)
   assert.match(read('components/public/WeddingPackageCard.tsx'), /price: number \| null/)
@@ -312,6 +312,29 @@ test('wedding package prices come only from the published, priced NYC catalog it
     assert.doesNotMatch(read(file), /travel fee may apply based on distance/i, file)
   }
   assert.match(read('app/(public)/weddings/page.tsx'), /displayToCustomer: true, picture: \{ not: null \}, cost: \{ gt: 0 \}/)
+})
+
+// Public NYC sale-item descriptions captured October 11, 2026. These fixtures
+// protect customers from the older WeddingPackage rows' conflicting quantities.
+for (const fixture of JSON.parse(read('tests/fixtures/nyc-wedding-package-catalog.json'))) {
+  behavior('wedding package scope matches the published NYC catalog: ' + fixture.name, () => {
+    const { weddingPackageCatalogDetails } = loadTs('lib/weddingPackageCatalog.ts')
+    const actual = weddingPackageCatalogDetails(fixture.description)
+    assert.equal(actual.guests, fixture.guests)
+    assert.equal(actual.items.length, fixture.itemCount)
+    const includes = actual.items.join(' | ')
+    for (const inclusion of fixture.requiredInclusions) assert.ok(includes.includes(inclusion), inclusion)
+    assert.match(includes, /setup\s*(?:&|and)\s*breakdown/i)
+    assert.doesNotMatch(includes, /Not Included|Travel\/delivery|floral arrangements beyond|reserve yours/i)
+    if (fixture.name === 'Garden Reception' || fixture.name === 'Luxury Estate') assert.doesNotMatch(includes, /dance floor|photo booth|coordinator/i)
+  })
+}
+behavior('unrecognized wedding copy never falls back to another package scope', () => {
+  const { weddingPackageCatalogDetails } = loadTs('lib/weddingPackageCatalog.ts')
+  assert.deepEqual(weddingPackageCatalogDetails('Please contact us for a custom quote.'), { guests: 0, items: [] })
+  const source = read('lib/wedding-packages.ts')
+  assert.match(source, /description = localizeNycPublicCopy\(approvedCatalog\?\.description\)/)
+  assert.doesNotMatch(source, /localizeNycPublicCopy\(p\.description\)|items: packageItems|guests: p\.guests/)
 })
 
 test('planning packages show no unapproved prices', () => {

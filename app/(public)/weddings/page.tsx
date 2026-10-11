@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { nycPageMetadata } from '@/lib/nycSeo'
 import { nycItemPath } from '@/lib/nycItemPath'
 import Link from 'next/link'
@@ -7,7 +8,6 @@ import Accordion from '@/components/public/Accordion'
 import { getSyncedWeddingPackages } from '@/lib/wedding-packages'
 import { formatCurrency } from '@/lib/utils'
 import { prisma } from '@/lib/prisma'
-import type { Metadata } from 'next'
 import { IMAGE_CACHE_BUST } from '@/lib/imageVersion'
 export const metadata = nycPageMetadata("/weddings","Wedding Rentals | Riverdale, Bronx & Lower Westchester","Browse wedding tents, tables, chairs, Chiavari seating, linens, lighting, dance floors and packages with delivery across Riverdale, selected Bronx neighborhoods and Lower Westchester.")
 export const dynamic = 'force-dynamic'
@@ -38,15 +38,15 @@ const faqItems = [
 const whatWeOffer = [
   { label: 'Seating', icon: '🪑', href: '/category/table-chair-rentals' },
   { label: 'Linens', icon: '🤍', href: '/category/linen-rentals' },
-  { label: 'Ceremony Decor', icon: '💐', href: '/category/weddings' },
+  { label: 'Ceremony Decor', icon: '💐', href: '#wedding-rentals' },
   { label: 'Lighting', icon: '✨', href: '/category/event-lighting-rentals' },
-  { label: 'Backdrops', icon: '🖼️', href: '/category/weddings' },
-  { label: 'Tents & Dance Floors', icon: '⛺', href: '/category/tent-rentals' },
+  { label: 'Backdrops', icon: '🖼️', href: '#wedding-rentals' },
+  { label: 'Dance Floors', icon: '💃', href: '/category/dance-floor-stage-rentals' },
 ]
 
 const whyChooseUs = [
   { label: 'Family-owned rental company serving the NYC / Downstate market', icon: '🏡' },
-  { label: 'Fully insured and professional setup crews', icon: '🛡️' },
+  { label: 'Clear delivery, setup, and pickup details for your order', icon: '🛡️' },
   { label: 'Clean, professionally maintained equipment', icon: '✨' },
   { label: 'Flexible packages for different guest counts and budgets', icon: '💝' },
 ]
@@ -109,7 +109,7 @@ export default async function WeddingsPage() {
           <div className="max-w-5xl mx-auto px-4 py-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-white/80 text-xs md:text-sm uppercase tracking-wider">
             <span>Family-Owned Rental Company</span>
             <span className="hidden md:inline text-primary">•</span>
-            <span>Fully Insured</span>
+            <span>Clear Rental &amp; Delivery Details</span>
             <span className="hidden md:inline text-primary">•</span>
             <span>Serving Downstate New York</span>
           </div>
@@ -128,7 +128,14 @@ export default async function WeddingsPage() {
               {decorItems.map((item) => (
                 <Link key={item.id} href={nycItemPath(item.slug!)} className="group block bg-white rounded-xl border border-primary/20 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                   <div className="relative w-full aspect-square bg-gray-50">
-                    <img src={`/api/item-image/${item.slug}?v=${IMAGE_CACHE_BUST}`} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <Image
+                      src={`/api/item-image/${item.slug}?v=${IMAGE_CACHE_BUST}`}
+                      alt={item.name}
+                      fill
+                      sizes="(max-width: 767px) calc((100vw - 3rem) / 2), (max-width: 1023px) calc((100vw - 6rem) / 4), 195px"
+                      quality={65}
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
                   </div>
                   <div className="p-3">
                     <p className="text-sm font-semibold text-dark line-clamp-2">{item.name}</p>
@@ -143,7 +150,7 @@ export default async function WeddingsPage() {
 
         <SectionDivider />
 
-        <div id="packages" className="text-center mb-4">
+        <div id="packages" className="text-center mb-4 scroll-mt-28">
           <p className="text-secondary uppercase tracking-[0.3em] text-xs font-bold mb-3">Curated Collections</p>
           <h2 className={`font-serif text-3xl md:text-4xl font-bold text-dark mb-3`}>Our Wedding Rental Packages</h2>
           <p className="text-body">Delivery is charged by ZIP code and shown at checkout. Package pricing and setup details are confirmed before booking.</p>
@@ -166,7 +173,7 @@ export default async function WeddingsPage() {
             <h2 className={`font-serif text-xl font-bold text-dark mb-6 text-center`}>What We Offer</h2>
             <div className="grid md:grid-cols-3 gap-5">
               {whatWeOffer.map((item) => (
-                <Link key={item.label} href={item.href} className="bg-white border border-primary/20 p-6 rounded-xl text-center font-medium text-dark shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block">
+                <Link key={item.label} href={item.href === '#wedding-rentals' && !decorItems.length ? '/category/weddings' : item.href} className="bg-white border border-primary/20 p-6 rounded-xl text-center font-medium text-dark shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block">
                   <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary/15 border border-primary/40 flex items-center justify-center text-2xl">{item.icon}</div>
                   {item.label}
                 </Link>

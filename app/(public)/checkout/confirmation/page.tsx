@@ -42,7 +42,9 @@ export default function ConfirmationPage() {
   }, [])
 
   if (!receipt) return <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-    <p className="text-body">{message}</p>
+    <h1 className="mb-4 text-2xl font-bold text-dark">Payment Confirmation</h1>
+    <p role="status" className="text-body">{message}</p>
+    <a href="tel:7182834593" className="mt-4 block text-secondary underline">Call the NYC team: 718-283-4593</a>
     <Link href="/" className="btn-primary inline-block mt-4">Return Home</Link>
   </div>
 

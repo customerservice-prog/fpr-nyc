@@ -80,7 +80,7 @@ export default function MyOrderPage(){
    </div>}
 
    {stage==='code'&&<div className="mt-6 max-w-md space-y-3">
-    <label className="block text-sm font-semibold">6-digit verification code<input inputMode="numeric" maxLength={6} value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,'').slice(0,6))} className="mt-1 w-full rounded-lg border px-3 py-3 text-2xl tracking-[.25em]"/></label>
+    <label className="block text-sm font-semibold">6-digit verification code<input inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,'').slice(0,6))} className="mt-1 w-full rounded-lg border px-3 py-3 text-2xl tracking-[.25em]"/></label>
     <button disabled={busy||code.length!==6} onClick={()=>void verify()} className="btn-primary w-full disabled:opacity-50">{busy?'Verifying…':'Open my order'}</button>
     <button type="button" className="text-sm text-secondary underline" onClick={()=>{setStage('lookup');setCode('');setError('')}}>Use a different order number</button>
    </div>}

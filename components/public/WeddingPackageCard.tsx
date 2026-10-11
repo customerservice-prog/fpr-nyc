@@ -57,7 +57,7 @@ export default function WeddingPackageCard({
         )}
         <h3 className={`font-serif text-2xl font-bold text-dark mb-1`}>{name}</h3>
         <p className="text-3xl font-bold text-secondary mb-1">{price !== null && price > 0 ? formatCurrency(price) : 'Price on request'}</p>
-        <p className="text-body text-sm mb-4">Up to {guests} guests</p>
+        <p className="text-body text-sm mb-4">{guests > 0 ? `Up to ${guests} guests` : 'Guest count confirmed in your quote'}</p>
         <div className="h-px bg-primary/30 mb-4" />
         <ul className="space-y-2 mb-6">
           {items.map((item) => (
@@ -68,7 +68,7 @@ export default function WeddingPackageCard({
           ))}
         </ul>
         <Link
-          href={`/wedding-packages?package=${id}`}
+          href={`/wedding-packages?package=${encodeURIComponent(id)}`}
           prefetch={false}
           className="btn-primary block text-center uppercase text-sm tracking-wide"
         >

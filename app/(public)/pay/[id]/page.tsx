@@ -43,6 +43,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
   const [loading, setLoading] = useState(false)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [paid, setPaid] = useState(false)
+  const [paymentPending, setPaymentPending] = useState(false)
   const [receipt, setReceipt] = useState<PaymentReceipt | null>(null)
   const [saveCard, setSaveCard] = useState(false)
   const [paymentOption, setPaymentOption] = useState<'deposit' | 'full' | 'other'>('deposit')
@@ -188,6 +189,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
     if (!response.ok) throw new Error('Your payment result needs verification. Please contact us before paying again.')
     const result = await response.json()
     if (result.pending) {
+      setPaymentPending(true)
       toast.success('Your payment is processing. We will email your receipt when it completes.')
     } else if (result.receipt?.orderId === id && result.receipt.status === 'succeeded') {
       setReceipt(result.receipt)
@@ -226,13 +228,13 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <h1 className="text-2xl font-bold text-dark mb-4">Quote Not Found</h1>
-        <p className="text-body">This payment link is invalid or has expired. Please contact us at 718-283-4593.</p>
+        <p className="text-body">This payment link is invalid or has expired. Please contact us at <a href="tel:7182834593" className="text-secondary underline">718-283-4593</a>.</p>
       </div>
     )
   }
 
   if (!order) {
-    return <div className="max-w-2xl mx-auto px-4 py-12 text-center">Loading...</div>
+    return <div className="max-w-2xl mx-auto px-4 py-12 text-center"><p role="status">Loading your order...</p></div>
   }
 
   if (order.status === 'canceled') {
@@ -257,16 +259,18 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
   if (paid) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-        <h1 className="text-2xl font-bold text-dark mb-4">Thank You!</h1>
-        <p className="text-body mb-4">Your payment has been received for Order #{order.orderNumber}.</p>
-        {receipt ? <PaymentReceiptSummary receipt={receipt} /> : <p className="text-body mt-4">Please contact us at 718-283-4593 if you need a copy of your verified receipt.</p>}
+        <h1 className="text-2xl font-bold text-dark mb-4">{paymentPending ? 'Payment Processing' : receipt ? 'Thank You!' : 'Payment Verification'}</h1>
+        <p role="status" className="text-body mb-4">{paymentPending
+          ? `Your payment for Order #${order.orderNumber} is processing with your bank. We will email your receipt when it completes. Please do not pay again.`
+          : receipt ? `Your payment has been received for Order #${order.orderNumber}.` : `Your payment result for Order #${order.orderNumber} needs verification. Please contact our NYC team before making another payment.`}</p>
+        {receipt ? <PaymentReceiptSummary receipt={receipt} /> : !paymentPending && <p className="text-body mt-4">Please contact us at <a href="tel:7182834593" className="text-secondary underline">718-283-4593</a> if you need a copy of your verified receipt.</p>}
       </div>
     )
   }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
-      <h1 className="text-2xl font-bold text-dark mb-2">Quote #{order.orderNumber}</h1>
+      <h1 className="text-2xl font-bold text-dark mb-2">{order.status === 'quote' || order.status === 'incomplete' ? 'Quote' : 'Order'} #{order.orderNumber}</h1>
       <p className="text-body mb-8">Prepared for {order.customerName}</p>
 
       <div className="bg-gray-50 p-6 rounded-lg mb-8 space-y-3">
@@ -300,19 +304,20 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
           {canSelfEdit && (
             <div>
               {editItems.map((item, idx) => (
-                <div key={item.itemId + idx} className="flex items-center justify-between text-sm py-2 border-b gap-2">
-                  <span className="flex-1">{item.itemName}</span>
+                <div key={item.itemId + idx} className="flex flex-wrap items-center justify-between text-sm py-2 border-b gap-2">
+                  <span className="min-w-0 basis-full sm:flex-1">{item.itemName}</span>
                   <div className="flex items-center gap-2">
-                    <button type="button" onClick={() => changeQty(idx, -1)} className="w-6 h-6 border rounded">-</button>
+                    <button type="button" aria-label={`Decrease quantity of ${item.itemName}`} onClick={() => changeQty(idx, -1)} className="w-11 h-11 border rounded">-</button>
                     <span className="w-6 text-center">{item.quantity}</span>
-                    <button type="button" onClick={() => changeQty(idx, 1)} className="w-6 h-6 border rounded">+</button>
+                    <button type="button" aria-label={`Increase quantity of ${item.itemName}`} onClick={() => changeQty(idx, 1)} className="w-11 h-11 border rounded">+</button>
                   </div>
                   <span className="w-20 text-right">{formatCurrency(item.quantity * item.unitPrice)}</span>
-                  <button type="button" onClick={() => removeEditItem(idx)} className="text-red-600 text-xs">Remove</button>
+                  <button type="button" aria-label={`Remove ${item.itemName}`} onClick={() => removeEditItem(idx)} className="min-h-11 text-red-600 text-xs">Remove</button>
                 </div>
               ))}
               <div className="mt-4 relative">
                 <input
+                  aria-label="Search rentals to add to your quote"
                   type="text"
                   value={addQuery}
                   onChange={(e) => searchCatalog(e.target.value)}
@@ -410,8 +415,8 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
               )}
 
               <div className="mb-4">
-                <label className="block text-sm text-body mb-1">Other Amount (if different from above)</label>
-                <input type="number" min="0" step="0.01" value={otherAmount} onChange={(e) => { setOtherAmount(e.target.value); setPaymentOption('other') }} placeholder="Enter amount" className="border rounded px-3 py-2 w-full" />
+                <label htmlFor="pay-other-amount" className="block text-sm text-body mb-1">Other Amount (if different from above)</label>
+                <input id="pay-other-amount" type="number" min="0" step="0.01" value={otherAmount} onChange={(e) => { setOtherAmount(e.target.value); setPaymentOption('other') }} placeholder="Enter amount" className="border rounded px-3 py-2 w-full" />
               </div>
             </>
           )}
@@ -423,7 +428,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
               <button type="button" onClick={applyTip10} className="px-3 py-1 rounded-full border border-secondary/30 text-sm text-secondary hover:bg-secondary/10 transition">10%</button>
               <button type="button" onClick={applyTip15} className="px-3 py-1 rounded-full border border-secondary/30 text-sm text-secondary hover:bg-secondary/10 transition">15%</button>
               <button type="button" onClick={applyTip20} className="px-3 py-1 rounded-full border border-secondary/30 text-sm text-secondary hover:bg-secondary/10 transition">20%</button>
-              <input type="number" min="0" step="0.01" placeholder="Custom $" value={customTip} onChange={handleCustomTip} className="w-24 border border-gray-300 rounded-full px-3 py-1 text-sm" />
+              <input aria-label="Custom tip amount in dollars" type="number" min="0" step="0.01" placeholder="Custom $" value={customTip} onChange={handleCustomTip} className="w-24 border border-gray-300 rounded-full px-3 py-1 text-sm" />
             </div>
             {tipAmount > 0 && (
               <p className="text-sm text-secondary font-medium">Thank you! Adding a {formatCurrency(tipAmount)} tip for the crew.</p>

@@ -22,7 +22,7 @@ export default function ReviewCarousel({ showHeading = true }: { showHeading?: b
         <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm md:p-9">
           <p className="text-xs font-extrabold uppercase tracking-[.18em] text-[#C85F00]">New Riverdale / Downstate location</p>
           <h2 className="mt-2 text-2xl font-bold text-dark">Friendly service, now serving Downstate New York</h2>
-          <p className="mx-auto mt-3 max-w-3xl text-sm leading-6 text-body">This NYC / Downstate location is new, so we do not copy reviews from another Friendly Party Rental location and present them as local reviews. Book online with live date availability, transparent delivery pricing, a 25% deposit, and the same Friendly Party Rental equipment standards.</p>
+          <p className="mx-auto mt-3 max-w-3xl text-sm leading-6 text-body">Our Riverdale team brings Friendly Party Rental service to Bronx and Lower Westchester celebrations. Check your date, choose your rentals, and review delivery pricing online. Reserve with a 25% deposit and contact our NYC team for help with your setup.</p>
           <div className="mt-6 grid gap-3 text-sm font-semibold sm:grid-cols-4"><div className="rounded-xl bg-slate-50 p-4">Live online booking</div><div className="rounded-xl bg-slate-50 p-4">25% deposit</div><div className="rounded-xl bg-slate-50 p-4">Delivery & setup options</div><div className="rounded-xl bg-slate-50 p-4">Real NYC support</div></div>
         </div>
       </div>

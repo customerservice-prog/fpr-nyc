@@ -21,6 +21,7 @@ export default function GalleryPage() {
         const local: GalleryImage[] = Array.isArray(data.images) ? data.images : []
         setShared(local.length === 0)
         setImages(local.length ? local : NYC_SHARED_GALLERY)
+        setIndex(0)
         setLoading(false)
       })
       .catch(() => { if (!controller.signal.aborted) fallback() })

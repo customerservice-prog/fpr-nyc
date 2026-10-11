@@ -77,7 +77,7 @@ export default function DesignYourEventPage() {
     <section id="explore-designs" className={`${styles.wrap} ${styles.section}`}>
       <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>Choose your starting point</p><h2>What are we celebrating?</h2></div><p>Explore rental photos and talk through the pieces that make your event work. Event-date availability and setup requirements are confirmed separately.</p></div>
       <div className={styles.starters}>{starters.map((item, index) => <article key={item.slug} className={styles.starter}>
-        <div className={styles.starterImage}><span className={styles.number}>0{index + 1}</span><img src={'/api/item-image/' + item.slug} alt={item.name + ' rental photo'} width={600} height={420} loading="lazy" /><span className={styles.photoLabel}>Rental photo</span></div>
+        <div className={styles.starterImage}><span className={styles.number}>0{index + 1}</span><Image src={'/api/item-image/' + item.slug} alt={item.name + ' rental photo'} fill sizes="(max-width: 700px) calc(100vw - 40px), 390px" quality={65} /><span className={styles.photoLabel}>Rental photo</span></div>
         <div className={styles.starterCopy}><p className={styles.tag}>{item.tag}</p><h3>{item.title}</h3><p>{item.body}</p><Link href={item.href} prefetch={false} className={styles.cardButton}>{item.label}</Link></div>
       </article>)}</div>
       <p className={styles.underCards}>Complete the layout with <Link href="/category/table-chair-rentals">tables and chairs</Link> or <Link href="/category/dance-floor-stage-rentals">a dance floor</Link>. Have a different rental in mind? <Link href="/category">Browse our rental categories</Link> or <Link href="/contact_us">ask our Riverdale team</Link>.</p>

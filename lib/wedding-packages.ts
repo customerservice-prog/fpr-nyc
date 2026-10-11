@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { IMAGE_CACHE_BUST } from '@/lib/imageVersion'
 import { WEDDING_PACKAGES } from '@/lib/utils'
 import { localizeNycPublicCopy } from '@/lib/nycPublicCopy'
+import { weddingPackageCatalogDetails } from '@/lib/weddingPackageCatalog'
 
 const fallbackById = new Map(WEDDING_PACKAGES.map((pkg) => [pkg.id, pkg]))
 
@@ -23,30 +24,33 @@ export async function getSyncedWeddingPackages() {
 
   const items = await prisma.item.findMany({
     where: { name: { in: packages.map((p) => `Wedding Package - ${p.name}`) } },
-    select: { name: true, cost: true, displayToCustomer: true, status: true },
+    select: { name: true, cost: true, description: true, displayToCustomer: true, status: true },
   })
 
-  const approvedCostByName = new Map<string, number>()
+  const approvedCatalogByName = new Map<string, { cost: number; description: string | null }>()
   for (const item of items) {
     const cost = Number(item.cost)
-    if (item.displayToCustomer && item.status === 'Available' && Number.isFinite(cost) && cost > 0) approvedCostByName.set(item.name, cost)
+    if (item.displayToCustomer && item.status === 'Available' && Number.isFinite(cost) && cost > 0) approvedCatalogByName.set(item.name, { cost, description: item.description })
   }
 
   return packages.map((p) => {
     const fallback = fallbackById.get(p.id)
-    const approvedPrice = approvedCostByName.get(`Wedding Package - ${p.name}`)
+    const approvedCatalog = approvedCatalogByName.get(`Wedding Package - ${p.name}`)
     const image = NYC_WEDDING_IMAGES[p.id] || (p.image
       ? `/api/wedding-package-image/${p.id}?v=${p.updatedAt ? new Date(p.updatedAt).toISOString() : IMAGE_CACHE_BUST}`
       : fallback?.image || null)
-    const description = localizeNycPublicCopy(p.description) || fallback?.description || ''
-    const packageItems = Array.isArray(p.items) && p.items.length ? p.items : (fallback?.items || [])
+    // WeddingPackage rows were copied with older package scopes. Use the published
+    // NYC sale item's description for quantities, guest count and exclusions too.
+    const description = localizeNycPublicCopy(approvedCatalog?.description) || ''
+    const details = weddingPackageCatalogDetails(description)
 
     return {
       ...p,
       image,
       description,
-      items: packageItems,
-      price: approvedPrice ?? null,
+      guests: details.guests,
+      items: details.items,
+      price: approvedCatalog?.cost ?? null,
     }
   })
 }

@@ -310,22 +310,22 @@ export default function PaymentPage() {
           <legend className="sr-only">Payment amount and optional tip</legend>
           <p className="text-sm font-medium text-dark mb-2">How much would you like to pay today?</p>
           <div className="flex flex-wrap gap-2 mb-2">
-            <button type="button" onClick={() => { setPaymentChoice('deposit'); setCustomPayAmount('') }} className={`px-3 py-1 rounded border text-sm ${paymentChoice === 'deposit' ? 'border-primary bg-primary/10 text-dark font-medium' : 'border-gray-300 text-body'}`}>Pay Deposit{totalsReady ? ' (' + formatCurrency(depositAmount) + ')' : ''}</button>
-            <button type="button" onClick={() => { setPaymentChoice('full'); setCustomPayAmount('') }} className={`px-3 py-1 rounded border text-sm ${paymentChoice === 'full' ? 'border-primary bg-primary/10 text-dark font-medium' : 'border-gray-300 text-body'}`}>Pay Full Balance{totalsReady ? ' (' + formatCurrency(grandTotal) + ')' : ''}</button>
-            <button type="button" onClick={() => setPaymentChoice('custom')} className={`px-3 py-1 rounded border text-sm ${paymentChoice === 'custom' ? 'border-primary bg-primary/10 text-dark font-medium' : 'border-gray-300 text-body'}`}>Pay Custom Amount</button>
+            <button type="button" aria-pressed={paymentChoice === 'deposit'} onClick={() => { setPaymentChoice('deposit'); setCustomPayAmount('') }} className={`px-3 py-1 rounded border text-sm ${paymentChoice === 'deposit' ? 'border-primary bg-primary/10 text-dark font-medium' : 'border-gray-300 text-body'}`}>Pay Deposit{totalsReady ? ' (' + formatCurrency(depositAmount) + ')' : ''}</button>
+            <button type="button" aria-pressed={paymentChoice === 'full'} onClick={() => { setPaymentChoice('full'); setCustomPayAmount('') }} className={`px-3 py-1 rounded border text-sm ${paymentChoice === 'full' ? 'border-primary bg-primary/10 text-dark font-medium' : 'border-gray-300 text-body'}`}>Pay Full Balance{totalsReady ? ' (' + formatCurrency(grandTotal) + ')' : ''}</button>
+            <button type="button" aria-pressed={paymentChoice === 'custom'} onClick={() => setPaymentChoice('custom')} className={`px-3 py-1 rounded border text-sm ${paymentChoice === 'custom' ? 'border-primary bg-primary/10 text-dark font-medium' : 'border-gray-300 text-body'}`}>Pay Custom Amount</button>
           </div>
           {paymentChoice === 'custom' && <div>
-            <input type="number" min={depositAmount} max={grandTotal} step="0.01" placeholder={`Minimum ${formatCurrency(depositAmount)}`} value={customPayAmount} onChange={(event) => setCustomPayAmount(event.target.value)} className="w-40 border rounded px-2 py-1 text-sm" />
+            <input aria-label="Custom payment amount in dollars" type="number" min={depositAmount} max={grandTotal} step="0.01" placeholder={`Minimum ${formatCurrency(depositAmount)}`} value={customPayAmount} onChange={(event) => setCustomPayAmount(event.target.value)} className="w-40 border rounded px-2 py-1 text-sm" />
             <p className="text-xs text-gray-500 mt-1">Must be between {formatCurrency(depositAmount)} and {formatCurrency(grandTotal)}.</p>
           </div>}
           <div className="border-t pt-3 mt-3">
-            <p className="text-sm font-medium text-dark mb-2">Add a tip for your delivery crew</p>
+            <p className="text-sm font-medium text-dark mb-2">Add a tip for your delivery crew (optional)</p>
             <div className="flex flex-wrap gap-2 mb-2">
               <button type="button" onClick={applyTipNone} className="px-3 py-1 rounded border border-gray-300 text-sm text-body">No Tip</button>
               <button type="button" onClick={() => applyTipPercent(0.1)} className="px-3 py-1 rounded border border-gray-300 text-sm text-body">10%</button>
               <button type="button" onClick={() => applyTipPercent(0.15)} className="px-3 py-1 rounded border border-gray-300 text-sm text-body">15%</button>
               <button type="button" onClick={() => applyTipPercent(0.2)} className="px-3 py-1 rounded border border-gray-300 text-sm text-body">20%</button>
-              <input type="number" min="0" step="0.01" placeholder="Custom $" value={customTip} onChange={applyCustomTip} className="w-24 border rounded px-2 py-1 text-sm" />
+              <input aria-label="Custom tip amount in dollars" type="number" min="0" step="0.01" placeholder="Custom $" value={customTip} onChange={applyCustomTip} className="w-24 border rounded px-2 py-1 text-sm" />
             </div>
             <div className="flex justify-between text-body text-sm"><span>Tip</span><span>{formatCurrency(tipAmount)}</span></div>
           </div>

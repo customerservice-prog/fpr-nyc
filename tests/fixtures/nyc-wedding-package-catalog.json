@@ -1,0 +1,66 @@
+[
+  {
+    "name": "Backyard Elopement",
+    "description": "Rent the Wedding Package - Backyard Elopement in Riverdale, NY from Friendly Party Rental NYC — a simple, elegant, stress-free package for intimate ceremonies of up to 30 guests. Includes a 10x20 EZ pop-up pole tent, up to 4 folding tables, up to 30 white folding chairs, white table linens, and setup & breakdown. Starting at $345.00/day. Serving Riverdale, the Bronx and Lower Westchester — reserve yours online today!",
+    "guests": 30,
+    "itemCount": 5,
+    "requiredInclusions": [
+      "10x20",
+      "4 folding tables",
+      "30 white folding chairs",
+      "white table linens"
+    ]
+  },
+  {
+    "name": "Classic Ceremony",
+    "description": "A complete outdoor event package for up to 50 guests, featuring a 20′ × 20′ pole tent, six 6′ folding tables, 50 white folding chairs, white table linens, and basic centerpiece accents. Professional setup and breakdown of the included rental equipment is included, so you can enjoy a simple, coordinated setup without renting each item separately.\n\nPlease Note: This package includes only the rental items specifically listed above. Additional décor, tableware, lighting, sidewalls, and other rentals are not included unless added separately. Travel/delivery fees and applicable sales tax are additional.",
+    "guests": 50,
+    "itemCount": 6,
+    "requiredInclusions": [
+      "20′ × 20′",
+      "six 6′ folding tables",
+      "50 white folding chairs",
+      "basic centerpiece accents"
+    ]
+  },
+  {
+    "name": "Garden Reception",
+    "description": "Garden Reception — $2,295\n\nComplete reception setup for up to 80 guests\n\nCreate an elegant outdoor reception without having to select every rental individually. Our Garden Reception Package provides the essential tent, tables, seating, linens, centerpieces, and lighting for up to 80 guests, with professional setup and breakdown included.\n\nYour package includes:\n\nOne 20′ × 40′ Pole Tent\nEight 5′ Round Banquet Tables\nEighty Gold Chiavari Chairs\nEight Premium Table Linens\nEight Rustic Lantern Table Centerpieces — one per guest table\nPerimeter String Lighting around the tent\nProfessional Setup & Breakdown of included rental equipment\n\nPlease Note: This package is designed for up to 80 guests. The tent is a pole tent with interior center poles, and the final table arrangement may vary depending on the event location and site conditions.\n\nNot Included: Plates, chargers, glassware, flatware, napkins, table settings, floral arrangements beyond the included Rustic Lantern Centerpieces, dance floor, sidewalls, draping, cocktail tables, or other décor/rentals not specifically listed above. Items shown in styled photos that are not listed as included are for presentation purposes only.\n\nTravel/delivery fees and applicable sales tax are additional and calculated separately.",
+    "guests": 80,
+    "itemCount": 7,
+    "requiredInclusions": [
+      "20′ × 40′",
+      "Eight 5′ Round Banquet Tables",
+      "Eighty Gold Chiavari Chairs",
+      "Eight Rustic Lantern Table Centerpieces",
+      "Perimeter String Lighting"
+    ]
+  },
+  {
+    "name": "Luxury Estate",
+    "description": "Luxury Estate — $4,995\nComplete reception setup for up to 150 guests\n\nDesigned for larger weddings that need a polished, coordinated reception space, the Luxury Estate Package combines a spacious 40′ × 60′ pole tent with guest tables, gold Chiavari seating, premium linens, matching rustic lantern centerpieces, cocktail tables, perimeter lighting, and professional setup and breakdown.\n\nThe package includes one 40′ × 60′ pole tent, 15 five-foot round banquet tables, 150 gold Chiavari chairs, 15 premium table linens, 15 Rustic Lantern Table Centerpieces, four cocktail tables with spandex covers, perimeter string lighting, and professional setup and breakdown of the included rental equipment.\n\nPlease Note: The 40′ × 60′ tent is a pole tent with interior center poles. Final table and equipment placement may vary based on the event location, ground conditions, required clearances, and site layout.\n\nNot Included: Plates, chargers, glassware, flatware, napkins, place settings, floral arrangements beyond the included Rustic Lantern Centerpieces, dance floor, sidewalls, draping, generators, photo booth, or other rentals/decor not specifically listed above. Items shown in styled photography that are not listed as included are for presentation purposes only.\n\nTravel/delivery fees and applicable sales tax are additional.",
+    "guests": 150,
+    "itemCount": 8,
+    "requiredInclusions": [
+      "40′ × 60′",
+      "15 five-foot round banquet tables",
+      "150 gold Chiavari chairs",
+      "15 Rustic Lantern Table Centerpieces",
+      "four cocktail tables with spandex covers"
+    ]
+  },
+  {
+    "name": "All-Inclusive Premium",
+    "description": "All-Inclusive Premium — $7,495\n\nOur most complete wedding reception package for up to 200 guests.\n\nDesigned for couples who want the major reception rentals handled in one package, the All-Inclusive Premium combines our large 40′ × 100′ pole tent with guest seating, tables, premium linens, matching centerpieces, cocktail tables, a large dance floor, perimeter lighting, photo booth entertainment, and professional setup and breakdown.\n\nThe package includes one 40′ × 100′ pole tent, 20 five-foot round banquet tables, 200 gold Chiavari chairs, 20 premium table linens, 20 Rustic Lantern Table Centerpieces, six cocktail tables with spandex covers, an 18′ × 18′ portable dance floor, perimeter string lighting, and one 6-hour photo booth rental.\n\nProfessional setup and breakdown of the included rental equipment is included.\n\nPlease Note: The 40′ × 100′ tent is a pole tent with interior center poles. Final table, dance floor, photo booth and cocktail-table placement may vary depending on the event site, ground conditions, safety clearances and available space.\n\nNot Included: Plates, chargers, glassware, flatware, napkins, place settings, catering equipment, sidewalls, tent draping, generator/power service, floral arrangements beyond the included Rustic Lantern Centerpieces, attendant service for the photo booth, or rentals/decor not specifically listed above.\n\nItems shown in styled photography that are not specifically listed as included are for presentation purposes only.\n\nTravel/delivery fees and applicable sales tax are additional.",
+    "guests": 200,
+    "itemCount": 10,
+    "requiredInclusions": [
+      "40′ × 100′",
+      "20 five-foot round banquet tables",
+      "200 gold Chiavari chairs",
+      "six cocktail tables with spandex covers",
+      "18′ × 18′",
+      "one 6-hour photo booth rental"
+    ]
+  }
+]

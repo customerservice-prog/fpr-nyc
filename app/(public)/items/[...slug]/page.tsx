@@ -8,7 +8,7 @@ import { safeJsonLd } from '@/lib/jsonLd'
 import ItemGallery from '@/components/public/ItemGallery'
 import SuggestedAddons from '@/components/public/SuggestedAddons'
 import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
-import { matchesTentLighting } from '@/lib/nycAddonMatching'
+import { getSmartAddonSearchTerms, isSmartAddonCompatible, rankSmartAddons, supportsSmartAddons } from '@/lib/smartAddons'
 import { itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 import { nycItemImagePath, nycItemPath, nycItemUrlSlug, pickStoredItem, storedItemSlugCandidates } from '@/lib/nycItemPath'
 import { NYC_SERVICE_AREAS } from '@/lib/nycServiceAreas'
@@ -94,60 +94,60 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
   if (segment !== (slugParts || []).join('/')) permanentRedirect(itemPath)
 
   const description = itemDescriptionForNyc(item.name, item.description, Number(item.cost))
-  const relatedItems = await prisma.item.findMany({ where: { categoryId: item.categoryId, id: { not: item.id }, displayToCustomer: true }, orderBy: { name: 'asc' }, take: 4 })
-  const validRelatedItems = relatedItems.filter((ri) => { const slug = typeof ri.slug === 'string' ? ri.slug.trim() : ''; return slug.length > 0 && slug.toLowerCase() !== 'null' && slug.toLowerCase() !== 'undefined' })
-  let suggestedAddons = item.suggestedAddonIds && item.suggestedAddonIds.length > 0 ? await prisma.item.findMany({ where: { id: { in: item.suggestedAddonIds }, displayToCustomer: true }, select: { id: true, name: true, slug: true, description: true, cost: true, picture: true, quantity: true, type: true, colorOptions: true, category: { select: { slug: true, pricingProfile: true } } } }) : []
-  if (!suggestedAddons.length && item.category.slug === 'tent-rentals') {
-    const lighting=await prisma.item.findMany({where:{displayToCustomer:true,status:'Available',quantity:{gt:0},name:{contains:'Tent Lighting',mode:'insensitive'}},select:{id:true,name:true,slug:true,description:true,cost:true,picture:true,quantity:true,type:true,colorOptions:true,category:{select:{slug:true,pricingProfile:true}}},take:100})
-    suggestedAddons=lighting.filter(addon=>matchesTentLighting(item.name,addon.name))
-  }
-  if (!suggestedAddons.length) {
-    const fallbackCategories: Record<string,string[]> = {
-      'bounce-house-rentals':['concession-machine-rentals','table-chair-rentals','generator-rentals','yard-game-rentals'],
-      'table-chair-rentals':['linen-rentals','event-lighting-rentals'],
-      'concession-machine-rentals':['beverage-food-service','table-chair-rentals','yard-game-rentals'],
-      'photobooth-rentals':['event-lighting-rentals','dance-floor-stage-rentals','table-chair-rentals'],
-      'dance-floor-stage-rentals':['event-lighting-rentals','table-chair-rentals','generator-rentals'],
-      'linen-rentals':['table-chair-rentals','event-lighting-rentals'],
-      'weddings':['event-lighting-rentals','dance-floor-stage-rentals','photobooth-rentals','linen-rentals'],
-      'party-rental-packages':['event-lighting-rentals','photobooth-rentals','yard-game-rentals','linen-rentals'],
-      'heater-fan-rentals':['generator-rentals','party-rental-accessories'],
-      'inflatable-movie-screen-rentals':['generator-rentals','table-chair-rentals'],
-      'foam-party-machine-rentals':['generator-rentals','party-rental-accessories'],
-      'yard-game-rentals':['table-chair-rentals','party-rental-accessories'],
-      'event-lighting-rentals':['generator-rentals','party-rental-accessories'],
-      'beverage-food-service':['table-chair-rentals','linen-rentals'],
-    }
-    const categorySlugs=fallbackCategories[item.category.slug]||[]
-    if(categorySlugs.length){
-      const fallback=await prisma.item.findMany({
-        where:{id:{not:item.id},displayToCustomer:true,status:'Available',quantity:{gt:0},type:'Regular',category:{slug:{in:categorySlugs}}},
-        orderBy:[{sortOrder:'asc'},{name:'asc'}],
-        select:{id:true,name:true,slug:true,description:true,cost:true,picture:true,quantity:true,type:true,colorOptions:true,category:{select:{slug:true,pricingProfile:true}}},
-        take:12,
-      })
-      suggestedAddons=fallback.filter(addon=>!/\b(fee|replacement|upgrade|extra hour|delivery|travel)\b/i.test(addon.name)).slice(0,3)
-    }
-  }
-  // Add-on cards show NYC copy and the NYC photo proxy (never another store's URL or wording).
-  const validSuggestedAddons = suggestedAddons
-    .filter((addon) => { const slug = typeof addon.slug === 'string' ? addon.slug.trim() : ''; return slug.length > 0 && slug.toLowerCase() !== 'null' && slug.toLowerCase() !== 'undefined' })
-    .map((addon) => ({
-      ...addon,
-      description: itemDescriptionForNyc(addon.name, addon.description, Number(addon.cost)),
-      picture: addon.picture ? nycItemImagePath(addon.slug) : null,
-      categorySlug: addon.category.slug,
-      pricingProfile: addon.category.pricingProfile,
-      colorOptions: addon.colorOptions,
-      isPackage: addon.type === 'Package',
-      oneTimeFee: nycItemUrlSlug(addon.slug) === 'photobooth-custom-image-layout-upgrade' && /\bone[-\s]time\b/i.test(addon.description || ''),
-    }))
-
-  const showPremiumAddons = validSuggestedAddons.length > 0
-  const isOneTimeLayout = segment === 'photobooth-custom-image-layout-upgrade' && /\bone[-\s]time\b/i.test(description)
+  const smartSource = { id: item.id, name: item.name, slug: segment, category: item.category }
+  const smartAddonTerms = getSmartAddonSearchTerms(smartSource)
+  const smartEnabled = supportsSmartAddons(smartSource)
+  const addonSelect = { id: true, name: true, slug: true, description: true, cost: true, picture: true, quantity: true, type: true, colorOptions: true, category: { select: { name: true, slug: true, pricingProfile: true } } } as const
+  const [relatedItems, explicitAddons, smartCandidates] = await Promise.all([
+    smartEnabled || item.suggestedAddonIds.length > 0 ? Promise.resolve([]) : prisma.item.findMany({
+      where: { categoryId: item.categoryId, id: { not: item.id }, displayToCustomer: true },
+      orderBy: { name: 'asc' }, take: 4,
+    }),
+    item.suggestedAddonIds.length > 0 ? prisma.item.findMany({
+      where: { id: { in: item.suggestedAddonIds }, displayToCustomer: true, category: { displayToCustomer: true } },
+      select: addonSelect,
+    }) : Promise.resolve([]),
+    smartAddonTerms.length > 0 ? prisma.item.findMany({
+      where: {
+        id: { not: item.id }, displayToCustomer: true, status: 'Available', quantity: { gt: 0 }, type: 'Regular',
+        category: { displayToCustomer: true },
+        OR: smartAddonTerms.map(term => ({ name: { contains: term, mode: 'insensitive' as const } })),
+      },
+      orderBy: { name: 'asc' }, take: 80, select: addonSelect,
+    }) : Promise.resolve([]),
+  ])
+  const validSlug = (addon: { slug: string | null }) => typeof addon.slug === 'string' && !!addon.slug.trim() && !/^(?:null|undefined)$/i.test(addon.slug)
+  const validRelatedItems = relatedItems.filter(validSlug)
+  const explicitById = new Map(explicitAddons.filter(validSlug).map(addon => [addon.id, addon]))
+  const pinnedAddons = item.suggestedAddonIds
+    .map(id => explicitById.get(id))
+    .filter((addon): addon is (typeof explicitAddons)[number] => Boolean(addon))
+    .filter(addon => isSmartAddonCompatible(smartSource, addon))
+  const pinnedIds = new Set(pinnedAddons.map(addon => addon.id))
+  const eligibleSmartCandidates = smartCandidates.filter(addon => validSlug(addon) && !pinnedIds.has(addon.id) && !/\b(fee|replacement|extra hour|delivery|travel)\b/i.test(addon.name))
+  const smartAddons = rankSmartAddons(smartSource, eligibleSmartCandidates, Math.max(0, 4 - pinnedAddons.length))
+  const recommendedAddons = (item.category.slug === 'photobooth-rentals'
+    ? [...pinnedAddons, ...smartAddons].filter(addon => nycItemUrlSlug(addon.slug) === 'photobooth-custom-image-layout-upgrade' || (/with attendant/i.test(item.name) && nycItemUrlSlug(addon.slug) === 'photobooth-custom-backdrop-upgrade'))
+    : [...pinnedAddons, ...smartAddons]).slice(0, 4)
+  const isPhotoBoothUpgrade = (slug: string | null) => ['photobooth-custom-image-layout-upgrade', 'photobooth-custom-backdrop-upgrade'].includes(nycItemUrlSlug(slug))
+  // Main-site recommendation rules, rendered only from NYC catalog prices and photos.
+  const validSuggestedAddons = recommendedAddons.map(addon => ({
+    ...addon,
+    description: itemDescriptionForNyc(addon.name, addon.description, Number(addon.cost)),
+    picture: addon.picture ? nycItemImagePath(addon.slug) : null,
+    categorySlug: addon.category.slug,
+    pricingProfile: addon.category.pricingProfile,
+    colorOptions: addon.colorOptions,
+    isPackage: addon.type === 'Package',
+    oneTimeFee: isPhotoBoothUpgrade(addon.slug),
+  }))
+  const showPremiumAddons = validSuggestedAddons.length > 0 && smartEnabled
+  const isOneTimeUpgrade = isPhotoBoothUpgrade(segment)
   const includedCopy = `${item.name} ${description}`
   const knownIncludedItems = /20\s*(?:x|×)\s*30/i.test(includedCopy) && /\b8\s*tables\b/i.test(includedCopy) && /\b64\s*chairs\b/i.test(includedCopy)
-    ? ['20x30 tent', '8 tables', '64 chairs'] : []
+    ? ['20x30 tent', '8 tables', '64 chairs']
+    : item.category.slug === 'photobooth-rentals' && /^photobooth-\d+-hour-(?:with|no)-attendant$/.test(segment)
+      ? ['4x6 prints included', 'Photo props', 'Standard backdrop', 'Digital gallery'] : []
 
   const isStandaloneTent = /\btent\b/i.test(item.name) && /\b\d+\s*(?:x|×)\s*\d+\b/i.test(item.name) && !/(?:side\s*wall|sidewall|package|accessor)/i.test(item.name)
   const isInflatable = item.category.slug === 'bounce-house-rentals' && !/\b(package|blower|sandbag|extension cord|accessor)\b/i.test(item.name)
@@ -180,7 +180,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
         <ItemGallery slug={segment} name={item.name} hasPicture={!!item.picture} additionalImageCount={(item.additionalImages || []).length} version={String(item.updatedAt.getTime())} />
         <div>
           <h1 className="text-3xl font-bold mb-4 text-gray-900">{item.name}</h1>
-          <p className="text-xl font-semibold mb-4 text-gray-900">Starting at ${Number(item.cost).toFixed(2)}<span className="text-sm font-normal text-gray-500">{isOneTimeLayout ? ' one-time upgrade fee' : '/day'}</span></p>
+          <p className="text-xl font-semibold mb-4 text-gray-900">Starting at ${Number(item.cost).toFixed(2)}<span className="text-sm font-normal text-gray-500">{isOneTimeUpgrade ? ' one-time upgrade fee' : '/day'}</span></p>
           {isStandaloneTent && (
             <figure className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
               <div className="bg-white p-3">

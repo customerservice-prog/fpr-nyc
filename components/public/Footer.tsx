@@ -4,7 +4,7 @@ import { NYC_LOGO_PATH, NYC_LOGO_WIDTH, NYC_LOGO_HEIGHT } from '@/lib/nycBrand'
 
 const LOGO_URL = NYC_LOGO_PATH
 
-export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string }) {
+export default function Footer({ footerStyle = 'light-links' }: { footerStyle?: string }) {
   if (footerStyle === 'none') {
     return null
   }
@@ -13,10 +13,10 @@ export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string 
     return (
       <footer className="bg-gray-100 text-gray-700 pt-8 pb-24 mt-12 text-center">
         <div className="max-w-7xl mx-auto px-4 space-y-2">
-          <img src={LOGO_URL} alt={BUSINESS.name} width={NYC_LOGO_WIDTH} height={NYC_LOGO_HEIGHT} className="mx-auto block w-full max-w-[200px] h-auto" />
+          <img src={LOGO_URL} alt={BUSINESS.name} width={NYC_LOGO_WIDTH} height={NYC_LOGO_HEIGHT} className="mx-auto block w-full max-w-[140px] h-auto" />
           <p className="font-bold text-base">{BUSINESS.name}</p>
-          <p>{BUSINESS.address}</p>
-          <p className="break-words">{BUSINESS.phone} | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
+          {BUSINESS.address && <p>{BUSINESS.address}</p>}
+          <p className="break-words"><a href={`tel:${BUSINESS.phone}`} className="underline">{BUSINESS.phone}</a> | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
           {BUSINESS.googleProfile && <p><a href={BUSINESS.googleProfile} target="_blank" rel="noopener noreferrer" className="underline">View Friendly Party Rental NYC on Google</a></p>}
           <p className="text-gray-500 text-sm pt-2">
             &copy; {new Date().getFullYear()} {BUSINESS.legalName} All rights reserved.
@@ -30,10 +30,10 @@ export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string 
     return (
       <footer className="bg-gray-100 text-gray-700 pt-8 pb-24 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center text-sm space-y-2">
-          <img src={LOGO_URL} alt={BUSINESS.name} width={NYC_LOGO_WIDTH} height={NYC_LOGO_HEIGHT} className="mx-auto mb-1 block w-full max-w-[180px] h-auto" />
+          <img src={LOGO_URL} alt={BUSINESS.name} width={NYC_LOGO_WIDTH} height={NYC_LOGO_HEIGHT} className="mx-auto mb-1 block w-full max-w-[120px] h-auto" />
           <p className="font-bold text-base">{BUSINESS.name}</p>
-          <p>{BUSINESS.address}</p>
-          <p className="break-words">{BUSINESS.phone} | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
+          {BUSINESS.address && <p>{BUSINESS.address}</p>}
+          <p className="break-words"><a href={`tel:${BUSINESS.phone}`} className="underline">{BUSINESS.phone}</a> | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
           {BUSINESS.googleProfile && <p><a href={BUSINESS.googleProfile} target="_blank" rel="noopener noreferrer" className="underline">View Friendly Party Rental NYC on Google</a></p>}
           <p>Serving {BUSINESS.serviceArea}</p>
           <div className="flex items-center justify-center gap-4 pt-1">
@@ -58,11 +58,9 @@ export default function Footer({ footerStyle = 'dark' }: { footerStyle?: string 
   return (
     <footer className="bg-[#1a1a1a] text-white pt-8 pb-24 mt-12">
       <div className="max-w-7xl mx-auto px-4 text-center text-sm space-y-2">
-        {/* White box sized around the exact logo so its white artwork background reads cleanly on the dark footer. */}
-        <div className="mx-auto mb-2 w-full max-w-[240px] rounded-lg bg-white p-2"><img src={LOGO_URL} alt={BUSINESS.name} width={NYC_LOGO_WIDTH} height={NYC_LOGO_HEIGHT} className="block w-full h-auto" /></div>
         <p className="font-bold text-base">{BUSINESS.name}</p>
-        <p>{BUSINESS.address}</p>
-        <p className="break-words">{BUSINESS.phone} | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
+        {BUSINESS.address && <p>{BUSINESS.address}</p>}
+        <p className="break-words"><a href={`tel:${BUSINESS.phone}`} className="underline">{BUSINESS.phone}</a> | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
         <p>Serving {BUSINESS.serviceArea}</p>
         <div className="flex items-center justify-center gap-4 pt-1">
           <a href={BUSINESS.facebook} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="Facebook">

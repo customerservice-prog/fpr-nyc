@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, contactFormEmail } from '@/lib/email'
-import { NYC_EMAIL_ADDRESS, nycEmailHref } from '@/lib/nycEmail'
+import { NYC_EMAIL_ADDRESS, NYC_NOTIFICATION_EMAIL, nycEmailHref } from '@/lib/nycEmail'
 import { NYC_PUBLIC_HOST } from '@/lib/nycPublicOrigin'
 
 export async function GET() {
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     let notificationSent = false
     try {
-      await sendEmail({ to: NYC_EMAIL_ADDRESS, subject: emailContent.subject, html: emailContent.html, replyTo: trimmedEmail })
+      await sendEmail({ to: NYC_NOTIFICATION_EMAIL, subject: emailContent.subject, html: emailContent.html, replyTo: trimmedEmail })
       notificationSent = true
     } catch { console.warn('Riverdale inquiry saved; email notification pending configuration or retry.') }
     return NextResponse.json({ success: true, saved: true, notificationSent, emailHref: nycEmailHref('Riverdale inquiry from ' + trimmedName, 'Website: ' + NYC_PUBLIC_HOST + '\nName: ' + trimmedName + '\nPhone: ' + trimmedPhone + '\nEvent date: ' + (eventDate || '') + '\n\n' + trimmedMessage) }, { status: notificationSent ? 200 : 202 })

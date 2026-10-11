@@ -16,6 +16,6 @@ export default function ServiceAreaDirectory(){
   </div>
   <p className={styles.directoryCount} role="status">{term?`${filtered.length} ${filtered.length===1?'community matches':'communities match'} your search`:`${NYC_SERVICE_AREAS.length} listed communities`}</p>
   <ul className={styles.cityGrid}>{filtered.map(area=><li key={area.slug}><Link href={area.href} prefetch={false}><span className={styles.cityIcon}><MapPin size={17}/></span><span><strong>{area.name}, NY</strong><small>ZIP {area.zips.join(', ')}</small></span><span aria-hidden="true">→</span></Link></li>)}</ul>
-  {!filtered.length&&<div className={styles.noResults}><h3>Don’t see your town?</h3><p>Try the delivery checker above or contact our Riverdale team to confirm service.</p><a href="tel:+13158841498">Call 315-884-1498</a><button type="button" onClick={()=>setQuery('')}>Show all communities</button></div>}
+  {!filtered.length&&<div className={styles.noResults}><h3>Don’t see your town?</h3><p>Try the delivery checker above or contact our Riverdale team to confirm service.</p><a href="tel:+17182834593">Call 718-283-4593</a><button type="button" onClick={()=>setQuery('')}>Show all communities</button></div>}
  </section>
 }

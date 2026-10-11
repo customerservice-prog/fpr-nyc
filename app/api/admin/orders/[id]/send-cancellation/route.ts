@@ -1,4 +1,4 @@
-import { NYC_EMAIL_ADDRESS } from '@/lib/nycEmail'
+import { NYC_NOTIFICATION_EMAIL } from '@/lib/nycEmail'
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -58,7 +58,7 @@ export async function POST(
 
   try {
     const companySettings = await prisma.companySettings.findFirst()
-    const notifyEmail = NYC_EMAIL_ADDRESS
+    const notifyEmail = NYC_NOTIFICATION_EMAIL
     if (notifyEmail) {
       await sendEmail({
         to: notifyEmail,

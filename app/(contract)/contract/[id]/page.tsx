@@ -88,7 +88,7 @@ export default function ContractPage({ params }: { params: Promise<{ id: string 
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <h1 className="text-2xl font-bold text-dark mb-4">Contract Not Found</h1>
-        <p className="text-body">This contract link is invalid. Please contact us at 315-884-1498.</p>
+        <p className="text-body">This contract link is invalid. Please contact us at 718-283-4593.</p>
       </div>
     )
   }

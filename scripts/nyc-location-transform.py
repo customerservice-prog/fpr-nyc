@@ -64,9 +64,9 @@ REPLACEMENTS = [
     ("Friendly Party Rental SC", "Friendly Party Rental NYC"),
     ("Friendly Party Rental South Carolina", "Friendly Party Rental NYC"),
     ("friendlypartyrentalsc.com", "fpr-nyc-production.up.railway.app"),
-    ("864-610-5324", "315-884-1498"),
-    ("8646105324", "3158841498"),
-    ("+18646105324", "+13158841498"),
+    ("864-610-5324", "718-283-4593"),
+    ("8646105324", "7182834593"),
+    ("+18646105324", "+17182834593"),
     ("Greenville, SC", "Riverdale, NY"),
     ("Greenville SC", "Riverdale NY"),
     ("Upstate South Carolina", "Downstate New York"),
@@ -132,7 +132,7 @@ utils = ROOT/"lib/utils.ts"
 if utils.exists():
     s = utils.read_text()
     s = s.replace("name: 'Friendly Party Rental SC'", "name: 'Friendly Party Rental NYC'")
-    s = re.sub(r"emailHref:\s*'[^']*'", "emailHref: 'mailto:customerservice@friendlypartyrental.com?subject=%5BNYC%20%2F%20Downstate%5D%20rental%20inquiry'", s)
+    s = re.sub(r"emailHref:\s*'[^']*'", "emailHref: 'mailto:friendlypartyrentalnyc@gmail.com?subject=%5BNYC%20%2F%20Riverdale%5D%20rental%20inquiry'", s)
     s = re.sub(r"address:\s*'[^']*'", "address: ''", s)
     s = re.sub(r"serviceArea:\s*'[^']*'", "serviceArea: 'Riverdale, selected Bronx neighborhoods & Lower Westchester'", s)
     s = re.sub(r"mapUrl:\s*'[^']*'", "mapUrl: ''", s)
@@ -164,7 +164,7 @@ export default function NycHomeSeo() {
     <div><h2 className="text-xl font-bold text-dark mb-3">Table &amp; Chair Rentals</h2><p className="text-body text-sm">Browse <Link href="/category/table-chair-rentals" prefetch={false} className="underline">banquet tables, round tables, cocktail tables, folding chairs, resin chairs, and Chiavari chairs</Link>. Check the <Link href="/service-area#delivery-estimate" prefetch={false} className="underline">delivery fee for your event ZIP code</Link> while planning your order.</p></div>
     <div><h2 className="text-xl font-bold text-dark mb-3">Bounce Houses &amp; Water Slides</h2><p className="text-body text-sm">Explore <Link href="/category/bounce-house-rentals" prefetch={false} className="underline">bounce houses and water slides</Link>, concessions, yard games, generators, and other event add-ons. Review each item page for setup space, power, water, and other requirements before checkout.</p></div>
     <div><h2 className="text-xl font-bold text-dark mb-3">Wedding Rentals</h2><p className="text-body text-sm">Compare <Link href="/weddings#packages" prefetch={false} className="underline">wedding packages</Link>, tents, tables, chairs, linens, lighting, dance floors, ceremony pieces, and reception equipment, then confirm availability and site requirements with the NYC / Downstate team.</p></div>
-    <div><h2 className="text-xl font-bold text-dark mb-3">Riverdale, Bronx &amp; Lower Westchester Delivery</h2><p className="text-body text-sm">Friendly Party Rental NYC serves Riverdale, Fieldston, Kingsbridge, selected Bronx ZIP codes, Yonkers, Mount Vernon, New Rochelle, Bronxville, Tuckahoe, Eastchester, Pelham, and nearby approved areas. <Link href="/service-area" prefetch={false} className="underline">Review the service area and delivery fee checker</Link>, or call <a href="tel:+13158841498" className="underline">315-884-1498</a>.</p></div>
+    <div><h2 className="text-xl font-bold text-dark mb-3">Riverdale, Bronx &amp; Lower Westchester Delivery</h2><p className="text-body text-sm">Friendly Party Rental NYC serves Riverdale, Fieldston, Kingsbridge, selected Bronx ZIP codes, Yonkers, Mount Vernon, New Rochelle, Bronxville, Tuckahoe, Eastchester, Pelham, and nearby approved areas. <Link href="/service-area" prefetch={false} className="underline">Review the service area and delivery fee checker</Link>, or call <a href="tel:+17182834593" className="underline">718-283-4593</a>.</p></div>
   </div>
 }
 """)
@@ -195,14 +195,14 @@ if service.exists():
     x=service.read_text().replace("@/components/public/ScServiceArea.module.css","@/components/public/NycServiceArea.module.css")
     x=x.replace("name:a.name+', SC'","name:a.name+', New York'").replace("nearby Upstate communities","nearby Bronx and Lower Westchester communities")
     x=x.replace("35 listed communities","11 listed communities").replace("Riverdale plus 34 nearby Upstate areas.","Riverdale plus selected Bronx and Lower Westchester areas.")
-    x=x.replace("{area.name}, SC","{area.name}, NY").replace('href="tel:+18646105324"','href="tel:+13158841498"').replace('href="sms:+18646105324"','href="sms:+13158841498"')
+    x=x.replace("{area.name}, SC","{area.name}, NY").replace('href="tel:+18646105324"','href="tel:+17182834593"').replace('href="sms:+18646105324"','href="sms:+17182834593"')
     service.write_text(x)
 
 utils = ROOT/"lib/utils.ts"
 if utils.exists():
     x=utils.read_text()
     x=re.sub(r"name:\s*'Friendly Party Rental SC'","name: 'Friendly Party Rental NYC'",x)
-    x=re.sub(r"emailHref:\s*'[^']*'","emailHref: 'mailto:customerservice@friendlypartyrental.com?subject=%5BNYC%20%2F%20Downstate%5D%20rental%20inquiry'",x)
+    x=re.sub(r"emailHref:\s*'[^']*'","emailHref: 'mailto:friendlypartyrentalnyc@gmail.com?subject=%5BNYC%20%2F%20Riverdale%5D%20rental%20inquiry'",x)
     x=re.sub(r"address:\s*'[^']*'","address: ''",x)
     x=re.sub(r"serviceArea:\s*'[^']*'","serviceArea: 'Riverdale, selected Bronx neighborhoods & Lower Westchester'",x)
     x=re.sub(r"mapUrl:\s*'[^']*'","mapUrl: ''",x)
@@ -330,7 +330,7 @@ export function normalizeNycSearchProperty(value:unknown):string|null{
 const CATEGORY_SEARCH_NAMES:Record<string,string>={
 'tent-rentals':'Tent Rentals','table-chair-rentals':'Table & Chair Rentals','bounce-house-rentals':'Bounce House & Water Slide Rentals','linen-rentals':'Linen Rentals','concession-machine-rentals':'Concession Machine Rentals','beverage-food-service':'Food & Beverage Service Rentals','dance-floor-stage-rentals':'Dance Floor & Stage Rentals','event-lighting-rentals':'Event Lighting Rentals','foam-party-machine-rentals':'Foam Party Machine Rentals','generator-rentals':'Generator Rentals','heater-fan-rentals':'Heater & Fan Rentals','inflatable-movie-screen-rentals':'Inflatable Movie Screen Rentals','party-rental-accessories':'Party Rental Accessories','party-rental-packages':'Party Rental Packages','photobooth-rentals':'Photo Booth Rentals','restroom-rentals':'Restroom Rentals','yard-game-rentals':'Yard Game Rentals','weddings':'Wedding Rentals'}
 export function categorySearchName(slug:string,fallback:string):string{return CATEGORY_SEARCH_NAMES[slug]||fallback.replace(/\\s*[—–-]\\s*(?:Riverdale,?\\s*NY|NYC\\s*\\/\\s*Downstate)$/i,'').trim()}
-export const NYC_LOCAL_ENTITY_IDENTITY={name:'Friendly Party Rental NYC',phone:'315-884-1498',website:(process.env.NEXT_PUBLIC_SITE_URL||process.env.PUBLIC_BASE_URL||''),primaryMarket:'Riverdale / selected Bronx neighborhoods / Lower Westchester',businessModel:'Delivery-only service-area business; no customer warehouse pickup'} as const
+export const NYC_LOCAL_ENTITY_IDENTITY={name:'Friendly Party Rental NYC',phone:'718-283-4593',website:(process.env.NEXT_PUBLIC_SITE_URL||process.env.PUBLIC_BASE_URL||''),primaryMarket:'Riverdale / selected Bronx neighborhoods / Lower Westchester',businessModel:'Delivery-only service-area business; no customer warehouse pickup'} as const
 """)
 
 # NYC has a dedicated RentSketch tenant and signed order-access relay.

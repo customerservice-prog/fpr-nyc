@@ -5,7 +5,7 @@ import { isAuthorizedCronRequest } from '@/lib/cronAuth'
 import { prisma } from '@/lib/prisma'
 import { describeStripeError, isNycPaymentsUnavailable, requireNycStripe } from '@/lib/stripe'
 import { sendEmail } from '@/lib/email'
-import { BUSINESS } from '@/lib/utils'
+import { NYC_NOTIFICATION_EMAIL } from '@/lib/nycEmail'
 import { buildNycPaymentMetadata, nycIdempotencyKey } from '@/lib/nycPaymentMetadata'
 import { toCents } from '@/lib/nycCheckoutPricing'
 import { alertOwner, recordSucceededIntent } from '@/lib/nycStripeReconcile'
@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
 
       try {
         await sendEmail({
-          to: BUSINESS.email,
+          to: NYC_NOTIFICATION_EMAIL,
           subject: `[Autopay Failed] Order ${order.orderNumber}`,
           html: `<p>Autopay charge failed for order ${order.orderNumber} (customer: ${order.customer?.firstName} ${order.customer?.lastName}). Error: ${message}</p>`,
         })

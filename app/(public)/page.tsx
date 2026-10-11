@@ -1,3 +1,4 @@
+import { localizeNycContactText } from '@/lib/nycCatalogCore.mjs'
 import { headers } from 'next/headers'
 import ResponsiveHome from '@/components/public/ResponsiveHome'
 import NycHomeSeo from '@/components/public/NycHomeSeo'
@@ -92,10 +93,10 @@ export default async function HomePage() {
     focalY: revisionHero.focalY,
     desktopFocalX: revisionHero.desktopFocalX,
     desktopFocalY: revisionHero.desktopFocalY,
-    primaryActionValue: revisionHero.primaryActionValue,
-    secondaryActionValue: revisionHero.secondaryActionValue,
+    primaryActionValue: localizeNycContactText(revisionHero.primaryActionValue),
+    secondaryActionValue: localizeNycContactText(revisionHero.secondaryActionValue),
   } : null
-  const content = { ...DEFAULT_HOME_CONTENT, ...(revisionResult?.content as Record<string,string> || {}) }
+  const content = Object.fromEntries(Object.entries({ ...DEFAULT_HOME_CONTENT, ...(revisionResult?.content as Record<string,string> || {}) }).map(([key, value]) => [key, localizeNycContactText(value)]))
 
   return <ResponsiveHome
     initialDevice={initialHomeDevice(requestHeaders.get('user-agent'))}

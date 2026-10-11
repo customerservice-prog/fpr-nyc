@@ -61,7 +61,7 @@ export async function savePlanningInquiry(db: PrismaClient, inquiry: PlanningInq
       return { created: false, reference: existing.id }
     }
     const recent = await tx.contactMessage.count({ where: { id: { startsWith: 'planning_' }, email: inquiry.email, createdAt: { gte: new Date(now.getTime() - 3600000) } } })
-    if (recent >= 3) throw new PlanningInquiryError('Several inquiries have already been saved for this email. Please call 315-884-1498 for additional details.', 429)
+    if (recent >= 3) throw new PlanningInquiryError('Several inquiries have already been saved for this email. Please call 718-283-4593 for additional details.', 429)
     const { eventType, ...data } = inquiry
     await tx.contactMessage.create({ data })
     return { created: true, reference: inquiry.id }

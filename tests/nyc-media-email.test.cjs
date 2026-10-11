@@ -11,7 +11,7 @@ function load(file, mocks={}, env={}) {
  return module.exports
 }
 const location=load('lib/scEmail.ts')
-const business={email:location.NYC_EMAIL_ADDRESS,emailHref:location.nycEmailHref(),name:'Friendly Party Rental',legalName:'Friendly Party Rental',phone:'315-884-1498',address:'Riverdale, NY'}
+const business={email:location.NYC_EMAIL_ADDRESS,emailHref:location.nycEmailHref(),name:'Friendly Party Rental',legalName:'Friendly Party Rental',phone:'718-283-4593',address:'Riverdale, NY'}
 const response={json(body,options={}){return {body,status:options.status||200}}}
 for(const subject of ['New contact inquiry','New order #QA-TEST','Re: [Downstate New York] Inquiry','[Downstate New York] Inquiry','[Downstate New York] [Downstate New York] Inquiry','hello\r\nBcc: invalid']) {
  test('subject tag is safe and idempotent: '+subject,()=>{

@@ -90,7 +90,7 @@ function layout(tracking) {
     '@/lib/utils': { BUSINESS: {
       name:'Friendly Party Rental NYC',
       legalName:'Friendly Party Rental L.L.C.',
-      phone:'315-884-1498',
+      phone:'718-283-4593',
       email:'customerservice@friendlypartyrental.com',
     } },
     '@/lib/nycServiceAreas': { NYC_SERVICE_AREAS: [
@@ -140,7 +140,7 @@ test('NYC public payment and confirmation surfaces use NYC identity', () => {
   const confirmation = fs.readFileSync(path.join(root, 'app/(public)/checkout/confirmation/page.tsx'), 'utf8')
   assert.match(pay, /order\.eventState \|\| 'NY'/)
   assert.doesNotMatch(pay, /order\.eventState \|\| 'SC'/)
-  assert.match(confirmation, /NYC%20%2F%20Downstate/)
+  assert.match(confirmation, /NYC%20%2F%20Riverdale/)
   assert.doesNotMatch(confirmation, /South%20Carolina|Greenville/)
 })
 

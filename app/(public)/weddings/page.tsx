@@ -19,7 +19,7 @@ const faqItems = [
   },
   {
     question: 'Can I customize a wedding package?',
-    answer: 'Yes. We can adjust quantities and add or remove rental items to better fit your guest count, venue and style. Call 315-884-1498 or request a quote online and our team will help build the setup you need.',
+    answer: 'Yes. We can adjust quantities and add or remove rental items to better fit your guest count, venue and style. Call 718-283-4593 or request a quote online and our team will help build the setup you need.',
   },
   {
     question: 'Can I see my reception layout before I book?',

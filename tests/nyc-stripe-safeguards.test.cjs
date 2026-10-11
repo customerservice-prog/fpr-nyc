@@ -260,7 +260,7 @@ function pricingConfig(overrides = {}) {
     depositRule: { type: 'percentage', amount: 25 },
     deliveryFee: 75,
     policy: TEST_POLICY,
-    phone: '315-884-1498',
+    phone: '718-283-4593',
     now: new Date('2026-10-01T12:00:00Z'),
     ...overrides,
   }
@@ -366,7 +366,7 @@ behavior('pricing: sales tax follows the delivery jurisdiction', () => {
   assert.equal(yonkers.taxAmount, 42.16)
   assert.equal(mountVernon.taxJurisdiction.reportingCode, '5521')
   assert.equal(yonkers.taxJurisdiction.reportingCode, '6511')
-  assert.throws(() => pricing.computeNycCheckoutPricing(request, pricingConfig({ salesTax: tax.resolveNycSalesTax('10707') })), err => err.code === 'tax_address_review' && /10707/.test(err.message) && /315-884-1498/.test(err.message))
+  assert.throws(() => pricing.computeNycCheckoutPricing(request, pricingConfig({ salesTax: tax.resolveNycSalesTax('10707') })), err => err.code === 'tax_address_review' && /10707/.test(err.message) && /718-283-4593/.test(err.message))
 })
 
 behavior('pricing: expired coupons, fixed deposits, retired fees and payment bounds', () => {

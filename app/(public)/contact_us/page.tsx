@@ -95,7 +95,7 @@ export default function ContactPage() {
       <section aria-labelledby="contact-form-title" className="min-w-0 rounded-xl border bg-gray-50 p-5 sm:p-6">
         <h2 id="contact-form-title" className="mb-3 text-xl font-bold text-dark">Send an Event Inquiry</h2>
         <p className="mb-3 text-sm leading-6 text-body">Include your exact event address and ZIP code, requested items and quantities, setup surface, measurements and any access restrictions. For an existing NYC order, include your order number.</p>
-        <p className="mb-6 text-sm leading-6 text-body">Our customer-service inbox is shared; NYC email links are labeled [NYC / Downstate]. Do not include card details or passwords. For time-sensitive requests, please call.</p>
+        <p className="mb-6 text-sm leading-6 text-body">Contact our Riverdale team using the form below or our NYC email address. For time-sensitive requests, please call.</p>
         {receipt ? <div ref={receiptRef} tabIndex={-1} data-testid="contact-receipt" className="rounded-xl border bg-white p-5 focus:outline-none" role="status">
           <h3 className="text-lg font-bold text-dark">Your NYC inquiry is saved</h3>
           <p className="mt-2 text-sm leading-6 text-body">This is an inquiry, not a confirmed reservation or payment. You do not need to submit the same form again.</p>

@@ -10,6 +10,7 @@ import { getStripe } from '@/lib/stripe-client'
 import { normalizeDeliveryZip, requireDeliveryMethod } from '@/lib/delivery'
 import { formatTaxRatePercent } from '@/lib/nycSalesTax'
 import type { CheckoutPricingResult } from '@/lib/nycCheckoutPricing'
+import { cartCheckoutLineName } from '@/lib/nycCartLineName'
 import CardPaymentForm from '@/components/public/CardPaymentForm'
 import PaymentCardAuthorization from '@/components/public/PaymentCardAuthorization'
 
@@ -157,7 +158,7 @@ export default function PaymentPage() {
       eventTimeSlot,
       pickupTimeSlot,
       deliveryType: 'delivery',
-      items: items.map((i) => ({ id: i.id, name: i.selectedColor ? i.name + ' — ' + i.selectedColor : i.name, quantity: i.quantity, unitPrice: i.price })),
+      items: items.map((i) => ({ id: i.id, name: cartCheckoutLineName(i), quantity: i.quantity, unitPrice: i.price })),
       couponCode: quote.couponCode,
       depositAmount: paymentPrincipal,
       tipAmount,
@@ -225,7 +226,7 @@ export default function PaymentPage() {
           deliveryType: 'delivery',
           eventDate,
           eventTimeSlot,
-          items: items.map((item) => ({ id: item.id, name: item.name, quantity: item.quantity, unitPrice: item.price })),
+          items: items.map((item) => ({ id: item.id, name: cartCheckoutLineName(item), quantity: item.quantity, unitPrice: item.price })),
           // The server recomputes every amount below and refuses the order if they differ.
           subtotal: quote.adjustedSubtotal,
           rentalDays: quote.rentalDays,

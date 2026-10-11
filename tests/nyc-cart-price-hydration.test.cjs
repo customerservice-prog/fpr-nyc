@@ -38,6 +38,23 @@ function providerHarness(savedItems) {
 const line = { id: 'package', name: 'Tent Package', price: 325, quantity: 2, maxQuantity: 10, selectedColor: 'White', eventDate: '2026-11-14', picture: '/photo.jpg' }
 const settle = () => new Promise(resolve => setImmediate(resolve))
 
+test('malformed saved entries cannot crash hydration while valid legacy rentals and colors stay intact', async () => {
+  const navy = { ...line, name: 'Round Linen', selectedColor: 'Navy', quantity: 3 }
+  const legacy = { ...line, id: 'legacy-tent', name: 'Pole Tent' }
+  delete legacy.selectedColor
+  const h = providerHarness([null, {}, 'bad', [], { ...line, name: {} }, { ...line, quantity: -1 }, { ...line, selectedColor: {} }, navy, legacy])
+  const restored = h.render()
+  assert.deepEqual(JSON.parse(JSON.stringify(restored.items)), [navy, legacy])
+  assert.equal(restored.loaded, true)
+  assert.equal(restored.subtotal, 1625)
+  h.resolve({ ok: true, json: async () => ({ items: [{ id: 'package', cost: 30 }, { id: 'legacy-tent', cost: 425 }] }) })
+  await settle()
+  assert.deepEqual(JSON.parse(JSON.stringify(h.render().items)), [{ ...navy, price: 30 }, { ...legacy, price: 425 }])
+  const onlyBad = providerHarness([null])
+  assert.equal(onlyBad.render().items.length, 0)
+  assert.equal(onlyBad.calls.length, 0)
+})
+
 test('saved cart refreshes live prices while preserving concurrent quantities, colors, dates and scheduling', async () => {
   const h = providerHarness([line, { ...line, id: 'removed' }])
   assert.equal(h.calls.length, 1)

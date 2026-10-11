@@ -42,15 +42,54 @@ test('rental CTA has a usable NYC launch URL before hydration', () => {
 function harness() {
   const states=[], listeners=new Map(), effects=[], cleanups=[]; let cursor=0, frame
   const assigned=[]
-  const window={ location:{origin:'https://friendlypartyrentalnyc.com',assign:url=>assigned.push(url)},history:{pushState(){},back(){}},scrollY:0,scrollTo(){},addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:(name,fn)=>{if(listeners.get(name)===fn)listeners.delete(name)} }
-  const react={useState:initial=>{const i=cursor++;if(!(i in states))states[i]=initial;return[states[i],next=>states[i]=typeof next==='function'?next(states[i]):next]},useRef:()=>({current:null}),useCallback:fn=>fn,useEffect:fn=>effects.push(fn),createElement:(type,props,...children)=>{if(type==='iframe'){frame={contentWindow:{}};props.ref.current=frame}return{type,props,children}}}
-  const document={documentElement:{style:{}},body:{style:{}}}
+  function element(inertAttribute=null){
+    const attributes=new Map(inertAttribute===null?[]:[['inert',inertAttribute]])
+    return {style:{},children:[],parentElement:null,getAttribute:key=>attributes.get(key)??null,setAttribute:(key,value)=>attributes.set(key,value),removeAttribute:key=>attributes.delete(key),get inert(){return attributes.has('inert')},set inert(value){if(value)attributes.set('inert','');else attributes.delete('inert')}}
+  }
+  function append(parent,child){parent.children.push(child);child.parentElement=parent;return child}
+  const body=element(),root=append(body,element()),nested=append(root,element()),overlayParent=append(nested,element()),overlay=append(overlayParent,element())
+  const background=[append(overlayParent,element()),append(nested,element()),append(root,element()),append(body,element('already-disabled'))]
+  const document={documentElement:{style:{}},body}
+  const opener={isConnected:true,focus:()=>{document.activeElement=opener}}
+  document.activeElement=opener
+  let closeControl,backCalls=0
+  const window={ location:{origin:'https://friendlypartyrentalnyc.com',assign:url=>assigned.push(url)},history:{state:null,pushState(state){this.state=state},back(){backCalls++}},scrollY:0,scrollTo(){},addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:(name,fn)=>{if(listeners.get(name)===fn)listeners.delete(name)} }
+  const react={useState:initial=>{const i=cursor++;if(!(i in states))states[i]=initial;return[states[i],next=>states[i]=typeof next==='function'?next(states[i]):next]},useRef:()=>({current:null}),useCallback:fn=>fn,useEffect:fn=>effects.push(fn),createElement:(type,props,...children)=>{if(type==='iframe'){frame={contentWindow:{}};props.ref.current=frame}if(type==='button'&&props.ref){closeControl={isConnected:true,focus:()=>{document.activeElement=closeControl}};props.ref.current=closeControl}if(type==='div'&&props.ref)props.ref.current=overlay;return{type,props,children}}}
   const Launcher=load('components/public/DesignYourEventLauncher.tsx', {'react':react,'next/link':'link','lucide-react':{X:'close'},'@/lib/nycRentSketch':helper,'@/lib/rentsketchBooking':booking},{window,document,setTimeout:()=>1,clearTimeout(){}}).default
   function render(){cleanups.splice(0).forEach(fn=>fn());cursor=0;const tree=Launcher();effects.splice(0).forEach(fn=>{const cleanup=fn();if(cleanup)cleanups.push(cleanup)});return tree}
   render();listeners.get('open-design-your-event')({detail:{source:'test'}});render()
   const message=(data,source=frame.contentWindow,origin='https://rentsketch.com')=>listeners.get('message')({data,source,origin})
-  return {message,assigned,render}
+  return {message,assigned,render,keydown:event=>listeners.get('keydown')?.(event),get activeElement(){return document.activeElement},get closeControl(){return closeControl},opener,background,overlay,ancestors:[overlayParent,nested,root,body],get backCalls(){return backCalls},get hasKeyboardListener(){return listeners.has('keydown')}}
 }
+
+test('keyboard opens on the close control, Escape closes and restores the same opener',()=>{
+  const h=harness()
+  assert.equal(h.activeElement,h.closeControl)
+  assert.equal(h.hasKeyboardListener,true)
+  h.keydown({key:'Enter',defaultPrevented:false,preventDefault(){throw new Error('unrelated keys must be left alone')}})
+  assert.equal(h.backCalls,0)
+  h.keydown({key:'Escape',defaultPrevented:true,preventDefault(){throw new Error('handled keys must be left alone')}})
+  assert.equal(h.backCalls,0)
+  let prevented=false
+  h.keydown({key:'Escape',defaultPrevented:false,preventDefault(){prevented=true}})
+  assert.equal(prevented,true)
+  assert.equal(h.backCalls,1)
+  assert.equal(h.render(),null)
+  assert.equal(h.activeElement,h.opener)
+  assert.equal(h.hasKeyboardListener,false)
+})
+
+test('a nested designer leaves its ancestor path usable and restores exact background inert states',()=>{
+  const h=harness()
+  assert.equal(h.background.length,4)
+  for(const node of h.background)assert.equal(node.inert,true,'background siblings at every ancestor level must be inert')
+  for(const node of [h.overlay,...h.ancestors])assert.equal(node.inert,false,'the designer and its ancestor path must remain usable')
+  h.keydown({key:'Escape',defaultPrevented:false,preventDefault(){}})
+  assert.equal(h.render(),null)
+  for(const node of h.background.slice(0,3))assert.equal(node.getAttribute('inert'),null,'previously interactive siblings must be restored')
+  assert.equal(h.background[3].getAttribute('inert'),'already-disabled','preexisting inert attributes must be preserved exactly')
+  assert.equal(h.activeElement,h.opener)
+})
 
 test('embedded booking accepts only its own NYC iframe and validates the selection',()=>{
   const h=harness()

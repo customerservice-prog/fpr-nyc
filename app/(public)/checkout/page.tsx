@@ -12,6 +12,7 @@ import { Pencil } from 'lucide-react'
 import { useCheckoutPolicy } from '@/components/public/useCheckoutPolicy'
 import { exactPickupFeeForPolicy, isLateExactPickupTime } from '@/lib/nycCheckoutPolicy'
 import { formatTaxRatePercent } from '@/lib/nycSalesTax'
+import { cartCheckoutLineName } from '@/lib/nycCartLineName'
 
 interface CheckoutForm {
   firstName: string
@@ -237,7 +238,7 @@ export default function CheckoutPage() {
             eventTimeSlot,
             pickupTimeSlot,
             deliveryType: 'delivery',
-            items: items.map((item) => ({ id: item.id, name: item.selectedColor ? item.name + ' — ' + item.selectedColor : item.name, quantity: item.quantity, unitPrice: item.price })),
+            items: items.map((item) => ({ id: item.id, name: cartCheckoutLineName(item), quantity: item.quantity, unitPrice: item.price })),
             subtotal,
           }),
         })

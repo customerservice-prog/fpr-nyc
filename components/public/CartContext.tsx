@@ -105,6 +105,19 @@ const PICKUP_TIME_KEY = 'fpr_pickup_time_slot'
 const EXACT_TIME_KEY = 'fpr_exact_time_requested'
 const SCHEDULING_KEY = 'fpr_scheduling_details'
 
+function restoredCartItems(value: unknown): CartItem[] {
+  if (!Array.isArray(value)) return []
+  return value.filter((entry): entry is CartItem => {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return false
+    const item = entry as Partial<CartItem>
+    return typeof item.id === 'string' && !!item.id && typeof item.name === 'string'
+      && typeof item.price === 'number' && Number.isFinite(item.price) && item.price >= 0
+      && typeof item.quantity === 'number' && Number.isInteger(item.quantity) && item.quantity > 0
+      && typeof item.maxQuantity === 'number' && Number.isFinite(item.maxQuantity) && item.maxQuantity >= 0
+      && (item.selectedColor == null || typeof item.selectedColor === 'string')
+  })
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [eventDate, setEventDateState] = useState<string | null>(null)
@@ -133,26 +146,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const savedExactTime = localStorage.getItem(EXACT_TIME_KEY)
       const savedScheduling = localStorage.getItem(SCHEDULING_KEY)
       if (saved) {
-        const restoredItems = JSON.parse(saved)
-        if (Array.isArray(restoredItems)) {
-          setItems(restoredItems)
-          if (restoredItems.length > 0) {
-            // Refresh display prices only. Checkout still calculates the authoritative total.
-            fetch('/api/items', { method: 'GET', cache: 'no-store', signal: priceRefresh.signal })
-              .then(response => response.ok ? response.json() : null)
-              .then(data => {
-                if (priceRefresh.signal.aborted || !Array.isArray(data?.items)) return
-                const prices = new Map<string, number>()
-                for (const rental of data.items) {
-                  if (rental && typeof rental.id === 'string' && typeof rental.cost === 'number' && Number.isFinite(rental.cost) && rental.cost > 0) prices.set(rental.id, rental.cost)
-                }
-                setItems(current => current.map(line => {
-                  const price = prices.get(line.id)
-                  return price !== undefined && price !== line.price ? { ...line, price } : line
-                }))
-              })
-              .catch(() => { /* Retain the cart if the read-only refresh is unavailable. */ })
-          }
+        const restoredItems = restoredCartItems(JSON.parse(saved))
+        setItems(restoredItems)
+        if (restoredItems.length > 0) {
+          // Refresh display prices only. Checkout still calculates the authoritative total.
+          fetch('/api/items', { method: 'GET', cache: 'no-store', signal: priceRefresh.signal })
+            .then(response => response.ok ? response.json() : null)
+            .then(data => {
+              if (priceRefresh.signal.aborted || !Array.isArray(data?.items)) return
+              const prices = new Map<string, number>()
+              for (const rental of data.items) {
+                if (rental && typeof rental.id === 'string' && typeof rental.cost === 'number' && Number.isFinite(rental.cost) && rental.cost > 0) prices.set(rental.id, rental.cost)
+              }
+              setItems(current => current.map(line => {
+                const price = prices.get(line.id)
+                return price !== undefined && price !== line.price ? { ...line, price } : line
+              }))
+            })
+            .catch(() => { /* Retain the cart if the read-only refresh is unavailable. */ })
         }
       }
       if (savedDate) setEventDateState(savedDate)

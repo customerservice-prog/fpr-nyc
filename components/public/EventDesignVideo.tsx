@@ -100,6 +100,7 @@ export default function EventDesignVideo({
       }}
     >
       {!lazy && <source src={filmSource} type="video/mp4" />}
+      <track kind="captions" src="/videos/event-design-walkthrough-v2.vtt" srcLang="en" label="English descriptions" />
       Your browser does not support this video. <a href="/videos/event-design-walkthrough-v2.mp4">Open the animated walkthrough.</a>
     </video>
     {failed && <p className={styles.filmError} role="status">The demo could not load in this player. <a href="/videos/event-design-walkthrough-v2.mp4">Open the 32-second video directly</a>.</p>}
@@ -128,7 +129,7 @@ export default function EventDesignVideo({
         </div>
       </div>
 
-      <div className={styles.filmDescription} id={descriptionId}><p>An animated demonstration of RentSketch models, not a recording of a NYC order or an availability guarantee.</p><details><summary>Read the video description</summary><p>Four 5-foot round tables with eight white resin chairs each form a layout. The complete 20×20 pole-tent model appears, and the camera moves toward the interior. A table close-up shows gold Chiavari chairs, selected plates, flatware, glasses and napkins, and a 120-inch linen changing from Ivory to Sage Green. The same tent scene changes from day to night with bistro lighting. The Crayon Bounce House and Tidal Wave Water Slide models appear without a tent. Review & Quote appears as part of the demonstrated workflow. Contact our Riverdale team to confirm the options for your NYC event. This silent film uses current RentSketch geometry with offline lighting and animation; it is not a screen recording. Inflatable dimensions remain illustrative until confirmed by our team.</p></details></div>
+      <div className={styles.filmDescription} id={descriptionId}><p>An animated demonstration of RentSketch models, not a recording of a NYC order or an availability guarantee.</p><details><summary>Read the video description</summary><p>Four 5-foot round tables with eight white resin chairs each form a layout. The complete 20×20 pole-tent model appears, and the camera moves toward the interior. A table close-up shows gold Chiavari chairs, selected plates, flatware, glasses and napkins, and a 120-inch linen changing from Ivory to Sage Green. The same tent scene changes from day to night with bistro lighting. The Rainbow Castle Bounce House and Tidal Wave Water Slide models appear without a tent. Review & Quote appears as part of the demonstrated workflow. Contact our Riverdale team to confirm the options for your NYC event. This silent film uses current RentSketch geometry with offline lighting and animation; it is not a screen recording. Inflatable dimensions remain illustrative until confirmed by our team.</p></details></div>
     </>}
   </div>
 }

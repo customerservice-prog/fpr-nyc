@@ -64,10 +64,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'We need to confirm your total before payment. Please restart checkout or contact us.' }, { status: 409 })
     }
 
+    const unpaidOnlineOrder = order.source === 'online' && Number(order.amountPaid || 0) <= 0
+    const firstOnlinePayment = unpaidOnlineOrder && ['incomplete', 'quote'].includes(order.status)
+    const needsLegacyUpgradeReview = unpaidOnlineOrder && order.pricingVersion !== NYC_PRICING_VERSION && Number(order.durationFee || 0) > 0
+    const lineIds = Array.from(new Set(order.items.map(line => line.itemId).filter((id): id is string => !!id)))
+    const catalog = firstOnlinePayment || needsLegacyUpgradeReview
+      ? await prisma.item.findMany({ where: { id: { in: lineIds } }, select: { id: true, slug: true, cost: true } })
+      : []
+    // Earlier online pricing added multi-day fees to these one-time upgrades.
+    // Require corrected pricing for every unpaid online status, without changing historical totals.
+    if (needsLegacyUpgradeReview && catalog.some(item => isNycOneTimePhotoboothUpgrade(item.slug))) {
+      return NextResponse.json({ error: 'Pricing for a one-time Photo Booth upgrade has changed. Please restart checkout to review the corrected total before paying.', code: 'pricing_changed' }, { status: 409 })
+    }
+
     // First online payment (saved checkout or a pay link for an unpaid order): the
     // stock hold of an unpaid order expires, so re-check everything that could have
     // changed since it was priced before any card can be charged.
-    const firstOnlinePayment = order.source === 'online' && Number(order.amountPaid || 0) <= 0 && ['incomplete', 'quote'].includes(order.status)
     if (firstOnlinePayment) {
       requireDeliveryMethod(order.deliveryType)
       if (order.status === 'incomplete' && order.checkoutStage === 'details_completed') {
@@ -88,16 +100,9 @@ export async function POST(request: NextRequest) {
       const deliveryQuote = await getDeliveryQuote(order.eventZip)
       requireMatchingDeliveryFee(order.deliveryFee, deliveryQuote)
       // Catalog prices must still match what the customer was quoted.
-      const lineIds = Array.from(new Set(order.items.map(line => line.itemId).filter((id): id is string => !!id)))
-      const catalog = await prisma.item.findMany({ where: { id: { in: lineIds } }, select: { id: true, slug: true, cost: true } })
       const catalogCents = new Map(catalog.map(item => [item.id, toCents(Number(item.cost))]))
       if (order.items.some(line => !line.itemId || catalogCents.get(line.itemId) !== toCents(Number(line.unitPrice)))) {
         return NextResponse.json({ error: 'Prices in this saved checkout have changed. Please restart checkout to see the current total before paying.' }, { status: 409 })
-      }
-      // Earlier online pricing added multi-day fees to these one-time upgrades.
-      // Leave historical totals intact, but require a fresh quote before first payment.
-      if (order.pricingVersion !== NYC_PRICING_VERSION && Number(order.durationFee || 0) > 0 && catalog.some(item => isNycOneTimePhotoboothUpgrade(item.slug))) {
-        return NextResponse.json({ error: 'Pricing for a one-time Photo Booth upgrade has changed. Please restart checkout to review the corrected total before paying.', code: 'pricing_changed' }, { status: 409 })
       }
       const exactSettings = (order.exactDeliveryRequested && order.exactDeliveryTime) || (order.pickupType === 'exact' && order.exactPickupTime)
         ? await prisma.exactTimeSettings.findFirst()

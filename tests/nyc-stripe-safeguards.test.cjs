@@ -215,19 +215,22 @@ function checkoutRouteHarness(overrides = {}) {
   }
 }
 
-behavior('checkout: legacy unpaid multi-day upgrade quotes require corrected pricing before any payment write', async () => {
+behavior('checkout: every legacy unpaid online status requires corrected upgrade pricing before any payment write', async () => {
   for (const pricingVersion of ['nyc-server-pricing-v2', 'nyc-quote-self-edit-v1']) {
     for (const slug of ['photobooth-custom-image-layout-upgrade', 'photobooth-custom-backdrop-upgrade-syracuse-ny']) {
-      const h = checkoutRouteHarness({ pricingVersion, catalog: [{ id: 'upgrade', slug, cost: 145 }] })
-      const response = await h.pay()
-      assert.equal(response.status, 409, pricingVersion + ': ' + slug)
-      assert.equal(response.data.code, 'pricing_changed')
-      assert.match(response.data.error, /restart checkout.*corrected total/)
-      assert.deepEqual(h.calls.orderWrites, [])
-      assert.deepEqual(h.calls.intentCreates, [])
-      assert.equal(h.calls.transactions, 0)
-      assert.equal(h.calls.capacityChecks, 0)
-      assert.equal(h.order.durationFee, 645, 'historical pricing is never changed by the guard')
+      for (const status of ['quote', 'incomplete', 'active', 'confirmed']) {
+        const h = checkoutRouteHarness({ pricingVersion, status, catalog: [{ id: 'upgrade', slug, cost: 145 }] })
+        const response = await h.pay()
+        assert.equal(response.status, 409, pricingVersion + ': ' + slug + ': ' + status)
+        assert.equal(response.data.code, 'pricing_changed')
+        assert.match(response.data.error, /restart checkout.*corrected total/)
+        assert.deepEqual(h.calls.orderWrites, [])
+        assert.deepEqual(h.calls.intentCreates, [])
+        assert.equal(h.calls.transactions, 0)
+        assert.equal(h.calls.capacityChecks, 0)
+        assert.equal(h.calls.catalogReads, 1)
+        assert.equal(h.order.durationFee, 645, 'historical pricing is never changed by the guard')
+      }
     }
   }
 })
@@ -248,6 +251,19 @@ behavior('checkout: unaffected legacy quotes and corrected current quotes remain
     assert.equal(h.calls.intentCreates.length, 1)
     assert.equal(h.calls.intentCreates[0].amount, 50000)
     assert.equal(h.calls.capacityChecks, 1)
+    assert.equal(h.calls.catalogReads, 1, 'first-payment pricing and legacy review share the catalog read')
+  }
+  for (const status of ['active', 'confirmed']) {
+    for (const overrides of [
+      { catalog: [{ id: 'package', slug: '20x20-tent-package-4-tables-32-chairs', cost: 645 }] },
+      { pricingVersion: currentVersion },
+    ]) {
+      const h = checkoutRouteHarness({ ...overrides, status })
+      assert.equal((await h.pay()).status, 200)
+      assert.equal(h.calls.intentCreates.length, 1)
+      assert.equal(h.calls.capacityChecks, 0, 'the pricing guard does not change status-based capacity checks')
+      assert.equal(h.calls.transactions, 0)
+    }
   }
 })
 

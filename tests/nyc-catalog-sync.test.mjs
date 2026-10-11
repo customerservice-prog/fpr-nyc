@@ -66,6 +66,15 @@ test('Syracuse catalog copy is localized for NYC with the NYC price', () => {
   assert.equal(localizeNycCatalogText(null), '')
 })
 
+test('catalog sync localizes explicit source-price mentions without changing other amounts', () => {
+  const source = { slug: 'photobooth-custom-image-layout-upgrade', name: 'Photobooth Custom Image Layout Upgrade', description: 'This optional $85 fee covers bespoke artwork. A separate $100 service is quoted independently.', cost: 85, quantity: 1, category: { slug: 'photo-booth-rentals', name: 'Photo Booth Rentals' } }
+  const desired = desiredNycItem(source, 0)
+  assert.equal(desired.cost, 145)
+  assert.equal(desired.description, 'This optional $145 fee covers bespoke artwork. A separate $100 service is quoted independently.')
+  assert.equal(localizeNycCatalogText(desired.description, { price: 145, sourcePrice: 85 }), desired.description)
+  assert.equal(localizeNycCatalogText('Package includes $85 artwork.', { price: 85, sourcePrice: 85 }), 'Package includes $85 artwork.')
+})
+
 test('desired NYC item mirrors Syracuse fields; photo-less items stay unpublished', () => {
   const source = { id: 's1', slug: 'cornhole', name: 'Cornhole ', description: 'Rent in Syracuse, NY. Starting at $40.00/day.', type: 'Regular', cost: 40, quantity: 20, displayToCustomer: true, scheduleProfile: null, status: 'Available', bookableAfter: null, bookableAfterMessage: '', specialDisplayName: '', setupArea: '', attendants: null, ageGroup: '', colorOptions: [], taxable: true, setupFee: null, suggestedAddonIds: [], category: { slug: 'yard-game-rentals', name: 'Yard Games', pricingProfile: 'standard' } }
   const withPhoto = desiredNycItem(source, 3, { main: true, additional: 1 })

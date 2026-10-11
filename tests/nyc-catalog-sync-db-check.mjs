@@ -27,7 +27,7 @@ try {
     assert.equal(row.status, source.status, source.slug + ' status')
     assert.equal(row.attendants, null, source.slug + ' attendants')
     assert.deepEqual(row.colorOptions, source.colorOptions, source.slug + ' colors')
-    assert.equal(row.description || '', localizeNycCatalogText(source.description, { price }), source.slug + ' description')
+    assert.equal(row.description || '', localizeNycCatalogText(source.description, { price, sourcePrice: source.cost }), source.slug + ' description')
     assert.deepEqual(wrongMarketTerms(row.description || ''), [], source.slug + ' wording')
     const hasPhoto = source.slug !== 'sugar-and-creamer-set'
     assert.equal(row.displayToCustomer, hasPhoto, source.slug + ' published')

@@ -1,6 +1,6 @@
 import type { CartItem } from '@/components/public/CartContext'
 import { parseBookingHandoff, resolveDesignCart, bookingDateKey } from './rentsketchBooking'
-import type { BookingHandoff, BookingCatalogItem } from './rentsketchBooking'
+import type { BookingHandoff, BookingCatalogItem, BookingAttribution } from './rentsketchBooking'
 
 export type CheckoutHandoff = BookingHandoff & { deliveryZip?: string }
 export function parseCheckoutHandoff(input: unknown): CheckoutHandoff {
@@ -8,11 +8,18 @@ export function parseCheckoutHandoff(input: unknown): CheckoutHandoff {
   const zip = (input as { deliveryZip?: unknown })?.deliveryZip
   return { ...parsed, ...(typeof zip === 'string' && /^\d{5}$/.test(zip) ? { deliveryZip: zip } : {}) }
 }
-export function resolveExactDesignCart(handoff: CheckoutHandoff, catalog: BookingCatalogItem[], existing: CartItem[], date: string) {
+export function resolveExactDesignCart(handoff: CheckoutHandoff, catalog: BookingCatalogItem[], existing: CartItem[], date: string, previousBooking?: BookingAttribution | null) {
   // Keep unrelated rentals, but selected lines use the exact design quantity.
   // A revisited design replaces its matching selection; it never increments it.
   const selected = new Set(handoff.items.flatMap(line => catalog.filter(p => p.slug === line.slug).map(p => JSON.stringify([p.id, line.selectedColor || '']))))
-  const retained = existing.filter(item => !selected.has(JSON.stringify([item.id, item.selectedColor || ''])))
+  // A revised saved layout replaces its previous imported selection as a whole.
+  // Removed rentals and old color variants must not become "other cart rentals".
+  const sameDesign = previousBooking?.designId === handoff.designId
+  const previousKeys = sameDesign && Array.isArray(previousBooking.itemKeys) && previousBooking.itemKeys.length ? new Set(previousBooking.itemKeys) : null
+  // Older imports recorded only product IDs. Keep that fallback so a revised
+  // legacy layout still removes its old rentals; new imports identify each color.
+  const previousIds = new Set(sameDesign && !previousKeys && Array.isArray(previousBooking.itemIds) ? previousBooking.itemIds : [])
+  const retained = existing.filter(item => !previousKeys?.has(cartVariantKey(item)) && !previousIds.has(item.id) && !selected.has(cartVariantKey(item)))
   const result = resolveDesignCart(handoff, catalog, retained, date)
   for (const line of handoff.items) {
     if (catalog.filter(p => p.slug === line.slug).length > 1) result.issues.push(line.slug + ': duplicate catalog identity needs confirmation.')

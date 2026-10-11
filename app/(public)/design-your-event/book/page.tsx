@@ -6,7 +6,7 @@ import { useCart, DEFAULT_SCHEDULING_DETAILS } from '@/components/public/CartCon
 import { trackEvent } from '@/lib/gtag'
 import { RENTSKETCH_BOOKING_KEY, bookingDateKey } from '@/lib/rentsketchBooking'
 import type { BookingCatalogItem } from '@/lib/rentsketchBooking'
-import { parseCheckoutHandoff, resolveExactDesignCart, prepareDesignCheckout } from '@/lib/rentsketchBookingFlow'
+import { parseCheckoutHandoff, resolveExactDesignCart, prepareDesignCheckout, cartVariantKey } from '@/lib/rentsketchBookingFlow'
 import type { CheckoutHandoff } from '@/lib/rentsketchBookingFlow'
 
 const money = (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
@@ -20,7 +20,7 @@ async function readCatalog(date: string, signal?: AbortSignal): Promise<BookingC
 
 export default function DesignBookingPage() {
   const router = useRouter()
-  const { items, eventDate, loaded, applyDesignCart, setDurationTierId, setDeliveryType, setEventTimeSlot, setPickupTimeSlot, setExactTimeRequested, setSchedulingDetails } = useCart()
+  const { items, eventDate, loaded, bookingDesign, applyDesignCart, setDurationTierId, setDeliveryType, setEventTimeSlot, setPickupTimeSlot, setExactTimeRequested, setSchedulingDetails } = useCart()
   const [handoff,setHandoff] = useState<CheckoutHandoff|null>(null), [date,setDate] = useState(''), [keepCart,setKeepCart] = useState(true)
   const [catalog,setCatalog] = useState<BookingCatalogItem[]>([]), [loading,setLoading] = useState(false), [continuing,setContinuing] = useState(false)
   const [error,setError] = useState(''), [retry,setRetry] = useState(0), [received,setReceived] = useState(false), [initiallyEmpty,setInitiallyEmpty] = useState(false)
@@ -56,7 +56,7 @@ export default function DesignBookingPage() {
     readCatalog(date,controller.signal).then(result=>{if(active)setCatalog(result)}).catch(err=>{if(active)setError(err.name==='AbortError'?'The availability check timed out. Please retry.':err.message)}).finally(()=>{clearTimeout(timer);if(active)setLoading(false)})
     return()=>{active=false;clearTimeout(timer);controller.abort()}
   },[handoff,date,retry])
-  const review=useMemo(()=>handoff?resolveExactDesignCart(handoff,catalog,keepCart?items:[],date):null,[handoff,catalog,keepCart,items,date])
+  const review=useMemo(()=>handoff?resolveExactDesignCart(handoff,catalog,keepCart?items:[],date,bookingDesign):null,[handoff,catalog,keepCart,items,date,bookingDesign])
 
   async function continueBooking(automatic=false) {
     if(!handoff||continuing||loading||navigationStarted.current)return
@@ -64,11 +64,11 @@ export default function DesignBookingPage() {
     setContinuing(true);setError('')
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000)
     try {
-      const latest=await readCatalog(date,controller.signal),checked=resolveExactDesignCart(handoff,latest,keepCart?items:[],date)
+      const latest=await readCatalog(date,controller.signal),checked=resolveExactDesignCart(handoff,latest,keepCart?items:[],date,bookingDesign)
       setCatalog(latest)
       if(checked.issues.length){setError('Some rentals need confirmation. Nothing has been removed, substituted, or added to your cart.');return}
       prepareDesignCheckout(sessionStorage,handoff,date)
-      applyDesignCart(checked.items,date,{designId:handoff.designId,source:handoff.source,eventDate:date,surfaceType:handoff.surfaceType,importedAt:Date.now(),itemIds:checked.imported.map(item=>item.id)})
+      applyDesignCart(checked.items,date,{designId:handoff.designId,source:handoff.source,eventDate:date,surfaceType:handoff.surfaceType,importedAt:Date.now(),itemIds:checked.imported.map(item=>item.id),itemKeys:checked.imported.map(cartVariantKey)})
       // RentSketch's quote is one-day standard service. Do not reuse a prior
       // cart's duration, exact-time fees, or scheduling selections silently.
       setDurationTierId(null);setDeliveryType(null);setEventTimeSlot('');setPickupTimeSlot(null);setExactTimeRequested(false);setSchedulingDetails(DEFAULT_SCHEDULING_DETAILS)

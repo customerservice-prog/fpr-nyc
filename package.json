@@ -27,7 +27,7 @@
     "test:nyc-minoa-staff-ux-parity": "node --test tests/nyc-minoa-staff-ux-parity.test.cjs",
     "test:nyc-admin-schedule-parity": "node --test tests/nyc-admin-schedule-parity.test.cjs",
     "test:nyc-secure-order-service": "node --test tests/nyc-secure-order-service.test.cjs",
-    "test:nyc-rentsketch-sync-parity": "node --test tests/nyc-rentsketch-sync-parity.test.cjs tests/nyc-rentsketch-launcher.test.cjs tests/nyc-rentsketch-quotes.test.cjs tests/nyc-rentsketch-quick-demo.test.cjs",
+    "test:nyc-rentsketch-sync-parity": "node --test tests/nyc-rentsketch-sync-parity.test.cjs tests/nyc-rentsketch-launcher.test.cjs tests/nyc-rentsketch-quotes.test.cjs tests/nyc-rentsketch-quick-demo.test.cjs tests/nyc-rentsketch-booking-flow.test.cjs",
     "test:nyc-contacts": "node --test tests/nyc-riverdale-contact-routing.test.cjs"
   },
   "prisma": {

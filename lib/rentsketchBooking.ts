@@ -19,6 +19,8 @@ export interface BookingAttribution {
   surfaceType: string
   importedAt: number
   itemIds: string[]
+  /** Imported cart lines encoded as [item id, selected color]. Legacy carts may omit this. */
+  itemKeys?: string[]
 }
 export interface BookingCatalogItem {
   id: string

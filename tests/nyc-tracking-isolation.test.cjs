@@ -140,7 +140,7 @@ test('NYC public payment and confirmation surfaces use NYC identity', () => {
   const confirmation = fs.readFileSync(path.join(root, 'app/(public)/checkout/confirmation/page.tsx'), 'utf8')
   assert.match(pay, /order\.eventState \|\| 'NY'/)
   assert.doesNotMatch(pay, /order\.eventState \|\| 'SC'/)
-  assert.match(confirmation, /NYC%20%2F%20Downstate/)
+  assert.match(confirmation, /NYC%20%2F%20Riverdale/)
   assert.doesNotMatch(confirmation, /South%20Carolina|Greenville/)
 })
 

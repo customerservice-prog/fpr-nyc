@@ -15,6 +15,15 @@ function load(path, deps = {}, globals = {}) {
 const helper = load('lib/nycRentSketch.ts')
 const booking = load('lib/rentsketchBooking.ts')
 
+test('only actual standalone tent rentals receive tent preview actions',()=>{
+  for(const name of ['20x20 Pole Tent','20x30 Pole Tent','20x40 Pole Tent','30 x 30 Pole Tent','30 x 45 Pole Tent','30 x 60 Pole Tent','40 x 40 Pole Tent','40x60 Pole Tent','40 x 80 Pole Tent','40 x 100 Pole Tent','20 x 20 Frame Tent','20 x 30 Frame Tent','20 x 40 Frame Tent','30x40 Classic Frame Tent','10 x 10 EZ Pop Up Canopy Tent','10 x 20 EZ Pop Up Canopy Tent'])assert.equal(helper.isActualTentItem(name),true,name)
+  for(const name of ['10x10 Pop-Up Sidewall',"20' Side Wall Tent","20' Side Wall with Windows",'Tent Misting 10x10 Pop Up Tent','20x20 Tent Package – 4 Tables & 32 Chairs','20x30 Tent + 8 Tables + 64 Chairs Package','30x30 Tent Package – 8 Tables & 80 Chairs','Linen Tent Package','Tent Accessory 20x20',...['20x20','20x30','20x40','30x30','30x45','30x60','40x40','40x60','40x80','40x100'].map(size=>'Tent Lighting ('+size+')')])assert.equal(helper.isActualTentItem(name),false,name)
+  const card=fs.readFileSync('components/public/ItemCard.tsx','utf8')
+  const page=fs.readFileSync('app/(public)/items/[...slug]/page.tsx','utf8')
+  assert.match(card,/const isTent=!isPackage&&isActualTentItem\(name\)/)
+  assert.match(page,/const isStandaloneTent = isActualTentItem\(item.name\)/)
+})
+
 test('planner URLs preserve NYC tenant, inflatable contract, parent origin and 2D retry', () => {
   const plain = new URL(helper.nycRentSketchDesignerUrl('home_designer_section'))
   assert.equal(plain.searchParams.get('tenant'), 'friendly-nyc')
@@ -58,4 +67,22 @@ test('embedded booking accepts only its own NYC iframe and validates the selecti
   assert.equal(accepted.tenant,'friendly-nyc')
   assert.equal(accepted.source,'test')
   assert.equal(accepted.items[0].quantity,1)
+})
+
+test('generic designer errors offer a 2D retry without inventing a rental selection',()=>{
+  const h=harness()
+  h.message({type:'rentsketch.error',tenant:'friendly-nyc',reason:'3D unavailable'})
+  function find(tree,predicate){
+    if(!tree||typeof tree!=='object')return null
+    if(predicate(tree))return tree
+    for(const child of tree.children||[]){const found=find(child,predicate);if(found)return found}
+    return null
+  }
+  const fallback=find(h.render(),node=>node.type==='button'&&node.children.includes('Open in 2D'))
+  assert.ok(fallback,'a generic event plan must offer the same 2D fallback as a rental preview')
+  fallback.props.onClick()
+  const frame=find(h.render(),node=>node.type==='iframe')
+  const url=new URL(frame.props.src)
+  for(const [key,value] of Object.entries({tenant:'friendly-nyc',source:'test',view:'2d',embed:'1',parentOrigin:'https://friendlypartyrentalnyc.com',retry:'1'}))assert.equal(url.searchParams.get(key),value,key)
+  for(const key of ['product','productSlug','tent','tentSlug','focus','autoplace'])assert.equal(url.searchParams.has(key),false,key)
 })

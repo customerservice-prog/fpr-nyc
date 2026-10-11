@@ -8,6 +8,7 @@ import { safeJsonLd } from '@/lib/jsonLd'
 import ItemGallery from '@/components/public/ItemGallery'
 import SuggestedAddons from '@/components/public/SuggestedAddons'
 import DesignYourEventCTA from '@/components/public/DesignYourEventCTA'
+import { isActualTentItem } from '@/lib/nycRentSketch'
 import { getSmartAddonSearchTerms, isSmartAddonCompatible, rankSmartAddons, supportsSmartAddons } from '@/lib/smartAddons'
 import { itemDescriptionForNyc } from '@/lib/nycPublicCopy'
 import { nycItemImagePath, nycItemPath, nycItemUrlSlug, pickStoredItem, storedItemSlugCandidates } from '@/lib/nycItemPath'
@@ -150,7 +151,7 @@ export default async function ItemPage({ params }: { params: Promise<{ slug: str
     : item.category.slug === 'photobooth-rentals' && /^photobooth-\d+-hour-(?:with|no)-attendant$/.test(segment)
       ? ['4x6 prints included', 'Photo props', 'Standard backdrop', 'Digital gallery'] : []
 
-  const isStandaloneTent = /\btent\b/i.test(item.name) && /\b\d+\s*(?:x|×)\s*\d+\b/i.test(item.name) && !/(?:side\s*wall|sidewall|package|accessor)/i.test(item.name)
+  const isStandaloneTent = isActualTentItem(item.name)
   const isInflatable = item.category.slug === 'bounce-house-rentals' && !/\b(package|blower|sandbag|extension cord|accessor)\b/i.test(item.name)
 
   const jsonLd = {

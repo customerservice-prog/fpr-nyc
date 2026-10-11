@@ -2,6 +2,13 @@
 // RentSketch uses the isolated NYC catalog and synced NYC rental prices for planning.
 // NYC checkout remains the authority for availability, duration pricing, delivery, tax and deposit.
 export const NYC_RENTSKETCH_TENANT = 'friendly-nyc'
+
+/** Only standalone tent rentals can start a tent preview; sized accessories cannot. */
+export function isActualTentItem(name: string): boolean {
+  return /\b(?:tent|canopy)\b/i.test(name) && /\b\d+\s*(?:x|×)\s*\d+\b/i.test(name) &&
+    !/(?:side\s*wall|package|accessor|light|mist)/i.test(name)
+}
+
 export const nycOrderAccessUrl =
   'https://rentsketch.com/my-event/?tenant=' + encodeURIComponent(NYC_RENTSKETCH_TENANT) + '&mode=order'
 
@@ -20,11 +27,10 @@ export type NycRentSketchPreview = {
 }
 
 export function nycRentSketchEmbedUrl({ source, name, slug, productType = 'tent', view = '3d', parentOrigin, retry }: NycRentSketchPreview) {
-  const params = new URLSearchParams({ tenant: NYC_RENTSKETCH_TENANT, embed: '1', v: '20260920-inflatables-1', source })
+  const params = new URLSearchParams({ tenant: NYC_RENTSKETCH_TENANT, embed: '1', v: '20260920-inflatables-1', source, view })
   if (parentOrigin) params.set('parentOrigin', parentOrigin)
   if (retry) params.set('retry', String(retry))
   if (name || slug) {
-    params.set('view', view)
     params.set('focus', productType)
     params.set('autoplace', '1')
     if (name) params.set(productType === 'inflatable' ? 'product' : 'tent', name)

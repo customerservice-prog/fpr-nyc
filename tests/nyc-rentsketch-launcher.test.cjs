@@ -39,7 +39,7 @@ test('rental CTA has a usable NYC launch URL before hydration', () => {
   assert.match(html, /productSlug=tidal-wave-inflatable-water-slide/)
 })
 
-function harness() {
+function harness({graphics='webgl2',extensionAvailable=true,contextLost=false,cleanupFailure='',launch={source:'test'}}={}) {
   const states=[], listeners=new Map(), effects=[], cleanups=[]; let cursor=0, frame
   const assigned=[]
   function element(inertAttribute=null){
@@ -50,17 +50,69 @@ function harness() {
   const body=element(),root=append(body,element()),nested=append(root,element()),overlayParent=append(nested,element()),overlay=append(overlayParent,element())
   const background=[append(overlayParent,element()),append(nested,element()),append(root,element()),append(body,element('already-disabled'))]
   const document={documentElement:{style:{}},body}
+  const probeCalls=[]
+  let graphicsReleases=0
+  const graphicsContext={isContextLost:()=>contextLost,getExtension:name=>{
+    assert.equal(name,'WEBGL_lose_context')
+    if(cleanupFailure==='extension')throw new Error('Optional release extension unavailable')
+    return extensionAvailable?{loseContext:()=>{graphicsReleases++;if(cleanupFailure==='release')throw new Error('Optional context release failed')}}:null
+  }}
+  document.createElement=tag=>{
+    assert.equal(tag,'canvas')
+    probeCalls.push(tag)
+    return {getContext:type=>{
+      probeCalls.push(type)
+      if(graphics==='throws')throw new Error('Graphics context blocked')
+      return type===graphics?graphicsContext:null
+    }}
+  }
   const opener={isConnected:true,focus:()=>{document.activeElement=opener}}
   document.activeElement=opener
   let closeControl,backCalls=0
   const window={ location:{origin:'https://friendlypartyrentalnyc.com',assign:url=>assigned.push(url)},history:{state:null,pushState(state){this.state=state},back(){backCalls++}},scrollY:0,scrollTo(){},addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:(name,fn)=>{if(listeners.get(name)===fn)listeners.delete(name)} }
   const react={useState:initial=>{const i=cursor++;if(!(i in states))states[i]=initial;return[states[i],next=>states[i]=typeof next==='function'?next(states[i]):next]},useRef:()=>({current:null}),useCallback:fn=>fn,useEffect:fn=>effects.push(fn),createElement:(type,props,...children)=>{if(type==='iframe'){frame={contentWindow:{}};props.ref.current=frame}if(type==='button'&&props.ref){closeControl={isConnected:true,focus:()=>{document.activeElement=closeControl}};props.ref.current=closeControl}if(type==='div'&&props.ref)props.ref.current=overlay;return{type,props,children}}}
-  const Launcher=load('components/public/DesignYourEventLauncher.tsx', {'react':react,'next/link':'link','lucide-react':{X:'close'},'@/lib/nycRentSketch':helper,'@/lib/rentsketchBooking':booking},{window,document,setTimeout:()=>1,clearTimeout(){}}).default
+  const viewHelper=load('lib/nycRentSketchView.ts',{}, {document})
+  const Launcher=load('components/public/DesignYourEventLauncher.tsx', {'react':react,'next/link':'link','lucide-react':{X:'close'},'@/lib/nycRentSketch':helper,'@/lib/nycRentSketchView':viewHelper,'@/lib/rentsketchBooking':booking},{window,document,setTimeout:()=>1,clearTimeout(){}}).default
   function render(){cleanups.splice(0).forEach(fn=>fn());cursor=0;const tree=Launcher();effects.splice(0).forEach(fn=>{const cleanup=fn();if(cleanup)cleanups.push(cleanup)});return tree}
-  render();listeners.get('open-design-your-event')({detail:{source:'test'}});render()
+  render();listeners.get('open-design-your-event')({detail:launch});render()
   const message=(data,source=frame.contentWindow,origin='https://rentsketch.com')=>listeners.get('message')({data,source,origin})
-  return {message,assigned,render,keydown:event=>listeners.get('keydown')?.(event),get activeElement(){return document.activeElement},get closeControl(){return closeControl},opener,background,overlay,ancestors:[overlayParent,nested,root,body],get backCalls(){return backCalls},get hasKeyboardListener(){return listeners.has('keydown')}}
+  return {message,assigned,render,probeCalls,get graphicsReleases(){return graphicsReleases},keydown:event=>listeners.get('keydown')?.(event),get activeElement(){return document.activeElement},get closeControl(){return closeControl},opener,background,overlay,ancestors:[overlayParent,nested,root,body],get backCalls(){return backCalls},get hasKeyboardListener(){return listeners.has('keydown')}}
 }
+
+test('actual launch handler selects usable graphics immediately and preserves the rental contract',()=>{
+  function iframe(tree){
+    if(!tree||typeof tree!=='object')return null
+    if(tree.type==='iframe')return tree
+    for(const child of tree.children||[]){const found=iframe(child);if(found)return found}
+    return null
+  }
+  const launch={source:'device_preview',view:'3d',product:'Rainbow Castle Bounce House',productSlug:'crayon-bounce-house',productType:'inflatable'}
+  for(const [graphics,expectedView,calls,releases] of [
+    ['webgl2','3d',['canvas','webgl2'],1],
+    ['webgl','3d',['canvas','webgl2','webgl'],1],
+    ['none','2d',['canvas','webgl2','webgl'],0],
+    ['throws','2d',['canvas','webgl2'],0],
+  ]){
+    const h=harness({graphics,launch})
+    const url=new URL(iframe(h.render()).props.src)
+    for(const [key,value] of Object.entries({tenant:'friendly-nyc',source:'device_preview',view:expectedView,product:'Rainbow Castle Bounce House',productSlug:'crayon-bounce-house',focus:'inflatable',autoplace:'1',parentOrigin:'https://friendlypartyrentalnyc.com'}))assert.equal(url.searchParams.get(key),value,graphics+': '+key)
+    assert.deepEqual(h.probeCalls,calls)
+    assert.equal(h.graphicsReleases,releases)
+  }
+  const explicit=harness({graphics:'throws',launch:{...launch,view:'2d'}})
+  assert.equal(new URL(iframe(explicit.render()).props.src).searchParams.get('view'),'2d')
+  assert.deepEqual(explicit.probeCalls,[],'an explicit 2D request must not allocate a graphics context')
+  const withoutReleaseExtension=harness({graphics:'webgl',extensionAvailable:false,launch})
+  assert.equal(new URL(iframe(withoutReleaseExtension.render()).props.src).searchParams.get('view'),'3d')
+  assert.equal(withoutReleaseExtension.graphicsReleases,0)
+  for(const cleanupFailure of ['extension','release']){
+    const usable=harness({graphics:'webgl2',cleanupFailure,launch})
+    assert.equal(new URL(iframe(usable.render()).props.src).searchParams.get('view'),'3d','optional cleanup failure cannot reject a valid context')
+  }
+  const lost=harness({graphics:'webgl2',contextLost:true,launch})
+  assert.equal(new URL(iframe(lost.render()).props.src).searchParams.get('view'),'2d','a returned but lost context cannot provide 3D')
+  assert.equal(lost.graphicsReleases,1)
+})
 
 test('keyboard opens on the close control, Escape closes and restores the same opener',()=>{
   const h=harness()
@@ -109,6 +161,7 @@ test('error and success panels keep close and recovery handlers inside scrollabl
     assert.ok(close,'The close control stays outside scrollable panel content')
     assert.match(close.props.className,/min-w-11 min-h-11/)
     if(state==='error'){
+      assert.match(find(panel,node=>node.props?.key==='msg').children[0],/continue planning in 2D/)
       assert.equal(find(panel,node=>node.props?.key==='reason').children[0],reason.trim())
       const retry=find(panel,node=>node.children?.includes('Open in 2D'))
       assert.match(retry.props.className,/min-h-11/)

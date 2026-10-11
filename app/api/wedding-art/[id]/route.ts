@@ -13,7 +13,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         'Content-Type': artwork.contentType,
         'Cache-Control': 'public, max-age=0, must-revalidate',
         'X-Content-Type-Options': 'nosniff',
-        'X-Image-Reference': 'native-NYC-package-current-catalog',
+        'X-Image-Reference': artwork.reference,
       },
     })
   } catch {

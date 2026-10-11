@@ -5,15 +5,16 @@ import { pickStoredItem, storedItemSlugCandidates } from '@/lib/nycItemPath'
 import { nycItemUrlSlug } from '@/lib/nycItemPath'
 import { NYC_WEDDING_ITEM_TO_PACKAGE } from '@/lib/nycWeddingImages'
 import { readNycWeddingArtwork } from '@/lib/nycWeddingArtworkServer'
+import { isNycPartyArtworkRequest, renderNycPartyPackageArtwork } from '@/lib/nycPartyPackageArtworkServer'
 
 export const dynamic = 'force-dynamic'
 
 // Serves NYC item photos from this NYC domain.
 //   /api/item-image/<slug>            main photo (Item.picture)
 //   /api/item-image/<slug>?index=N    additional photo N (Item.additionalImages[N])
-// The catalog sync stores the Syracuse photo URLs for every mirrored item, so NYC
-// shows exactly the Syracuse photo through this local proxy (no hotlinking from
-// customer browsers). Inline (data:) images and uploads stored by NYC admin work too.
+// Ordinary mirrored photos use a local Syracuse-source proxy (no browser hotlinks).
+// Price-bearing package cards use reviewed NYC artwork and the current NYC cost.
+// Inline (data:) images and uploads stored by NYC admin work too.
 
 const CACHE_CONTROL = 'public, max-age=3600, stale-while-revalidate=86400'
 const MAX_ADDITIONAL_INDEX = 50
@@ -75,7 +76,27 @@ export async function GET(
       'Content-Type': artwork.contentType,
       'Cache-Control': 'public, max-age=0, must-revalidate',
       'X-Content-Type-Options': 'nosniff',
-      'X-Image-Reference': 'native-NYC-package-current-catalog',
+      'X-Image-Reference': artwork.reference,
+    } })
+  }
+
+  // Published NYC party packages use the reviewed local card and live catalog cost.
+  // A missing or changed card must never fall through to its stale upstream poster.
+  if (isNycPartyArtworkRequest(slug, index)) {
+    const candidates = storedItemSlugCandidates(slug)
+    const rows = await prisma.item.findMany({
+      where: { slug: { in: candidates }, displayToCustomer: true, category: { displayToCustomer: true } },
+      select: { slug: true, name: true, cost: true, description: true },
+    })
+    const item = pickStoredItem(slug, rows)
+    if (!item) return new NextResponse('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } })
+    const artwork = await renderNycPartyPackageArtwork(slug, item)
+    if (!artwork) return new NextResponse('Package artwork unavailable', { status: 503, headers: { 'Cache-Control': 'no-store' } })
+    return new NextResponse(artwork.bytes, { headers: {
+      'Content-Type': artwork.contentType,
+      'Cache-Control': 'public, max-age=0, must-revalidate',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Image-Reference': artwork.reference,
     } })
   }
 

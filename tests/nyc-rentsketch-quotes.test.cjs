@@ -114,3 +114,36 @@ test('inventory requests retain their signature and freshness checks', async () 
   assert.equal(api.records.size, 0)
   assert.equal(api.emails.length, 0)
 })
+
+const feedback = {
+  type: 'feedback.created', createdAt: new Date().toISOString(), data: {
+    feedbackType: 'problem', customerEmail: 'qa@example.invalid', entryMode: 'designer',
+    productId: 'local-product-example', viewMode: '3d',
+    pageUrl: 'https://rentsketch.com/designer/?tenant=friendly-nyc',
+    message: 'Local mock feedback only <script>alert(1)</script>',
+  },
+}
+
+test('signed NYC feedback notifies staff with escaped context without creating a quote', async () => {
+  const api = load()
+  const result = await api.post(feedback)
+  assert.equal(result.status, 200)
+  assert.equal(result.body.notificationSent, true)
+  assert.equal(api.records.size, 0)
+  assert.equal(api.emails.length, 1)
+  assert.equal(api.emails[0].to, 'staff@example.invalid')
+  assert.equal(api.emails[0].replyTo, 'qa@example.invalid')
+  for (const text of ['Riverdale RentSketch feedback', 'Type: problem', 'View: 3d', 'local-product-example', '&lt;script&gt;']) assert.ok(api.emails[0].html.includes(text))
+  assert.ok(!api.emails[0].html.includes('<script>'))
+})
+
+test('unsigned NYC feedback sends nothing and notification failures are not acknowledged as delivered', async () => {
+  const unsigned = load()
+  assert.equal((await unsigned.post(feedback, 'invalid')).status, 401)
+  assert.equal(unsigned.emails.length, 0)
+  const failed = load({ emailFails: true })
+  const result = await failed.post(feedback)
+  assert.equal(result.status, 502)
+  assert.equal(result.body.notificationSent, undefined)
+  assert.equal(failed.records.size, 0)
+})

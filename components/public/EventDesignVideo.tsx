@@ -5,7 +5,7 @@ import { Play, Layers3, Armchair, MoonStar, PartyPopper, Send, ArrowRight } from
 import styles from '@/app/(public)/design-your-event/design.module.css'
 import { attachEventDesignPlayback } from './eventDesignPlayback'
 import { trackEvent } from '@/lib/gtag'
-import Link from 'next/link'
+import { nycRentSketchDesignerUrl } from '@/lib/nycRentSketch'
 
 const filmSource = '/videos/event-design-walkthrough-v2.mp4'
 const DEMO_SECONDS = 32
@@ -67,7 +67,7 @@ export default function EventDesignVideo({
     void player.play().catch(() => {})
   }
 
-  function trackAction(action: 'layout_help' | 'check_date') {
+  function trackAction(action: 'free_planner') {
     trackEvent('rentsketch_demo_cta_click', { source, action })
   }
 
@@ -108,24 +108,23 @@ export default function EventDesignVideo({
     </div>
 
     {homeFeature ? <div data-home-film-footer id={descriptionId}>
-      <p>Explore RentSketch’s layout and atmosphere previews. Our Riverdale team confirms the equipment and setup for your NYC event.</p>
+      <p>Move rentals, switch between 2D and 3D, then send your finished plan to our Riverdale team for a quote.</p>
       <a href="/design-your-event#quick-demo">Explore everything RentSketch can do <ArrowRight size={16} aria-hidden="true" /></a>
     </div> : <>
       <div className={styles.demoConversion} data-demo-complete={completed ? 'true' : 'false'}>
         <div className={styles.demoConversionCopy}>
           <p className={styles.demoEyebrow}>{completed ? 'You just saw RentSketch in action' : 'This is the quick look. The full designer is hands-on.'}</p>
-          <h3>Picture your Riverdale celebration.</h3>
-          <p>See how seating, tables and a tent work together in the demonstration. Share your date, guest count and space with our Riverdale team to plan the real rental setup.</p>
+          <h3>Build your own Riverdale event.</h3>
+          <p>Move rentals, compare table styles, switch between 2D and 3D, preview the atmosphere, then send your finished plan to our Riverdale team for a real quote.</p>
           <div className={styles.demoProof}>
-            <span>✓ Riverdale, Bronx & Lower Westchester</span>
-            <span>✓ Rental layout help from our team</span>
-            <span>✓ Equipment and availability confirmed separately</span>
+            <span>✓ Free planning for NYC customers and shoppers</span>
+            <span>✓ No order or card required to start</span>
+            <span>✓ Send the finished setup to our Riverdale team</span>
           </div>
         </div>
         <div className={styles.demoConversionActions}>
-          <Link href="/contact_us" onClick={() => trackAction('layout_help')} className={styles.demoPassButton}>Get Riverdale Layout Help <ArrowRight size={17} aria-hidden="true" /></Link>
-          <Link href="/order-by-date" onClick={() => trackAction('check_date')} className={styles.demoIncludedButton}>Check My Event Date</Link>
-          <p>Our Riverdale team confirms your rental list, site requirements and delivery. A visual preview does not reserve equipment.</p>
+          <a data-rentsketch-demo-planner href={nycRentSketchDesignerUrl('quick_demo')} onClick={() => trackAction('free_planner')} className={styles.demoPassButton}>Plan my event — free <ArrowRight size={17} aria-hidden="true" /></a>
+          <p>Friendly Party Rental NYC does not charge a separate RentSketch design fee. Shoppers and existing customers use the same free planner; our Riverdale team confirms rental pricing, availability and any booking changes.</p>
         </div>
       </div>
 

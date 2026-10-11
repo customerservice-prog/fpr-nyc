@@ -82,6 +82,37 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  if (payload?.type === 'feedback.created') {
+    const feedbackType = String(d.feedbackType || 'general').slice(0, 40)
+    const email = String(d.customerEmail || '').slice(0, 254)
+    const message = [
+      'Type: ' + feedbackType,
+      'Customer email: ' + (email || 'Not provided'),
+      'Entry: ' + String(d.entryMode || 'unknown').slice(0, 80),
+      'Product: ' + String(d.productId || 'none').slice(0, 160),
+      'View: ' + String(d.viewMode || 'unknown').slice(0, 40),
+      'Page: ' + String(d.pageUrl || 'unknown').slice(0, 1000),
+      '',
+      String(d.message || '').slice(0, 4000),
+    ].join('\n')
+    try {
+      const notification = await sendEmail({
+        to: NYC_NOTIFICATION_EMAIL,
+        subject: 'RentSketch feedback — ' + feedbackType,
+        replyTo: email || undefined,
+        html: `<div style="font-family:Arial,sans-serif;max-width:680px;margin:auto;color:#172536">
+          <h2>Riverdale RentSketch feedback</h2>
+          <div style="background:#f5f7f8;border-radius:10px;padding:14px;white-space:pre-wrap">${esc(message)}</div>
+        </div>`,
+      }) as { success?: boolean; simulated?: boolean }
+      if (!notification.success || notification.simulated) throw new Error('Staff notification was not delivered')
+      return NextResponse.json({ ok: true, notificationSent: true })
+    } catch {
+      console.error('NYC RentSketch feedback notification was not delivered')
+      return NextResponse.json({ error: 'Riverdale feedback notification could not be delivered' }, { status: 502 })
+    }
+  }
+
   if (payload?.type !== 'quote_request.created') return NextResponse.json({ ok: true, ignored: true })
 
   const requestId = String(d.id || randomUUID()).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80)

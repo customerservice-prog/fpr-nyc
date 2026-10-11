@@ -16,5 +16,5 @@ test('Riverdale service-area redesign stays truthful and delivery-only',()=>{
  assert.match(dir,/Try Yonkers or 10471/)
  assert.match(dir,/\{area\.name\}, NY</)
  assert.doesNotMatch(dir,/Greer|29650|, SC</)
- assert.match(dir,/315-884-1498/)
+ assert.match(dir,/718-283-4593/)
 })

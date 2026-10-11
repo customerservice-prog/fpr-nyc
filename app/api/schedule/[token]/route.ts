@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { createZoomMeeting } from '@/lib/zoom'
 import { createGoogleCalendarMeeting, getGoogleCalendarConnection } from '@/lib/googleCalendar'
 import { sendEmail, meetingInviteEmail } from '@/lib/email'
-import { BUSINESS } from '@/lib/utils'
+import { NYC_NOTIFICATION_EMAIL } from '@/lib/nycEmail'
 import { parseMeetingWallClock, requireFutureMeeting } from '@/lib/meetingTime'
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (meeting.email) {
       await sendEmail({ to: meeting.email, subject: invite.subject, html: invite.html })
     }
-    await sendEmail({ to: BUSINESS.email, subject: invite.subject, html: invite.html })
+    await sendEmail({ to: NYC_NOTIFICATION_EMAIL, subject: invite.subject, html: invite.html })
   }
 
   return NextResponse.json({ success: true, videoLink: zoomLink || '', provider: 'zoom' })

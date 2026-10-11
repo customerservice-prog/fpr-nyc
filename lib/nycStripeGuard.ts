@@ -50,7 +50,7 @@ export interface NycStripeConfigReport {
 }
 
 export const NYC_PAYMENTS_UNAVAILABLE_MESSAGE =
-  'Online payment is temporarily unavailable. Please contact Friendly Party Rental NYC at 315-884-1498 before paying.'
+  'Online payment is temporarily unavailable. Please contact Friendly Party Rental NYC at 718-283-4593 before paying.'
 
 /** Raised whenever a payment operation must not proceed. `reason` is safe to log (never contains secrets). */
 export class NycPaymentsUnavailableError extends Error {

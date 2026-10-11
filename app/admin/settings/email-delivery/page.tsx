@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
-import { NYC_EMAIL_ADDRESS, NYC_EMAIL_TAG } from '@/lib/nycEmail'
+import { NYC_EMAIL_ADDRESS, NYC_NOTIFICATION_EMAIL, NYC_EMAIL_TAG } from '@/lib/nycEmail'
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Riverdale Email Delivery', robots: { index: false, follow: false } }
 export default async function EmailDeliveryPage() {
@@ -23,9 +23,9 @@ export default async function EmailDeliveryPage() {
     </section>
     <section className="rounded-xl border bg-white p-5">
       <h2 className="text-lg font-bold">One inbox, unmistakable location</h2>
-      <p className="mt-2 break-all">Shared inbox: {NYC_EMAIL_ADDRESS}</p>
+      <p className="mt-2 break-all">Public Riverdale email: {NYC_EMAIL_ADDRESS}</p><p className="mt-2 break-all">Staff notifications: {NYC_NOTIFICATION_EMAIL}</p>
       <p className="mt-2">Subject example: <strong>{NYC_EMAIL_TAG} Riverdale rental inquiry</strong></p>
-      <p className="mt-2">Sender label: Friendly Party Rental NYC. Messages include a NYC / DOWNSTATE NEW YORK banner. Replies to contact notifications go to the customer.</p>
+      <p className="mt-2">Sender label: Friendly Party Rental NYC - Riverdale. Messages include a NYC / RIVERDALE LOCATION banner. Replies to contact notifications go to the customer.</p>
     </section>
     <section className="rounded-xl border bg-white p-5">
       <h2 className="text-lg font-bold">Secure sender setup</h2>

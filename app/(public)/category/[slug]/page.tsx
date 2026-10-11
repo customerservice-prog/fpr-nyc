@@ -66,8 +66,8 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
     {
       q: 'How much does it cost to rent ' + categoryLower + ' in Riverdale, NY?',
       a: minPrice
-        ? 'Pricing starts at $' + minPrice.toFixed(2) + '/day and depends on the specific item, quantity, rental duration, delivery location, and setup requirements. Call 315-884-1498 for help with a quote.'
-        : 'Pricing depends on the specific item, quantity, rental duration, delivery location, and setup requirements. Call 315-884-1498 for help with a quote.',
+        ? 'Pricing starts at $' + minPrice.toFixed(2) + '/day and depends on the specific item, quantity, rental duration, delivery location, and setup requirements. Call 718-283-4593 for help with a quote.'
+        : 'Pricing depends on the specific item, quantity, rental duration, delivery location, and setup requirements. Call 718-283-4593 for help with a quote.',
     },
     {
       q: 'Do you deliver ' + categoryLower + ' near me?',
@@ -79,7 +79,7 @@ export default async function CategorySlugPage(props: { params: Promise<{ slug: 
     },
     {
       q: 'Can your team help me choose the right rentals?',
-      a: 'Yes. Call 315-884-1498 for help choosing equipment or planning a tent, table and chair layout with our Riverdale team.',
+      a: 'Yes. Call 718-283-4593 for help choosing equipment or planning a tent, table and chair layout with our Riverdale team.',
     },
   ]
 

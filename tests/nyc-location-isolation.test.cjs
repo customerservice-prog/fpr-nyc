@@ -18,7 +18,7 @@ test('NYC checkout and admin orders default to New York', () => {
 test('NYC staff email settings do not claim a Greenville banner', () => {
   const page = read('app/admin/settings/email-delivery/page.tsx')
   assert.doesNotMatch(page, /SOUTH CAROLINA|GREENVILLE/)
-  assert.match(page, /NYC \/ DOWNSTATE NEW YORK/)
+  assert.match(page, /NYC \/ RIVERDALE LOCATION/)
 })
 
 test('NYC app template keeps paid ads unconfigured', () => {

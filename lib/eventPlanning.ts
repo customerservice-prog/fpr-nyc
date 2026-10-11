@@ -1,7 +1,7 @@
 import { NYC_SERVICE_AREA_SUMMARY } from './nycServiceAreas'
 import { NYC_PUBLIC_ORIGIN } from './nycPublicOrigin'
 
-export const PLANNING_PHONE = '315-884-1498'
+export const PLANNING_PHONE = '718-283-4593'
 export const PLANNING_ORIGIN = NYC_PUBLIC_ORIGIN
 export const PLANNING_HELP = ['Rentals', 'Event design / layout', 'Vendor coordination', 'Day-of coordination', 'Full planning', 'Not sure yet'] as const
 export const planningServices = [
@@ -147,7 +147,7 @@ export function planningPackageItems(pkg: { items: readonly string[] }): string[
 }
 
 export const planningFaqs = [
-  { question: 'Can I add planning to an existing rental order?', answer: 'Yes. Include your order number in the inquiry or call 315-884-1498. We will review your existing rentals and discuss any additional planning services, subject to availability.' },
+  { question: 'Can I add planning to an existing rental order?', answer: 'Yes. Include your order number in the inquiry or call 718-283-4593. We will review your existing rentals and discuss any additional planning services, subject to availability.' },
   { question: 'Do you plan more than weddings?', answer: 'Yes. We discuss corporate events, private celebrations, festivals and fundraisers as well as weddings. Events that do not fit a published package are scoped individually.' },
   { question: 'Are rentals and delivery included in the planning price?', answer: 'The package details below describe planning and coordination services. Your written quote must confirm the rental equipment, delivery, setup, pickup, travel fees and taxes that apply to your event. Do not assume that an item or service not listed is included.' },
   { question: 'What happens if my event runs longer than the package hours?', answer: PLANNING_PRICES_APPROVED ? 'The published planning packages list their included meetings and on-site hours. Additional time is billed at $' + PLANNING_EXTRA_HOURLY_RATE + ' per hour. Discuss extra time with the team when confirming your scope.' : 'The planning packages list their included meetings and on-site hours. Additional time is quoted with your planning scope. Discuss extra time with the team when confirming your scope.' },

@@ -1,9 +1,10 @@
 import { BUSINESS, formatDate } from '@/lib/utils'
+import { NYC_NOTIFICATION_EMAIL } from '@/lib/nycEmail'
 import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
 
 export function ownerNotificationRecipients() {
   const configured = String(process.env.OWNER_NOTIFICATION_EMAIL || '').trim()
-  return Array.from(new Set([BUSINESS.email, configured].filter(Boolean).map(v => v.toLowerCase()))).join(',')
+  return Array.from(new Set([NYC_NOTIFICATION_EMAIL, configured].filter(Boolean).map(v => v.toLowerCase()))).join(',')
 }
 
 export function hasDeliverableCustomerEmail(email?: string | null) {

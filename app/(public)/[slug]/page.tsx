@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import {nycPageMetadata} from '@/lib/nycSeo'
+import { localizeNycContactText } from '@/lib/nycCatalogCore.mjs'
 
 export const dynamic = 'force-dynamic'
 
@@ -69,7 +70,7 @@ interface Block {
 function parseBlocks(content: string | null): Block[] {
   if (!content) return []
   try {
-    const parsed = JSON.parse(content)
+    const parsed = JSON.parse(localizeNycContactText(content))
     return Array.isArray(parsed) ? parsed : []
   } catch {
     return []

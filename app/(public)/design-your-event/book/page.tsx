@@ -106,6 +106,6 @@ export default function DesignBookingPage() {
       <button type="button" disabled={loading||continuing||!date||!catalog.length||!!review?.issues.length} onClick={()=>void continueBooking(false)} className="btn-primary rounded-xl w-full min-h-14 px-6 py-4 text-lg font-bold disabled:opacity-50">{continuing?'Opening checkout…':'Add These Rentals & Continue to Checkout'}</button>
     </>}
     <a href="https://rentsketch.com/designer/?tenant=friendly-nyc&source=booking_return" className="block text-center w-full mt-3 min-h-12 py-3 underline">Return to RentSketch</a>
-    <p className="text-sm text-body text-center mt-4">Need a hand? <a className="underline" href="tel:3158841498">315-884-1498</a></p>
+    <p className="text-sm text-body text-center mt-4">Need a hand? <a className="underline" href="tel:7182834593">718-283-4593</a></p>
   </div>
 }

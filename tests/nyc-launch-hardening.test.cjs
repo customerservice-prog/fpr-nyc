@@ -49,7 +49,7 @@ function config(overrides = {}) {
     depositRule: { type: 'percentage', amount: 25 },
     deliveryFee: 225,
     policy: POLICY,
-    phone: '315-884-1498',
+    phone: '718-283-4593',
     now: new Date('2026-10-01T12:00:00Z'),
     ...overrides,
   }

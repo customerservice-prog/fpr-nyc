@@ -7,6 +7,6 @@ export async function GET() {
   try {
     return NextResponse.json(await getSyncedWeddingPackages(), { headers: { 'Cache-Control': 'no-store' } })
   } catch {
-    return NextResponse.json({ error: 'Wedding packages are temporarily unavailable. Please call 315-884-1498.' }, { status: 503 })
+    return NextResponse.json({ error: 'Wedding packages are temporarily unavailable. Please call 718-283-4593.' }, { status: 503 })
   }
 }

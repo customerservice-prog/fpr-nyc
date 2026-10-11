@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer'
-import { NYC_EMAIL_ADDRESS, nycEmailSubject, nycEmailHtml } from '@/lib/nycEmail'
+import { NYC_EMAIL_ADDRESS, NYC_NOTIFICATION_EMAIL, nycEmailSubject, nycEmailHtml } from '@/lib/nycEmail'
 import { BUSINESS, formatDateTime } from '@/lib/utils'
 import { NYC_EMAIL_LOGO_URL } from '@/lib/nycBrand'
 import { NYC_PUBLIC_HOST, NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
@@ -26,7 +26,7 @@ const transporter = nodemailer.createTransport({
 const LOGO_URL = NYC_EMAIL_LOGO_URL
 
 function normalizedRecipient(to: string) {
-  return to.toLowerCase() === 'customerservice@fpr-nyc-production.up.railway.app' ? NYC_EMAIL_ADDRESS : to
+  return to.toLowerCase() === 'customerservice@fpr-nyc-production.up.railway.app' ? NYC_NOTIFICATION_EMAIL : to
 }
 
 function likelyMistypedRecipient(address: string) {
@@ -59,7 +59,7 @@ function plainTextBody(text: string | undefined, html: string) {
     .replace(/&quot;/g, '"')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
-  return 'NYC / DOWNSTATE NEW YORK | ' + NYC_EMAIL_SITE_HOST + '\n\n' + (text || fallback)
+  return 'NYC / RIVERDALE LOCATION | ' + NYC_EMAIL_SITE_HOST + '\n\n' + (text || fallback)
 }
 
 async function sendWithResend({
@@ -86,14 +86,14 @@ async function sendWithResend({
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from,
-      to: [to],
+      from: 'Friendly Party Rental NYC - Riverdale <' + (from.match(/<([^<>]+)>$/)?.[1] || from) + '>',
+      to: to.split(',').map(value => value.trim()).filter(Boolean),
       reply_to: [replyTo],
       subject,
       html,
       text,
       headers: {
-        'X-FPR-Location': 'nyc-downstate',
+        'X-FPR-Location': 'nyc-riverdale',
         'X-FPR-Website': NYC_EMAIL_SITE_HOST,
       },
     }),
@@ -148,13 +148,13 @@ export async function sendEmail({
     if (resend) return resend
 
     const delivery = await transporter.sendMail({
-      from: { name: BUSINESS.name, address: (process.env.EMAIL_FROM || process.env.EMAIL_USER || NYC_EMAIL_ADDRESS).replace(/^.*<([^>]+)>.*$/, '$1').trim() },
+      from: { name: BUSINESS.name + ' - Riverdale', address: (process.env.EMAIL_FROM || process.env.EMAIL_USER || NYC_EMAIL_ADDRESS).replace(/^.*<([^>]+)>.*$/, '$1').trim() },
       to: recipient,
       replyTo: finalReplyTo,
       subject: finalSubject,
       html: finalHtml,
       text: finalText,
-      headers: { 'X-FPR-Location': 'nyc-downstate', 'X-FPR-Website': NYC_EMAIL_SITE_HOST },
+      headers: { 'X-FPR-Location': 'nyc-riverdale', 'X-FPR-Website': NYC_EMAIL_SITE_HOST },
     })
     // SMTP acceptance is not inbox delivery, but an empty/rejected envelope is
     // definitely not a successful send. Never mark it as one.

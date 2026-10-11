@@ -79,7 +79,7 @@ behavior('sales tax: ZIPs shared with the City of Yonkers are held for address r
     const result = tax.resolveNycSalesTax(zip)
     assert.equal(result.status, 'needs_address_review', zip)
     assert.deepEqual(result.candidates.map(c => c.id).sort(), ['westchester-outside-cities', 'yonkers'])
-    assert.match(tax.salesTaxUnavailableMessage(result, '315-884-1498'), /Yonkers/)
+    assert.match(tax.salesTaxUnavailableMessage(result, '718-283-4593'), /Yonkers/)
   }
   for (const value of ['10001', '13212', '29601', '', null, 'abcde', '1047']) {
     assert.equal(tax.resolveNycSalesTax(value).status, 'unknown_zip', String(value))
@@ -184,7 +184,7 @@ test('customer-facing tax labels keep eighth-of-a-percent rates', () => {
 test('NYC emails and the chat assistant carry NYC identity and approved prices only', () => {
   const email = read('lib/email.ts')
   assert.doesNotMatch(email, /SOUTH CAROLINA|GREENVILLE|greenville-sc/)
-  assert.match(email, /'X-FPR-Location': 'nyc-downstate'/)
+  assert.match(email, /'X-FPR-Location': 'nyc-riverdale'/)
   const chat = read('app/api/chat-assistant/route.ts')
   for (const inherited of [/Greer|Simpsonville|Mauldin|Easley|Travelers Rest|Spartanburg|Anderson|Piedmont/, /\$199|\$125|\$100 fee|\$49\.99/, /10% damage waiver applies/, /in-store pickup/, /\?\? (75|40|100)\)/]) {
     assert.doesNotMatch(chat, inherited)

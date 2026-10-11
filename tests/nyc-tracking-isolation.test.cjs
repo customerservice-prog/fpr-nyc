@@ -90,7 +90,7 @@ function layout(tracking) {
     '@/lib/utils': { BUSINESS: {
       name:'Friendly Party Rental NYC',
       legalName:'Friendly Party Rental L.L.C.',
-      phone:'315-884-1498',
+      phone:'718-283-4593',
       email:'customerservice@friendlypartyrental.com',
     } },
     '@/lib/nycServiceAreas': { NYC_SERVICE_AREAS: [

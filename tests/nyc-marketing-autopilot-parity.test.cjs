@@ -23,7 +23,7 @@ test('NYC marketing uses the NYC origin and no SC or Syracuse street identity',(
   assert.match(read('lib/nycPublicOrigin.ts'),/NEXT_PUBLIC_SITE_URL \|\| NYC_PRIMARY_ORIGIN/)
   assert.doesNotMatch(autopilot,/friendlypartyrentalsc\.com|friendly-party-rental-greenville-sc/)
   assert.match(message,/Riverdale/)
-  assert.match(message,/315-884-1498/)
+  assert.match(message,/718-283-4593/)
   assert.match(message,/Lower Westchester/)
   assert.doesNotMatch(message,/South Carolina|Greenville|Upstate communities/)
   assert.doesNotMatch(message,/330 Costello Parkway|Minoa, NY/)

@@ -52,7 +52,7 @@ export default function ServiceAreaPage(){
 
   <section className={`${styles.wrap} ${styles.contact}`}>
    <div><h2>Don’t see your town?</h2><p>We may still be able to deliver. Share your event ZIP, date and equipment list and our NYC / Downstate team can confirm whether the location is within the current delivery area and what travel fee applies.</p></div>
-   <div className={styles.contactActions}><a href="tel:+13158841498" className={styles.secondaryLink}><Phone size={17}/> 315-884-1498</a><a href="sms:+13158841498" className={styles.secondaryLink}><MessageCircle size={17}/> Text us</a></div>
+   <div className={styles.contactActions}><a href="tel:+17182834593" className={styles.secondaryLink}><Phone size={17}/> 718-283-4593</a><a href="sms:+17182834593" className={styles.secondaryLink}><MessageCircle size={17}/> Text us</a></div>
   </section>
 
   <section className={`${styles.wrap} ${styles.bookingWrap}`}><div className={styles.booking}>

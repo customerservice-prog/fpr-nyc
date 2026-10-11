@@ -198,7 +198,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
   const handlePay = async () => {
     if (!order) return
     if (paymentsAvailable !== true) {
-      toast.error('Online payment is temporarily unavailable. Please call us at 315-884-1498.')
+      toast.error('Online payment is temporarily unavailable. Please call us at 718-283-4593.')
       return
     }
     if (amountDue <= 0) {
@@ -226,7 +226,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <h1 className="text-2xl font-bold text-dark mb-4">Quote Not Found</h1>
-        <p className="text-body">This payment link is invalid or has expired. Please contact us at 315-884-1498.</p>
+        <p className="text-body">This payment link is invalid or has expired. Please contact us at 718-283-4593.</p>
       </div>
     )
   }
@@ -250,7 +250,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
             ))}
           </div>
         )}
-        <p className="text-body mt-4">If you have any questions, please contact us at 315-884-1498.</p></div>
+        <p className="text-body mt-4">If you have any questions, please contact us at 718-283-4593.</p></div>
     )
   }
 
@@ -259,7 +259,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <h1 className="text-2xl font-bold text-dark mb-4">Thank You!</h1>
         <p className="text-body mb-4">Your payment has been received for Order #{order.orderNumber}.</p>
-        {receipt ? <PaymentReceiptSummary receipt={receipt} /> : <p className="text-body mt-4">Please contact us at 315-884-1498 if you need a copy of your verified receipt.</p>}
+        {receipt ? <PaymentReceiptSummary receipt={receipt} /> : <p className="text-body mt-4">Please contact us at 718-283-4593 if you need a copy of your verified receipt.</p>}
       </div>
     )
   }
@@ -294,7 +294,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
           ))}
           {!canSelfEdit && (
             <p className="text-sm text-body mt-3">
-              Need to add or change items? Please call us at 315-884-1498.
+              Need to add or change items? Please call us at 718-283-4593.
             </p>
           )}
           {canSelfEdit && (
@@ -344,7 +344,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
                 {savingItems ? 'Saving...' : 'Save Changes'}
               </button>
               <p className="text-xs text-body mt-2">
-                Changes save immediately and update your total below. Once your order is booked, please call 315-884-1498 for further changes.
+                Changes save immediately and update your total below. Once your order is booked, please call 718-283-4593 for further changes.
               </p>
             </div>
           )}
@@ -449,7 +449,7 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
           <PaymentCardAuthorization checked={saveCard} onChange={setSaveCard} required={false} compact />
           {paymentsAvailable === false && (
             <div role="alert" className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-sm text-amber-900">
-              Online payment is temporarily unavailable. Please call Friendly Party Rental NYC at <a href="tel:315-884-1498" className="underline">315-884-1498</a>. No card has been charged.
+              Online payment is temporarily unavailable. Please call Friendly Party Rental NYC at <a href="tel:718-283-4593" className="underline">718-283-4593</a>. No card has been charged.
             </div>
           )}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm text-body">

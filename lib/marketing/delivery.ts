@@ -1,3 +1,4 @@
+import { NYC_EMAIL_ADDRESS, nycEmailSubject } from '@/lib/nycEmail'
 import nodemailer from 'nodemailer'
 import { isDeliverySuppressed, normalizeSuppressionEmail, suppressMarketingEmail } from '@/lib/marketing/suppression'
 
@@ -58,8 +59,8 @@ export async function sendMarketingEmail({ to, subject, html, headers }: {
   let accepted = false
   try {
     const result = await transport.sendMail({
-      from: config.from, to: email, replyTo: config.replyTo,
-      subject, html, text: html.replace(/<[^>]*>/g, ''), headers,
+      from: 'Friendly Party Rental NYC - Riverdale <' + (config.from.match(/<([^<>]+)>$/)?.[1] || config.from) + '>', to: email, replyTo: config.replyTo || NYC_EMAIL_ADDRESS,
+      subject: nycEmailSubject(subject), html, text: html.replace(/<[^>]*>/g, ''), headers,
     })
     accepted = Array.isArray(result.accepted) && result.accepted.some(value =>
       normalizeSuppressionEmail(typeof value === 'string' ? value : value.address) === email)

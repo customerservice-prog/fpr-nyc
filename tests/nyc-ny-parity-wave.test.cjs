@@ -6,17 +6,17 @@ const read=(path)=>fs.readFileSync(path,'utf8')
 
 test('Riverdale planning pages use SC identity and published SC planning prices',()=>{
   const planning=read('lib/eventPlanning.ts')
-  assert.ok(planning.includes("PLANNING_PHONE = '315-884-1498'"))
+  assert.ok(planning.includes("PLANNING_PHONE = '718-283-4593'"))
   assert.ok(planning.includes("PLANNING_ORIGIN = 'https://www.fpr-nyc-production.up.railway.app'"))
   assert.ok(planning.includes("title: 'Wedding Planning & Coordination in Riverdale, NY'"))
   for(const price of ['$1,275','$1,500','$2,075','$3,350','$5,500']) assert.ok(planning.includes(price))
   assert.ok(!planning.includes('Syracuse'))
-  assert.ok(!planning.includes('315-884-1498'))
+  assert.ok(!planning.includes('718-283-4593'))
 })
 
 test('visual estimator uses SC contact and no NY planning footer',()=>{
   const source=read('components/public/PlanningEstimator.tsx')
-  assert.ok(source.includes('315-884-1498'))
+  assert.ok(source.includes('718-283-4593'))
   assert.ok(source.includes('{NYC_PUBLIC_HOST}/event-planning'), 'printed estimate footer uses the NYC primary domain')
   assert.ok(!source.includes('friendlypartyrental.com/event-planning'))
 })
@@ -28,7 +28,7 @@ test('planning inquiry capture is persistent and SC-labelled',()=>{
   assert.ok(inquiry.includes('Riverdale / Downstate New York'))
   assert.ok(route.includes('https://www.fpr-nyc-production.up.railway.app'))
   assert.ok(route.includes('customerservice@friendlypartyrental.com'))
-  assert.ok(!route.includes('315-884-1498'))
+  assert.ok(!route.includes('718-283-4593'))
 })
 
 test('card saving stays optional on new and existing customer payments',()=>{

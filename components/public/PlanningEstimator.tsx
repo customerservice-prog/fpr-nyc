@@ -227,7 +227,7 @@ export default function PlanningEstimator({ initialType = '' }: { initialType?: 
           </>}
           {step === 3 && <>
             <p className={styles.intro}>A clear starting point for your conversation with our team. Review the details, then send your choices without starting over.</p><div className={styles.nextSteps}><div><span>1</span><strong>Review</strong><small>Check your event, planning package, rentals and known-charge subtotal.</small></div><div><span>2</span><strong>Send</strong><small>Your choices attach to the consultation form. Nothing is submitted until you complete it.</small></div><div><span>3</span><strong>Confirm</strong><small>Our office verifies availability, site needs, fees and scope before anything becomes a booking.</small></div></div>
-            <p className={styles.printOnly}>Friendly Party Rental NYC · 315-884-1498 · {NYC_PUBLIC_HOST}/event-planning</p>
+            <p className={styles.printOnly}>Friendly Party Rental NYC · 718-283-4593 · {NYC_PUBLIC_HOST}/event-planning</p>
             <div className={styles.reviewPhoto}><Photo src={selectedEvent.image} alt={selectedEvent.alt} sizes="(max-width: 767px) 80vw, 700px"/></div>
             <dl className={styles.reviewDetails}><div><dt>Your event</dt><dd>{selectedEvent.label}</dd></div><div><dt>Guest count</dt><dd>{details.guests} guests · {details.setting}</dd></div><div><dt>Date</dt><dd>{details.eventDate || 'Still deciding'}</dd></div><div><dt>Venue / city</dt><dd>{details.location || 'To be confirmed'}</dd></div></dl>
             <h4 className={styles.subheading}>Your estimate breakdown</h4>
@@ -254,7 +254,7 @@ export default function PlanningEstimator({ initialType = '' }: { initialType?: 
           {details.budget > 0 && <div className={styles.budget} data-over={estimate.subtotalCents / 100 > details.budget}><div className={styles.summaryRow}><span>Your planning + rental budget</span><strong>{money(details.budget)}</strong></div><div className={styles.budgetTrack}><span style={{ width: `${Math.min(100, estimate.subtotalCents / 100 / details.budget * 100)}%` }}/></div><p>{estimate.subtotalCents / 100 > details.budget ? `${money(estimate.subtotalCents / 100 - details.budget)} above your budget before remaining fees. Try another package or adjust your rentals.` : `${money(details.budget - estimate.subtotalCents / 100)} not allocated yet. Leave room for all unpriced services and fees.`}</p></div>}
           <p className={styles.fine}>{estimate.planningPriced ? 'Published planning prices + base rental catalog rates.' : 'Base rental catalog rates and ZIP delivery estimate only; planning services are quoted individually.'} Excludes tax, damage waiver, setup/installation, special timing and third-party vendors. Availability and final quote require confirmation.</p>
           <button type="button" className={styles.primary} style={{ width: '100%', marginTop: 16 }} onClick={() => go(3)}>Review estimate <ArrowRight size={14}/></button>
-          <a className={styles.textButton} style={{ width: '100%', justifyContent: 'center', marginTop: 5 }} href="tel:+13158841498">Prefer to talk? 315-884-1498</a>
+          <a className={styles.textButton} style={{ width: '100%', justifyContent: 'center', marginTop: 5 }} href="tel:+17182834593">Prefer to talk? 718-283-4593</a>
         </div>
       </aside>
     </div>

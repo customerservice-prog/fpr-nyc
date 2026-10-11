@@ -91,6 +91,39 @@ test('a nested designer leaves its ancestor path usable and restores exact backg
   assert.equal(h.activeElement,h.opener)
 })
 
+test('error and success panels keep close and recovery handlers inside scrollable mobile content',()=>{
+  function find(tree,predicate){
+    if(!tree||typeof tree!=='object')return null
+    if(predicate(tree))return tree
+    for(const child of tree.children||[]){const found=find(child,predicate);if(found)return found}
+    return null
+  }
+  for(const state of ['error','success']){
+    const h=harness(),reason='A long diagnostic message '.repeat(40)
+    h.message(state==='error'?{type:'rentsketch.error',tenant:'friendly-nyc',reason}:{type:'rentsketch.quoteRequested',tenant:'friendly-nyc'})
+    const tree=h.render(),panel=find(tree,node=>node.props?.key===state)
+    assert.ok(panel)
+    assert.match(panel.props.className,/overflow-y-auto overscroll-contain/)
+    assert.match(panel.children[0].props.className,/min-h-full/)
+    const close=find(tree,node=>node.props?.['aria-label']==='Close Event Designer')
+    assert.ok(close,'The close control stays outside scrollable panel content')
+    assert.match(close.props.className,/min-w-11 min-h-11/)
+    if(state==='error'){
+      assert.equal(find(panel,node=>node.props?.key==='reason').children[0],reason.trim())
+      const retry=find(panel,node=>node.children?.includes('Open in 2D'))
+      assert.match(retry.props.className,/min-h-11/)
+      retry.props.onClick()
+      assert.equal(new URL(find(h.render(),node=>node.type==='iframe').props.src).searchParams.get('view'),'2d')
+    }else{
+      const returning=find(panel,node=>node.props?.key==='return')
+      assert.match(returning.props.className,/min-h-11/)
+      returning.props.onClick()
+      assert.equal(h.render(),null)
+      assert.equal(h.activeElement,h.opener)
+    }
+  }
+})
+
 test('embedded booking accepts only its own NYC iframe and validates the selection',()=>{
   const h=harness()
   const selection={version:1,tenant:'friendly-nyc',designId:'test-layout-123',eventDate:'2026-11-14',items:[{slug:'20x20-pole-tent-package',quantity:1}]}

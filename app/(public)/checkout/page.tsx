@@ -13,6 +13,7 @@ import { useCheckoutPolicy } from '@/components/public/useCheckoutPolicy'
 import { exactPickupFeeForPolicy, isLateExactPickupTime } from '@/lib/nycCheckoutPolicy'
 import { formatTaxRatePercent } from '@/lib/nycSalesTax'
 import { cartCheckoutLineName } from '@/lib/nycCartLineName'
+import { cartVariantKey } from '@/lib/rentsketchBookingFlow'
 
 interface CheckoutForm {
   firstName: string
@@ -284,7 +285,7 @@ export default function CheckoutPage() {
           eventTimeSlot,
           pickupTimeSlot,
           deliveryType: 'delivery',
-          items,
+          items: items.map(item => ({ ...item, name: cartCheckoutLineName(item) })),
           subtotal,
         }),
       })
@@ -703,9 +704,9 @@ export default function CheckoutPage() {
         )}
 
         {items.map((item) => (
-          <div key={item.id} className="flex justify-between text-sm text-body py-1">
-            <span>{item.name} x{item.quantity}</span>
-            <span>{formatCurrency(item.price * item.quantity)}</span>
+          <div key={cartVariantKey(item)} className="flex items-start justify-between gap-3 text-sm text-body py-1">
+            <span className="min-w-0 break-words">{cartCheckoutLineName(item)} x{item.quantity}</span>
+            <span className="shrink-0 whitespace-nowrap">{formatCurrency(item.price * item.quantity)}</span>
           </div>
         ))}
         <div className="flex justify-between text-dark mt-2 border-t pt-2">

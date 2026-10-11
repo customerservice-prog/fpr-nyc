@@ -38,6 +38,19 @@ function providerHarness(savedItems) {
 const line = { id: 'package', name: 'Tent Package', price: 325, quantity: 2, maxQuantity: 10, selectedColor: 'White', eventDate: '2026-11-14', picture: '/photo.jpg' }
 const settle = () => new Promise(resolve => setImmediate(resolve))
 
+test('updating or removing one real linen color preserves the other color line and rate', () => {
+  const base = { id: 'cmunkulfu0031nvjhcw17lcr5', name: '120 inch Round Polyester Tablecloth', price: 34, maxQuantity: 20, eventDate: '2026-11-14' }
+  const green = { ...base, selectedColor: 'Hunter Emerald Green', quantity: 2 }
+  const navy = { ...base, selectedColor: 'Navy Blue', quantity: 3 }
+  const h = providerHarness([green, navy])
+  h.render().updateQuantity(base.id, 4, green.selectedColor)
+  assert.deepEqual(JSON.parse(JSON.stringify(h.render().items)), [{ ...green, quantity: 4 }, navy])
+  h.render().removeItem(base.id, green.selectedColor)
+  assert.deepEqual(JSON.parse(JSON.stringify(h.render().items)), [navy])
+  assert.equal(h.render().subtotal, 102)
+  h.cleanup()
+})
+
 test('malformed saved entries cannot crash hydration while valid legacy rentals and colors stay intact', async () => {
   const navy = { ...line, name: 'Round Linen', selectedColor: 'Navy', quantity: 3 }
   const legacy = { ...line, id: 'legacy-tent', name: 'Pole Tent' }

@@ -6,6 +6,7 @@ import {getSearchConsoleSummary} from '@/lib/search-console'
 import {normalizeNycSearchProperty,NYC_GSC_DOMAIN_PROPERTY,NYC_GSC_URL_PREFIX} from '@/lib/nycSearchReadiness'
 import {NYC_SERVICE_AREAS} from '@/lib/nycServiceAreas'
 import {NYC_PUBLIC_ORIGIN} from '@/lib/nycPublicOrigin'
+import {prisma} from '@/lib/prisma'
 export const dynamic='force-dynamic'
 export const metadata={title:'Riverdale Google Search Visibility',robots:{index:false,follow:false}}
 export default async function SearchVisibilityPage(){
@@ -13,8 +14,10 @@ export default async function SearchVisibilityPage(){
   if(!session)redirect('/admin/login')
   if((session.user as {role?:string}).role!=='admin')return <div className="p-6">Administrator access required.</div>
   const configured=normalizeNycSearchProperty(process.env.GSC_SITE_URL || process.env.NYC_GSC_PROPERTY)
-  const hasVerificationTag=Boolean(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim())
-  const report=await getSearchConsoleSummary(28).catch(()=>null)
+  const [report,googleConnection]=await Promise.all([
+    getSearchConsoleSummary(28).catch(()=>null),
+    prisma.googleCalendarConnection.findUnique({where:{id:'primary'},select:{searchConsoleVerificationFile:true,searchConsoleVerifiedAt:true,scope:true}}).catch(()=>null),
+  ])
   const property=configured||NYC_GSC_DOMAIN_PROPERTY
   const resource=encodeURIComponent(property)
   const consoleUrl='https://search.google.com/search-console?resource_id='+resource
@@ -29,12 +32,16 @@ export default async function SearchVisibilityPage(){
       <a href={consoleUrl} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block rounded-lg bg-blue-700 px-4 py-3 text-white font-semibold">Open New York Search Console</a>
     </section>
     <section className="rounded-xl border p-5">
-      <h2 className="text-lg font-bold">Verify the correct property</h2>
-      <p className="mt-2 break-all">Domain property: <code>{NYC_GSC_DOMAIN_PROPERTY}</code></p>
-      <p className="mt-2 break-all">URL-prefix alternative: <code>{NYC_GSC_URL_PREFIX}</code></p>
-      <p className="mt-3">Use the Google account that owns or has permission for the New York website. If Google asks you to add the property, follow its ownership verification. A Search Console property for another Friendly Party Rental location does not verify this separate NYC domain.</p>
-      <p className="mt-3">Public HTML verification tag in this deployment: <strong>{hasVerificationTag?'Present; ownership is still confirmed by Google':'Not configured; another valid Google verification method may still be used'}</strong>.</p>
-      <p className="mt-3">For the URL-prefix HTML-tag method, Google supplies a public verification token for <code>NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION</code>. Domain verification uses the DNS record Google supplies. Never put passwords, service-account private keys or tokens into public page content.</p>
+      <h2 className="text-lg font-bold">NYC site ownership</h2>
+      <p className="mt-2 break-all">Automatic URL-prefix property: <code>{NYC_GSC_URL_PREFIX}</code></p>
+      <p className="mt-2 break-all">Optional DNS domain property: <code>{NYC_GSC_DOMAIN_PROPERTY}</code></p>
+      <p className="mt-3">Ownership status: <strong>{googleConnection?.searchConsoleVerifiedAt?'Verified through Google Site Verification':'Not yet verified through this admin'}</strong>.</p>
+      {googleConnection?.searchConsoleVerificationFile&&<p className="mt-2 break-all text-sm">Verification file kept live at <a className="underline text-blue-700" href={'/'+googleConnection.searchConsoleVerificationFile} target="_blank" rel="noopener noreferrer">{NYC_PUBLIC_ORIGIN+'/'+googleConnection.searchConsoleVerificationFile}</a>.</p>}
+      <p className="mt-3">The admin uses Google&apos;s FILE verification method for the canonical NYC URL-prefix, so HostGator DNS is not required for this property. Another Friendly Party Rental location does not verify the NYC site.</p>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <form action="/api/admin/search-console/verify" method="post"><button type="submit" className="rounded-lg bg-blue-700 px-4 py-3 font-semibold text-white">Verify / retry NYC Search Console</button></form>
+        <a href="/api/admin/google-calendar/connect" className="rounded-lg border border-blue-700 px-4 py-3 font-semibold text-blue-700">Reconnect Google permissions</a>
+      </div>
     </section>
     <section className="rounded-xl border p-5">
       <h2 className="text-lg font-bold">Submit and check public pages</h2>

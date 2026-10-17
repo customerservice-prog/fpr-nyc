@@ -8,8 +8,10 @@ import {
   exchangeGoogleAuthorizationCode,
   getGoogleCalendarConnection,
   saveGoogleCalendarConnection,
+  SITE_VERIFICATION_SCOPE,
   verifyGoogleOAuthState,
 } from '@/lib/googleCalendar'
+import { ensureNycSearchConsoleVerification } from '@/lib/nycSearchVerification'
 
 const CANONICAL_ORIGIN = 'https://friendlypartyrentalnyc.com'
 
@@ -77,6 +79,18 @@ export async function GET(request: NextRequest) {
       accessToken: tokens.access_token,
       scope: tokens.scope || null,
     })
+
+    const scopes = new Set(String(tokens.scope || '').split(/\s+/).filter(Boolean))
+    if (scopes.has(SITE_VERIFICATION_SCOPE)) {
+      try {
+        await ensureNycSearchConsoleVerification(tokens.access_token)
+        return dashboard(request, 'connected-search-verified')
+      } catch (verificationError) {
+        console.warn('NYC Search Console verification did not complete during Google reconnect', verificationError)
+        return dashboard(request, 'connected-search-pending')
+      }
+    }
+
     return dashboard(request, 'connected')
   } catch (error) {
     console.error('Google Calendar OAuth callback failed', error)

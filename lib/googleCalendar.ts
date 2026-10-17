@@ -9,6 +9,7 @@ const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo'
 const GOOGLE_CALENDAR_API = 'https://www.googleapis.com/calendar/v3'
 const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events'
 export const SEARCH_CONSOLE_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly'
+export const SITE_VERIFICATION_SCOPE = 'https://www.googleapis.com/auth/siteverification.verify_only'
 const PROFILE_SCOPES = ['openid', 'email']
 const TIME_ZONE = 'America/New_York'
 const CONNECTION_ID = 'primary'
@@ -135,7 +136,7 @@ export async function buildGoogleAuthorizationUrl(redirectUri: string, username:
   url.searchParams.set('access_type', 'offline')
   url.searchParams.set('prompt', 'consent select_account')
   url.searchParams.set('include_granted_scopes', 'true')
-  url.searchParams.set('scope', [...PROFILE_SCOPES, CALENDAR_SCOPE, SEARCH_CONSOLE_SCOPE].join(' '))
+  url.searchParams.set('scope', [...PROFILE_SCOPES, CALENDAR_SCOPE, SEARCH_CONSOLE_SCOPE, SITE_VERIFICATION_SCOPE].join(' '))
   url.searchParams.set('state', createGoogleOAuthState(username))
   url.searchParams.set('login_hint', BUSINESS_GOOGLE_EMAIL)
   url.searchParams.set('hd', 'friendlypartyrental.com')
@@ -244,6 +245,19 @@ export function googleConnectionHasSearchConsoleScope(connection: { scope?: stri
 export async function getGoogleSearchConsoleAccessToken() {
   const connection = await getGoogleCalendarConnection()
   if (!connection || !googleConnectionHasSearchConsoleScope(connection)) return null
+  const refreshToken = decryptGoogleSecret(connection.encryptedRefreshToken)
+  const accessToken = await refreshGoogleAccessToken(refreshToken)
+  return { accessToken, connection }
+}
+
+export function googleConnectionHasSiteVerificationScope(connection: { scope?: string | null } | null | undefined) {
+  const scopes = new Set(String(connection?.scope || '').split(/\s+/).filter(Boolean))
+  return scopes.has(SITE_VERIFICATION_SCOPE)
+}
+
+export async function getGoogleSiteVerificationAccessToken() {
+  const connection = await getGoogleCalendarConnection()
+  if (!connection || !googleConnectionHasSiteVerificationScope(connection)) return null
   const refreshToken = decryptGoogleSecret(connection.encryptedRefreshToken)
   const accessToken = await refreshGoogleAccessToken(refreshToken)
   return { accessToken, connection }

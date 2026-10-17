@@ -58,6 +58,8 @@ export async function GET(request: NextRequest) {
     connected: !!connection && healthy,
     connectionExists: !!connection,
     searchConsoleAuthorized: googleConnectionHasSearchConsoleScope(connection),
+    searchConsoleVerificationFile: connection?.searchConsoleVerificationFile || null,
+    searchConsoleVerifiedAt: connection?.searchConsoleVerifiedAt?.toISOString() || null,
     connectionError,
     googleEmail: connection?.googleEmail || null,
     calendarId: connection?.calendarId || 'primary',

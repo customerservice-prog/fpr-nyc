@@ -467,6 +467,7 @@ export default function CheckoutPage() {
               selectedDate={editDate}
               onSelectDate={(d) => setEditDate(d)}
               closedDates={closedDates}
+              minDate={new Date(2027, 0, 1)}
             />
 
             <div className="flex gap-3 mt-4 mb-4">

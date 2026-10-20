@@ -7,7 +7,7 @@ const ts = require('typescript')
 function providerHarness(savedItems) {
   const states = []; let cursor = 0; let hydrate; let value; const calls = []
   const data = new Map(Object.entries({
-    fpr_cart: JSON.stringify(savedItems), fpr_event_date: '2026-11-14',
+    fpr_cart: JSON.stringify(savedItems), fpr_event_date: '2027-11-14',
     fpr_event_time_slot: '12:00–18:00', fpr_duration_tier: 'two-days',
     fpr_pickup_time_slot: '18:00', fpr_exact_time_requested: 'true',
     fpr_scheduling_details: JSON.stringify({ eventStartTime: '12:00', eventEndTime: '18:00', exactDeliveryTime: '10:00', exactDeliveryFee: 50 }),
@@ -26,6 +26,10 @@ function providerHarness(savedItems) {
       if (name === 'react') return react
       if (name === '@/lib/delivery-session') return { migrateDeliveryOnlySession() {} }
       if (name === '@/lib/rentsketchBooking') return { RENTSKETCH_ATTRIBUTION_KEY: 'booking', bookingDateKey: v => v }
+      if (name === '@/lib/nycBookingWindow') return {
+        NYC_PUBLIC_BOOKING_MESSAGE: '2027 only',
+        isNycPublicBookingDateOpen: value => typeof value === 'string' && value >= '2027-01-01',
+      }
       throw new Error('Unexpected dependency: ' + name)
     },
   }
@@ -35,11 +39,11 @@ function providerHarness(savedItems) {
   render(); const cleanup = hydrate(); render()
   return { render, cleanup, calls, resolve }
 }
-const line = { id: 'package', name: 'Tent Package', price: 325, quantity: 2, maxQuantity: 10, selectedColor: 'White', eventDate: '2026-11-14', picture: '/photo.jpg' }
+const line = { id: 'package', name: 'Tent Package', price: 325, quantity: 2, maxQuantity: 10, selectedColor: 'White', eventDate: '2027-11-14', picture: '/photo.jpg' }
 const settle = () => new Promise(resolve => setImmediate(resolve))
 
 test('updating or removing one real linen color preserves the other color line and rate', () => {
-  const base = { id: 'cmunkulfu0031nvjhcw17lcr5', name: '120 inch Round Polyester Tablecloth', price: 34, maxQuantity: 20, eventDate: '2026-11-14' }
+  const base = { id: 'cmunkulfu0031nvjhcw17lcr5', name: '120 inch Round Polyester Tablecloth', price: 34, maxQuantity: 20, eventDate: '2027-11-14' }
   const green = { ...base, selectedColor: 'Hunter Emerald Green', quantity: 2 }
   const navy = { ...base, selectedColor: 'Navy Blue', quantity: 3 }
   const h = providerHarness([green, navy])
@@ -80,7 +84,7 @@ test('saved cart refreshes live prices while preserving concurrent quantities, c
   await settle(); const updated = h.render()
   assert.deepEqual(JSON.parse(JSON.stringify(updated.items)), [{ ...line, price: 645, quantity: 4 }, { ...line, id: 'new', price: 22, quantity: 1 }])
   assert.equal(updated.subtotal, 2602)
-  assert.equal(updated.eventDate, '2026-11-14'); assert.equal(updated.durationTierId, 'two-days')
+  assert.equal(updated.eventDate, '2027-11-14'); assert.equal(updated.durationTierId, 'two-days')
   assert.equal(updated.eventTimeSlot, '12:00–18:00'); assert.equal(updated.pickupTimeSlot, '18:00')
   assert.equal(updated.exactTimeRequested, true); assert.equal(updated.schedulingDetails.exactDeliveryFee, 50)
 })

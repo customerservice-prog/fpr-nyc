@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useLayoutEffect, useState,
 import { migrateDeliveryOnlySession } from '@/lib/delivery-session'
 import { RENTSKETCH_ATTRIBUTION_KEY, bookingDateKey } from '@/lib/rentsketchBooking'
 import type { BookingAttribution } from '@/lib/rentsketchBooking'
+import { isNycPublicBookingDateOpen, NYC_PUBLIC_BOOKING_MESSAGE } from '@/lib/nycBookingWindow'
 
 export interface CartItem {
   id: string
@@ -166,7 +167,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             .catch(() => { /* Retain the cart if the read-only refresh is unavailable. */ })
         }
       }
-      if (savedDate) setEventDateState(savedDate)
+      if (savedDate && isNycPublicBookingDateOpen(savedDate)) setEventDateState(savedDate)
+      else if (savedDate) {
+        localStorage.removeItem(DATE_KEY)
+        sessionStorage.removeItem('checkout_data')
+        sessionStorage.removeItem('checkout_draft_key')
+      }
       if (savedDuration) setDurationTierIdState(savedDuration)
       if (savedTimeSlot) setEventTimeSlotState(savedTimeSlot)
       setDeliveryTypeState('delivery')
@@ -275,6 +281,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const setEventDate = useCallback((date: string) => {
+    if (!isNycPublicBookingDateOpen(date)) {
+      setEventDateState(null)
+      localStorage.removeItem(DATE_KEY)
+      return
+    }
     setEventDateState(date)
     localStorage.setItem(DATE_KEY, date)
   }, [])
@@ -312,6 +323,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const applyDesignCart = useCallback((nextItems: CartItem[], date: string, booking: BookingAttribution) => {
+    if (!isNycPublicBookingDateOpen(date)) throw new Error(NYC_PUBLIC_BOOKING_MESSAGE)
     const datedItems = nextItems.map((item) => ({ ...item, eventDate: date }))
     const values: Record<string,string> = {
       [CART_KEY]: JSON.stringify(datedItems),

@@ -275,15 +275,25 @@ export async function runCatalogSync({ prisma, fetchImpl = fetch, origin = SYRAC
   await prisma.$transaction(async (tx) => {
     for (const row of categoryPlan) {
       if (row.action === 'create') {
-        await tx.category.create({
-          data: {
+        const createData = {
+          name: row.category.name,
+          slug: row.category.slug,
+          pricingProfile: row.category.pricingProfile,
+          displayToCustomer: true,
+          sortOrder: row.category.sortOrder ?? 0,
+          description: row.category.name + ' rentals from Friendly Party Rental NYC for Riverdale, the Bronx and Lower Westchester.',
+          picture: origin + '/api/category-image/' + encodeURIComponent(row.category.slug),
+        }
+        // Another Railway deployment may have created this slug after our plan
+        // snapshot. Upsert makes the sync race-safe instead of failing P2002.
+        await tx.category.upsert({
+          where: { slug: row.category.slug },
+          create: createData,
+          update: {
             name: row.category.name,
-            slug: row.category.slug,
             pricingProfile: row.category.pricingProfile,
             displayToCustomer: true,
             sortOrder: row.category.sortOrder ?? 0,
-            description: row.category.name + ' rentals from Friendly Party Rental NYC for Riverdale, the Bronx and Lower Westchester.',
-            picture: origin + '/api/category-image/' + encodeURIComponent(row.category.slug),
           },
         })
       } else {
@@ -298,7 +308,10 @@ export async function runCatalogSync({ prisma, fetchImpl = fetch, origin = SYRAC
       const data = itemWriteData(desired, categoryId)
       const current = beforeBySlug.get(desired.slug)
       if (!current) {
-        await tx.item.create({ data: { ...data, slug: desired.slug, picture: 'picture' in data ? data.picture : null, additionalImages: 'additionalImages' in data ? data.additionalImages : [] } })
+        const createData = { ...data, slug: desired.slug, picture: 'picture' in data ? data.picture : null, additionalImages: 'additionalImages' in data ? data.additionalImages : [] }
+        // The plan can become stale while another deploy is syncing the same slug.
+        // Upsert preserves idempotency and turns that race into the same desired row.
+        await tx.item.upsert({ where: { slug: desired.slug }, create: createData, update: data })
         continue
       }
       const changes = changedFields(current, { ...desired, categoryId }).filter((field) => field !== 'suggestedAddonIds')

@@ -8,6 +8,7 @@ import { RENTSKETCH_BOOKING_KEY, bookingDateKey } from '@/lib/rentsketchBooking'
 import type { BookingCatalogItem } from '@/lib/rentsketchBooking'
 import { parseCheckoutHandoff, resolveExactDesignCart, prepareDesignCheckout, cartVariantKey } from '@/lib/rentsketchBookingFlow'
 import type { CheckoutHandoff } from '@/lib/rentsketchBookingFlow'
+import { NYC_PUBLIC_BOOKING_START, NYC_PUBLIC_BOOKING_MESSAGE } from '@/lib/nycBookingWindow'
 
 const money = (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year:'numeric',month:'2-digit',day:'2-digit' }).format(new Date())
@@ -60,7 +61,7 @@ export default function DesignBookingPage() {
 
   async function continueBooking(automatic=false) {
     if(!handoff||continuing||loading||navigationStarted.current)return
-    if(!bookingDateKey(date)||date<today()){setError('Choose an upcoming event date first.');return}
+    if(!bookingDateKey(date)||date<NYC_PUBLIC_BOOKING_START){setError(NYC_PUBLIC_BOOKING_MESSAGE);return}
     setContinuing(true);setError('')
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000)
     try {
@@ -79,7 +80,7 @@ export default function DesignBookingPage() {
     finally{clearTimeout(timer);setContinuing(false)}
   }
   useEffect(()=>{
-    if(!initiallyEmpty||!handoff||!date||date<today()||loading||continuing||error||!catalog.length||!review||review.issues.length||autoAttempted.current)return
+    if(!initiallyEmpty||!handoff||!date||date<NYC_PUBLIC_BOOKING_START||loading||continuing||error||!catalog.length||!review||review.issues.length||autoAttempted.current)return
     autoAttempted.current=true;void continueBooking(true)
   },[initiallyEmpty,handoff,date,loading,continuing,error,catalog,review])
 
@@ -92,7 +93,7 @@ export default function DesignBookingPage() {
     {handoff&&!navigationStarted.current&&<>
       <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 mb-6">
         <label htmlFor="designBookingDate" className="block font-semibold text-dark mb-2">Event date</label>
-        <input id="designBookingDate" type="date" min={today()} value={date} disabled={continuing} onChange={e=>{autoAttempted.current=false;setDate(e.target.value)}} className="w-full sm:w-auto min-h-12 rounded-lg border border-gray-300 bg-white px-3 text-base" />
+        <input id="designBookingDate" type="date" min={NYC_PUBLIC_BOOKING_START} value={date} disabled={continuing} onChange={e=>{autoAttempted.current=false;setDate(e.target.value)}} className="w-full sm:w-auto min-h-12 rounded-lg border border-gray-300 bg-white px-3 text-base" />
         {!initiallyEmpty&&items.length>0&&<label className="flex items-start gap-3 mt-4 text-sm text-body"><input type="checkbox" checked={keepCart} disabled={continuing} onChange={e=>setKeepCart(e.target.checked)} className="mt-1 h-5 w-5"/><span><strong>Keep my other cart rentals</strong><br/>Matching items use the exact quantities from this design—not an added copy. Other rentals remain. Uncheck to replace the cart with this plan.</span></label>}
         {keepCart&&items.length>0&&eventDate&&date&&bookingDateKey(eventDate)!==date&&<p className="text-sm mt-3 text-amber-900">This event date applies to all rentals you keep in the cart. Review it before continuing.</p>}
       </div>

@@ -42,6 +42,7 @@ test('contact form sends staff notification directly to daily inbox and keeps cu
     '@/lib/prisma': { prisma: { contactMessage: { async create() { saved++ } } } },
     '@/lib/nycEmail': location,
     '@/lib/nycPublicOrigin': origin,
+    '@/lib/nycBookingWindow': { isNycPublicBookingDateOpen: () => true, NYC_PUBLIC_BOOKING_MESSAGE: '2027 only' },
     '@/lib/email': { contactFormEmail() { return { subject: 'New inquiry', html: '<p>Inquiry</p>' } }, async sendEmail(value) { message = value; return { success: true } } },
   })
   const result = await route.POST({ json: async () => ({ name: 'Test Customer', email: 'test@example.invalid', phone: '202-555-0100', message: 'Need tables for my event.', elapsedMs: 4000 }) })

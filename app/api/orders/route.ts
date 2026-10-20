@@ -11,6 +11,7 @@ import { DeliveryQuoteError, getDeliveryQuote, requireDeliveryMethod, requireMat
 import { effectiveEventEndDate } from '@/lib/orderDates'
 import { isNycPaymentsUnavailable, requireNycStripe } from '@/lib/stripe'
 import { NYC_PAYMENTS_UNAVAILABLE_MESSAGE } from '@/lib/nycStripeGuard'
+import { NycPublicBookingDateError, requireNycPublicBookingDate } from '@/lib/nycBookingWindow'
 import { CheckoutPricingError, checkoutLineName, sameCents, validateFirstPaymentPrincipal } from '@/lib/nycCheckoutPricing'
 import { aggregateQuantities, priceNycCheckout } from '@/lib/nycCheckoutPricingServer'
 import { exactSlotConflict, findInventoryShortfalls, lockNycCapacity, rentalPeriod, shortfallMessage } from '@/lib/nycInventory'
@@ -18,6 +19,7 @@ import { exactSlotConflict, findInventoryShortfalls, lockNycCapacity, rentalPeri
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    if (body?.eventDate) requireNycPublicBookingDate(body.eventDate)
     // Enforce NYC / Lower Westchester's public delivery-only policy before any database writes,
     // inventory reservations, email notifications, or payment creation.
     requireDeliveryMethod(body?.deliveryType)
@@ -350,6 +352,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ order: { id: order.id, orderNumber: order.orderNumber } })
   } catch (error) {
+    if (error instanceof NycPublicBookingDateError) {
+      return NextResponse.json({ error: error.message, code: error.code }, { status: error.status })
+    }
     if (isNycPaymentsUnavailable(error)) {
       console.error('Order creation blocked:', error.reason)
       return NextResponse.json({ error: NYC_PAYMENTS_UNAVAILABLE_MESSAGE, code: 'payments_unavailable' }, { status: 503 })

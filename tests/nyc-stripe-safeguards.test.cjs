@@ -149,6 +149,16 @@ test('Environment template documents the NYC account and payments switch', () =>
   assert.match(env, /^NYC_ONLINE_PAYMENTS_ENABLED=false$/m)
 })
 
+test('Staging may deploy only when payments are off, while production stays strict', () => {
+  const script = read('scripts/verify-nyc-stripe-readiness.mjs')
+  assert.match(script, /environmentName && environmentName !== 'production' && !onlineEnabled/)
+  assert.match(script, /reason: 'non_production_payments_disabled'/)
+  const bypass = script.indexOf("environmentName && environmentName !== 'production' && !onlineEnabled")
+  const liveSecretCheck = script.indexOf("STRIPE_SECRET_KEY must be a live Stripe secret or restricted key")
+  assert.ok(bypass > 0 && bypass < liveSecretCheck, 'staging bypass must occur before live-key validation')
+  assert.match(script, /environmentName !== 'production'/, 'production must never enter the staging bypass')
+})
+
 // ---------------------------------------------------------------------------
 // Behavioral tests of the pure modules
 // ---------------------------------------------------------------------------

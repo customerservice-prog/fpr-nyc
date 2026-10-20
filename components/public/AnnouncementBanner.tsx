@@ -6,8 +6,8 @@ export default function AnnouncementBanner() {
       <p className="flex flex-wrap items-center justify-center gap-2 text-sm md:text-base font-semibold tracking-wide">
         <PartyPopper className="w-4 h-4 md:w-5 md:h-5 text-[#F5A31B] shrink-0" />
         <span>
-          <span className="text-[#F5A31B] font-extrabold">NEW LOCATION, NOW OPEN:</span>{' '}
-          Riverdale, NY is booking November dates and beyond — lock in your event before spots run out!
+          <span className="text-[#F5A31B] font-extrabold">NOW BOOKING 2027:</span>{' '}
+          Riverdale / NYC online reservations are open for January 1, 2027 and beyond.
         </span>
       </p>
     </div>

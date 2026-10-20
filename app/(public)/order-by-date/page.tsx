@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import BookingCalendar from '@/components/public/BookingCalendar'
 import { formatDateShort } from '@/lib/utils'
 
+const BOOKING_START = new Date(2027, 0, 1)
+
 export default function OrderByDatePage() {
   const router = useRouter()
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -28,15 +30,16 @@ export default function OrderByDatePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
-      <h1 className="text-3xl font-bold text-dark mb-2 text-center">Pick Your Event Date</h1>
+      <h1 className="text-3xl font-bold text-dark mb-2 text-center">Pick Your 2027+ Event Date</h1>
       <p className="text-body text-center mb-7">
-        Choose the date of your party. We’ll show rentals available for that date.
+        Riverdale / NYC online reservations are open for events on or after January 1, 2027.
       </p>
 
       <BookingCalendar
         selectedDate={selectedDate}
         onSelectDate={handleSelect}
         closedDates={closedDates}
+        minDate={BOOKING_START}
       />
 
       {selectedDate && (

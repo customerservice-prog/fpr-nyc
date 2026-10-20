@@ -65,9 +65,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'We need to confirm your total before payment. Please restart checkout or contact us.' }, { status: 409 })
     }
 
-    const unpaidOnlineOrder = order.source === 'online' && Number(order.amountPaid || 0) <= 0
+    const firstPaymentForOrder = Number(order.amountPaid || 0) <= 0
+    if (firstPaymentForOrder) requireNycPublicBookingDate(order.eventDate)
+    const unpaidOnlineOrder = order.source === 'online' && firstPaymentForOrder
     const firstOnlinePayment = unpaidOnlineOrder && ['incomplete', 'quote'].includes(order.status)
-    if (firstOnlinePayment) requireNycPublicBookingDate(order.eventDate)
     const needsLegacyUpgradeReview = unpaidOnlineOrder && order.pricingVersion !== NYC_PRICING_VERSION && Number(order.durationFee || 0) > 0
     const lineIds = Array.from(new Set(order.items.map(line => line.itemId).filter((id): id is string => !!id)))
     const catalog = firstOnlinePayment || needsLegacyUpgradeReview

@@ -7,11 +7,14 @@ import { PUBLIC_CATEGORIES } from '@/lib/utils'
 import CartDrawer from '@/components/public/CartDrawer'
 import { useCart } from '@/components/public/CartContext'
 import { ShoppingCart } from 'lucide-react'
+import { NYC_PUBLIC_BOOKING_START, nycBookingDateKey } from '@/lib/nycBookingWindow'
 
 function ItemsContent() {
   const searchParams = useSearchParams()
   const date = searchParams.get('date')
   const category = searchParams.get('category')
+  const dateKey = nycBookingDateKey(date)
+  const dateBlocked = !!date && (!dateKey || dateKey < NYC_PUBLIC_BOOKING_START)
   const [items, setItems] = useState<Array<{
     id: string
     name: string
@@ -28,8 +31,8 @@ function ItemsContent() {
   const { setEventDate, itemCount } = useCart()
 
   useEffect(() => {
-    if (date) setEventDate(date)
-  }, [date, setEventDate])
+    if (date && !dateBlocked) setEventDate(date)
+  }, [date, dateBlocked, setEventDate])
 
   useEffect(() => {
     fetch('/api/categories')
@@ -45,7 +48,7 @@ function ItemsContent() {
   }, [])
 
   useEffect(() => {
-    if (!date) return
+    if (!date || dateBlocked) return
     const controller = new AbortController()
     let active = true
     const timeout = window.setTimeout(() => controller.abort(), 12000)
@@ -71,7 +74,17 @@ function ItemsContent() {
         if (active) setLoading(false)
       })
     return () => { active = false; window.clearTimeout(timeout); controller.abort() }
-  }, [date, category, retry])
+  }, [date, dateBlocked, category, retry])
+
+  if (dateBlocked) {
+    return (
+      <div className="text-center py-12">
+        <h1 className="mb-3 text-2xl font-bold text-dark">Now Booking 2027 &amp; Beyond</h1>
+        <p className="text-body mb-4">Please choose an event date on or after January 1, 2027.</p>
+        <a href="/order-by-date" className="btn-primary inline-block">Choose a 2027 Date</a>
+      </div>
+    )
+  }
 
   if (!date) {
     return (

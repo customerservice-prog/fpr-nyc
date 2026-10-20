@@ -111,7 +111,7 @@ export default function Header({ navItems, headerStyle = 1 }: { navItems?: NavLi
         <a href={BUSINESS.facebook} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="Facebook"><Facebook size={isPhotoBoothLanding ? 16 : 24} fill="currentColor"/></a>
         <a href={BUSINESS.youtube} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="YouTube"><Youtube size={isPhotoBoothLanding ? 16 : 24}/></a>
         {BUSINESS.yelp && <a href={BUSINESS.yelp} target="_blank" rel="noopener noreferrer" className={'flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold ' + (isPhotoBoothLanding ? 'w-4 h-4' : 'w-6 h-6')} aria-label="Yelp" title="Yelp">Y</a>}
-      </div><Link href="/order-by-date" className={'btn-primary whitespace-nowrap ' + (isPhotoBoothLanding ? 'text-xs py-1 px-3' : 'text-sm py-2 px-5')} prefetch={false}>Book Now &#9658;</Link></div>
+      </div><Link href="/order-by-date" className={'btn-primary whitespace-nowrap ' + (isPhotoBoothLanding ? 'text-xs py-1 px-3' : 'text-sm py-2 px-5')} prefetch={false}>Book 2027 &#9658;</Link></div>
     </div></div>}
     {cfg.mode === 'logoOnly' && <div className="flex justify-center py-3">{logo}</div>}
     <nav className={cfg.mode === 'blackbar' ? 'bg-black border-t border-black' : 'bg-white border-t border-gray-200'} aria-label="Main navigation"><div className="max-w-7xl mx-auto px-4">{renderNav(cfg.mode === 'blackbar' ? 'text-white' : 'text-dark', navJustify)}</div></nav>

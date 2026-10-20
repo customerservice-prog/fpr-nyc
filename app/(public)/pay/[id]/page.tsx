@@ -9,6 +9,7 @@ import CardPaymentForm from '@/components/public/CardPaymentForm'
 import PaymentCardAuthorization from '@/components/public/PaymentCardAuthorization'
 import PaymentReceiptSummary from '@/components/public/PaymentReceiptSummary'
 import type { PaymentReceipt } from '@/lib/paymentReceipt'
+import { isNycPublicBookingDateOpen } from '@/lib/nycBookingWindow'
 
 interface PublicOrder {
   id: string
@@ -237,6 +238,8 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
     return <div className="max-w-2xl mx-auto px-4 py-12 text-center"><p role="status">Loading your order...</p></div>
   }
 
+  const unpaidPre2027 = order.amountPaid <= 0 && !isNycPublicBookingDateOpen(order.eventDate)
+
   if (order.status === 'canceled') {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
@@ -253,6 +256,21 @@ export default function PayOrderPage({ params }: { params: Promise<{ id: string 
           </div>
         )}
         <p className="text-body mt-4">If you have any questions, please contact us at 718-283-4593.</p></div>
+    )
+  }
+
+  if (unpaidPre2027) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-12 text-center">
+        <h1 className="text-2xl font-bold text-dark mb-4">2026 Online Booking Is Closed</h1>
+        <p className="text-body mb-3">Order #{order.orderNumber} has not received a payment, so this 2026 quote can no longer be started online.</p>
+        <p className="text-body mb-6">Friendly Party Rental NYC is now accepting new online reservations for events on or after January 1, 2027.</p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <a href="/order-by-date" className="btn-primary">Choose a 2027 Date</a>
+          <a href="tel:7182834593" className="inline-flex min-h-12 items-center rounded border px-5 font-semibold text-secondary">Call 718-283-4593</a>
+        </div>
+        <p className="text-body text-sm mt-6">If you already made a payment on a separate 2026 order, use that order&apos;s original payment link or contact our Riverdale team.</p>
+      </div>
     )
   }
 

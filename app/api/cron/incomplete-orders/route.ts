@@ -7,6 +7,7 @@ import { sendEmail, incompleteOrderRecaptureEmail } from '@/lib/email'
 import { BUSINESS } from '@/lib/utils'
 import { ownerNotificationRecipients } from '@/lib/orderLifecycleNotifications'
 import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
+import { isNycPublicBookingDateOpen } from '@/lib/nycBookingWindow'
 
 const SITE_URL = NYC_PUBLIC_ORIGIN
 
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
         },
         include: { customer: true },
     })
-    for (const order of (stage0Enabled ? stage0Orders : [])) {
+    for (const order of (stage0Enabled ? stage0Orders : []).filter(order => isNycPublicBookingDateOpen(order.eventDate))) {
         if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
         const email = stage0Setting
             ? incompleteOrderRecaptureEmail({ subject: stage0Setting.subject, content: stage0Setting.content }, { firstName: order.customer?.firstName || '', orderId: order.id, resumeLink: resumeLink(order.id) })
@@ -99,7 +100,7 @@ export async function GET(request: NextRequest) {
         },
         include: { customer: true },
     })
-        for (const order of (stage3Enabled ? stage3Orders : [])) {
+        for (const order of (stage3Enabled ? stage3Orders : []).filter(order => isNycPublicBookingDateOpen(order.eventDate))) {
             if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
             if (order.incompleteFollowUpSentAt && order.incompleteFollowUpSentAt > oneDayAgo) { continue }
         const email = stage3Setting
@@ -120,7 +121,7 @@ export async function GET(request: NextRequest) {
         },
         include: { customer: true },
     })
-    for (const order of (stage7Enabled ? stage7Orders : [])) {
+    for (const order of (stage7Enabled ? stage7Orders : []).filter(order => isNycPublicBookingDateOpen(order.eventDate))) {
         if (order.customer?.email && await hasAlreadyConverted(order.customer.email, order.id)) { continue }
         if (order.incompleteFollowUp3SentAt && order.incompleteFollowUp3SentAt > oneDayAgo) { continue }
         const email = stage7Setting

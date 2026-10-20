@@ -1,6 +1,7 @@
 import type { PrismaClient } from '@prisma/client'
 import { PLANNING_HELP, planningServices } from './eventPlanning'
 import { NYC_PUBLIC_ORIGIN } from './nycPublicOrigin'
+import { NYC_PUBLIC_BOOKING_START } from './nycBookingWindow'
 
 export class PlanningInquiryError extends Error {
   constructor(message: string, public status = 400) { super(message) }
@@ -28,8 +29,7 @@ export function parsePlanningInquiry(body: unknown, now = new Date()) {
   let date: Date | null = null
   if (eventDate) {
     date = new Date(eventDate + 'T12:00:00Z')
-    const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now)
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate) || !Number.isFinite(date.getTime()) || date.toISOString().slice(0,10) !== eventDate || eventDate < today) throw new PlanningInquiryError('Please choose a valid upcoming date, or leave it blank while deciding.')
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate) || !Number.isFinite(date.getTime()) || date.toISOString().slice(0,10) !== eventDate || eventDate < NYC_PUBLIC_BOOKING_START) throw new PlanningInquiryError('New Riverdale / NYC event inquiries are open for January 1, 2027 and later. Leave the date blank if you are still deciding.')
   }
   const rawGuests = data.guestCount
   let guestCount: number | null = null

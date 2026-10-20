@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, selfServiceQuoteEmail } from '@/lib/email'
 import { checkoutLineName } from '@/lib/nycCheckoutPricing'
+import { isNycPublicBookingDateOpen, NYC_PUBLIC_BOOKING_MESSAGE } from '@/lib/nycBookingWindow'
 
 // "Email me this quote" from checkout. The email is built only from the NYC catalog
 // (names and prices come from the database, never from the browser), goes to one
@@ -36,6 +37,10 @@ function escapeHtml(value: unknown, max = 120): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => null)
+    const eventDate = typeof body?.eventDate === 'string' ? body.eventDate.trim() : ''
+    if (eventDate && !isNycPublicBookingDateOpen(eventDate)) {
+      return NextResponse.json({ error: NYC_PUBLIC_BOOKING_MESSAGE, code: 'nyc_2027_booking_only' }, { status: 409 })
+    }
     const to = typeof body?.to === 'string' ? body.to.trim().toLowerCase() : ''
     if (!/^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(to) || to.length > 254) {
       return NextResponse.json({ error: 'Please enter one valid email address.' }, { status: 400 })
@@ -71,7 +76,7 @@ export async function POST(request: NextRequest) {
 
     const { subject, html } = selfServiceQuoteEmail({
       customerName: escapeHtml(body?.customerName, 100),
-      eventDate: /^\d{4}-\d{2}-\d{2}$/.test(String(body?.eventDate || '')) ? String(body.eventDate) : '',
+      eventDate: /^\d{4}-\d{2}-\d{2}$/.test(eventDate) ? eventDate : '',
       eventTimeSlot: escapeHtml(body?.eventTimeSlot, 80) || null,
       pickupTimeSlot: escapeHtml(body?.pickupTimeSlot, 80) || null,
       deliveryType: 'delivery',

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { DeliveryQuoteError, requireDeliveryMethod } from '@/lib/delivery'
 import { CheckoutPricingError } from '@/lib/nycCheckoutPricing'
 import { priceNycCheckout } from '@/lib/nycCheckoutPricingServer'
+import { isNycPublicBookingDateOpen, NYC_PUBLIC_BOOKING_MESSAGE } from '@/lib/nycBookingWindow'
 
 // Read-only price quote for the payment page. It runs the exact server pricing the
 // order API uses, so the customer is shown the server's own numbers. Nothing is
@@ -16,6 +17,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid checkout details.', code: 'invalid_request' }, { status: 400, headers })
     }
     requireDeliveryMethod(body.deliveryType)
+    if (!isNycPublicBookingDateOpen(body.eventDate)) {
+      return NextResponse.json({ error: NYC_PUBLIC_BOOKING_MESSAGE, code: 'nyc_2027_booking_only' }, { status: 409, headers })
+    }
     const pricing = await priceNycCheckout(body)
     return NextResponse.json({ pricing }, { headers })
   } catch (error) {

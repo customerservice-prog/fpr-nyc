@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { sendEmail, contactFormEmail } from '@/lib/email'
 import { NYC_EMAIL_ADDRESS, NYC_NOTIFICATION_EMAIL, nycEmailHref } from '@/lib/nycEmail'
 import { NYC_PUBLIC_HOST } from '@/lib/nycPublicOrigin'
+import { isNycPublicBookingDateOpen, NYC_PUBLIC_BOOKING_MESSAGE } from '@/lib/nycBookingWindow'
 
 export async function GET() {
  return NextResponse.json({ email: NYC_EMAIL_ADDRESS, emailHref: nycEmailHref(), notificationsEnabled: !!((process.env.RESEND_API_KEY && process.env.RESEND_FROM) || (process.env.EMAIL_USER && process.env.EMAIL_PASS)) }, { headers: { 'Cache-Control': 'no-store' } })
@@ -50,6 +51,9 @@ export async function POST(request: NextRequest) {
       const d = new Date(eventDate)
       if (isNaN(d.getTime())) {
         return NextResponse.json({ error: 'Please enter a valid event date' }, { status: 400 })
+      }
+      if (!isNycPublicBookingDateOpen(eventDate)) {
+        return NextResponse.json({ error: NYC_PUBLIC_BOOKING_MESSAGE, code: 'nyc_2027_booking_only' }, { status: 409 })
       }
       parsedEventDate = d
     }

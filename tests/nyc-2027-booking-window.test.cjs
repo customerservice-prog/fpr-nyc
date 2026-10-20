@@ -55,3 +55,44 @@ test('Riverdale storefront clearly announces 2027-only booking',()=>{
   assert.match(notice,/sessionStorage/)
   assert.match(sticky,/Book 2027/)
 })
+
+
+test('scheduled payment and recovery paths cannot revive unpaid pre-2027 orders',()=>{
+  const autoCharge=read('app/api/cron/auto-charge/route.ts')
+  const incomplete=read('app/api/cron/incomplete-orders/route.ts')
+  const prepay=read('app/api/cron/pre-payment-reminders/route.ts')
+  assert.match(autoCharge,/amountPaid \|\| 0\) <= 0 && !isNycPublicBookingDateOpen\(order\.eventDate\)/)
+  assert.match(autoCharge,/skipped_pre_2027_unpaid/)
+  assert.equal((incomplete.match(/filter\(order => isNycPublicBookingDateOpen\(order\.eventDate\)\)/g)||[]).length,3)
+  assert.match(prepay,/isNycPublicBookingDateOpen\(o\.eventDate\) \|\| Number\(o\.amountPaid \|\| 0\) > 0/)
+})
+
+test('unpaid 2026 payment links stop before presenting payment controls',()=>{
+  const pay=read('app/(public)/pay/[id]/page.tsx')
+  assert.match(pay,/unpaidPre2027 = order\.amountPaid <= 0 && !isNycPublicBookingDateOpen\(order\.eventDate\)/)
+  assert.match(pay,/2026 Online Booking Is Closed/)
+  assert.match(pay,/Choose a 2027 Date/)
+})
+
+test('quote email and checkout pricing refuse pre-2027 dates',()=>{
+  const emailQuote=read('app/api/send-quote/route.ts')
+  const checkoutQuote=read('app/api/checkout/quote/route.ts')
+  assert.match(emailQuote,/eventDate && !isNycPublicBookingDateOpen\(eventDate\)/)
+  assert.match(checkoutQuote,/!isNycPublicBookingDateOpen\(body\.eventDate\)/)
+  assert.match(emailQuote,/nyc_2027_booking_only/)
+  assert.match(checkoutQuote,/nyc_2027_booking_only/)
+})
+
+test('contact and planning inquiry surfaces accept only 2027+ dated inquiries',()=>{
+  const contactPage=read('app/(public)/contact_us/page.tsx')
+  const contactApi=read('app/api/contact/route.ts')
+  const planningForm=read('components/public/PlanningInquiryForm.tsx')
+  const planningParser=read('lib/planningInquiry.ts')
+  const estimator=read('components/public/PlanningEstimator.tsx')
+  assert.match(contactPage,/min=\{NYC_PUBLIC_BOOKING_START\}/)
+  assert.match(contactApi,/!isNycPublicBookingDateOpen\(eventDate\)/)
+  assert.match(planningForm,/min=\{NYC_PUBLIC_BOOKING_START\}/)
+  assert.match(planningParser,/eventDate < NYC_PUBLIC_BOOKING_START/)
+  assert.match(estimator,/min=\{NYC_PUBLIC_BOOKING_START\}/)
+  assert.match(estimator,/restored\.eventDate < NYC_PUBLIC_BOOKING_START/)
+})

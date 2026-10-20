@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { PLANNING_HELP, planningServices } from '@/lib/eventPlanning'
 import { ESTIMATE_EVENT, sanitizeEstimate, type InquiryEstimate } from '@/lib/planningEstimator'
 import { trackEvent } from '@/lib/gtag'
+import { NYC_PUBLIC_BOOKING_START } from '@/lib/nycBookingWindow'
 
 export default function PlanningInquiryForm({ initialType = '' }: { initialType?: string }) {
   const [busy, setBusy] = useState(false)
@@ -66,7 +67,7 @@ export default function PlanningInquiryForm({ initialType = '' }: { initialType?
     {estimateSummary && <div className="rounded-xl border border-blue-200 bg-blue-50 p-4" data-attached-estimate><p className="text-sm font-bold text-blue-950">Your visual estimate is attached.</p><p className="mt-2 text-xs leading-6 text-blue-900">Your event choices and itemized estimate will be sent with this form. It is not a confirmed quote or a reservation.</p><details className="mt-3"><summary className="cursor-pointer text-xs font-semibold text-blue-900">Review the attached estimate</summary><pre className="mt-3 whitespace-pre-wrap break-words font-sans text-xs leading-6 text-slate-700">{estimateSummary}</pre></details><button type="button" disabled={busy} onClick={() => setEstimateSummary('')} className="mt-2 min-h-11 text-xs font-semibold text-blue-800 underline">Remove attached estimate</button></div>}
     <fieldset disabled={busy} className="grid min-w-0 gap-5 sm:grid-cols-2">
       <label className="text-sm font-semibold">Event type *<select name="eventType" required defaultValue={initialType} className={input}><option value="">Choose your event</option>{planningServices.map(s => <option key={s.slug} value={s.type}>{s.label}</option>)}<option>Other / not sure yet</option></select></label>
-      <label className="text-sm font-semibold">Event date <span className="font-normal">(optional)</span><input className={input} type="date" name="eventDate"/><span className="mt-1 block text-xs font-normal text-slate-500">Leave blank if your date is undecided.</span></label>
+      <label className="text-sm font-semibold">Event date <span className="font-normal">(optional)</span><input className={input} type="date" name="eventDate" min={NYC_PUBLIC_BOOKING_START}/><span className="mt-1 block text-xs font-normal text-slate-500">New event inquiries are open for January 1, 2027 and later. Leave blank if your date is undecided.</span></label>
       <label className="text-sm font-semibold">Estimated guest count<input className={input} type="number" min="1" max="100000" step="1" name="guestCount" inputMode="numeric" placeholder="Approximate is fine"/></label>
       <label className="text-sm font-semibold">Venue or city *<input className={input} name="location" maxLength={200} required placeholder="Venue, city or neighborhood" autoComplete="address-level2"/></label>
       <label className="text-sm font-semibold sm:col-span-2">Do you have a venue?<select name="venueStatus" className={input} defaultValue="Still deciding"><option>Still deciding</option><option>Yes, booked</option><option>Have a venue in mind</option><option>Hosting at home</option></select></label>

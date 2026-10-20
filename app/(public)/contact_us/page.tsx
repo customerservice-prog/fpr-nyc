@@ -6,7 +6,8 @@ import { useForm } from 'react-hook-form'
 import { BUSINESS } from '@/lib/utils'
 import { trackEvent } from '@/lib/gtag'
 import { nycEmailHref } from '@/lib/nycEmail'
-import { NYC_SERVICE_MAP_EMBED_URL, nycCalendarDay, nycContactOutcome, nycGoogleProfileHref } from '@/lib/nycCustomerHelp'
+import { NYC_SERVICE_MAP_EMBED_URL, nycContactOutcome, nycGoogleProfileHref } from '@/lib/nycCustomerHelp'
+import { NYC_PUBLIC_BOOKING_START } from '@/lib/nycBookingWindow'
 
 interface ContactForm { name: string; email: string; phone: string; eventDate: string; message: string; website?: string }
 interface Receipt { emailHref: string; notificationSent: boolean }
@@ -16,17 +17,10 @@ export default function ContactPage() {
   const startTimeRef = useRef(Date.now())
   const requestInFlight = useRef(false)
   const receiptRef = useRef<HTMLDivElement>(null)
-  const [today, setToday] = useState('')
   const [receipt, setReceipt] = useState<Receipt | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const profileHref = nycGoogleProfileHref(BUSINESS.googleProfile)
 
-  useEffect(() => {
-    const refreshDay = () => setToday(nycCalendarDay())
-    refreshDay()
-    const timer = window.setInterval(refreshDay, 60000)
-    return () => window.clearInterval(timer)
-  }, [])
   useEffect(() => { if (receipt) receiptRef.current?.focus() }, [receipt])
 
   const onSubmit = async (data: ContactForm) => {
@@ -106,7 +100,7 @@ export default function ContactPage() {
           <div><label htmlFor="contact-name" className="mb-1 block text-sm font-medium text-dark">Name *</label><input id="contact-name" autoComplete="name" aria-invalid={!!errors.name} aria-describedby={errors.name ? 'contact-name-error' : undefined} {...register('name', { required: true, validate: value => value.trim().length >= 2 })} className="w-full border rounded px-3 py-2" />{errors.name && <p id="contact-name-error" className="mt-1 text-sm text-red-700">Please enter your name.</p>}</div>
           <div><label htmlFor="contact-email" className="mb-1 block text-sm font-medium text-dark">Email *</label><input id="contact-email" type="email" autoComplete="email" aria-invalid={!!errors.email} aria-describedby={errors.email ? 'contact-email-error' : undefined} {...register('email', { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ })} className="w-full border rounded px-3 py-2" />{errors.email && <p id="contact-email-error" className="mt-1 text-sm text-red-700">Please enter a valid email address.</p>}</div>
           <div><label htmlFor="contact-phone" className="mb-1 block text-sm font-medium text-dark">Phone</label><input id="contact-phone" type="tel" autoComplete="tel" aria-invalid={!!errors.phone} aria-describedby={errors.phone ? 'contact-phone-error' : undefined} {...register('phone', { pattern: /^[0-9+()\-.\s]{7,20}$/ })} className="w-full border rounded px-3 py-2" />{errors.phone && <p id="contact-phone-error" className="mt-1 text-sm text-red-700">Please enter a valid phone number.</p>}</div>
-          <div><label htmlFor="contact-date" className="mb-1 block text-sm font-medium text-dark">Event Date</label><input id="contact-date" type="date" min={today || undefined} aria-invalid={!!errors.eventDate} aria-describedby="contact-date-help" {...register('eventDate', { validate: value => !value || value >= nycCalendarDay() || 'Choose today or a future date in New York.' })} className="min-w-0 max-w-full w-full border rounded px-3 py-2" /><p id="contact-date-help" className={`mt-1 text-sm ${errors.eventDate ? 'text-red-700' : 'text-body'}`}>{errors.eventDate?.message || 'Event dates use New York local time.'}</p></div>
+          <div><label htmlFor="contact-date" className="mb-1 block text-sm font-medium text-dark">Event Date</label><input id="contact-date" type="date" min={NYC_PUBLIC_BOOKING_START} aria-invalid={!!errors.eventDate} aria-describedby="contact-date-help" {...register('eventDate', { validate: value => !value || value >= NYC_PUBLIC_BOOKING_START || 'New event inquiries are open for January 1, 2027 and later.' })} className="min-w-0 max-w-full w-full border rounded px-3 py-2" /><p id="contact-date-help" className={`mt-1 text-sm ${errors.eventDate ? 'text-red-700' : 'text-body'}`}>{errors.eventDate?.message || 'New Riverdale / NYC event inquiries are open for January 1, 2027 and later.'}</p></div>
           <div><label htmlFor="contact-message" className="mb-1 block text-sm font-medium text-dark">Event Details *</label><textarea id="contact-message" aria-invalid={!!errors.message} aria-describedby={errors.message ? 'contact-message-error' : undefined} {...register('message', { required: true, validate: value => value.trim().length >= 10 })} rows={6} className="w-full border rounded px-3 py-2" />{errors.message && <p id="contact-message-error" className="mt-1 text-sm text-red-700">Please include at least 10 characters of event details.</p>}</div>
           <button type="submit" disabled={isSubmitting || !isValid} className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed">{isSubmitting ? 'Saving inquiry...' : 'Send inquiry'}</button>
         </form>}

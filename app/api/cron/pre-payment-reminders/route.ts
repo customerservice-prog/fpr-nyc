@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { isAuthorizedCronRequest } from '@/lib/cronAuth'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, prePaymentReminderEmail } from '@/lib/email'
+import { isNycPublicBookingDateOpen } from '@/lib/nycBookingWindow'
 
 // Automatic 3-day-before-event Pre-Payment Reminder email.
 // Runs on a schedule (see .github/workflows/pre-payment-reminders-cron.yml).
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
 
   const results: any[] = []
 
-  for (const order of orders.filter((o) => Math.max((o.totalAmount || 0) - (o.amountPaid || 0), 0) > 0)) {
+  for (const order of orders.filter((o) => (isNycPublicBookingDateOpen(o.eventDate) || Number(o.amountPaid || 0) > 0) && Math.max((o.totalAmount || 0) - (o.amountPaid || 0), 0) > 0)) {
     const email = order.customer?.email || ''
     if (!email || email.includes('@imported.friendlypartyrental.local') || email.startsWith('no-email-')) {
       results.push({ orderId: order.id, orderNumber: order.orderNumber, skipped: true, reason: 'invalid or placeholder email' })

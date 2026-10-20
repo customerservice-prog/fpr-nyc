@@ -9,6 +9,7 @@ import { NYC_NOTIFICATION_EMAIL } from '@/lib/nycEmail'
 import { buildNycPaymentMetadata, nycIdempotencyKey } from '@/lib/nycPaymentMetadata'
 import { toCents } from '@/lib/nycCheckoutPricing'
 import { alertOwner, recordSucceededIntent } from '@/lib/nycStripeReconcile'
+import { isNycPublicBookingDateOpen } from '@/lib/nycBookingWindow'
 
 // Automatic pre-event card charge (Autopay).
 // Charges customers who opted in at checkout to save their card and have
@@ -59,6 +60,13 @@ export async function GET(request: NextRequest) {
   const results: Array<{ orderId: string; orderNumber: string; status: string; amount?: number; error?: string }> = []
 
   for (const order of orders) {
+    // The 2027 launch window applies to automatic charges too. A legacy 2026
+    // order may collect only a remaining balance after a real prior payment;
+    // autopay must never become the first payment that revives an unpaid 2026 order.
+    if (Number(order.amountPaid || 0) <= 0 && !isNycPublicBookingDateOpen(order.eventDate)) {
+      results.push({ orderId: order.id, orderNumber: order.orderNumber, status: 'skipped_pre_2027_unpaid' })
+      continue
+    }
     const remainingCents = Math.max(toCents(order.totalAmount || 0) - toCents(order.amountPaid || 0), 0)
     const chargeCents = settings.chargeRemainingBalance
       ? remainingCents

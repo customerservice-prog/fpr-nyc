@@ -9,6 +9,7 @@ import { calculateEstimate, estimateInquiry, estimatePackages, initialEstimate, 
 import styles from './PlanningEstimator.module.css'
 import { NYC_PUBLIC_HOST } from '@/lib/nycPublicOrigin'
 import { nycItemPath } from '@/lib/nycItemPath'
+import { NYC_PUBLIC_BOOKING_START } from '@/lib/nycBookingWindow'
 
 const steps = ['Your event', 'Planning', 'Rentals', 'Your estimate']
 const progressOptions: { value: PlanningProgress; title: string; description: string }[] = [
@@ -106,7 +107,10 @@ export default function PlanningEstimator({ initialType = '' }: { initialType?: 
       const raw = localStorage.getItem(ESTIMATE_STORAGE_KEY)
       if (!raw) return
       const value = JSON.parse(raw)
-      if (value?.version === 1 && typeof value.savedAt === 'number' && value.savedAt <= Date.now() && Date.now() - value.savedAt < 30 * 86400000) setSaved({ version: 1, savedAt: value.savedAt, details: sanitizeEstimate(value.details, initialType), selections: sanitizeSelections(value.selections) })
+      if (value?.version === 1 && typeof value.savedAt === 'number' && value.savedAt <= Date.now() && Date.now() - value.savedAt < 30 * 86400000) {
+        const restored = sanitizeEstimate(value.details, initialType)
+        setSaved({ version: 1, savedAt: value.savedAt, details: { ...restored, eventDate: restored.eventDate && restored.eventDate < NYC_PUBLIC_BOOKING_START ? '' : restored.eventDate }, selections: sanitizeSelections(value.selections) })
+      }
     } catch { /* Storage is optional, including private browsing. */ }
     return () => deliveryAbort.current?.abort()
   }, [initialType])
@@ -205,7 +209,7 @@ export default function PlanningEstimator({ initialType = '' }: { initialType?: 
             <p className={styles.photoNote}>Gallery images are inspiration, not a promise of included equipment or a particular event style.</p>
             <div className={styles.fields}>
               <div className={`${styles.field} ${styles.wide}`}><span><Users size={15}/> How many guests?</span><div className={styles.guests}><input aria-label="Guest count slider" type="range" min="10" max="500" step="10" value={Math.min(500, Math.max(10, details.guests))} onChange={e => update('guests', Number(e.target.value))}/><NumberInput label="Guest count" value={details.guests} onChange={v => update('guests', v)} min={1} max={10000} className={`${styles.input} ${styles.guestNumber}`}/></div><div className={styles.pills}>{[30, 50, 80, 150, 200].map(n => <button key={n} type="button" className={styles.pill} aria-pressed={details.guests === n} onClick={() => update('guests', n)}>{n} guests</button>)}</div><small>Guest count helps with quantities. It does not change your published planning package price.</small></div>
-              <label className={styles.field}><span><CalendarDays size={15}/> Event date</span><input type="date" aria-label="Estimate event date" className={styles.input} value={details.eventDate} onChange={e => update('eventDate', e.target.value)}/><small>Undecided? You can leave this blank.</small></label>
+              <label className={styles.field}><span><CalendarDays size={15}/> Event date</span><input type="date" aria-label="Estimate event date" className={styles.input} min={NYC_PUBLIC_BOOKING_START} value={details.eventDate} onChange={e => update('eventDate', e.target.value)}/><small>New event planning starts January 1, 2027. Undecided? You can leave this blank.</small></label>
               <label className={styles.field}><span>Event setting</span><select className={styles.select} value={details.setting} onChange={e => update('setting', e.target.value)}><option>Outdoor</option><option>Indoor</option><option>Both / unsure</option></select></label>
               <label className={`${styles.field} ${styles.wide}`}><span><MapPin size={15}/> Venue or city</span><input className={styles.input} value={details.location} onChange={e => update('location', e.target.value)} placeholder="Your venue, backyard or city" maxLength={200} autoComplete="address-level2"/></label>
               <label className={styles.field}><span>Venue status</span><select className={styles.select} value={details.venueStatus} onChange={e => update('venueStatus', e.target.value)}><option>Still deciding</option><option>Yes, booked</option><option>Have a venue in mind</option><option>Hosting at home</option></select></label>

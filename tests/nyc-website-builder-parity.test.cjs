@@ -4,60 +4,47 @@ const fs = require('node:fs')
 
 const read = file => fs.readFileSync(file, 'utf8')
 
-test('NYC website editor uses the Syracuse-style builder workspace', () => {
+test('NYC website editor uses Website Studio V3', () => {
   const page = read('app/admin/website/page.tsx')
-  const builder = read('components/admin/NycWebsiteBuilder.tsx')
-  assert.match(page, /NycWebsiteBuilder/)
+  const editor = read('components/admin/WebsiteEditorV3.tsx')
+  assert.match(page, /WebsiteEditorV3/)
+  assert.match(page, /Friendly Party Rental NYC \/ Riverdale Website Studio V3/)
   for (const marker of [
-    'Website Builder',
-    'Homepage',
-    'Revision #',
-    'History',
-    'All pages',
-    'Live site',
-    'Discard draft / Reload live',
-    'Restore original live design',
-    'Matches live version',
-    'Publish Live',
-    'Desktop',
-    'Tablet',
-    'Mobile',
-    'Add section',
-    'Zoom',
-  ]) assert.ok(builder.includes(marker), 'missing builder parity marker: ' + marker)
-  assert.ok(!builder.includes('Mobile preview · desktop editing coming soon'))
+    'Website pages',
+    'Image library',
+    'Inventory',
+    'Categories',
+    'Wedding packages',
+    'desktop',
+    'tablet',
+    'mobile',
+    'publish',
+    'revision',
+  ]) assert.ok(editor.toLowerCase().includes(marker.toLowerCase()), 'missing Website Studio V3 marker: ' + marker)
 })
 
-test('NYC website builder previews the real NYC storefront instead of Syracuse copy', () => {
-  const builder = read('components/admin/NycWebsiteBuilder.tsx')
-  assert.match(builder, /ResponsiveHome/)
-  assert.match(builder, /NycHomeSeo/)
-  assert.match(builder, /Header/)
-  assert.match(builder, /Footer/)
-  assert.doesNotMatch(builder, /Party Rentals Made Easy in Syracuse|330 Costello Parkway|Serving Syracuse/)
+test('NYC Website Studio V3 edits the real NYC storefront', () => {
+  const editor = read('components/admin/WebsiteEditorV3.tsx')
+  assert.match(editor, /ResponsiveHome/)
+  assert.match(editor, /Header/)
+  assert.match(editor, /Footer/)
+  assert.match(editor, /WebsitePageStudio/)
+  assert.doesNotMatch(editor, /Party Rentals Made Easy in Syracuse|330 Costello Parkway|Serving Syracuse/)
 })
 
-test('NYC website builder keeps edits private until explicit publication', () => {
-  const builder = read('components/admin/NycWebsiteBuilder.tsx')
-  assert.match(builder, /Private draft saved · live unchanged/)
-  assert.match(builder, /Publish this private homepage draft to the live NYC website/)
-  assert.match(builder, /Discard the private NYC homepage draft/)
+test('NYC Website Studio keeps draft, publish and revision workflows', () => {
+  const editor = read('components/admin/WebsiteEditorV3.tsx')
+  assert.match(editor, /createDraftSaveQueue/)
+  assert.match(editor, /\/api\/admin\/website\/home\/publish/)
+  assert.match(editor, /\/api\/admin\/website\/home\/restore/)
+  assert.match(editor, /\/api\/admin\/website\/home\/revisions/)
+  assert.match(editor, /expectedUpdatedAt/)
 })
 
-
-test('desktop and tablet preview clicks are wired into the editor inspector', () => {
-  const builder = read('components/admin/NycWebsiteBuilder.tsx')
-  const desktop = read('components/public/DesktopHome.tsx')
-  assert.ok(builder.includes('heroEditMode={{'), 'builder must pass hero editing to every device')
-  assert.ok(builder.includes('contentEditMode={{'), 'builder must pass text editing to every device')
-  assert.ok(builder.includes('categoryEditMode={{'), 'builder must pass category editing to every device')
-  assert.ok(!builder.includes("heroEditMode={device === 'mobile'"), 'desktop hero editing must not be disabled')
-  assert.ok(!builder.includes("contentEditMode={device === 'mobile'"), 'desktop text editing must not be disabled')
-  assert.ok(desktop.includes('contentEditMode'))
-  assert.ok(desktop.includes('heroEditMode'))
-  assert.ok(desktop.includes('categoryEditMode'))
-  assert.ok(desktop.includes('data-home-field'))
-  assert.ok(desktop.includes('data-home-category'))
-  assert.ok(builder.includes('data-website-preview-chrome="header"'))
-  assert.ok(builder.includes('data-website-preview-chrome="footer"'))
+test('NYC Website Studio supports all three responsive preview sizes', () => {
+  const editor = read('components/admin/WebsiteEditorV3.tsx')
+  assert.match(editor, /type Device = 'mobile' \| 'tablet' \| 'desktop'/)
+  assert.match(editor, /deviceWidth/)
+  assert.match(editor, /suggestedZoom/)
+  assert.match(editor, /ResponsiveHome/)
 })

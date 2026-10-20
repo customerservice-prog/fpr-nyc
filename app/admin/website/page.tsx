@@ -1,6 +1,5 @@
-// Friendly Party Rental NYC / Riverdale website builder entry point.
-import NycWebsiteBuilder from '@/components/admin/NycWebsiteBuilder'
+import WebsiteEditorV3 from '@/components/admin/WebsiteEditorV3'
 
 export default function AdminWebsitePage() {
-  return <NycWebsiteBuilder />
+  return <WebsiteEditorV3 />
 }

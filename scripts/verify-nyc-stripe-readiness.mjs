@@ -5,9 +5,25 @@ const secretKey = String(process.env.STRIPE_SECRET_KEY || '').trim()
 const publishableKey = String(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '').trim()
 const webhookSecret = String(process.env.STRIPE_WEBHOOK_SECRET || '').trim()
 const onlineEnabled = String(process.env.NYC_ONLINE_PAYMENTS_ENABLED || '').trim() === 'true'
+const environmentName = String(process.env.RAILWAY_ENVIRONMENT_NAME || process.env.RAILWAY_ENVIRONMENT || '').trim().toLowerCase()
 
 if (process.env.GITHUB_ACTIONS === 'true' && !process.env.NYC_STRIPE_ACCOUNT_ID && !process.env.STRIPE_SECRET_KEY) {
   console.log('[nyc-stripe-verify] skipped: GitHub Actions catalog/schema CI does not receive live Stripe credentials')
+  process.exit(0)
+}
+
+// Staging intentionally cannot charge cards and does not receive production Stripe
+// credentials. Keep that environment deployable without weakening production:
+// production still must prove the live secret, publishable key, webhook secret,
+// account ID, and account ownership below on every deploy.
+if (environmentName && environmentName !== 'production' && !onlineEnabled) {
+  console.log(JSON.stringify({
+    verified: false,
+    skipped: true,
+    reason: 'non_production_payments_disabled',
+    environment: environmentName,
+    onlinePaymentsSwitch: false,
+  }))
   process.exit(0)
 }
 

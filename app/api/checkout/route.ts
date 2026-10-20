@@ -14,6 +14,7 @@ import { exactSlotConflict, findInventoryShortfalls, lockNycCapacity, rentalPeri
 import { evaluateRentalRestrictions } from '@/lib/rentalRestrictions'
 import { DeliveryQuoteError, getDeliveryQuote, requireDeliveryMethod, requireMatchingDeliveryFee } from '@/lib/delivery'
 import { PAYMENT_CARD_AUTHORIZATION_VERSION } from '@/lib/cardAuthorization'
+import { NycPublicBookingDateError, requireNycPublicBookingDate } from '@/lib/nycBookingWindow'
 
 // Creates (or safely reuses) the Stripe PaymentIntent for an NYC order.
 // Amounts are validated against the order record on the server; the browser only
@@ -66,6 +67,7 @@ export async function POST(request: NextRequest) {
 
     const unpaidOnlineOrder = order.source === 'online' && Number(order.amountPaid || 0) <= 0
     const firstOnlinePayment = unpaidOnlineOrder && ['incomplete', 'quote'].includes(order.status)
+    if (firstOnlinePayment) requireNycPublicBookingDate(order.eventDate)
     const needsLegacyUpgradeReview = unpaidOnlineOrder && order.pricingVersion !== NYC_PRICING_VERSION && Number(order.durationFee || 0) > 0
     const lineIds = Array.from(new Set(order.items.map(line => line.itemId).filter((id): id is string => !!id)))
     const catalog = firstOnlinePayment || needsLegacyUpgradeReview
@@ -238,6 +240,9 @@ export async function POST(request: NextRequest) {
       paymentIntentId: paymentIntent.id,
     })
   } catch (error) {
+    if (error instanceof NycPublicBookingDateError) {
+      return NextResponse.json({ error: error.message, code: error.code }, { status: error.status })
+    }
     if (isNycPaymentsUnavailable(error)) {
       console.error('[checkout] Payment blocked:', error.reason)
       return NextResponse.json({ error: NYC_PAYMENTS_UNAVAILABLE_MESSAGE, code: 'payments_unavailable' }, { status: 503 })

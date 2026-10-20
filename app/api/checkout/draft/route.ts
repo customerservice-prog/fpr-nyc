@@ -9,6 +9,7 @@ import { effectiveEventEndDate } from '@/lib/orderDates'
 import { CheckoutPricingError, NYC_PRICING_VERSION, checkoutLineName, toCents, type CheckoutPricingResult } from '@/lib/nycCheckoutPricing'
 import { priceNycCheckout } from '@/lib/nycCheckoutPricingServer'
 import { lockNycCapacity } from '@/lib/nycInventory'
+import { NycPublicBookingDateError, requireNycPublicBookingDate } from '@/lib/nycBookingWindow'
 
 function clean(value: unknown, max = 255) {
   return typeof value === 'string' ? value.trim().slice(0, max) : ''
@@ -160,6 +161,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true, orderId: order.id, orderNumber: order.orderNumber, status: order.status, stage: order.checkoutStage })
   } catch (error) {
+    if (error instanceof NycPublicBookingDateError) return NextResponse.json({ error: error.message, code: error.code }, { status: error.status })
     if (error instanceof DeliveryQuoteError) return NextResponse.json({ error: error.message }, { status: error.status })
     console.error('Checkout draft error:', error)
     return NextResponse.json({ error: 'Could not save checkout progress' }, { status: 500 })

@@ -12,7 +12,7 @@ interface FaqEntry {
 }
 
 const FAQ_DATA: FaqEntry[] = [
-  { q: 'How do I book a rental?', a: 'Browse our catalog, select items, choose your event date, and complete checkout online. You can also call 718-283-4593 for help.' },
+  { q: 'How do I book a rental?', a: 'New Riverdale / NYC online reservations are open for 2027 events only. Browse our catalog, choose a date on or after January 1, 2027, and complete checkout online. You can also call 718-283-4593 for help.' },
   { q: 'What can I rent from you?', a: 'We carry tents, tables and chairs, linens, lighting, bounce houses and waterslides, concessions and beverage service, dance floors, generators, photo booths, yard games, heating and cooling, wedding packages, and party accessories.' },
   { q: 'What payment methods do you accept?', a: 'We accept all major credit and debit cards through our secure online checkout.' },
   { q: 'When is the remaining balance due?', a: 'The remaining balance is due 3 days before your event. Your contract must be read and signed at final payment, or delivery will not occur.' },

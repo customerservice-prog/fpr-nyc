@@ -19,7 +19,7 @@ test('public order creation and first payment reject pre-2027 dates',()=>{
   assert.ok(orders.indexOf('requireNycPublicBookingDate(body.eventDate)') < orders.indexOf("await requireNycStripe('charge')"))
   assert.match(draft,/requireNycPublicBookingDate\(eventDate\)/)
   assert.ok(draft.indexOf('requireNycPublicBookingDate(eventDate)') < draft.indexOf('await prisma.order.findUnique'))
-  assert.match(checkout,/if \(firstOnlinePayment\) requireNycPublicBookingDate\(order\.eventDate\)/)
+  assert.match(checkout,/if \(firstPaymentForOrder\) requireNycPublicBookingDate\(order\.eventDate\)/)
 })
 
 test('dated availability APIs reject 2026 while undated browsing remains available',()=>{

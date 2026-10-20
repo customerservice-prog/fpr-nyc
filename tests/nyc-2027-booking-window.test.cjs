@@ -1,0 +1,57 @@
+const test=require('node:test')
+const assert=require('node:assert/strict')
+const fs=require('node:fs')
+const path=require('node:path')
+const root=path.join(__dirname,'..')
+const read=file=>fs.readFileSync(path.join(root,file),'utf8')
+
+test('NYC public booking starts January 1 2027',()=>{
+  const policy=read('lib/nycBookingWindow.ts')
+  assert.match(policy,/NYC_PUBLIC_BOOKING_START = '2027-01-01'/)
+  assert.match(policy,/nyc_2027_booking_only/)
+})
+
+test('public order creation and first payment reject pre-2027 dates',()=>{
+  const orders=read('app/api/orders/route.ts')
+  const draft=read('app/api/checkout/draft/route.ts')
+  const checkout=read('app/api/checkout/route.ts')
+  assert.match(orders,/requireNycPublicBookingDate\(body\.eventDate\)/)
+  assert.ok(orders.indexOf('requireNycPublicBookingDate(body.eventDate)') < orders.indexOf("await requireNycStripe('charge')"))
+  assert.match(draft,/requireNycPublicBookingDate\(eventDate\)/)
+  assert.ok(draft.indexOf('requireNycPublicBookingDate(eventDate)') < draft.indexOf('await prisma.order.findUnique'))
+  assert.match(checkout,/if \(firstOnlinePayment\) requireNycPublicBookingDate\(order\.eventDate\)/)
+})
+
+test('dated availability APIs reject 2026 while undated browsing remains available',()=>{
+  const items=read('app/api/items/route.ts')
+  const availability=read('app/api/availability/route.ts')
+  assert.match(items,/isNycPublicBookingDateOpen\(date\)/)
+  assert.match(availability,/isNycPublicBookingDateOpen\(date\)/)
+})
+
+test('customer calendars and direct date links start at 2027',()=>{
+  const calendar=read('components/public/BookingCalendar.tsx')
+  const picker=read('app/(public)/order-by-date/page.tsx')
+  const items=read('app/(public)/items/ItemsClient.tsx')
+  const category=read('app/(public)/category/[slug]/CategoryClient.tsx')
+  assert.match(calendar,/minDate\?: Date/)
+  assert.match(calendar,/canGoPrevious/)
+  assert.match(picker,/new Date\(2027, 0, 1\)/)
+  assert.match(picker,/minDate=\{BOOKING_START\}/)
+  assert.match(items,/NYC_PUBLIC_BOOKING_START/)
+  assert.match(category,/NYC_PUBLIC_BOOKING_START/)
+  assert.match(category,/minDate=\{BOOKING_START\}/)
+})
+
+test('Riverdale storefront clearly announces 2027-only booking',()=>{
+  const layout=read('app/(public)/layout.tsx')
+  const notice=read('components/public/Nyc2027ArrivalNotice.tsx')
+  const sticky=read('components/public/StickyBar.tsx')
+  assert.match(layout,/2027 events only/)
+  assert.match(layout,/2026 online booking is closed/)
+  assert.match(notice,/Now Booking 2027 & Beyond/)
+  assert.match(notice,/January 1, 2027/)
+  assert.match(notice,/Choose My 2027 Date/)
+  assert.match(notice,/sessionStorage/)
+  assert.match(sticky,/Book 2027/)
+})

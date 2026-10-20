@@ -18,7 +18,7 @@ export default function StickyBar() {
           prefetch={false}
           className="bg-secondary text-white px-6 py-2 rounded font-medium hover:bg-blue-700 transition-colors flex-1 max-w-xs text-center"
         >
-          Book Now
+          Book 2027
         </Link>
         <a
           href={`tel:${BUSINESS.phone}`}

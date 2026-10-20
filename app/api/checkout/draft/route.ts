@@ -38,6 +38,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Incomplete checkout details' }, { status: 400 })
     }
 
+    requireNycPublicBookingDate(eventDate)
+
     const existing = await prisma.order.findUnique({ where: { checkoutDraftKey }, include: { customer: true } })
     if (existing && existing.status !== 'incomplete') {
       return NextResponse.json({ ok: true, orderId: existing.id, orderNumber: existing.orderNumber, status: existing.status })

@@ -19,15 +19,19 @@ interface BookingCalendarProps {
   selectedDate: Date | null
   onSelectDate: (date: Date) => void
   closedDates?: string[]
+  minDate?: Date
 }
 
 export default function BookingCalendar({
   selectedDate,
   onSelectDate,
   closedDates = [],
+  minDate,
 }: BookingCalendarProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date())
   const today = startOfDay(new Date())
+  const requestedMinimum = minDate ? startOfDay(minDate) : today
+  const earliest = isBefore(today, requestedMinimum) ? requestedMinimum : today
+  const [currentMonth, setCurrentMonth] = useState(() => startOfMonth(earliest))
 
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
@@ -47,13 +51,15 @@ export default function BookingCalendar({
   })
 
   const years = Array.from({ length: 3 }, (_, i) => currentMonth.getFullYear() + i)
+  const canGoPrevious = !isBefore(startOfMonth(subMonths(currentMonth, 1)), startOfMonth(earliest))
 
   return (
     <div className="bg-white rounded-lg shadow-lg border border-primary/50 p-3 sm:p-6 max-w-2xl mx-auto">
       <div className="flex items-center justify-between gap-1 mb-4 sm:mb-6">
         <button
-          onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          className="shrink-0 p-2 sm:p-3 hover:bg-gray-100 rounded"
+          onClick={() => canGoPrevious && setCurrentMonth(subMonths(currentMonth, 1))}
+          disabled={!canGoPrevious}
+          className="shrink-0 p-2 sm:p-3 hover:bg-gray-100 rounded disabled:cursor-not-allowed disabled:opacity-30"
           aria-label="Previous month"
         >
           <ChevronLeft size={24} />
@@ -102,7 +108,7 @@ export default function BookingCalendar({
           <div key={`pad-${i}`} className="h-11 sm:h-16" />
         ))}
         {days.map((day) => {
-          const isPast = isBefore(day, today)
+          const isPast = isBefore(day, earliest)
           const disabled = isPast || isClosed(day)
           const selected = selectedDate && isSameDay(day, selectedDate)
           const closed = isClosed(day)
@@ -112,7 +118,7 @@ export default function BookingCalendar({
               key={day.toISOString()}
               onClick={() => !disabled && onSelectDate(day)}
               disabled={disabled}
-              title={isPast ? 'Closed (past date)' : undefined}
+              title={isPast ? 'Unavailable before the booking start date' : undefined}
               className={`h-11 sm:h-16 rounded-lg text-base sm:text-lg font-medium transition-colors
                 ${!isSameMonth(day, currentMonth) ? 'text-gray-300' : ''}
                 ${selected ? 'bg-secondary text-white' : ''}

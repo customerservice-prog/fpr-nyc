@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getItemsWithAvailability, PUBLIC_ITEM_SELECT, withCategoryImage } from '@/lib/availability'
 import { itemDescriptionForNyc } from '@/lib/nycPublicCopy'
+import { isNycPublicBookingDateOpen, NYC_PUBLIC_BOOKING_MESSAGE } from '@/lib/nycBookingWindow'
 
 function localizeItem<T extends { name: string; description?: string | null; cost?: number | null }>(item: T): T {
   return { ...item, description: itemDescriptionForNyc(item.name, item.description, typeof item.cost === 'number' ? item.cost : null) }
@@ -13,6 +14,10 @@ export async function GET(request: NextRequest) {
   const date = searchParams.get('date')
   const category = searchParams.get('category')
   const search = searchParams.get('search')
+
+  if (date && !isNycPublicBookingDateOpen(date)) {
+    return NextResponse.json({ error: NYC_PUBLIC_BOOKING_MESSAGE, code: 'nyc_2027_booking_only' }, { status: 409 })
+  }
 
   if (!date) {
     const { prisma } = await import('@/lib/prisma')

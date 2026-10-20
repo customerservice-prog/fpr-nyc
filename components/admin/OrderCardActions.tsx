@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import { formatCurrency } from '@/lib/utils'
 import { useSession } from 'next-auth/react'
 import { canIssueRefunds, canProcessPayments, hasStaffPermission } from '@/lib/staffPermissions'
+import ReviewRequestButton from '@/components/reviews/ReviewRequestButton'
 
 export type OrderQuickAction = 'cancel' | 'refund' | 'restrict' | 'note'
 type Action = OrderQuickAction
@@ -106,7 +107,7 @@ export default function OrderCardActions({ orderId, orderNumber, status, onUpdat
       {!compact && <><Link href={`/admin/orders/${orderId}`} className="mr-1 min-h-10 inline-flex items-center font-semibold text-secondary hover:underline">View / Edit Order</Link>
       <span className="capitalize text-gray-500 mr-2">{status}</span>
       {mayPay && <Link href={`/admin/orders/${orderId}?action=card`} title="Take payment or charge the card on file" className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 font-medium hover:bg-blue-50"><span aria-hidden="true">💳</span> Payment</Link>}</>}
-      {visibleActions.map(a=><button key={a.id} type="button" disabled={a.id==='cancel'&&['canceled','cancelled'].includes(status)} title={`${TITLES[a.id]} · Order ${orderNumber}`} onClick={e=>{opener.current=e.currentTarget;setAction(a.id)}} className={`inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 font-medium disabled:opacity-40 ${a.id==='cancel'||a.id==='restrict'?'text-red-700 hover:bg-red-50':'text-gray-800 hover:bg-blue-50'}`}><span aria-hidden="true">{a.emoji}</span>{a.label}</button>)}
+      <ReviewRequestButton orderId={orderId} compact ready={!['canceled','cancelled','quote','incomplete'].includes(status)} readyMessage="Not available" />{visibleActions.map(a=><button key={a.id} type="button" disabled={a.id==='cancel'&&['canceled','cancelled'].includes(status)} title={`${TITLES[a.id]} · Order ${orderNumber}`} onClick={e=>{opener.current=e.currentTarget;setAction(a.id)}} className={`inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 font-medium disabled:opacity-40 ${a.id==='cancel'||a.id==='restrict'?'text-red-700 hover:bg-red-50':'text-gray-800 hover:bg-blue-50'}`}><span aria-hidden="true">{a.emoji}</span>{a.label}</button>)}
     </div>
     {action && <dialog ref={dialog} aria-label={`${TITLES[action]} · Order ${orderNumber}`} onCancel={e=>{e.preventDefault();close()}} className="m-auto max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-xl overflow-y-auto rounded-2xl border-0 bg-white p-0 shadow-2xl backdrop:bg-black/60" onClick={e=>e.stopPropagation()}>
       <div className="flex items-start justify-between gap-3 border-b p-5"><div><h2 className="text-lg font-bold">{TITLES[action]}</h2><p className="mt-1 text-sm text-gray-600">Order {orderNumber}{order ? ` · ${order.customer.firstName} ${order.customer.lastName}` : ''}</p></div><button type="button" aria-label="Close order action" disabled={busy} onClick={close} className="rounded border px-3 py-2">✕</button></div>

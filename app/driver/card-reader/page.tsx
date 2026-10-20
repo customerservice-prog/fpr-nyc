@@ -55,7 +55,7 @@ export default function DriverCardReaderPage() {
     setCreating(true)
     setError('')
     try {
-      const res = await fetch('/api/checkout', {
+      const res = await fetch('/api/driver/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId: selected.id, amount: amt }),

@@ -15,6 +15,9 @@ import { exactPickupFeeForPolicy, isLateExactPickupTime } from '@/lib/nycCheckou
 import { categorySearchName } from '@/lib/nycSearchReadiness'
 import { bookingDateKey } from '@/lib/rentsketchBooking'
 import { nycCalendarDay } from '@/lib/nycCustomerHelp'
+import { NYC_PUBLIC_BOOKING_START } from '@/lib/nycBookingWindow'
+
+const BOOKING_START = new Date(2027, 0, 1)
 import { ShoppingCart, CalendarDays, Pencil, Truck, MapPin } from 'lucide-react'
 
 const APPOINTMENT_SLOTS = [
@@ -103,9 +106,10 @@ function getRecommendedWindow(eventStartTime: string): { start: string; end: str
 export default function CategoryClient({ slug, initialCategory, initialItems }: { slug: string; initialCategory: { name: string; description?: string; bookableAfter?: string | null; bookableAfterMessage?: string | null } | null; initialItems: Array<{ id: string; slug?: string | null; name: string; cost: number; picture?: string | null; available: number; category?: { pricingProfile?: string | null } | null; bookableAfter?: string | null; bookableAfterMessage?: string | null; description?: string | null; colorOptions?: string[]; updatedAt?: string | null }> }) {
   const searchParams = useSearchParams()
   const dateParam = searchParams.get('date')
+  const earliestBookingKey = nycCalendarDay() > NYC_PUBLIC_BOOKING_START ? nycCalendarDay() : NYC_PUBLIC_BOOKING_START
   const restoredCartDate = useRef(false)
   const [selectedDate, setSelectedDate] = useState<Date | null>(
-    dateParam && bookingDateKey(dateParam) >= nycCalendarDay() ? new Date(bookingDateKey(dateParam) + 'T12:00:00') : null
+    dateParam && bookingDateKey(dateParam) >= earliestBookingKey ? new Date(bookingDateKey(dateParam) + 'T12:00:00') : null
   )
   const [category, setCategory] = useState<{ name: string; description?: string; bookableAfter?: string | null; bookableAfterMessage?: string | null } | null>(initialCategory)
   const [notFoundTriggered, setNotFoundTriggered] = useState(false)
@@ -150,7 +154,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
   useEffect(() => {
     if (!cartLoaded || restoredCartDate.current) return
     restoredCartDate.current = true
-    if (!dateParam && !selectedDate && cartEventDate && bookingDateKey(cartEventDate) >= nycCalendarDay()) {
+    if (!dateParam && !selectedDate && cartEventDate && bookingDateKey(cartEventDate) >= earliestBookingKey) {
       setSelectedDate(new Date(bookingDateKey(cartEventDate) + 'T12:00:00'))
       setBrowseWithoutDate(false)
     }
@@ -489,6 +493,7 @@ export default function CategoryClient({ slug, initialCategory, initialItems }: 
                 selectedDate={selectedDate}
                 onSelectDate={handleSelectDate}
                 closedDates={closedDates}
+                minDate={BOOKING_START}
               />
               <div className="text-center mt-4">
                 <button

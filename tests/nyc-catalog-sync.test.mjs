@@ -138,6 +138,13 @@ test('desired NYC item mirrors Syracuse fields; photo-less items stay unpublishe
   assert.equal(unknown.displayToCustomer, true)
 })
 
+test('catalog sync uses slug upserts so overlapping deploys cannot collide on creates', () => {
+  const engine = fs.readFileSync(new URL('../scripts/nyc-catalog-sync-engine.mjs', import.meta.url), 'utf8')
+  assert.match(engine, /tx\.category\.upsert\(\{\s*where: \{ slug: row\.category\.slug \}/)
+  assert.match(engine, /tx\.item\.upsert\(\{ where: \{ slug: desired\.slug \}/)
+  assert.doesNotMatch(engine, /await tx\.item\.create\(\{ data: \{ \.\.\.data, slug: desired\.slug/)
+})
+
 // ---------------------------------------------------------------------------
 // Full engine run against an in-memory database and a fake Syracuse API.
 
@@ -158,6 +165,13 @@ class FakeDb {
     return {
       findMany: async ({ select } = {}) => this.categories.map((row) => pickSelected(row, select)),
       create: async ({ data }) => { this.writes++; const row = { id: 'cat-' + data.slug, ...data }; this.categories.push(row); return row },
+      upsert: async ({ where, create, update }) => {
+        this.writes++
+        let row = this.categories.find((c) => c.slug === where.slug)
+        if (row) Object.assign(row, update)
+        else { row = { id: 'cat-' + create.slug, ...create }; this.categories.push(row) }
+        return row
+      },
       update: async ({ where, data }) => { this.writes++; const row = this.categories.find((c) => c.slug === where.slug); Object.assign(row, data); return row },
     }
   }
@@ -169,6 +183,13 @@ class FakeDb {
         return rows.map((row) => pickSelected(row, select))
       },
       create: async ({ data }) => { this.writes++; const row = { id: 'nyc-' + data.slug, suggestedAddonIds: [], ...data }; this.items.push(row); return row },
+      upsert: async ({ where, create, update }) => {
+        this.writes++
+        let row = this.items.find((r) => r.slug === where.slug)
+        if (row) Object.assign(row, update)
+        else { row = { id: 'nyc-' + create.slug, suggestedAddonIds: [], ...create }; this.items.push(row) }
+        return row
+      },
       update: async ({ where, data }) => {
         this.writes++
         const row = this.items.find((r) => r.slug === where.slug)

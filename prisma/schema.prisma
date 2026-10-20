@@ -116,9 +116,38 @@ model Driver {
   staffUser User? @relation("DriverStaffUser")
 }
 
+model StaffEmailNotification {
+  id String @id @default(cuid())
+  eventKey String @unique
+  kind String
+  orderId String?
+  subject String
+  html String @db.Text
+  status String @default("sending")
+  attempts Int @default(1)
+  provider String?
+  messageId String?
+  lastError String? @db.Text
+  sentAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([orderId, createdAt])
+}
+
 model Order {
   id String @id @default(cuid())
   orderNumber String @unique
+  emailDeliveryProvider String?
+  emailDeliveryMessageId String? @unique
+  emailDeliveryStatus String?
+  emailDeliveryRecipient String?
+  emailDeliverySubject String?
+  emailDeliveryLastEvent String?
+  emailDeliveryDetail String?
+  emailDeliverySentAt DateTime?
+  emailDeliveryUpdatedAt DateTime?
   customerId String
   customer Customer @relation(fields: [customerId], references: [id])
   status String @default("active")

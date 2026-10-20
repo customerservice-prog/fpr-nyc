@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { sendEmail, orderConfirmationEmail, paymentReceiptEmail } from '@/lib/email'
 import { formatDate } from '@/lib/utils'
 import { ownerNotificationRecipients } from '@/lib/orderLifecycleNotifications'
+import { sendStaffSalesAlert } from '@/lib/staffSalesAlerts'
 import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
 /** Email photo of an order line: the NYC photo proxy (never another store's image host). */
 function nycItemImage(item: { slug?: string | null; picture?: string | null } | null | undefined): string | null {
@@ -90,6 +91,28 @@ export async function finalizePayment(input: {
   })
   const { updated, isFirstPayment } = result
   if (result.duplicate) return updated
+
+  try {
+    const paymentRecord = stripePaymentId
+      ? await prisma.payment.findUnique({ where: { stripePaymentId } })
+      : await prisma.payment.findFirst({ where: { orderId, amount: paidAmount }, orderBy: { createdAt: 'desc' } })
+    if (paymentRecord) await sendStaffSalesAlert({
+      eventKey: 'payment:' + paymentRecord.id,
+      kind: 'payment',
+      orderId: updated.id,
+      orderNumber: updated.orderNumber,
+      customerName: [updated.customer?.firstName, updated.customer?.lastName].filter(Boolean).join(' '),
+      customerEmail: updated.customer?.email,
+      customerPhone: updated.customer?.phone,
+      eventDate: updated.eventDate,
+      totalAmount: updated.totalAmount,
+      amountPaid: updated.amountPaid,
+      paymentAmount: paidAmount,
+      balanceDue: updated.balanceDue,
+    })
+  } catch (alertError) {
+    console.error('[finalizePayment] Staff payment alert tracking failed:', alertError)
+  }
 
   if (result.overpaidBy > 0) {
     console.error(`[finalizePayment] Overpayment recorded for order ${orderId}: $${result.overpaidBy.toFixed(2)} (${stripePaymentId || 'manual'})`)

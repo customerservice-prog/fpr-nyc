@@ -114,6 +114,24 @@ export async function POST(
       return NextResponse.json({ error: 'The quote email could not be sent because outgoing email is not configured or was rejected. Copy the payment link below and send it to the customer instead.', payLink }, { status: 503 })
     }
 
+    try {
+      const delivery = result as { provider?: string; messageId?: string }
+      await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          emailDeliveryProvider: delivery.provider || null,
+          emailDeliveryMessageId: delivery.messageId || null,
+          emailDeliveryStatus: delivery.messageId ? 'sent' : 'sent_untracked',
+          emailDeliveryRecipient: toAddress,
+          emailDeliverySubject: emailContent.subject,
+          emailDeliverySentAt: new Date(),
+          emailDeliveryUpdatedAt: new Date(),
+        },
+      })
+    } catch (trackingError) {
+      console.error('Quote email sent but delivery tracking could not be saved:', trackingError)
+    }
+
 	if (!(result as { success: boolean }).success) {
 		console.error('Quote email failed to send:', (result as { error?: unknown }).error)
 		return NextResponse.json({ error: 'Failed to send email. Please check email configuration (EMAIL_USER/EMAIL_PASS) and try again.' }, { status: 500 })

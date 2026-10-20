@@ -24,8 +24,8 @@ export default function HomeBookingWidget() {
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 max-w-md mx-auto">
-      <h3 className="text-xl font-bold text-dark mb-4 text-center">Book Your Rentals Online</h3>
-      <BookingCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} closedDates={closedDates} />
+      <h3 className="text-xl font-bold text-dark mb-4 text-center">Book Your 2027 Event Online</h3>
+      <BookingCalendar selectedDate={selectedDate} onSelectDate={setSelectedDate} closedDates={closedDates} minDate={new Date(2027, 0, 1)} />
       <button
         onClick={handleContinue}
         disabled={!selectedDate}

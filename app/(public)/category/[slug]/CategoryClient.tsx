@@ -16,9 +16,9 @@ import { categorySearchName } from '@/lib/nycSearchReadiness'
 import { bookingDateKey } from '@/lib/rentsketchBooking'
 import { nycCalendarDay } from '@/lib/nycCustomerHelp'
 import { NYC_PUBLIC_BOOKING_START } from '@/lib/nycBookingWindow'
+import { ShoppingCart, CalendarDays, Pencil, Truck, MapPin } from 'lucide-react'
 
 const BOOKING_START = new Date(2027, 0, 1)
-import { ShoppingCart, CalendarDays, Pencil, Truck, MapPin } from 'lucide-react'
 
 const APPOINTMENT_SLOTS = [
   { value: 'morning', label: 'Morning (9am - 12pm)' },

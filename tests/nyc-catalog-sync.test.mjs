@@ -2,6 +2,7 @@
 // (run against an in-memory database and a fake Syracuse API; no network, no DB).
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
 import {
   catalogParityReport,
   cleanNycPrice,

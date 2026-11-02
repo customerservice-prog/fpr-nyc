@@ -102,6 +102,7 @@ test('all scheduled NYC endpoint workflows use short-lived GitHub OIDC auth',()=
   assert.ok(auth.includes('token === legacySecret'))
 
   const activeRoutes={
+    'app/api/cron/balance-reminder/route.ts':'.github/workflows/balance-reminder-cron.yml',
     'app/api/cron/thank-you/route.ts':'.github/workflows/thank-you-cron.yml',
     'app/api/cron/pre-payment-reminders/route.ts':'.github/workflows/pre-payment-reminders-cron.yml',
     'app/api/cron/incomplete-orders/route.ts':'.github/workflows/incomplete-orders-cron.yml',
@@ -114,7 +115,6 @@ test('all scheduled NYC endpoint workflows use short-lived GitHub OIDC auth',()=
   }
 
   for(const route of [
-    'app/api/cron/balance-reminder/route.ts',
     'app/api/cron/pre-rental-reminder/route.ts',
     'app/api/cron/one-year-reminder/route.ts',
   ]){

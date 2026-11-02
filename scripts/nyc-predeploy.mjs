@@ -39,6 +39,11 @@ export function runPredeploy(steps = PREDEPLOY_STEPS, run = spawnSync) {
   return 0
 }
 
+// The catalog engine already applies and verifies the NYC price rules and Syracuse
+// quantities in one transaction. Do not reset the independent deposit rule, and do
+// not repeat the redundant separate price and quantity scripts on every release.
+export const REMINDER_HOTFIX_STEPS = [PREDEPLOY_STEPS[0], PREDEPLOY_STEPS[1], PREDEPLOY_STEPS[5]]
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  process.exitCode = runPredeploy()
+  process.exitCode = runPredeploy(REMINDER_HOTFIX_STEPS)
 }

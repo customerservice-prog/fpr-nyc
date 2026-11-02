@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: '24'
       - name: Test reminder calendar and eligibility
-        run: node --test tests/nyc-balance-reminder-policy.test.mjs tests/nyc-resend-idempotency.test.mjs
+        run: node --test tests/nyc-balance-reminder-policy.test.mjs tests/nyc-resend-idempotency.test.mjs tests/nyc-balance-reminder-route.test.mjs tests/nyc-reminder-hotfix-deploy.test.mjs
       - uses: actions/setup-node@v4
         with:
           node-version: '20'

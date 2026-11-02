@@ -39,6 +39,11 @@ export function runPredeploy(steps = PREDEPLOY_STEPS, run = spawnSync) {
   return 0
 }
 
+// This isolated reminder hotfix deliberately preserves the current catalog,
+// prices, quantities and deposit settings. Normal production branch deployments
+// retain their original predeploy steps. Schema migration and payment checks remain.
+export const REMINDER_HOTFIX_STEPS = [PREDEPLOY_STEPS[0], PREDEPLOY_STEPS[5]]
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  process.exitCode = runPredeploy()
+  process.exitCode = runPredeploy(REMINDER_HOTFIX_STEPS)
 }

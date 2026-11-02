@@ -1,87 +1,57 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
+import { isAuthorizedCronRequest } from '@/lib/cronAuth'
 import { prisma } from '@/lib/prisma'
 import { sendEmail, balanceReminderEmail } from '@/lib/email'
 import { formatDate } from '@/lib/utils'
+import { isNycPublicBookingDateOpen } from '@/lib/nycBookingWindow'
+import { balanceReminderWindow, isBalanceReminderEligible } from '@/lib/nycBalanceReminder'
 
-// Automatic 3-day-before-event Balance Reminder email.
-// Runs on a schedule (see .github/workflows/balance-reminder-cron.yml).
-// Only sends if the "Balance Reminder Email" automatic message is enabled in admin settings.
 export async function GET(request: NextRequest) {
-  // EMERGENCY KILL SWITCH - automatic sending paused by owner request, do not remove without explicit approval
-  return NextResponse.json({ disabled: true, message: 'This automated email is temporarily disabled.' })
-
-  const authHeader = request.headers.get('authorization')
-  if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!(await isAuthorizedCronRequest(request, '.github/workflows/balance-reminder-cron.yml'))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const origin = process.env.NEXTAUTH_URL || request.nextUrl.origin
+  const setting = await prisma.automaticMessage.findUnique({ where: { id: 'automsg_balance_reminder' } })
+  if (!setting?.enabled) return NextResponse.json({ skipped: true, reason: 'Balance reminder disabled in settings' })
 
-  const setting = await prisma.automaticMessage.findFirst({
-    where: { id: 'automsg_balance_reminder' },
-  })
-  if (!setting?.enabled) {
-    return NextResponse.json({ skipped: true, reason: 'Balance Reminder automatic message is disabled' })
-  }
-
-  const now = new Date()
-  const startOfWindow = new Date(now)
-  startOfWindow.setDate(startOfWindow.getDate() + 3)
-  startOfWindow.setHours(0, 0, 0, 0)
-  const endOfWindow = new Date(startOfWindow)
-  endOfWindow.setHours(23, 59, 59, 999)
-
+  // Fail closed while deployment, provider behavior, and duplicate prevention are validated.
+  const dryRun = process.env.NYC_BALANCE_REMINDERS_ENABLED !== 'true' || request.nextUrl.searchParams.get('dryRun') === 'true'
+  const { start, end } = balanceReminderWindow(new Date())
   const orders = await prisma.order.findMany({
-    where: {
-      eventDate: { gte: startOfWindow, lte: endOfWindow },
-      status: { not: 'canceled' },
-      
-      balanceReminderSentAt: null,
-    },
+    where: { eventDate: { gte: start, lt: end }, status: 'active', followUpsPaused: false, balanceReminderSentAt: null },
     include: { customer: true },
   })
 
-  const url = new URL(request.url)
-  const dryRun = url.searchParams.get('dryRun') === 'true'
+  let eligible = 0, sent = 0, failed = 0
+  for (const order of orders) {
+    if (!isBalanceReminderEligible(order, isNycPublicBookingDateOpen(order.eventDate))) continue
+    const email = order.customer?.email?.trim() || ''
+    if (!email || email.includes('@imported.friendlypartyrental.local') || email.startsWith('no-email-')) continue
+    eligible++
+    if (dryRun) continue
 
-  const results: any[] = []
-
-  for (const order of orders.filter((o) => Math.max((o.totalAmount || 0) - (o.amountPaid || 0), 0) > 0)) {
-    const email = order.customer?.email || ''
-    if (!email || email.includes('@imported.friendlypartyrental.local') || email.startsWith('no-email-')) {
-      results.push({ orderId: order.id, orderNumber: order.orderNumber, skipped: true, reason: 'invalid or placeholder email' })
-      continue
-    }
-
-    const payLink = `${origin}/pay/${order.id}`
-    const customerName = `${order.customer.firstName} ${order.customer.lastName}`
-    const eventDate = formatDate(order.eventDate)
-
-    const emailContent = balanceReminderEmail({
+    const payLink = `${process.env.NEXTAUTH_URL || request.nextUrl.origin}/pay/${order.id}`
+    const message = balanceReminderEmail({
       orderNumber: order.orderNumber,
-      customerName,
-      eventDate,
+      customerName: `${order.customer.firstName} ${order.customer.lastName}`,
+      eventDate: formatDate(order.eventDate),
       eventAddress: order.eventAddress,
       eventCity: order.eventCity,
       eventState: order.eventState,
       eventZip: order.eventZip,
-      balanceDue: Math.max((order.totalAmount || 0) - (order.amountPaid || 0), 0),
+      balanceDue: Math.max(order.totalAmount - order.amountPaid, 0),
       payLink,
     })
-
-    if (!dryRun) {
-      await sendEmail({ to: email, subject: emailContent.subject, html: emailContent.html })
-
-      await prisma.order.update({
-        where: { id: order.id },
-        data: { balanceReminderSentAt: new Date() },
-      })
+    try {
+      await sendEmail({ to: email, subject: message.subject, html: message.html })
+      await prisma.order.update({ where: { id: order.id }, data: { balanceReminderSentAt: new Date() } })
+      sent++
+    } catch (error) {
+      console.error('NYC balance reminder failed for order', order.id, error instanceof Error ? error.message : 'Unknown error')
+      failed++
     }
-
-    results.push({ orderId: order.id, orderNumber: order.orderNumber, sent: !dryRun, dryRun, to: email })
   }
-
-  return NextResponse.json({ dryRun, processed: results.length, results })
+  return NextResponse.json({ dryRun, eligible, sent, failed }, { status: failed ? 500 : 200 })
 }

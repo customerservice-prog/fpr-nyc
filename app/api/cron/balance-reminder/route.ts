@@ -16,7 +16,9 @@ export async function GET(request: NextRequest) {
   const setting = await prisma.automaticMessage.findUnique({ where: { id: 'automsg_balance_reminder' } })
   if (!setting?.enabled) return NextResponse.json({ skipped: true, reason: 'Balance reminder disabled in settings' })
 
-  // Fail closed while deployment, provider behavior, and duplicate prevention are validated.
+  // Do not set NYC_BALANCE_REMINDERS_ENABLED=true until provider-level idempotency,
+  // concurrent retries, and the production build have been tested. The sent-at
+  // field is written after provider acceptance and alone cannot prevent duplicates.
   const dryRun = process.env.NYC_BALANCE_REMINDERS_ENABLED !== 'true' || request.nextUrl.searchParams.get('dryRun') === 'true'
   const { start, end } = balanceReminderWindow(new Date())
   const orders = await prisma.order.findMany({

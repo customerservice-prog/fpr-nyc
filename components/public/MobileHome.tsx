@@ -16,7 +16,7 @@ import styles from './MobileHome.module.css'
 
 interface MobileCategory { slug: string; name: string; href: string; image?: string }
 interface MobilePopularItem { id: string; name: string; slug: string | null; cost: number; picture: string | null; status?: string | null; category?: { name: string | null } | null }
-interface HomeHero {
+export interface HomeHero {
   mobileImageUrl?: string | null
   desktopImageUrl?: string | null
   focalX?: number

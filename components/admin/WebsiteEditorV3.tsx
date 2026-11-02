@@ -38,7 +38,7 @@ import {
 import type { HomeHero } from '@/components/public/MobileHome'
 import ResponsiveHome from '@/components/public/ResponsiveHome'
 import WebsitePageStudio from '@/components/admin/WebsitePageStudio'
-import HomeSeo from '@/components/public/HomeSeo'
+import NycHomeSeo from '@/components/public/NycHomeSeo'
 import Header from '@/components/public/Header'
 import MobileHeader from '@/components/public/MobileHeader'
 import Footer, { DEFAULT_FOOTER_LINKS, type FooterLink } from '@/components/public/Footer'
@@ -1923,7 +1923,7 @@ export default function WebsiteEditorV3() {
                       {...data}
                       hero={draft.hero}
                       content={draft.content}
-                      seoSection={<HomeSeo />}
+                      seoSection={<NycHomeSeo />}
                       device={device}
                       heroEditMode={{
                         selected: selection.kind === 'hero' ? selection.target : null,

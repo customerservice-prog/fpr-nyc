@@ -1,7 +1,7 @@
 name: NYC balance reminder repair checks
 on:
   push:
-    branches: [hotfix/nyc-reminder-from-live]
+    branches: [fix/nyc-safe-catalog-recovery]
 permissions:
   contents: read
 jobs:
@@ -25,6 +25,8 @@ jobs:
           node-version: '20'
           cache: npm
       - run: npm ci --legacy-peer-deps
+      - name: Test catalog synchronization without production data
+        run: node --test tests/nyc-catalog-sync.test.mjs
       - name: Check TypeScript
         run: npx tsc --noEmit
       - name: Build application without connecting to production

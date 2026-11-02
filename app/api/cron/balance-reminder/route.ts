@@ -16,9 +16,8 @@ export async function GET(request: NextRequest) {
   const setting = await prisma.automaticMessage.findUnique({ where: { id: 'automsg_balance_reminder' } })
   if (!setting?.enabled) return NextResponse.json({ skipped: true, reason: 'Balance reminder disabled in settings' })
 
-  // Do not set NYC_BALANCE_REMINDERS_ENABLED=true until provider-level idempotency,
-  // concurrent retries, and the production build have been tested. The sent-at
-  // field is written after provider acceptance and alone cannot prevent duplicates.
+  // Remain in dry-run mode until the production build and end-to-end email path
+  // have been tested. Idempotency is required and SMTP fallback is disabled.
   const dryRun = process.env.NYC_BALANCE_REMINDERS_ENABLED !== 'true' || request.nextUrl.searchParams.get('dryRun') === 'true'
   const { start, end } = balanceReminderWindow(new Date())
   const orders = await prisma.order.findMany({
@@ -47,7 +46,7 @@ export async function GET(request: NextRequest) {
       payLink,
     })
     try {
-      await sendEmail({ to: email, subject: message.subject, html: message.html })
+      await sendEmail({ to: email, subject: message.subject, html: message.html, idempotencyKey: `nyc-balance-reminder/${order.id}/${order.eventDate.toISOString().slice(0, 10)}` })
       await prisma.order.update({ where: { id: order.id }, data: { balanceReminderSentAt: new Date() } })
       sent++
     } catch (error) {

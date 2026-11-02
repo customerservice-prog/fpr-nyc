@@ -68,12 +68,14 @@ async function sendWithResend({
   html,
   text,
   replyTo,
+  idempotencyKey,
 }: {
   to: string
   subject: string
   html: string
   text: string
   replyTo: string
+  idempotencyKey?: string
 }) {
   const apiKey = String(process.env.RESEND_API_KEY || '').trim()
   const from = String(process.env.RESEND_FROM || '').trim()
@@ -84,6 +86,7 @@ async function sendWithResend({
     headers: {
       Authorization: 'Bearer ' + apiKey,
       'Content-Type': 'application/json',
+      ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
     },
     body: JSON.stringify({
       from: 'Friendly Party Rental NYC - Riverdale <' + (from.match(/<([^<>]+)>$/)?.[1] || from) + '>',
@@ -115,12 +118,14 @@ export async function sendEmail({
   html,
   text,
   replyTo,
+  idempotencyKey,
 }: {
   to: string
   subject: string
   html: string
   text?: string
   replyTo?: string
+  idempotencyKey?: string
 }) {
   const recipient = normalizedRecipient(to)
   const typoRecipient = likelyMistypedRecipient(recipient)
@@ -144,8 +149,11 @@ export async function sendEmail({
       subject: finalSubject,
       html: finalHtml,
       text: finalText,
+      idempotencyKey,
     })
     if (resend) return resend
+    // SMTP has no equivalent idempotency guarantee. Fail closed for protected sends.
+    if (idempotencyKey) throw new Error('Idempotent email requires Resend configuration')
 
     const delivery = await transporter.sendMail({
       from: { name: BUSINESS.name + ' - Riverdale', address: (process.env.EMAIL_FROM || process.env.EMAIL_USER || NYC_EMAIL_ADDRESS).replace(/^.*<([^>]+)>.*$/, '$1').trim() },

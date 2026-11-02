@@ -1,0 +1,31 @@
+name: NYC balance reminder repair checks
+on:
+  push:
+    branches: [hotfix/nyc-reminder-from-live]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://user:pass@localhost:5432/db
+      PUBLIC_INDEXABLE: 'false'
+      NYC_DELIVERY_FEES_JSON: '{}'
+      NYC_BALANCE_REMINDERS_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Test reminder calendar and eligibility
+        run: node --test tests/nyc-balance-reminder-policy.test.mjs tests/nyc-resend-idempotency.test.mjs
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - name: Check TypeScript
+        run: npx tsc --noEmit
+      - name: Build application without connecting to production
+        run: npm run build

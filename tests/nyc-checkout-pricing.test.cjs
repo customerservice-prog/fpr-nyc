@@ -48,7 +48,7 @@ function checkoutServerFixture(catalog) {
       depositRule: { findFirst: async () => ({ type: 'percentage', amount: 25 }) },
     } },
     '@/lib/delivery': { getDeliveryQuote: async () => ({ zip: '10471', fee: 100 }) },
-    '@/lib/utils': { BUSINESS: { phone: '718-283-4593' } },
+    '@/lib/utils': { BUSINESS: { phone: '917-274-7857' } },
   }
   const policy = { minimumOrderSubtotal: 750, approvedOn: '2026-10-01' }
   return loadTs('lib/nycCheckoutPricingServer.ts', mocks, { env: { NYC_CHECKOUT_POLICY_JSON: JSON.stringify(policy) } })
@@ -157,7 +157,7 @@ behavior('sales tax: ZIPs shared with the City of Yonkers are held for address r
     const result = tax.resolveNycSalesTax(zip)
     assert.equal(result.status, 'needs_address_review', zip)
     assert.deepEqual(result.candidates.map(c => c.id).sort(), ['westchester-outside-cities', 'yonkers'])
-    assert.match(tax.salesTaxUnavailableMessage(result, '718-283-4593'), /Yonkers/)
+    assert.match(tax.salesTaxUnavailableMessage(result, '917-274-7857'), /Yonkers/)
   }
   for (const value of ['10001', '13212', '29601', '', null, 'abcde', '1047']) {
     assert.equal(tax.resolveNycSalesTax(value).status, 'unknown_zip', String(value))

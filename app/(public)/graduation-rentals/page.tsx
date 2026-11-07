@@ -70,7 +70,7 @@ export default async function GraduationRentalsPage() {
         </article>}
       </div>
 
-      <p className="text-body text-sm mb-10">Need a different guest count? Call us at <a href="tel:718-283-4593" className="text-secondary underline">718-283-4593</a> and we&#39;ll help you size a tent and table/chair count for your graduation party. You can also browse <Link href="/category/party-rental-packages" className="text-secondary underline">all package deals</Link>.</p>
+      <p className="text-body text-sm mb-10">Need a different guest count? Call us at <a href="tel:917-274-7857" className="text-secondary underline">917-274-7857</a> and we&#39;ll help you size a tent and table/chair count for your graduation party. You can also browse <Link href="/category/party-rental-packages" className="text-secondary underline">all package deals</Link>.</p>
 
       <section className="mb-10" aria-labelledby="graduation-planning-heading">
         <h2 id="graduation-planning-heading" className="font-bold text-dark mb-4 text-xl">Plan the space before you book</h2>

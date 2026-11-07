@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const raw = await request.text()
     if (raw.length > 16000) return NextResponse.json({ error: 'Your inquiry is too long.' }, { status: 413 })
     const body = JSON.parse(raw)
-    if (typeof body?.website === 'string' && body.website.trim()) return NextResponse.json({ error: 'Please call 718-283-4593 to discuss your event.' }, { status: 400 })
+    if (typeof body?.website === 'string' && body.website.trim()) return NextResponse.json({ error: 'Please call 917-274-7857 to discuss your event.' }, { status: 400 })
     const inquiry = parsePlanningInquiry(body)
     const saved = await savePlanningInquiry(prisma, inquiry)
     if (saved.created) {
@@ -40,6 +40,6 @@ export async function POST(request: NextRequest) {
     if (error instanceof SyntaxError) return NextResponse.json({ error: 'Please check your form and try again.' }, { status: 400 })
     if (error instanceof PlanningInquiryError) return NextResponse.json({ error: error.message }, { status: error.status })
     console.error('Planning inquiry could not be saved.')
-    return NextResponse.json({ error: 'Your inquiry could not be saved. Please try again or call 718-283-4593.' }, { status: 500 })
+    return NextResponse.json({ error: 'Your inquiry could not be saved. Please try again or call 917-274-7857.' }, { status: 500 })
   }
 }

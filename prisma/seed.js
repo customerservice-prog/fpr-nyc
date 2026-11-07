@@ -189,7 +189,7 @@ async function main() {
 
   const companyData = {
     businessName: 'Friendly Party Rental NYC',
-    phone: '718-283-4593',
+    phone: '917-274-7857',
     email: 'friendlypartyrentalnyc@gmail.com',
     address: '',
     city: 'Riverdale',

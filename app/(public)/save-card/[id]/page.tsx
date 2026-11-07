@@ -125,7 +125,7 @@ export default function SaveCardPage({ params }: { params: Promise<{ id: string 
           )}
         </>
       )}
-      <p className="text-sm text-body">Need help with this NYC reservation? <a href="tel:7182834593" className="text-secondary underline">Call 718-283-4593</a>.</p>
+      <p className="text-sm text-body">Need help with this NYC reservation? <a href="tel:9172747857" className="text-secondary underline">Call 917-274-7857</a>.</p>
     </main>
   )
 }

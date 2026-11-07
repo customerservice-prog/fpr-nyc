@@ -15,15 +15,15 @@ interface ChatMessage {
 }
 
 const FAQ_DATA: FaqEntry[] = [
-  { q: 'How do I book a rental?', a: 'New Riverdale / NYC online reservations are open for 2027 events only. Browse our catalog, choose a date on or after January 1, 2027, and complete checkout online. You can also call 718-283-4593 for help.' },
+  { q: 'How do I book a rental?', a: 'New Riverdale / NYC online reservations are open for 2027 events only. Browse our catalog, choose a date on or after January 1, 2027, and complete checkout online. You can also call 917-274-7857 for help.' },
   { q: 'What can I rent from you?', a: 'We carry tents, tables and chairs, linens, lighting, bounce houses and waterslides, concessions and beverage service, dance floors, generators, photo booths, yard games, heating and cooling, and full wedding and party packages.' },
-  { q: 'Do I need to pay a deposit?', a: 'Any deposit due at booking is shown at checkout before you pay. Call 718-283-4593 with questions.' },
+  { q: 'Do I need to pay a deposit?', a: 'Any deposit due at booking is shown at checkout before you pay. Call 917-274-7857 with questions.' },
   { q: 'What payment methods do you accept?', a: 'We accept all major credit and debit cards through our secure online checkout.' },
   { q: 'When is the remaining balance due?', a: 'The balance is due before delivery. Automatic reminders are sent by email as your event approaches.' },
   { q: 'Is there sales tax on my order?', a: 'Applicable taxes are calculated automatically at checkout based on your order and event location.' },
   { q: 'Do you have coupons or promo codes?', a: 'Yes, if you have a coupon code you can enter it at checkout to apply your discount.' },
-  { q: 'Do you offer discounts for multi-day rentals?', a: 'Multi-day pricing, when it is offered online, is shown at checkout. Call 718-283-4593 for a multi-day quote.' },
-  { q: 'Can I request overnight or exact delivery times?', a: 'The delivery and pickup time options available online, and any fee for them, are shown when you schedule your event. Call 718-283-4593 for other timing requests.' },
+  { q: 'Do you offer discounts for multi-day rentals?', a: 'Multi-day pricing, when it is offered online, is shown at checkout. Call 917-274-7857 for a multi-day quote.' },
+  { q: 'Can I request overnight or exact delivery times?', a: 'The delivery and pickup time options available online, and any fee for them, are shown when you schedule your event. Call 917-274-7857 for other timing requests.' },
   { q: 'What if I need to cancel or reschedule?', a: 'Deposits are non-refundable, but rainchecks are valid for one year.' },
   { q: 'How far in advance should I book?', a: 'As early as possible. Summer weekends often book 4-8 weeks out.' },
   { q: 'Can I modify my order after booking?', a: 'Yes, with 48-72 hours notice.' },
@@ -44,7 +44,7 @@ const FAQ_DATA: FaqEntry[] = [
   { q: 'Can you set up at parks?', a: 'Yes. Permits may be required for park setups, and the customer is responsible for obtaining them.' },
   { q: 'What surfaces can you set up on?', a: 'We can set up on grass, pavement, turf, gravel, or concrete.' },
   { q: 'Do I need a permit for a backyard tent?', a: 'Usually not for residential setups. Large tents at commercial venues may require permits.' },
-  { q: 'Can you do a free yard assessment?', a: 'Yes! Call 718-283-4593 to schedule one.' },
+  { q: 'Can you do a free yard assessment?', a: 'Yes! Call 917-274-7857 to schedule one.' },
   ]
 
 const QUICK_QUESTIONS = [
@@ -90,7 +90,7 @@ async function findItemAnswer(userText: string, userTokens: Set<string>): Promis
     if (!item || typeof item.cost !== 'number' || !Number.isFinite(item.cost) || item.cost <= 0) return null
     const price = '$' + item.cost.toFixed(2).replace(/\.00$/, '')
     const categoryPart = item.category?.name ? ` (${item.category.name})` : ''
-    return `Yes! We carry ${item.name}${categoryPart} starting at ${price}. Check availability for your date on our booking calendar, or call 718-283-4593.`
+    return `Yes! We carry ${item.name}${categoryPart} starting at ${price}. Check availability for your date on our booking calendar, or call 917-274-7857.`
   } catch {
     return null
   }
@@ -99,7 +99,7 @@ async function findItemAnswer(userText: string, userTokens: Set<string>): Promis
 async function findBestAnswer(userText: string): Promise<string> {
   const userTokens = new Set(tokenize(userText))
   if (userTokens.size === 0) {
-    return "I'm not sure I understood that. Could you rephrase your question, or call us at 718-283-4593?"
+    return "I'm not sure I understood that. Could you rephrase your question, or call us at 917-274-7857?"
   }
 
   const itemAnswer = await findItemAnswer(userText, userTokens)
@@ -130,7 +130,7 @@ async function findBestAnswer(userText: string): Promise<string> {
     return bestEntry.a
   }
 
-  return "I don't have an exact answer for that, but our team can help! Call or text 718-283-4593, or visit our Contact Us page and we'll get right back to you."
+  return "I don't have an exact answer for that, but our team can help! Call or text 917-274-7857, or visit our Contact Us page and we'll get right back to you."
 }
 
 export default function ChatWidget() {

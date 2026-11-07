@@ -22,8 +22,9 @@ SET "phone" = '917-274-7857', "updatedAt" = NOW()
 WHERE "phone" IS DISTINCT FROM '917-274-7857';
 
 DO $body$
-DECLARE rec record;
-DECLARE statement text;
+DECLARE
+  rec record;
+  statement text;
 BEGIN
   FOR rec IN
     SELECT * FROM (VALUES

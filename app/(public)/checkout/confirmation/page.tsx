@@ -15,7 +15,7 @@ export default function ConfirmationPage() {
       try {
         const proof = JSON.parse(sessionStorage.getItem('order_confirmation') || 'null')
         if (!proof || typeof proof.orderId !== 'string' || typeof proof.stripePaymentId !== 'string') {
-          if (active) setMessage('No verified payment confirmation was found in this tab. Please check your receipt or contact us at 718-283-4593.')
+          if (active) setMessage('No verified payment confirmation was found in this tab. Please check your receipt or contact us at 917-274-7857.')
           return
         }
         const response = await fetch('/api/orders/' + encodeURIComponent(proof.orderId) + '/confirm-payment', {
@@ -34,7 +34,7 @@ export default function ConfirmationPage() {
         if (!active) return
         setReceipt(data.receipt)
       } catch {
-        if (active) setMessage('We could not load your verified payment receipt. Please contact us at 718-283-4593 before making another payment.')
+        if (active) setMessage('We could not load your verified payment receipt. Please contact us at 917-274-7857 before making another payment.')
       }
     }
     void verifyReceipt()
@@ -44,7 +44,7 @@ export default function ConfirmationPage() {
   if (!receipt) return <div className="max-w-2xl mx-auto px-4 py-12 text-center">
     <h1 className="mb-4 text-2xl font-bold text-dark">Payment Confirmation</h1>
     <p role="status" className="text-body">{message}</p>
-    <a href="tel:7182834593" className="mt-4 block text-secondary underline">Call the NYC team: 718-283-4593</a>
+    <a href="tel:9172747857" className="mt-4 block text-secondary underline">Call the NYC team: 917-274-7857</a>
     <Link href="/" className="btn-primary inline-block mt-4">Return Home</Link>
   </div>
 
@@ -58,7 +58,7 @@ export default function ConfirmationPage() {
       <p className="text-body text-sm mb-4">Please review and sign your rental contract so we can confirm your delivery.</p>
       <Link href={'/contract/' + receipt.orderId} className="btn-primary inline-block">View &amp; Sign Your Contract</Link>
     </div>
-    <p className="text-body text-sm mb-8">Questions? Call us at <a href="tel:718-283-4593" className="text-secondary">718-283-4593</a> or email <a href="mailto:friendlypartyrentalnyc@gmail.com?subject=%5BNYC%20%2F%20Riverdale%5D%20order%20question" className="text-secondary">friendlypartyrentalnyc@gmail.com</a>.</p>
+    <p className="text-body text-sm mb-8">Questions? Call us at <a href="tel:917-274-7857" className="text-secondary">917-274-7857</a> or email <a href="mailto:friendlypartyrentalnyc@gmail.com?subject=%5BNYC%20%2F%20Riverdale%5D%20order%20question" className="text-secondary">friendlypartyrentalnyc@gmail.com</a>.</p>
     <Link href="/" className="btn-primary inline-block">Return Home</Link>
   </div>
 }

@@ -29,7 +29,7 @@ export default async function PayNowPage({
     <div className="max-w-2xl mx-auto px-4 py-12 text-center">
       <h1 className="text-2xl font-bold text-dark mb-4">Link Not Found</h1>
       <p className="text-body">
-        This payment link is invalid or has expired. Please contact us at <a href="tel:7182834593" className="text-secondary underline">718-283-4593</a>.
+        This payment link is invalid or has expired. Please contact us at <a href="tel:9172747857" className="text-secondary underline">917-274-7857</a>.
       </p>
     </div>
   )

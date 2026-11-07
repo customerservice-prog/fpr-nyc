@@ -78,7 +78,7 @@ export default function DeliveryFeeChecker() {
           <p id="delivery-estimate-help" className={styles.estimatorHelp}>Uses the same ZIP-based estimate as checkout. No booking or account needed.</p>
         </form>
         <div aria-live="polite" aria-atomic="true">
-          {error && <div role="alert" className={styles.estimateError}><p>{error}</p><a href="tel:+17182834593">Call 718-283-4593</a></div>}
+          {error && <div role="alert" className={styles.estimateError}><p>{error}</p><a href="tel:+19172747857">Call 917-274-7857</a></div>}
           {quote && <div className={styles.estimateResult}>
             <div className={styles.resultTop}><div><p className={styles.resultLabel}><CheckCircle2 size={16} aria-hidden="true" /> Estimated delivery / travel fee</p><p className={styles.resultZip}>For ZIP {quote.zip}</p></div><strong className={styles.resultPrice}>${quote.fee.toFixed(2)}</strong></div>
             <p className={styles.resultNote}>Delivery only—warehouse pickup is not available. Rental charges, tax and optional services are separate. Confirm your event details and total at checkout.</p>

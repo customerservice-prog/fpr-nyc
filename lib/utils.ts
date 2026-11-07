@@ -73,8 +73,8 @@ export function parseAmount(value: string | number): number {
 export const BUSINESS = {
   name: 'Friendly Party Rental NYC',
   legalName: 'Friendly Party Rental L.L.C.',
-  phone: '718-283-4593',
-  text: '718-283-4593',
+  phone: '917-274-7857',
+  text: '917-274-7857',
   email: 'friendlypartyrentalnyc@gmail.com',
   emailHref: 'mailto:friendlypartyrentalnyc@gmail.com?subject=%5BNYC%20%2F%20Riverdale%5D%20rental%20inquiry',
   address: '',

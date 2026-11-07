@@ -26,13 +26,13 @@ test('inherited catalog and saved website contact links resolve to the Riverdale
   const { localizeNycCatalogText, localizeNycContactText } = await import('../lib/nycCatalogCore.mjs')
   const html = '<a href="tel:+13158841498">(315) 884-1498</a> <a href="sms:3158841498">Text</a> <a href="mailto:customerservice@friendlypartyrental.com?subject=%5BNYC%20%2F%20Downstate%5D">Email</a>'
   const localized = localizeNycContactText(html)
-  assert.match(localized, /tel:\+17182834593/)
-  assert.match(localized, /sms:\+17182834593/)
-  assert.match(localized, /718-283-4593/)
+  assert.match(localized, /tel:\+19172747857/)
+  assert.match(localized, /sms:\+19172747857/)
+  assert.match(localized, /917-274-7857/)
   assert.match(localized, /mailto:friendlypartyrentalnyc@gmail.com/)
   assert.doesNotMatch(localized, /315|Downstate/)
   assert.equal(localizeNycContactText(localized), localized)
-  assert.match(localizeNycCatalogText('Call 315-884-1498 for table rentals in Syracuse.'), /718-283-4593.*Riverdale/)
+  assert.match(localizeNycCatalogText('Call 315-884-1498 for table rentals in Syracuse.'), /917-274-7857.*Riverdale/)
 })
 
 test('contact form sends staff notification directly to daily inbox and keeps customer Reply-To', async () => {
@@ -70,7 +70,7 @@ test('Resend preserves verified sender address and labels all NYC mail as Riverd
   assert.equal(envelope.subject, '[NYC / Riverdale] Order received')
   assert.deepEqual(envelope.reply_to, ['friendlypartyrentalnyc@gmail.com'])
   assert.match(envelope.html, /NYC \/ RIVERDALE LOCATION/)
-  assert.match(envelope.html, /718-283-4593/)
+  assert.match(envelope.html, /917-274-7857/)
   assert.match(envelope.text, /^NYC \/ RIVERDALE LOCATION/)
 })
 

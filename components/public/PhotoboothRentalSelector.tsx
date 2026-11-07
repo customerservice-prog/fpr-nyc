@@ -260,7 +260,7 @@ export default function PhotoboothRentalSelector({
     },
   ]
 
-  if (!rentals.length) return <div className={styles.empty}><p>There are no Photo Booth rental packages available for this date. Try another date or call 718-283-4593 for help.</p><button type="button" className={styles.bookButton} onClick={onChooseDate}>Choose Another Date</button></div>
+  if (!rentals.length) return <div className={styles.empty}><p>There are no Photo Booth rental packages available for this date. Try another date or call 917-274-7857 for help.</p><button type="button" className={styles.bookButton} onClick={onChooseDate}>Choose Another Date</button></div>
 
   return (
     <div className={styles.root} data-photobooth-redesign="nyc-main-design-parity">
@@ -361,7 +361,7 @@ export default function PhotoboothRentalSelector({
           <strong>{customizationPrice !== null ? fmt(customizationPrice) : 'Ask for pricing'}</strong>
           {canAddCustomLayout
             ? <button type="button" disabled={!loaded} onClick={toggleCustomDesign} className={customInCart ? styles.customActive : ''}>{customInCart ? 'Remove from Cart' : 'Add Custom Design'} <WandSparkles size={17}/></button>
-            : <a href="sms:7182834593" className={styles.customRequest}>Ask About Custom Design <WandSparkles size={17}/></a>}
+            : <a href="sms:9172747857" className={styles.customRequest}>Ask About Custom Design <WandSparkles size={17}/></a>}
           {!canAddCustomLayout && <small>Contact us to request your custom image layout.</small>}
         </div>
       </section>
@@ -378,7 +378,7 @@ export default function PhotoboothRentalSelector({
             ? <button type="button" disabled={!loaded} onClick={togglePhysicalBackdrop}>
                 {backdropInCart ? 'Remove Backdrop' : service === 'attended' ? 'Add Backdrop to Cart' : 'Choose Attended Rental'}
               </button>
-            : <a href={'sms:7182834593?body=' + encodeURIComponent('Hi! Is a custom physical Photo Booth backdrop available for my Riverdale event?')}>Ask About Backdrop</a>}
+            : <a href={'sms:9172747857?body=' + encodeURIComponent('Hi! Is a custom physical Photo Booth backdrop available for my Riverdale event?')}>Ask About Backdrop</a>}
           <small>Separate from custom printed photo artwork.</small>
         </div>
       </section>

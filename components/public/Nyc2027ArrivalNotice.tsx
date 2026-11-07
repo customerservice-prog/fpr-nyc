@@ -118,9 +118,9 @@ export default function Nyc2027ArrivalNotice() {
           </div>
 
           <div className="rounded-2xl border border-slate-200 px-4 py-3 text-center text-sm text-slate-700">
-            Questions? <a href="tel:7182834593" className="font-bold text-blue-700 underline">Call 718-283-4593</a>
+            Questions? <a href="tel:9172747857" className="font-bold text-blue-700 underline">Call 917-274-7857</a>
             <span className="mx-2 text-slate-300">|</span>
-            <a href="sms:7182834593" className="font-bold text-blue-700 underline">Text us</a>
+            <a href="sms:9172747857" className="font-bold text-blue-700 underline">Text us</a>
           </div>
 
           <p className="text-center text-xs leading-5 text-slate-500">

@@ -33,7 +33,7 @@ test('category pages target the real NYC and Lower Westchester delivery footprin
   for(const name of ['TentRentalPaidSearchHero','TableChairPaidSearchHero','BounceHousePaidSearchHero']) {
     const hero=read(`components/public/${name}.tsx`)
     assert.match(hero,/Riverdale/)
-    assert.match(hero,/718-283-4593/)
+    assert.match(hero,/917-274-7857/)
     assert.doesNotMatch(hero,/Syracuse|315-/,name)
   }
   assert.match(guide,/Riverdale.*Bronx.*Lower Westchester/)

@@ -162,7 +162,7 @@ export async function renderNycWeddingArtwork(id: string, item: CatalogArtworkIt
     <text x="829" y="650" text-anchor="middle" font-family="DejaVu Sans,sans-serif" font-size="18" fill="#5b665d">Actual rental-equipment photo · Setup varies by venue</text>
     <image x="509" y="670" width="225" height="113" preserveAspectRatio="xMidYMid meet" xlink:href="data:image/png;base64,${logo.toString('base64')}"/>
     <text x="763" y="708" font-family="DejaVu Serif,serif" font-size="31" font-weight="700" fill="#173d2c">Riverdale, Bronx, NY</text>
-    <text x="763" y="746" font-family="DejaVu Sans,sans-serif" font-size="24" fill="#6b5733">718-283-4593</text>
+    <text x="763" y="746" font-family="DejaVu Sans,sans-serif" font-size="24" fill="#6b5733">917-274-7857</text>
     <rect y="815" width="1200" height="85" fill="#183d2d"/>
     <text x="600" y="850" text-anchor="middle" font-family="DejaVu Sans,sans-serif" font-size="22" fill="#fff">Travel fee &amp; applicable sales tax additional.</text>
     <text x="600" y="879" text-anchor="middle" font-family="DejaVu Sans,sans-serif" font-size="18" fill="#dfdccb">Review package details for the complete inclusions and exclusions.</text>

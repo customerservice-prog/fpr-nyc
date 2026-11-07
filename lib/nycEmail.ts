@@ -17,6 +17,6 @@ export function nycEmailHref(subject = 'Rental inquiry', body = ''): string {
 
 export function nycEmailHtml(html: string): string {
   if (html.includes('data-fpr-location="nyc-riverdale"')) return html
-  const banner = '<div data-fpr-location="nyc-riverdale" style="font-family:Arial,sans-serif;background:#0B1F3A;color:#ffffff;padding:16px 20px;margin-bottom:20px;border-radius:8px;"><strong>NYC / RIVERDALE LOCATION</strong><br><span style="font-size:12px;">Friendly Party Rental NYC &middot; ' + NYC_PUBLIC_HOST + ' &middot; 718-283-4593</span></div>'
+  const banner = '<div data-fpr-location="nyc-riverdale" style="font-family:Arial,sans-serif;background:#0B1F3A;color:#ffffff;padding:16px 20px;margin-bottom:20px;border-radius:8px;"><strong>NYC / RIVERDALE LOCATION</strong><br><span style="font-size:12px;">Friendly Party Rental NYC &middot; ' + NYC_PUBLIC_HOST + ' &middot; 917-274-7857</span></div>'
   return /<body\b[^>]*>/i.test(html) ? html.replace(/<body\b[^>]*>/i, m => m + banner) : banner + html
 }

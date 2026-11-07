@@ -22,7 +22,7 @@ export default async function PublicLayout({ children }: { children: React.React
     <Nyc2027ArrivalNotice />
     <div className="hidden md:block"><Header navItems={navItems} headerStyle={theme?.headerStyle??1}/></div><div className="md:hidden"><MobileHeader/></div>
     <div className="border-b border-amber-300 bg-amber-50 px-4 py-2.5 text-center text-sm font-semibold text-amber-950">
-      New online reservations are open for <strong>2027 events only</strong>. 2026 online booking is closed to new reservations. Existing customers can still use their order links or <a href="tel:7182834593" className="underline">call 718-283-4593</a>.
+      New online reservations are open for <strong>2027 events only</strong>. 2026 online booking is closed to new reservations. Existing customers can still use their order links or <a href="tel:9172747857" className="underline">call 917-274-7857</a>.
     </div>
     <main className="min-h-screen pb-20"><PublicPageOverride>{children}</PublicPageOverride></main>
     <Footer footerStyle={theme?.footerStyle??'light-links'}/>

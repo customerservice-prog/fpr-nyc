@@ -24,10 +24,10 @@ export default function TentRentalPaidSearchHero() {
             Browse Tents
           </a>
           <a
-            href="tel:+17182834593"
+            href="tel:+19172747857"
             className="inline-flex items-center justify-center rounded border border-gray-300 px-5 py-3 font-semibold text-dark bg-white hover:bg-gray-50"
           >
-            Call 718-283-4593
+            Call 917-274-7857
           </a>
         </div>
         <div className="grid sm:grid-cols-3 gap-3 mt-6 text-sm text-gray-700">

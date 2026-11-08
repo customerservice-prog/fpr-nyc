@@ -47,9 +47,9 @@ export default function Footer({ footerStyle = 'light-links' }: { footerStyle?: 
           {BUSINESS.googleProfile && <p><a href={BUSINESS.googleProfile} target="_blank" rel="noopener noreferrer" className="underline">View Friendly Party Rental NYC on Google</a></p>}
           <p>Serving {BUSINESS.serviceArea}</p>
           <div className="flex items-center justify-center gap-4 pt-1">
-            <a href={BUSINESS.facebook} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="Facebook">
+            {BUSINESS.facebook && <a href={BUSINESS.facebook} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="Facebook">
               <Facebook size={22} fill="currentColor" />
-            </a>
+            </a>}
             <a href={BUSINESS.youtube} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="YouTube">
               <Youtube size={22} />
             </a>
@@ -74,9 +74,9 @@ export default function Footer({ footerStyle = 'light-links' }: { footerStyle?: 
         <p className="break-words"><a href={`tel:${BUSINESS.phone}`} className="underline">{BUSINESS.phone}</a> | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
         <p>Serving {BUSINESS.serviceArea}</p>
         <div className="flex items-center justify-center gap-4 pt-1">
-          <a href={BUSINESS.facebook} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="Facebook">
+          {BUSINESS.facebook && <a href={BUSINESS.facebook} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="Facebook">
             <Facebook size={22} fill="currentColor" />
-          </a>
+          </a>}
           <a href={BUSINESS.youtube} target="_blank" rel="noopener noreferrer" className="text-red-600 hover:text-red-700" aria-label="YouTube">
             <Youtube size={22} />
           </a>

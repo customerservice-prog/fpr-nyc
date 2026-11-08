@@ -30,7 +30,7 @@ for(const html of ['<p>Example notification</p>','<!doctype html><html><head><ti
   if(html.includes('<body>')) assert.ok(branded.indexOf('data-fpr-location')>branded.indexOf('<body>'))
  })
 }
-function mailModule(sendMail,env={},fetchImpl) {return load('lib/email.ts',{'nodemailer':{createTransport(){return {sendMail}}},'@/lib/nycEmail':location,'@/lib/utils':{BUSINESS:business,formatDateTime:()=>''},...(fetchImpl?{__fetch:fetchImpl}:{})},env)}
+function mailModule(sendMail,env={},fetchImpl) {return load('lib/email.ts',{'@/lib/prisma':{prisma:{nycOutboundEmail:{async upsert(){return {id:'mock'}}}}},'nodemailer':{createTransport(){return {sendMail}}},'@/lib/nycEmail':location,'@/lib/utils':{BUSINESS:business,formatDateTime:()=>''},...(fetchImpl?{__fetch:fetchImpl}:{})},env)}
 test('missing SMTP credentials never simulate a sent message',async()=>{
  let sends=0;const mail=mailModule(()=>sends++)
  await assert.rejects(mail.sendEmail({to:business.email,subject:'QA',html:'<p>QA</p>'}),/not configured/)
@@ -121,7 +121,7 @@ for (const result of [{accepted:[],rejected:[]},{accepted:[],rejected:['recipien
 for (const [port,secure] of [['465',true],['587',false],['2525',false]]) {
  test('SMTP TLS mode matches submission port '+port,()=>{
   let options
-  load('lib/email.ts',{'nodemailer':{createTransport(value){options=value;return {sendMail:async()=>({accepted:[],rejected:[]})}}},'@/lib/nycEmail':location,'@/lib/utils':{BUSINESS:business,formatDateTime:()=>''}}, {EMAIL_PORT:port})
+  load('lib/email.ts',{'@/lib/prisma':{prisma:{nycOutboundEmail:{async upsert(){return {id:'mock'}}}}},'nodemailer':{createTransport(value){options=value;return {sendMail:async()=>({accepted:[],rejected:[]})}}},'@/lib/nycEmail':location,'@/lib/utils':{BUSINESS:business,formatDateTime:()=>''}}, {EMAIL_PORT:port})
   assert.equal(options.secure,secure);assert.equal(options.requireTLS,!secure)
   assert.equal(options.connectionTimeout,10000);assert.equal(options.socketTimeout,20000)
  })

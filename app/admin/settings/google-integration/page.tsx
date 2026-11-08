@@ -51,6 +51,7 @@ return (
 </span>
 <p className="text-sm text-gray-600 mb-4">
 Enter your Google API credentials to enable calendar sync and other Google integrations. Obtain these from the Google Cloud Console.
+For NYC Calendar and Meet authorization, connect the NYC business account (friendlypartyrentalnyc@gmail.com by default), not the Syracuse office account. Existing connections are not disconnected by this settings page.
 </p>
 <p className="text-sm mb-4">Saving these settings does not verify Google indexing or connect Search Console. <Link href="/admin/settings/search-visibility" className="text-blue-700 underline">Check Downstate New York search visibility</Link>.</p>
 <label className="block text-xs text-gray-500 mb-1">API Key / Client ID</label>

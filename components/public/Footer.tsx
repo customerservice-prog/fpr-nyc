@@ -4,6 +4,15 @@ import { NYC_LOGO_PATH, NYC_LOGO_WIDTH, NYC_LOGO_HEIGHT } from '@/lib/nycBrand'
 
 const LOGO_URL = NYC_LOGO_PATH
 
+// Consistent policy links across every NYC footer layout.
+function NycCustomerPolicies({ dark = false }: { dark?: boolean }) {
+  return <nav aria-label="Customer policies" className="flex flex-wrap justify-center gap-x-5 gap-y-2 pt-3 text-xs">
+    <Link href="/rental-policies" prefetch={false} className={dark ? 'underline text-gray-300 hover:text-white' : 'underline text-gray-600 hover:text-gray-900'}>Rental Policies</Link>
+    <Link href="/privacy-policy" prefetch={false} className={dark ? 'underline text-gray-300 hover:text-white' : 'underline text-gray-600 hover:text-gray-900'}>Privacy Policy</Link>
+    <Link href="/frequently_asked_questions" prefetch={false} className={dark ? 'underline text-gray-300 hover:text-white' : 'underline text-gray-600 hover:text-gray-900'}>FAQs</Link>
+  </nav>
+}
+
 export default function Footer({ footerStyle = 'light-links' }: { footerStyle?: string }) {
   if (footerStyle === 'none') {
     return null
@@ -18,6 +27,7 @@ export default function Footer({ footerStyle = 'light-links' }: { footerStyle?: 
           {BUSINESS.address && <p>{BUSINESS.address}</p>}
           <p className="break-words"><a href={`tel:${BUSINESS.phone}`} className="underline">{BUSINESS.phone}</a> | <a href={BUSINESS.emailHref} className="underline break-all">{BUSINESS.email}</a></p>
           {BUSINESS.googleProfile && <p><a href={BUSINESS.googleProfile} target="_blank" rel="noopener noreferrer" className="underline">View Friendly Party Rental NYC on Google</a></p>}
+          <NycCustomerPolicies />
           <p className="text-gray-500 text-sm pt-2">
             &copy; {new Date().getFullYear()} {BUSINESS.legalName} All rights reserved.
           </p>
@@ -47,6 +57,7 @@ export default function Footer({ footerStyle = 'light-links' }: { footerStyle?: 
               Y
             </a>}
           </div><nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 pt-3 border-t border-gray-200 mt-4"><Link href="/category/tent-rentals" className="underline" prefetch={false}>Tent Rentals</Link> <Link href="/category/table-chair-rentals" className="underline" prefetch={false}>Table & Chair Rentals</Link> <Link href="/weddings" className="underline" prefetch={false}>Wedding Rentals</Link> <Link href="/wedding-vendors" className="underline" prefetch={false}>Wedding Vendors</Link> <Link href="/graduation-rentals" className="underline" prefetch={false}>Graduation Party Rentals</Link> <Link href="/chiavari-chair-rentals" className="underline" prefetch={false}>Chiavari Chair Rentals</Link> <Link href="/category/dance-floor-stage-rentals" className="underline" prefetch={false}>Dance Floor Rentals</Link> <Link href="/category/bounce-house-rentals" className="underline" prefetch={false}>Bounce Houses & Waterslides</Link> <Link href="/category" className="underline" prefetch={false}>Browse All Rentals</Link> <Link href="/service-area" className="underline" prefetch={false}>New York Delivery Areas</Link></nav>
+          <NycCustomerPolicies />
           <p className="text-gray-500 text-sm pt-2">
             &copy; {new Date().getFullYear()} {BUSINESS.legalName} All rights reserved.
           </p>
@@ -74,6 +85,7 @@ export default function Footer({ footerStyle = 'light-links' }: { footerStyle?: 
           </a>}
         </div>
 <nav className="flex flex-wrap justify-center gap-x-4 gap-y-1 pt-3 border-t border-gray-700 mt-4"><Link href="/category/tent-rentals" className="underline text-gray-300 hover:text-white" prefetch={false}>Tent Rentals</Link> <Link href="/category/table-chair-rentals" className="underline text-gray-300 hover:text-white" prefetch={false}>Table & Chair Rentals</Link> <Link href="/weddings" className="underline text-gray-300 hover:text-white" prefetch={false}>Wedding Rentals</Link> <Link href="/wedding-vendors" className="underline text-gray-300 hover:text-white" prefetch={false}>Wedding Vendors</Link> <Link href="/graduation-rentals" className="underline text-gray-300 hover:text-white" prefetch={false}>Graduation Party Rentals</Link> <Link href="/chiavari-chair-rentals" className="underline text-gray-300 hover:text-white" prefetch={false}>Chiavari Chair Rentals</Link> <Link href="/category/dance-floor-stage-rentals" className="underline text-gray-300 hover:text-white" prefetch={false}>Dance Floor Rentals</Link> <Link href="/category/bounce-house-rentals" className="underline text-gray-300 hover:text-white" prefetch={false}>Bounce Houses & Waterslides</Link> <Link href="/category" className="underline text-gray-300 hover:text-white" prefetch={false}>Browse All Rentals</Link> <Link href="/service-area" className="underline text-gray-300 hover:text-white" prefetch={false}>New York Delivery Areas</Link></nav>
+        <NycCustomerPolicies dark />
         <p className="text-gray-400 pt-2">
           &copy; {new Date().getFullYear()} {BUSINESS.legalName} All rights reserved.
         </p>

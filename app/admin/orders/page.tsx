@@ -47,6 +47,7 @@ return (
 <div className="p-4 max-w-6xl mx-auto">
 <div className="flex items-center justify-between mb-6">
 <h1 className="text-2xl font-bold text-dark">Orders</h1>
+<div className="flex flex-wrap gap-4"><Link href="/admin/reports/payment-audit" className="font-semibold text-sm text-blue-700 hover:underline">Payment Audit</Link></div>
 <Link href="/admin/orders/new" className="btn-admin">+ New Order</Link>
 </div>
 

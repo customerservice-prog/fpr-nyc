@@ -28,6 +28,7 @@ export default async function NycLaunchReadinessPage() {
       <p className="mt-2 text-sm text-gray-600">Read-only checklist for Riverdale/Lower Westchester. It does not submit test orders, send messages, charge cards, enable automations or change settings.</p>
     </div>
     <NycPaymentReadiness />
+    <p><Link href="/admin/reports/payment-audit" className="inline-flex rounded border px-4 py-2 text-sm font-semibold text-blue-700">View NYC payment ledger and webhook audit</Link></p>
     <section className="rounded-xl border bg-white p-5 space-y-4">
       <h2 className="text-lg font-bold text-dark">Email and follow-up readiness</h2>
       <ul className="space-y-3">

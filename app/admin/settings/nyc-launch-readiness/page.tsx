@@ -19,6 +19,7 @@ export default async function NycLaunchReadinessPage() {
   const emailTransportConfigured = resendConfigured || smtpConfigured
   const replyMonitoringConfigured = Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS && process.env.EMAIL_IMAP_HOST)
   const balanceRemindersEnabled = process.env.NYC_BALANCE_REMINDERS_ENABLED === 'true'
+  const resendWebhookConfigured = Boolean(process.env.NYC_RESEND_WEBHOOK_SECRET)
 
   return <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-8">
     <Link href="/admin/settings" className="text-blue-700 underline">Back to NYC settings</Link>
@@ -48,12 +49,13 @@ export default async function NycLaunchReadinessPage() {
         </li>
         <li className="flex justify-between gap-4">
           <span>Resend delivery-event webhook</span>
-          <strong className="text-amber-700">Not implemented in NYC</strong>
+          <strong className={resendWebhookConfigured ? 'text-blue-700' : 'text-amber-700'}>{resendWebhookConfigured ? 'Signed endpoint configured — test events' : 'Awaiting NYC signing secret'}</strong>
         </li>
       </ul>
       <p className="text-sm text-gray-600">An email credential, a webhook secret or a scheduled workflow does not prove actual inbox delivery. Confirm a controlled recipient test and inbound reply before enabling automatic follow-ups.</p>
       <p className="text-sm">Public NYC email: <span className="font-semibold break-all">{NYC_EMAIL_ADDRESS}</span><br/>Staff notifications configured for: <span className="font-semibold break-all">{NYC_NOTIFICATION_EMAIL}</span></p>
       <Link href="/admin/settings/email-delivery" className="inline-flex rounded border px-4 py-2 text-sm font-semibold text-blue-700">Review NYC email setup</Link>
+      <Link href="/admin/settings/email-delivery/audit" className="ml-3 inline-flex rounded border px-4 py-2 text-sm font-semibold text-blue-700">View NYC email delivery audit</Link>
     </section>
     <section className="rounded-xl border bg-white p-5 space-y-3">
       <h2 className="text-lg font-bold text-dark">Final owner checks before selling NYC rentals</h2>

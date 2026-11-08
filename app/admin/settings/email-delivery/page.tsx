@@ -21,6 +21,7 @@ export default async function EmailDeliveryPage() {
       <p className="mt-2">{configured ? 'Credential presence does not prove successful delivery. Confirm a delivered test message before relying on notifications.' : 'Contact inquiries and applications are saved, but website-to-inbox notifications cannot be sent until the authorized sender is configured.'}</p>
       <p className="mt-2">Active transport: {resendConfigured ? 'Resend transactional email' : smtpConfigured ? 'SMTP' : 'none'}. This screen does not send messages or expose stored credentials.</p>
     </section>
+    <p><Link href="/admin/settings/email-delivery/audit" className="font-semibold text-blue-700 underline">View NYC transactional email delivery audit</Link></p>
     <section className="rounded-xl border bg-white p-5">
       <h2 className="text-lg font-bold">One inbox, unmistakable location</h2>
       <p className="mt-2 break-all">Public Riverdale email: {NYC_EMAIL_ADDRESS}</p><p className="mt-2 break-all">Staff notifications: {NYC_NOTIFICATION_EMAIL}</p>

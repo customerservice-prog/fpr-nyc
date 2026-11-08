@@ -1,3 +1,4 @@
+import { prisma } from '@/lib/prisma'
 import nodemailer from 'nodemailer'
 import { NYC_EMAIL_ADDRESS, NYC_NOTIFICATION_EMAIL, nycEmailSubject, nycEmailHtml } from '@/lib/nycEmail'
 import { BUSINESS, formatDateTime } from '@/lib/utils'
@@ -151,7 +152,21 @@ export async function sendEmail({
       text: finalText,
       idempotencyKey,
     })
-    if (resend) return resend
+    if (resend) {
+      // The provider has accepted the email; failure of audit storage must NOT
+      // turn a successfully accepted send into a retryable delivery failure.
+      // Only Resend IDs emitted by this NYC app are eligible for NYC webhook updates.
+      try {
+        await prisma.nycOutboundEmail.upsert({
+          where: { providerMessageId: resend.providerId },
+          update: {},
+          create: { providerMessageId: resend.providerId, status: 'accepted' },
+        })
+      } catch {
+        console.error('[nyc-email] Outbound email accepted, delivery audit storage unavailable')
+      }
+      return resend
+    }
     // SMTP has no equivalent idempotency guarantee. Fail closed for protected sends.
     if (idempotencyKey) throw new Error('Idempotent email requires Resend configuration')
 

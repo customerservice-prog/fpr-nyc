@@ -1253,3 +1253,31 @@ model StripeWebhookEvent {
   @@index([paymentIntentId])
   @@index([orderId])
 }
+
+
+// Transactional email delivery tracking for NYC only. No subject, recipient,
+// customer identity or message body is stored in either table.
+// A signed provider event may update a send only when its providerMessageId was
+// registered by this NYC service after Resend accepted the outbound email.
+model NycOutboundEmail {
+  id String @id @default(cuid())
+  providerMessageId String @unique
+  status String @default("accepted")
+  lastEvent String?
+  lastEventAt DateTime?
+  acceptedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, acceptedAt])
+}
+
+model NycEmailDeliveryEvent {
+  id String @id
+  providerMessageId String
+  eventType String
+  status String
+  eventAt DateTime
+  receivedAt DateTime @default(now())
+
+  @@index([providerMessageId, eventAt])
+}

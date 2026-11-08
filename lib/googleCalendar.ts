@@ -1,3 +1,4 @@
+import { NYC_EMAIL_ADDRESS } from '@/lib/nycEmail'
 import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, randomUUID, timingSafeEqual } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { cleanMeetingDuration, cleanMeetingEmail, instantToEasternWall, requireFutureMeeting, wallClockToInstant } from '@/lib/meetingTime'
@@ -12,7 +13,7 @@ export const SEARCH_CONSOLE_SCOPE = 'https://www.googleapis.com/auth/webmasters.
 const PROFILE_SCOPES = ['openid', 'email']
 const TIME_ZONE = 'America/New_York'
 const CONNECTION_ID = 'primary'
-const BUSINESS_GOOGLE_EMAIL = 'customerservice@friendlypartyrental.com'
+const BUSINESS_GOOGLE_EMAIL = (process.env.NYC_GOOGLE_CALENDAR_EMAIL || NYC_EMAIL_ADDRESS).trim().toLowerCase()
 
 type GoogleCredentials = {
   clientId: string
@@ -138,7 +139,7 @@ export async function buildGoogleAuthorizationUrl(redirectUri: string, username:
   url.searchParams.set('scope', [...PROFILE_SCOPES, CALENDAR_SCOPE, SEARCH_CONSOLE_SCOPE].join(' '))
   url.searchParams.set('state', createGoogleOAuthState(username))
   url.searchParams.set('login_hint', BUSINESS_GOOGLE_EMAIL)
-  url.searchParams.set('hd', 'friendlypartyrental.com')
+  // NYC may use a consumer Gmail account; do not force Syracuse Workspace.
   return url.toString()
 }
 

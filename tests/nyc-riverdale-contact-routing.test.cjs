@@ -57,6 +57,7 @@ test('Resend preserves verified sender address and labels all NYC mail as Riverd
   let envelope
   const mail = load('lib/email.ts', {
     nodemailer: { createTransport() { return {} } },
+    '@/lib/prisma': { prisma: { nycOutboundEmail: { async upsert() { return { id: 'mock-tracked' } } } } },
     '@/lib/nycEmail': location,
     '@/lib/utils': { BUSINESS: { name: 'Friendly Party Rental NYC' }, formatDateTime() {} },
     '@/lib/nycBrand': { NYC_EMAIL_LOGO_URL: 'https://friendlypartyrentalnyc.com/logo.png' },

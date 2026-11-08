@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { PrismaClient } from '@prisma/client'
-import { cleanNycPrice, isPackageItem, localizeNycCatalogText, wrongMarketTerms } from '../lib/nycCatalogCore.mjs'
+import { nycPriceForSyracuseItem, localizeNycCatalogText, wrongMarketTerms } from '../lib/nycCatalogCore.mjs'
 import { syracuseItems } from './fixtures/syracuse-catalog-sample.mjs'
 
 const prisma = new PrismaClient()
@@ -19,7 +19,7 @@ try {
   for (const source of syracuseItems) {
     const row = bySlug.get(source.slug)
     assert.ok(row, 'missing ' + source.slug)
-    const price = isPackageItem(source) ? source.cost : cleanNycPrice(Math.round(source.cost * 170) / 100)
+    const price = nycPriceForSyracuseItem(source)
     assert.equal(row.quantity, source.quantity, source.slug + ' quantity')
     assert.equal(row.cost, price, source.slug + ' price')
     assert.equal(row.name, source.name, source.slug + ' name')

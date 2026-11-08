@@ -339,6 +339,7 @@ export default function PaymentPage() {
         <PaymentCardAuthorization checked={saveCard} onChange={setSaveCard} required={false} compact />
         {checkoutAvailable === false && <div role="alert" className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-sm text-amber-900">Online payment is temporarily unavailable. Please call {BUSINESS.name} at <a href={phoneHref} className="underline">{BUSINESS.phone}</a> to complete your booking. No card has been charged.</div>}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm text-body"><p>Payment is processed securely through Stripe.</p></div>
+        <p className="mb-4 text-xs leading-5 text-gray-700">Review the <a href="/rental-policies" target="_blank" rel="noopener noreferrer" className="font-semibold underline">NYC Rental Policies</a> and <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="font-semibold underline">Privacy Policy</a> before submitting payment. Your itemized total and deposit are shown above, and a signed rental contract may be required before delivery.</p>
         <button onClick={handleContinue} disabled={loading || !totalsReady || checkoutAvailable !== true || needsLastMinuteAcceptance || (paymentChoice === 'custom' && parsedCustomPayAmount < depositAmount)} className="btn-primary w-full text-lg py-3">
           {loading ? 'Processing...' : !totalsReady ? quoteError ? 'Resolve pricing to continue' : 'Calculating your total...' : `Pay ${formatCurrency(amountDueToday)}`}
         </button>

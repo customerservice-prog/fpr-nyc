@@ -50,7 +50,7 @@ test('only NYC-originated Resend IDs may create NYC delivery records', () => {
   assert.match(webhook, /nycEmailDeliveryEvent\.createMany/)
   assert.match(webhook, /skipDuplicates: true/)
   assert.match(webhook, /NYC_RESEND_WEBHOOK_SECRET/)
-  assert.doesNotMatch(webhook, /RESEND_WEBHOOK_SECRET \|\|/)
+  assert.doesNotMatch(webhook, /process\.env\.RESEND_WEBHOOK_SECRET\b/)
   assert.doesNotMatch(schema.split('model NycOutboundEmail ')[1].split('model NycEmailDeliveryEvent')[0], /subject|recipient|customer|html|body/)
 })
 

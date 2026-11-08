@@ -70,6 +70,21 @@ export function parseAmount(value: string | number): number {
   return parseFloat(value.replace(/[^0-9.-]/g, '')) || 0
 }
 
+// NYC public social accounts must be explicitly configured for NYC.
+// Reject non-HTTPS/mismatched hosts so bad env values cannot become public links.
+function approvedNycSocialUrl(value: string | undefined, allowedHosts: string[]): string {
+  const raw = String(value || '').trim()
+  if (!raw) return ''
+  try {
+    const url = new URL(raw)
+    if (url.protocol !== 'https:' || !allowedHosts.includes(url.hostname.toLowerCase())) return ''
+    if (url.username || url.password) return ''
+    return url.href
+  } catch {
+    return ''
+  }
+}
+
 export const BUSINESS = {
   name: 'Friendly Party Rental NYC',
   legalName: 'Friendly Party Rental L.L.C.',
@@ -80,12 +95,12 @@ export const BUSINESS = {
   address: '',
   serviceArea: 'Riverdale, selected Bronx neighborhoods & Lower Westchester',
   hours: 'Mon–Sat: 9am–6pm',
-  facebook: 'https://www.facebook.com/friendlypartyrental',
-  instagram: 'https://www.instagram.com/friendlypartyrental',
+  facebook: approvedNycSocialUrl(process.env.NEXT_PUBLIC_NYC_FACEBOOK_URL, ['facebook.com', 'www.facebook.com', 'm.facebook.com']),
+  instagram: approvedNycSocialUrl(process.env.NEXT_PUBLIC_NYC_INSTAGRAM_URL, ['instagram.com', 'www.instagram.com']),
   youtube: 'https://www.youtube.com/@friendlypartyrental1005',
   yelp: '',
-  tiktok: 'https://www.tiktok.com/@friendlypartyrental',
-  twitter: 'https://twitter.com/friendlypartyrent',
+  tiktok: approvedNycSocialUrl(process.env.NEXT_PUBLIC_NYC_TIKTOK_URL, ['tiktok.com', 'www.tiktok.com']),
+  twitter: approvedNycSocialUrl(process.env.NEXT_PUBLIC_NYC_X_URL, ['x.com', 'www.x.com', 'twitter.com', 'www.twitter.com']),
   mapUrl: (process.env.NEXT_PUBLIC_GOOGLE_MAPS_URL || '').trim(),
   googleProfile: (process.env.NEXT_PUBLIC_GOOGLE_BUSINESS_PROFILE_URL || '').trim(),
 }

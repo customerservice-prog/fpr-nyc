@@ -45,3 +45,18 @@ test('NYC sitemap exposes policy URLs using the separate NYC canonical domain', 
   assert.match(sitemap, /NYC_STATIC_SEARCH_PATHS/)
   assert.doesNotMatch(seo, /friendlypartyrental\.com\//)
 })
+
+test('admin exposes secret-free NYC launch readiness without customer-facing actions', () => {
+  const page = read('app/admin/settings/nyc-launch-readiness/page.tsx')
+  const panel = read('components/admin/NycPaymentReadiness.tsx')
+  const settings = read('app/admin/settings/page.tsx')
+  assert.match(page, /getServerSession/)
+  assert.match(page, /role !== 'admin'/)
+  assert.match(page, /NYC_BALANCE_REMINDERS_ENABLED/)
+  assert.match(page, /Manual-only safety hold/)
+  assert.match(page, /Resend delivery-event webhook/)
+  assert.match(panel, /\/api\/payments\/status/)
+  assert.match(panel, /onlineCheckoutAvailable/)
+  assert.doesNotMatch(panel, /\/api\/checkout'|createPaymentIntent|sendEmail\(/)
+  assert.match(settings, /\/admin\/settings\/nyc-launch-readiness/)
+})

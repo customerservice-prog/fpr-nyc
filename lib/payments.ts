@@ -47,7 +47,7 @@ export async function finalizePayment(input: {
       const existing = await tx.payment.findUnique({ where: { stripePaymentId } })
       if (existing) {
         if (existing.orderId !== orderId) throw new Error('Payment belongs to another order')
-        return { updated: order, isFirstPayment: false, duplicate: true, overpaidBy: 0 }
+        return { updated: order, isFirstPayment: false, duplicate: true, overpaidBy: 0, staffAlertId: null as string | null }
       }
     }
     const totalWithNewTip = Math.round((Number(order.totalAmount || 0) + increase + tip) * 100) / 100
@@ -86,10 +86,222 @@ export async function finalizePayment(input: {
       },
       include: { items: { include: { item: true } }, customer: true, payments: true },
     })
-    return { updated, isFirstPayment: alreadyPaid === 0, duplicate: false, overpaidBy }
+    // Nested payment creation occurred inside the same transaction. Its fresh ID
+    // is the exact one-notification key, even when a customer pays the same amount twice.
+    const existingPaymentIds = new Set(order.payments.map(payment => payment.id))
+    const staffAlertId = updated.payments.find(payment => !existingPaymentIds.has(payment.id))?.id || null
+    return { updated, isFirstPayment: alreadyPaid === 0, duplicate: false, overpaidBy, staffAlertId }
   })
   const { updated, isFirstPayment } = result
   if (result.duplicate) return updated
+
+  // NYC staff only: never send alerts for a duplicate Stripe webhook or merely
+  // processing/failed intent. This code executes only AFTER the committed payment
+  // row exists, with its unique payment ID as Resend's idempotency key.
+  if (result.staffAlertId) {
+    try {
+      const safeOrder = String(updated.orderNumber).replace(/[&<>"']/g, value => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[value] || value
+      ))
+      const adminLink = NYC_PUBLIC_ORIGIN + '/admin/orders/' + encodeURIComponent(updated.id)
+      await sendEmail({
+        to: ownerNotificationRecipients(),
+        subject: '[NYC Payment] 
+    console.error(`[finalizePayment] Overpayment recorded for order ${orderId}: $${result.overpaidBy.toFixed(2)} (${stripePaymentId || 'manual'})`)
+    try {
+      await sendEmail({
+        to: ownerNotificationRecipients(),
+        subject: `[Action needed] Overpayment on NYC order ${updated.orderNumber}`,
+        html: `<p>A verified payment of $${paidAmount.toFixed(2)} was recorded on order ${updated.orderNumber}, which exceeded the remaining balance by $${result.overpaidBy.toFixed(2)}.</p><p>Stripe reference: ${stripePaymentId || 'manual entry'}. Please review the order and refund the extra amount if appropriate.</p>`,
+      })
+    } catch (err) { console.error('[finalizePayment] Overpayment alert email failed:', err) }
+  }
+
+  try {
+    const reasonHtml = receiptReason ? '<p><strong>Charge reason:</strong> ' + receiptReason.replace(/[&<>"\']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c)) + '</p>' : ''
+    const email = updated.customer?.email || ''
+    const isPlaceholderEmail = email.includes('@imported.friendlypartyrental.local') || email.startsWith('no-email-')
+    const isCanceled = updated.status === 'canceled'
+    if (!skipEmail) {
+      const canEmailCustomer = !!email && !isPlaceholderEmail
+      const customerName = updated.customer.firstName + ' ' + updated.customer.lastName
+      const sharedDetails = { eventAddress: updated.eventAddress, eventCity: updated.eventCity, eventState: updated.eventState, eventZip: updated.eventZip, deliveryType: updated.deliveryType, eventTimeSlot: updated.eventTimeSlot, pickupTimeSlot: updated.pickupTimeSlot, eventStartTime: updated.eventStartTime, eventEndTime: updated.eventEndTime, deliveryWindowStart: updated.deliveryWindowStart, deliveryWindowEnd: updated.deliveryWindowEnd, exactDeliveryRequested: updated.exactDeliveryRequested, exactDeliveryTime: updated.exactDeliveryTime, pickupType: updated.pickupType, pickupRequiredByTime: updated.pickupRequiredByTime, exactPickupTime: updated.exactPickupTime, customerPhone: updated.customer.phone, customerEmail: updated.customer.email, subtotal: updated.subtotal, rentalDays: updated.rentalDays, durationLabel: updated.durationLabel, durationFee: updated.durationFee, specialRequestFee: updated.specialRequestFee, specialRequestNames: updated.specialRequestNames, damageWaiver: updated.damageWaiver, damageWaiverFee: updated.damageWaiverFee, deliveryFee: updated.deliveryFee, deliveryDistance: updated.deliveryDistance, exactDeliveryFee: updated.exactDeliveryFee, exactPickupFee: updated.exactPickupFee, lastMinuteFeeAmount: updated.lastMinuteFeeAmount, miscellaneousFees: updated.miscellaneousFees, couponCode: updated.couponCode, couponDiscount: updated.couponDiscount, generalDiscount: updated.generalDiscount, taxAmount: updated.taxAmount, taxRate: updated.taxRate, tipAmount: updated.tipAmount }
+      if (isFirstPayment) {
+        const setting = await prisma.automaticMessage.findFirst({ where: { id: 'automsg_order_confirmation' } })
+        const content = orderConfirmationEmail({ id: updated.id, orderNumber: updated.orderNumber, customerName, eventDate: formatDate(updated.eventDate), totalAmount: updated.totalAmount, depositAmount: paidAmount, balanceDue: updated.balanceDue, items: updated.items.map(i => ({ name:i.itemName, quantity:i.quantity, unitPrice:i.unitPrice, total:i.total, image:nycItemImage(i.item) })), ...sharedDetails }, setting ?? undefined)
+        if (setting?.enabled !== false && canEmailCustomer && !isCanceled && sendReceipt !== false) try { await sendEmail({to:email,subject:content.subject,html:content.html + reasonHtml}) } catch {}
+      } else {
+        const content = paymentReceiptEmail({ id:updated.id, orderNumber:updated.orderNumber, customerName, amountPaid:paidAmount, totalAmount:updated.totalAmount, balanceDue:updated.balanceDue, eventDate:formatDate(updated.eventDate), items:updated.items.map(i=>({name:i.itemName,quantity:i.quantity,unitPrice:i.unitPrice,total:i.total,image:nycItemImage(i.item)})), depositAmount:updated.depositAmount, payments:(updated.payments||[]).map(p=>({amount:p.amount,method:p.method,createdAt:formatDate(p.createdAt),recordedByName:p.recordedByName})), ...sharedDetails })
+        if (canEmailCustomer && !isCanceled && sendReceipt !== false) try { await sendEmail({to:email,subject:content.subject,html:content.html + reasonHtml}) } catch {}
+      }
+    }
+  } catch (err) { console.error(`[finalizePayment] Payment confirmation email error for order ${orderId}:`, err) }
+  return updated
+}
+
+export async function removePayment(paymentId: string) {
+  const payment = await prisma.payment.findUnique({ where: { id: paymentId } })
+  if (!payment) throw new Error('Payment not found')
+  const order = await prisma.order.findUnique({ where: { id: payment.orderId }, include: { payments: true } })
+  if (!order) throw new Error('Order not found')
+  await prisma.payment.delete({ where: { id: paymentId } })
+  const remainingPayments = order.payments.filter(p => p.id !== paymentId)
+  const newAmountPaid = remainingPayments.reduce((sum,p)=>sum+p.amount,0)
+  const newBalanceDue = Math.max(Math.round((order.totalAmount-newAmountPaid)*100)/100,0)
+  return prisma.order.update({ where:{id:order.id}, data:{amountPaid:newAmountPaid,balanceDue:newBalanceDue}, include:{items:{include:{item:true}},customer:true,payments:true} })
+}
+
+ + paidAmount.toFixed(2) + ' - #' + updated.orderNumber,
+        html: '<div style="font-family:Arial,sans-serif;max-width:600px">' +
+          '<h2>Payment recorded — NYC / Riverdale</h2>' +
+          '<p><strong>Order:</strong> #' + safeOrder + '<br/>' +
+          '<strong>New payment:</strong> 
+    console.error(`[finalizePayment] Overpayment recorded for order ${orderId}: $${result.overpaidBy.toFixed(2)} (${stripePaymentId || 'manual'})`)
+    try {
+      await sendEmail({
+        to: ownerNotificationRecipients(),
+        subject: `[Action needed] Overpayment on NYC order ${updated.orderNumber}`,
+        html: `<p>A verified payment of $${paidAmount.toFixed(2)} was recorded on order ${updated.orderNumber}, which exceeded the remaining balance by $${result.overpaidBy.toFixed(2)}.</p><p>Stripe reference: ${stripePaymentId || 'manual entry'}. Please review the order and refund the extra amount if appropriate.</p>`,
+      })
+    } catch (err) { console.error('[finalizePayment] Overpayment alert email failed:', err) }
+  }
+
+  try {
+    const reasonHtml = receiptReason ? '<p><strong>Charge reason:</strong> ' + receiptReason.replace(/[&<>"\']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c)) + '</p>' : ''
+    const email = updated.customer?.email || ''
+    const isPlaceholderEmail = email.includes('@imported.friendlypartyrental.local') || email.startsWith('no-email-')
+    const isCanceled = updated.status === 'canceled'
+    if (!skipEmail) {
+      const canEmailCustomer = !!email && !isPlaceholderEmail
+      const customerName = updated.customer.firstName + ' ' + updated.customer.lastName
+      const sharedDetails = { eventAddress: updated.eventAddress, eventCity: updated.eventCity, eventState: updated.eventState, eventZip: updated.eventZip, deliveryType: updated.deliveryType, eventTimeSlot: updated.eventTimeSlot, pickupTimeSlot: updated.pickupTimeSlot, eventStartTime: updated.eventStartTime, eventEndTime: updated.eventEndTime, deliveryWindowStart: updated.deliveryWindowStart, deliveryWindowEnd: updated.deliveryWindowEnd, exactDeliveryRequested: updated.exactDeliveryRequested, exactDeliveryTime: updated.exactDeliveryTime, pickupType: updated.pickupType, pickupRequiredByTime: updated.pickupRequiredByTime, exactPickupTime: updated.exactPickupTime, customerPhone: updated.customer.phone, customerEmail: updated.customer.email, subtotal: updated.subtotal, rentalDays: updated.rentalDays, durationLabel: updated.durationLabel, durationFee: updated.durationFee, specialRequestFee: updated.specialRequestFee, specialRequestNames: updated.specialRequestNames, damageWaiver: updated.damageWaiver, damageWaiverFee: updated.damageWaiverFee, deliveryFee: updated.deliveryFee, deliveryDistance: updated.deliveryDistance, exactDeliveryFee: updated.exactDeliveryFee, exactPickupFee: updated.exactPickupFee, lastMinuteFeeAmount: updated.lastMinuteFeeAmount, miscellaneousFees: updated.miscellaneousFees, couponCode: updated.couponCode, couponDiscount: updated.couponDiscount, generalDiscount: updated.generalDiscount, taxAmount: updated.taxAmount, taxRate: updated.taxRate, tipAmount: updated.tipAmount }
+      if (isFirstPayment) {
+        const setting = await prisma.automaticMessage.findFirst({ where: { id: 'automsg_order_confirmation' } })
+        const content = orderConfirmationEmail({ id: updated.id, orderNumber: updated.orderNumber, customerName, eventDate: formatDate(updated.eventDate), totalAmount: updated.totalAmount, depositAmount: paidAmount, balanceDue: updated.balanceDue, items: updated.items.map(i => ({ name:i.itemName, quantity:i.quantity, unitPrice:i.unitPrice, total:i.total, image:nycItemImage(i.item) })), ...sharedDetails }, setting ?? undefined)
+        if (setting?.enabled !== false && canEmailCustomer && !isCanceled && sendReceipt !== false) try { await sendEmail({to:email,subject:content.subject,html:content.html + reasonHtml}) } catch {}
+      } else {
+        const content = paymentReceiptEmail({ id:updated.id, orderNumber:updated.orderNumber, customerName, amountPaid:paidAmount, totalAmount:updated.totalAmount, balanceDue:updated.balanceDue, eventDate:formatDate(updated.eventDate), items:updated.items.map(i=>({name:i.itemName,quantity:i.quantity,unitPrice:i.unitPrice,total:i.total,image:nycItemImage(i.item)})), depositAmount:updated.depositAmount, payments:(updated.payments||[]).map(p=>({amount:p.amount,method:p.method,createdAt:formatDate(p.createdAt),recordedByName:p.recordedByName})), ...sharedDetails })
+        if (canEmailCustomer && !isCanceled && sendReceipt !== false) try { await sendEmail({to:email,subject:content.subject,html:content.html + reasonHtml}) } catch {}
+      }
+    }
+  } catch (err) { console.error(`[finalizePayment] Payment confirmation email error for order ${orderId}:`, err) }
+  return updated
+}
+
+export async function removePayment(paymentId: string) {
+  const payment = await prisma.payment.findUnique({ where: { id: paymentId } })
+  if (!payment) throw new Error('Payment not found')
+  const order = await prisma.order.findUnique({ where: { id: payment.orderId }, include: { payments: true } })
+  if (!order) throw new Error('Order not found')
+  await prisma.payment.delete({ where: { id: paymentId } })
+  const remainingPayments = order.payments.filter(p => p.id !== paymentId)
+  const newAmountPaid = remainingPayments.reduce((sum,p)=>sum+p.amount,0)
+  const newBalanceDue = Math.max(Math.round((order.totalAmount-newAmountPaid)*100)/100,0)
+  return prisma.order.update({ where:{id:order.id}, data:{amountPaid:newAmountPaid,balanceDue:newBalanceDue}, include:{items:{include:{item:true}},customer:true,payments:true} })
+}
+
+ + paidAmount.toFixed(2) + '<br/>' +
+          '<strong>Total paid:</strong> 
+    console.error(`[finalizePayment] Overpayment recorded for order ${orderId}: $${result.overpaidBy.toFixed(2)} (${stripePaymentId || 'manual'})`)
+    try {
+      await sendEmail({
+        to: ownerNotificationRecipients(),
+        subject: `[Action needed] Overpayment on NYC order ${updated.orderNumber}`,
+        html: `<p>A verified payment of $${paidAmount.toFixed(2)} was recorded on order ${updated.orderNumber}, which exceeded the remaining balance by $${result.overpaidBy.toFixed(2)}.</p><p>Stripe reference: ${stripePaymentId || 'manual entry'}. Please review the order and refund the extra amount if appropriate.</p>`,
+      })
+    } catch (err) { console.error('[finalizePayment] Overpayment alert email failed:', err) }
+  }
+
+  try {
+    const reasonHtml = receiptReason ? '<p><strong>Charge reason:</strong> ' + receiptReason.replace(/[&<>"\']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c)) + '</p>' : ''
+    const email = updated.customer?.email || ''
+    const isPlaceholderEmail = email.includes('@imported.friendlypartyrental.local') || email.startsWith('no-email-')
+    const isCanceled = updated.status === 'canceled'
+    if (!skipEmail) {
+      const canEmailCustomer = !!email && !isPlaceholderEmail
+      const customerName = updated.customer.firstName + ' ' + updated.customer.lastName
+      const sharedDetails = { eventAddress: updated.eventAddress, eventCity: updated.eventCity, eventState: updated.eventState, eventZip: updated.eventZip, deliveryType: updated.deliveryType, eventTimeSlot: updated.eventTimeSlot, pickupTimeSlot: updated.pickupTimeSlot, eventStartTime: updated.eventStartTime, eventEndTime: updated.eventEndTime, deliveryWindowStart: updated.deliveryWindowStart, deliveryWindowEnd: updated.deliveryWindowEnd, exactDeliveryRequested: updated.exactDeliveryRequested, exactDeliveryTime: updated.exactDeliveryTime, pickupType: updated.pickupType, pickupRequiredByTime: updated.pickupRequiredByTime, exactPickupTime: updated.exactPickupTime, customerPhone: updated.customer.phone, customerEmail: updated.customer.email, subtotal: updated.subtotal, rentalDays: updated.rentalDays, durationLabel: updated.durationLabel, durationFee: updated.durationFee, specialRequestFee: updated.specialRequestFee, specialRequestNames: updated.specialRequestNames, damageWaiver: updated.damageWaiver, damageWaiverFee: updated.damageWaiverFee, deliveryFee: updated.deliveryFee, deliveryDistance: updated.deliveryDistance, exactDeliveryFee: updated.exactDeliveryFee, exactPickupFee: updated.exactPickupFee, lastMinuteFeeAmount: updated.lastMinuteFeeAmount, miscellaneousFees: updated.miscellaneousFees, couponCode: updated.couponCode, couponDiscount: updated.couponDiscount, generalDiscount: updated.generalDiscount, taxAmount: updated.taxAmount, taxRate: updated.taxRate, tipAmount: updated.tipAmount }
+      if (isFirstPayment) {
+        const setting = await prisma.automaticMessage.findFirst({ where: { id: 'automsg_order_confirmation' } })
+        const content = orderConfirmationEmail({ id: updated.id, orderNumber: updated.orderNumber, customerName, eventDate: formatDate(updated.eventDate), totalAmount: updated.totalAmount, depositAmount: paidAmount, balanceDue: updated.balanceDue, items: updated.items.map(i => ({ name:i.itemName, quantity:i.quantity, unitPrice:i.unitPrice, total:i.total, image:nycItemImage(i.item) })), ...sharedDetails }, setting ?? undefined)
+        if (setting?.enabled !== false && canEmailCustomer && !isCanceled && sendReceipt !== false) try { await sendEmail({to:email,subject:content.subject,html:content.html + reasonHtml}) } catch {}
+      } else {
+        const content = paymentReceiptEmail({ id:updated.id, orderNumber:updated.orderNumber, customerName, amountPaid:paidAmount, totalAmount:updated.totalAmount, balanceDue:updated.balanceDue, eventDate:formatDate(updated.eventDate), items:updated.items.map(i=>({name:i.itemName,quantity:i.quantity,unitPrice:i.unitPrice,total:i.total,image:nycItemImage(i.item)})), depositAmount:updated.depositAmount, payments:(updated.payments||[]).map(p=>({amount:p.amount,method:p.method,createdAt:formatDate(p.createdAt),recordedByName:p.recordedByName})), ...sharedDetails })
+        if (canEmailCustomer && !isCanceled && sendReceipt !== false) try { await sendEmail({to:email,subject:content.subject,html:content.html + reasonHtml}) } catch {}
+      }
+    }
+  } catch (err) { console.error(`[finalizePayment] Payment confirmation email error for order ${orderId}:`, err) }
+  return updated
+}
+
+export async function removePayment(paymentId: string) {
+  const payment = await prisma.payment.findUnique({ where: { id: paymentId } })
+  if (!payment) throw new Error('Payment not found')
+  const order = await prisma.order.findUnique({ where: { id: payment.orderId }, include: { payments: true } })
+  if (!order) throw new Error('Order not found')
+  await prisma.payment.delete({ where: { id: paymentId } })
+  const remainingPayments = order.payments.filter(p => p.id !== paymentId)
+  const newAmountPaid = remainingPayments.reduce((sum,p)=>sum+p.amount,0)
+  const newBalanceDue = Math.max(Math.round((order.totalAmount-newAmountPaid)*100)/100,0)
+  return prisma.order.update({ where:{id:order.id}, data:{amountPaid:newAmountPaid,balanceDue:newBalanceDue}, include:{items:{include:{item:true}},customer:true,payments:true} })
+}
+
+ + Number(updated.amountPaid).toFixed(2) + '<br/>' +
+          '<strong>Remaining balance:</strong> 
+    console.error(`[finalizePayment] Overpayment recorded for order ${orderId}: $${result.overpaidBy.toFixed(2)} (${stripePaymentId || 'manual'})`)
+    try {
+      await sendEmail({
+        to: ownerNotificationRecipients(),
+        subject: `[Action needed] Overpayment on NYC order ${updated.orderNumber}`,
+        html: `<p>A verified payment of $${paidAmount.toFixed(2)} was recorded on order ${updated.orderNumber}, which exceeded the remaining balance by $${result.overpaidBy.toFixed(2)}.</p><p>Stripe reference: ${stripePaymentId || 'manual entry'}. Please review the order and refund the extra amount if appropriate.</p>`,
+      })
+    } catch (err) { console.error('[finalizePayment] Overpayment alert email failed:', err) }
+  }
+
+  try {
+    const reasonHtml = receiptReason ? '<p><strong>Charge reason:</strong> ' + receiptReason.replace(/[&<>"\']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c)) + '</p>' : ''
+    const email = updated.customer?.email || ''
+    const isPlaceholderEmail = email.includes('@imported.friendlypartyrental.local') || email.startsWith('no-email-')
+    const isCanceled = updated.status === 'canceled'
+    if (!skipEmail) {
+      const canEmailCustomer = !!email && !isPlaceholderEmail
+      const customerName = updated.customer.firstName + ' ' + updated.customer.lastName
+      const sharedDetails = { eventAddress: updated.eventAddress, eventCity: updated.eventCity, eventState: updated.eventState, eventZip: updated.eventZip, deliveryType: updated.deliveryType, eventTimeSlot: updated.eventTimeSlot, pickupTimeSlot: updated.pickupTimeSlot, eventStartTime: updated.eventStartTime, eventEndTime: updated.eventEndTime, deliveryWindowStart: updated.deliveryWindowStart, deliveryWindowEnd: updated.deliveryWindowEnd, exactDeliveryRequested: updated.exactDeliveryRequested, exactDeliveryTime: updated.exactDeliveryTime, pickupType: updated.pickupType, pickupRequiredByTime: updated.pickupRequiredByTime, exactPickupTime: updated.exactPickupTime, customerPhone: updated.customer.phone, customerEmail: updated.customer.email, subtotal: updated.subtotal, rentalDays: updated.rentalDays, durationLabel: updated.durationLabel, durationFee: updated.durationFee, specialRequestFee: updated.specialRequestFee, specialRequestNames: updated.specialRequestNames, damageWaiver: updated.damageWaiver, damageWaiverFee: updated.damageWaiverFee, deliveryFee: updated.deliveryFee, deliveryDistance: updated.deliveryDistance, exactDeliveryFee: updated.exactDeliveryFee, exactPickupFee: updated.exactPickupFee, lastMinuteFeeAmount: updated.lastMinuteFeeAmount, miscellaneousFees: updated.miscellaneousFees, couponCode: updated.couponCode, couponDiscount: updated.couponDiscount, generalDiscount: updated.generalDiscount, taxAmount: updated.taxAmount, taxRate: updated.taxRate, tipAmount: updated.tipAmount }
+      if (isFirstPayment) {
+        const setting = await prisma.automaticMessage.findFirst({ where: { id: 'automsg_order_confirmation' } })
+        const content = orderConfirmationEmail({ id: updated.id, orderNumber: updated.orderNumber, customerName, eventDate: formatDate(updated.eventDate), totalAmount: updated.totalAmount, depositAmount: paidAmount, balanceDue: updated.balanceDue, items: updated.items.map(i => ({ name:i.itemName, quantity:i.quantity, unitPrice:i.unitPrice, total:i.total, image:nycItemImage(i.item) })), ...sharedDetails }, setting ?? undefined)
+        if (setting?.enabled !== false && canEmailCustomer && !isCanceled && sendReceipt !== false) try { await sendEmail({to:email,subject:content.subject,html:content.html + reasonHtml}) } catch {}
+      } else {
+        const content = paymentReceiptEmail({ id:updated.id, orderNumber:updated.orderNumber, customerName, amountPaid:paidAmount, totalAmount:updated.totalAmount, balanceDue:updated.balanceDue, eventDate:formatDate(updated.eventDate), items:updated.items.map(i=>({name:i.itemName,quantity:i.quantity,unitPrice:i.unitPrice,total:i.total,image:nycItemImage(i.item)})), depositAmount:updated.depositAmount, payments:(updated.payments||[]).map(p=>({amount:p.amount,method:p.method,createdAt:formatDate(p.createdAt),recordedByName:p.recordedByName})), ...sharedDetails })
+        if (canEmailCustomer && !isCanceled && sendReceipt !== false) try { await sendEmail({to:email,subject:content.subject,html:content.html + reasonHtml}) } catch {}
+      }
+    }
+  } catch (err) { console.error(`[finalizePayment] Payment confirmation email error for order ${orderId}:`, err) }
+  return updated
+}
+
+export async function removePayment(paymentId: string) {
+  const payment = await prisma.payment.findUnique({ where: { id: paymentId } })
+  if (!payment) throw new Error('Payment not found')
+  const order = await prisma.order.findUnique({ where: { id: payment.orderId }, include: { payments: true } })
+  if (!order) throw new Error('Order not found')
+  await prisma.payment.delete({ where: { id: paymentId } })
+  const remainingPayments = order.payments.filter(p => p.id !== paymentId)
+  const newAmountPaid = remainingPayments.reduce((sum,p)=>sum+p.amount,0)
+  const newBalanceDue = Math.max(Math.round((order.totalAmount-newAmountPaid)*100)/100,0)
+  return prisma.order.update({ where:{id:order.id}, data:{amountPaid:newAmountPaid,balanceDue:newBalanceDue}, include:{items:{include:{item:true}},customer:true,payments:true} })
+}
+
+ + Number(updated.balanceDue).toFixed(2) + '</p>' +
+          '<p><a href="' + adminLink + '">Open the NYC order in Admin</a></p>' +
+          '<p style="font-size:12px;color:#666">This is an internal notice of an already recorded payment, not an additional charge. Review the order if a payment was unexpected.</p></div>',
+        idempotencyKey: 'nyc-payment-alert/' + result.staffAlertId,
+      })
+    } catch {
+      // A notification problem never reverses money that Stripe already captured.
+      console.error('[nyc-payment] Staff payment notification could not be sent')
+    }
+  }
 
   if (result.overpaidBy > 0) {
     console.error(`[finalizePayment] Overpayment recorded for order ${orderId}: $${result.overpaidBy.toFixed(2)} (${stripePaymentId || 'manual'})`)

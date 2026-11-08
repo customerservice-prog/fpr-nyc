@@ -72,8 +72,10 @@ jobs:
           const base='http://127.0.0.1:3100'
           const day=24*3600*1000
           const date=days=>new Date(Date.now()+days*day).toISOString().slice(0,10)
+          // Keep happy-path CI bookings within the live 2027+ public booking window.
+          const bookingDate=days=>{const raw=date(days);return raw<'2027-01-21'?'2027-01-21':raw}
           const get=async path=>{const r=await fetch(base+path,{cache:'no-store'});return {status:r.status,body:await r.json()}}
-          const quote=async body=>{const r=await fetch(base+'/api/checkout/quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({deliveryType:'delivery',eventDate:date(20),eventZip:'10471',items:[{id:'ci-tent',quantity:1},{id:'ci-chair',quantity:40}],...body})});return {status:r.status,body:await r.json()}}
+          const quote=async body=>{const r=await fetch(base+'/api/checkout/quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({deliveryType:'delivery',eventDate:bookingDate(20),eventZip:'10471',items:[{id:'ci-tent',quantity:1},{id:'ci-chair',quantity:40}],...body})});return {status:r.status,body:await r.json()}}
           ;(async()=>{
             const policy=await get('/api/checkout-policy')
             assert.equal(policy.body.configured,true);assert.equal(policy.body.policy.minimumOrderSubtotal,150);assert.equal(policy.body.policy.damageWaiverPercent,null)
@@ -97,7 +99,7 @@ jobs:
               [{damageWaiver:true},400,'damage_waiver_not_offered'],
               [{schedulingDetails:{eventStartTime:'14:00',exactDeliveryRequested:true,exactDeliveryTime:'10:00',pickupType:'flexible'}},400,'exact_delivery_not_offered'],
               [{schedulingDetails:{eventStartTime:'14:00',pickupType:'exact',exactPickupTime:'19:00'}},400,'exact_pickup_not_offered'],
-              [{eventDate:date(2)},400,'last_minute_not_offered'],
+              [{eventDate:date(2)},date(2)<'2027-01-01'?409:400,date(2)<'2027-01-01'?'nyc_2027_booking_only':'last_minute_not_offered'],
               [{items:[{id:'ci-chair',quantity:10}]},400,'below_minimum'],
               [{items:[{id:'ci-hidden',quantity:20}]},409,'item_unavailable'],
               [{items:[{id:'ci-unpriced',quantity:1},{id:'ci-tent',quantity:1}]},409,'item_unavailable'],
@@ -109,7 +111,7 @@ jobs:
             assert.equal(status.body.onlinePaymentsAvailable,false);assert.equal(status.body.onlineCheckoutAvailable,false)
             assert.equal(status.body.checks.checkoutPolicyConfigured,true);assert.equal(status.body.checks.deliveryFeesConfigured,true);assert.equal(status.body.checks.taxRateConfigured,true)
             assert.equal(status.body.checks.stripeKeysConfigured,false);assert.equal(status.body.checks.onlinePaymentsSwitchOn,false)
-            const order=await fetch(base+'/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({deliveryType:'delivery',firstName:'CI',lastName:'Only',email:'ci@example.invalid',eventDate:date(20),eventAddress:'1 CI Test Way',eventCity:'Bronx',eventZip:'10471',items:[{id:'ci-tent',quantity:1}],deliveryFee:80,totalAmount:1,depositAmount:1})})
+            const order=await fetch(base+'/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({deliveryType:'delivery',firstName:'CI',lastName:'Only',email:'ci@example.invalid',eventDate:bookingDate(20),eventAddress:'1 CI Test Way',eventCity:'Bronx',eventZip:'10471',items:[{id:'ci-tent',quantity:1}],deliveryFee:80,totalAmount:1,depositAmount:1})})
             assert.equal(order.status,503,'orders are refused before anything is written while payments are off')
             const chat=async message=>(await (await fetch(base+'/api/chat-assistant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})})).json()).answer
             assert.match(await chat('Is there sales tax on my order?'),/8\.875%/)

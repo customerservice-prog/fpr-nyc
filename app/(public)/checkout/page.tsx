@@ -852,6 +852,9 @@ export default function CheckoutPage() {
           <label htmlFor="checkout-notes" className="block text-sm font-medium text-dark mb-1">Notes</label>
           <textarea id="checkout-notes" {...register('notes')} rows={3} className="w-full border rounded px-3 py-2" />
         </div>
+        <p className="text-xs leading-5 text-gray-600">
+          Before continuing, review the <a href="/rental-policies" target="_blank" rel="noopener noreferrer" className="font-semibold underline">NYC Rental Policies</a> and <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="font-semibold underline">Privacy Policy</a>. Your final order total, deposit and contract terms are confirmed during checkout and on your rental agreement.
+        </p>
         <button type="submit" disabled={loading} className="btn-primary w-full">
           {loading ? 'Processing...' : 'Continue to Payment'}
         </button>

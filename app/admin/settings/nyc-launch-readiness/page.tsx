@@ -40,6 +40,10 @@ export default async function NycLaunchReadinessPage() {
           <strong className={replyMonitoringConfigured ? 'text-blue-700' : 'text-amber-700'}>{replyMonitoringConfigured ? 'Present — test inbox handling' : 'Incomplete'}</strong>
         </li>
         <li className="flex justify-between gap-4 border-b pb-3">
+          <span>Staff payment notifications</span>
+          <strong className={emailTransportConfigured ? 'text-blue-700' : 'text-amber-700'}>{emailTransportConfigured ? 'Implemented — verify first NYC payment notice' : 'Email sender not configured'}</strong>
+        </li>
+        <li className="flex justify-between gap-4 border-b pb-3">
           <span>Balance-reminder sending switch</span>
           <strong className={balanceRemindersEnabled ? 'text-blue-700' : 'text-amber-700'}>{balanceRemindersEnabled ? 'Enabled — verify send history' : 'Dry-run / not active'}</strong>
         </li>

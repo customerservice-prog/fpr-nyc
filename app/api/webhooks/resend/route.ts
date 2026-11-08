@@ -23,7 +23,7 @@ const STATUS_BY_EVENT: Record<string, string> = {
 
 // Must verify the original raw body, all three Svix headers, and 5-minute freshness.
 // A separate secret is required for NYC. Syracuse's webhook secret is never used here.
-export function verifyNycResendSignature(raw: string, headers: Headers, secret: string, nowMs = Date.now()) {
+function verifyNycResendSignature(raw: string, headers: Headers, secret: string, nowMs = Date.now()) {
   const eventId = headers.get('svix-id')
   const timestamp = headers.get('svix-timestamp')
   const signature = headers.get('svix-signature')

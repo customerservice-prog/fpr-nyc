@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { createElement } from 'react'
 const settingsSections = [
- {title:'General Config',items:['Company Info','Email Delivery','Google Search Visibility','Time Zone','Routing Settings','Google Integration','QuickBooks Online','Mailchimp','AWeber','Constant Contact','Text Messaging','Text Logs','Tax Rate','Misc Settings','API Info','Users','System Setup','System Settings','Locations','Company Types','Company Roles','HighLevel Connect']},
+ {title:'General Config',items:['Company Info','NYC Launch Readiness','Email Delivery','Google Search Visibility','Time Zone','Routing Settings','Google Integration','QuickBooks Online','Mailchimp','AWeber','Constant Contact','Text Messaging','Text Logs','Tax Rate','Misc Settings','API Info','Users','System Setup','System Settings','Locations','Company Types','Company Roles','HighLevel Connect']},
  {title:'Order Config',items:['Reminders','Order Options','References','Setup Surfaces','Coupons','Service Areas','Closed Dates','Misc Order Settings','Loyalty & Credit Types']},
  {title:'Documents',items:['General Documents','Source Code','Setup Surveys','Automatic Messages','Automatic Text Messaging','Text Message Templates','Email Templates for Orders','Email Templates for Marketing','FPRMail','Contract Options']},
  {title:'Products',items:['Categories','Items','Sorting','Schedule Profiles','Bulk Pricing','Addons','Product Sharing','Cost of Goods','Register Setup','Auto Charge','Recurring Profiles','Wedding Packages']},
@@ -9,6 +9,7 @@ const settingsSections = [
  {title:'Website',items:['Website Pages','Visual Builder','General Images','Gallery','Navigation Editor','Premium Features','Responsive Editor','Conversion Booster']},
 ]
 const workingLinks: Record<string,string> = {
+ 'NYC Launch Readiness':'/admin/settings/nyc-launch-readiness',
  'Email Delivery':'/admin/settings/email-delivery',
  'Google Search Visibility':'/admin/settings/search-visibility',
  'Website Pages':'/admin/settings/website-pages','Visual Builder':'/admin/settings/visual-builder','Wedding Packages':'/admin/wedding-packages','General Images':'/admin/settings/general-images','Navigation Editor':'/admin/settings/navigation-editor','Premium Features':'/admin/settings/premium-features','Responsive Editor':'/admin/settings/responsive-editor','Conversion Booster':'/admin/settings/conversion-booster',

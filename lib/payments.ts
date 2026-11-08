@@ -47,7 +47,7 @@ export async function finalizePayment(input: {
       const existing = await tx.payment.findUnique({ where: { stripePaymentId } })
       if (existing) {
         if (existing.orderId !== orderId) throw new Error('Payment belongs to another order')
-        return { updated: order, isFirstPayment: false, duplicate: true, overpaidBy: 0 }
+        return { updated: order, isFirstPayment: false, duplicate: true, overpaidBy: 0, staffAlertId: null as string | null }
       }
     }
     const totalWithNewTip = Math.round((Number(order.totalAmount || 0) + increase + tip) * 100) / 100
@@ -86,10 +86,41 @@ export async function finalizePayment(input: {
       },
       include: { items: { include: { item: true } }, customer: true, payments: true },
     })
-    return { updated, isFirstPayment: alreadyPaid === 0, duplicate: false, overpaidBy }
+    // The payment was just created inside the same transaction as the order update.
+    // Its new row ID is the unique notification key, including for manual payments.
+    const priorPaymentIds = new Set(order.payments.map(payment => payment.id))
+    const staffAlertId = updated.payments.find(payment => !priorPaymentIds.has(payment.id))?.id || null
+    return { updated, isFirstPayment: alreadyPaid === 0, duplicate: false, overpaidBy, staffAlertId }
   })
   const { updated, isFirstPayment } = result
   if (result.duplicate) return updated
+
+  // An office email is informational only: no extra charge, and no sending for a duplicate Stripe webhook.
+  // This occurs after the DB transaction commits; email failures cannot undo a captured payment.
+  if (result.staffAlertId) {
+    try {
+      const escapeHtml = (value: string) => value.replace(/[&<>"']/g, character =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as Record<string, string>)[character] || character
+      )
+      const orderNumber = String(updated.orderNumber).replace(/[\r\n]/g, ' ').slice(0, 100)
+      const adminLink = NYC_PUBLIC_ORIGIN + '/admin/orders/' + encodeURIComponent(updated.id)
+      await sendEmail({
+        to: ownerNotificationRecipients(),
+        subject: '[NYC Payment] $' + paidAmount.toFixed(2) + ' - #' + orderNumber,
+        html: '<div style="font-family:Arial,sans-serif;max-width:600px">' +
+          '<h2>Payment recorded — NYC / Riverdale</h2>' +
+          '<p><strong>Order:</strong> #' + escapeHtml(orderNumber) + '<br/>' +
+          '<strong>New payment:</strong> $' + paidAmount.toFixed(2) + '<br/>' +
+          '<strong>Total paid:</strong> $' + Number(updated.amountPaid).toFixed(2) + '<br/>' +
+          '<strong>Remaining balance:</strong> $' + Number(updated.balanceDue).toFixed(2) + '</p>' +
+          '<p><a href="' + adminLink + '">Open the NYC order in Admin</a></p>' +
+          '<p style="font-size:12px;color:#666">This is an internal notice of an already recorded payment, not an additional charge. Review unexpected payments.</p></div>',
+        idempotencyKey: 'nyc-payment-alert/' + result.staffAlertId,
+      })
+    } catch {
+      console.error('[nyc-payment] Staff payment notification could not be sent')
+    }
+  }
 
   if (result.overpaidBy > 0) {
     console.error(`[finalizePayment] Overpayment recorded for order ${orderId}: $${result.overpaidBy.toFixed(2)} (${stripePaymentId || 'manual'})`)

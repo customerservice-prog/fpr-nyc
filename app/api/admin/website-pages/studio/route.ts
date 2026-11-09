@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { confirmNycPageAdminPassword } from '@/lib/confirmNycPageAdminPassword'
 import { normalizeNycStudioContent, parseNycStudioContent } from '@/lib/nycPageStudio'
+import { localizeNycContactText } from '@/lib/nycCatalogCore.mjs'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       page: { id: page.id, slug: page.slug, title: page.title, isPublished: page.isPublished, updatedAt: page.updatedAt },
       title: draft?.title ?? page.title,
-      blocks: parseNycStudioContent(content),
+      blocks: parseNycStudioContent(content ? localizeNycContactText(content) : content),
       draftUpdatedAt: draft?.updatedAt ?? null,
       hasDraft: Boolean(draft),
     }, { headers: { 'Cache-Control': 'no-store' } })

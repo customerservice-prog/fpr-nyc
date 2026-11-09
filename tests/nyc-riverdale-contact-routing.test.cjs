@@ -79,3 +79,42 @@ test('owner notifications stay in shared daily inbox after public Gmail change',
   const notifications = load('lib/orderLifecycleNotifications.ts', { '@/lib/utils': {}, '@/lib/nycPublicOrigin': origin, '@/lib/nycEmail': location }, { OWNER_NOTIFICATION_EMAIL: 'customerservice@friendlypartyrental.com' })
   assert.equal(notifications.ownerNotificationRecipients(), 'customerservice@friendlypartyrental.com')
 })
+
+
+test('RentSketch quote without customer email stays a Riverdale inquiry, never a Syracuse contact', async () => {
+  const crypto = require('node:crypto')
+  const secret = 'test-only-rentsketch-secret'
+  let saved, sent
+  const route = load('app/api/integrations/rentsketch/route.ts', {
+    crypto,
+    'next/server': { NextResponse: { json(body, options = {}) { return { body, status: options.status || 200 } } } },
+    '@/lib/prisma': { prisma: { contactMessage: { async upsert(value) { saved = value } } } },
+    '@/lib/email': { async sendEmail(value) { sent = value; return { success: true, simulated: false } } },
+    '@/lib/nycEmail': location,
+    '@/lib/nycPublicOrigin': origin,
+    '@/lib/nycRentSketchOrderAccess': { lookupNycRentSketchOrder: async () => null },
+    '@/lib/nycRentSketchInventory': { NycRentSketchInventoryError: class extends Error {}, nycRentSketchInventorySnapshot: async () => ({}) },
+    '@/lib/nycRentSketchOrderSync': { NycRentSketchOrderSyncError: class extends Error {}, syncNycRentSketchOrder: async () => ({}) },
+  }, { RENTSKETCH_WEBHOOK_SECRET: secret })
+  const payload = JSON.stringify({
+    type: 'quote_request.created',
+    data: { id: 'qa-phone-only', customerName: 'Customer Without Email', customerPhone: '202-555-0100' },
+  })
+  const signature = crypto.createHmac('sha256', secret).update(payload).digest('hex')
+  const result = await route.POST({
+    text: async () => payload,
+    headers: { get: name => name === 'x-rentsketch-signature' ? signature : null },
+  })
+  assert.equal(result.status, 200)
+  assert.equal(saved.create.email, location.NYC_EMAIL_ADDRESS)
+  assert.equal(sent.to, location.NYC_NOTIFICATION_EMAIL)
+  assert.equal(sent.replyTo, undefined)
+  assert.match(saved.create.message, /Customer email: Not provided/)
+  assert.match(sent.html, /<strong>Email:<\/strong> Not provided/)
+})
+
+test('NYC Google Calendar setup never directs staff to a Syracuse account', () => {
+  const source = fs.readFileSync('components/admin/MediaPanel.tsx', 'utf8')
+  assert.match(source, /calendarStatus\.expectedEmail \|\| NYC_EMAIL_ADDRESS/)
+  assert.doesNotMatch(source, /calendarStatus\.expectedEmail \|\| 'customerservice@friendlypartyrental\.com'/)
+})

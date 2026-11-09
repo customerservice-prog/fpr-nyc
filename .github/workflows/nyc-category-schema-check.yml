@@ -62,5 +62,7 @@ jobs:
         run: node --test tests/nyc-location-isolation.test.cjs tests/nyc-delivery.test.cjs tests/nyc-tracking-isolation.test.cjs tests/nyc-public-policies.test.cjs tests/nyc-google-calendar-account-isolation.test.cjs tests/nyc-resend-delivery-audit.test.cjs tests/nyc-staff-payment-alerts.test.cjs tests/nyc-payment-audit.test.cjs tests/nyc-social-profile-isolation.test.cjs tests/nyc-physical-inventory-verification.test.cjs
       - name: NYC physical inventory launch-readiness summary
         run: node --test tests/nyc-physical-inventory-readiness.test.cjs
+      - name: NYC draft-first page publishing and reauthentication
+        run: node --test tests/nyc-website-page-publish-safety.test.cjs
       - run: npx tsc --noEmit
       - run: npm run build

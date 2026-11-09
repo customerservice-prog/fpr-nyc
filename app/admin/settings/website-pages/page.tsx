@@ -74,6 +74,7 @@ if (loading) return <div className="p-4">Loading...</div>
 return (
 <div className="p-4">
 <h1 className="text-xl font-bold text-dark mb-2">Website Pages</h1>
+<p className="mb-3 text-sm"><a href="/admin/website/pages" className="inline-block rounded-lg bg-blue-700 px-4 py-2 font-bold text-white">Open visual NYC Page Studio</a></p>
 <p className="mb-4 text-sm text-gray-600">New NYC pages are saved privately. Publishing, unpublishing, and deletion require your admin password and confirmation.</p>
 <div className="bg-white rounded shadow p-4 mb-4">
 <div className="grid md:grid-cols-2 gap-2 mb-2">

@@ -64,5 +64,7 @@ jobs:
         run: node --test tests/nyc-physical-inventory-readiness.test.cjs
       - name: NYC draft-first page publishing and reauthentication
         run: node --test tests/nyc-website-page-publish-safety.test.cjs
+      - name: NYC multi-page studio private drafts, preview and publication regressions
+        run: node --test tests/nyc-page-studio.test.cjs
       - run: npx tsc --noEmit
       - run: npm run build

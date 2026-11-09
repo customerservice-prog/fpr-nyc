@@ -11,7 +11,7 @@ function transpile(file, mock = () => { throw Error('Unexpected runtime import')
   const module = { exports: {} }
   vm.runInNewContext(js, {
     module, exports: module.exports, require: mock,
-    console, Date, JSON, Number, String, Object, Array, Map, Set, Error, RegExp, URL,
+    console, Date, JSON, Number, String, Object, Array, Map, Set, Error, RegExp, URL, process: { env: { NODE_ENV: 'production' } },
   }, { filename: file })
   return module.exports
 }

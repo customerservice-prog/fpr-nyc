@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { wallClockToInstant } from '@/lib/meetingTime'
 import { formatMeetingTime, meetingDraft, mergeMeetings, type CalendarEvent, type Meeting, type MeetingView } from './meeting-view'
 import InterviewTestSheet from './InterviewTestSheet'
+import { NYC_EMAIL_ADDRESS } from '@/lib/nycEmail'
 
 interface CalendarStatus {
   configured: boolean
@@ -375,7 +376,7 @@ export default function MediaPanel() {
     {callFallback && <div className="border-b bg-blue-50 px-5 py-3 text-sm"><a className="font-bold text-blue-700 underline" href={callFallback} target="_blank" rel="noopener noreferrer">Open video call</a><span className="ml-2 text-slate-600">Your meeting management stays here.</span></div>}
 
     {showGoogleSetup && calendarStatus?.canManageConnection && <div className="grid gap-4 border-b border-amber-200 bg-amber-50 p-5 lg:grid-cols-2">
-      <div><h4 className="font-black text-slate-900">One-time Google setup</h4><p className="mt-2 text-sm leading-6 text-slate-700">Use <strong>{calendarStatus.expectedEmail || 'customerservice@friendlypartyrental.com'}</strong>. In Google Cloud, enable Google Calendar API and Google Search Console API, then create an OAuth 2.0 Web application client with this exact redirect URI.</p><a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-bold text-amber-900 underline">Google Cloud credentials</a></div>
+      <div><h4 className="font-black text-slate-900">One-time Google setup</h4><p className="mt-2 text-sm leading-6 text-slate-700">Use <strong>{calendarStatus.expectedEmail || NYC_EMAIL_ADDRESS}</strong>. In Google Cloud, enable Google Calendar API and Google Search Console API, then create an OAuth 2.0 Web application client with this exact redirect URI.</p><a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-bold text-amber-900 underline">Google Cloud credentials</a></div>
       <div className="space-y-3 rounded-xl border border-amber-200 bg-white p-4">
         <label className="block text-xs font-bold text-slate-600">Authorized redirect URI<div className="mt-1 flex gap-2"><input readOnly value={calendarStatus.callbackUrl || ''} className={input + ' min-w-0'} /><button type="button" onClick={() => copyText(calendarStatus.callbackUrl, 'Redirect URI')} className={button}>Copy</button></div></label>
         <label className="block text-xs font-bold text-slate-600">Google OAuth Client ID<input value={googleClientId} onChange={event => setGoogleClientId(event.target.value)} className={input + ' mt-1'} /></label>

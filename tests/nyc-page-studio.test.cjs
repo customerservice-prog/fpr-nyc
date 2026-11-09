@@ -96,6 +96,7 @@ function setupApi() {
     if (id === '@/lib/prisma') return {prisma}
     if (id === '@/lib/confirmNycPageAdminPassword') return {confirmNycPageAdminPassword:async (_,pwd)=>pwd==='strong-admin-password'}
     if (id === '@/lib/nycPageStudio') return studioLib
+    if (id === '@/lib/nycCatalogCore.mjs') return {localizeNycContactText:raw=>raw}
     throw Error('Unexpected dependency '+id)
   })
   function request(data, origin='https://friendlypartyrentalnyc.com') {

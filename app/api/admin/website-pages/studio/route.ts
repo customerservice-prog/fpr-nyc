@@ -115,6 +115,9 @@ export async function POST(request: NextRequest) {
       if (!draft || draft.updatedAt.getTime() !== expected.getTime()) {
         throw new Error('STALE_DRAFT')
       }
+      if (parseNycStudioContent(draft.content).length === 0) {
+        throw new Error('EMPTY_DRAFT')
+      }
       // Conditional delete refuses to publish if another editor changed the draft.
       const removed = await tx.nycCustomPageDraft.deleteMany({
         where: { pageId, updatedAt: expected },
@@ -130,6 +133,9 @@ export async function POST(request: NextRequest) {
   } catch (cause) {
     if (cause instanceof Error && cause.message === 'STALE_DRAFT') {
       return replyError('This draft changed in another session. Reload and review before publishing.', 409)
+    }
+    if (cause instanceof Error && cause.message === 'EMPTY_DRAFT') {
+      return replyError('Add at least one section before publishing this NYC page.')
     }
     console.error('[nyc-page-studio] write failed', cause)
     return replyError('Unable to save or publish NYC page changes', 503)

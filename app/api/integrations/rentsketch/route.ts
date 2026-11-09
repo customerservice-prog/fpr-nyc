@@ -2,7 +2,7 @@ import { createHmac, randomUUID, timingSafeEqual } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendEmail } from '@/lib/email'
-import { NYC_NOTIFICATION_EMAIL } from '@/lib/nycEmail'
+import { NYC_EMAIL_ADDRESS, NYC_NOTIFICATION_EMAIL } from '@/lib/nycEmail'
 import { NYC_PUBLIC_ORIGIN } from '@/lib/nycPublicOrigin'
 import { lookupNycRentSketchOrder } from '@/lib/nycRentSketchOrderAccess'
 import { NycRentSketchInventoryError, nycRentSketchInventorySnapshot } from '@/lib/nycRentSketchInventory'
@@ -117,7 +117,9 @@ export async function POST(req: NextRequest) {
 
   const requestId = String(d.id || randomUUID()).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 80)
   const name = String(d.customerName || 'RentSketch customer').slice(0, 160)
-  const email = String(d.customerEmail || '').slice(0, 254) || 'customerservice@friendlypartyrental.com'
+  const customerEmail = String(d.customerEmail || '').trim().slice(0, 254)
+  // Preserve phone-only inquiries in NYC without mislabeling a Syracuse inbox as the customer.
+  const email = customerEmail || NYC_EMAIL_ADDRESS
   const phone = String(d.customerPhone || '').slice(0, 50) || null
   const eventDateText = String(d.eventDate || '').slice(0, 40)
   const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(eventDateText) ? new Date(eventDateText + 'T12:00:00Z') : null
@@ -133,6 +135,7 @@ export async function POST(req: NextRequest) {
   const message = [
     '[RENTSKETCH NYC QUOTE REQUEST]',
     'Request: ' + requestId,
+    'Customer email: ' + (customerEmail || 'Not provided'),
     'Design: ' + String(d.designId || 'Not provided').slice(0, 120),
     'Source: ' + source,
     'Event type: ' + String(d.eventType || 'Not provided').slice(0, 120),
@@ -167,11 +170,11 @@ export async function POST(req: NextRequest) {
     const notification = await sendEmail({
       to: NYC_NOTIFICATION_EMAIL,
       subject: 'New RentSketch quote request — ' + name,
-      replyTo: email,
+      replyTo: customerEmail || undefined,
       html: `<div style="font-family:Arial,sans-serif;max-width:680px;margin:auto;color:#172536">
         <h2>New Riverdale RentSketch quote request</h2>
         <p>A customer sent an event layout from Friendly Party Rental NYC. Confirm availability, site details, delivery and final pricing before booking.</p>
-        <p><strong>Customer:</strong> ${esc(name)}<br><strong>Email:</strong> ${esc(email)}<br><strong>Phone:</strong> ${esc(phone || 'Not provided')}<br><strong>Event date:</strong> ${esc(eventDateText || 'Not provided')}</p>
+        <p><strong>Customer:</strong> ${esc(name)}<br><strong>Email:</strong> ${esc(customerEmail || 'Not provided')}<br><strong>Phone:</strong> ${esc(phone || 'Not provided')}<br><strong>Event date:</strong> ${esc(eventDateText || 'Not provided')}</p>
         <div style="background:#f5f7f8;border-radius:10px;padding:14px;white-space:pre-wrap">${esc(message)}</div>
         <p><a href="${NYC_PUBLIC_ORIGIN}/admin/planning-inquiries">Open Riverdale Planning Inquiries</a></p>
       </div>`,

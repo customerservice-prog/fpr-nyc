@@ -1,5 +1,3 @@
-import type { ReactNode } from 'react'
-
 export interface Block {
   id: string
   type: string

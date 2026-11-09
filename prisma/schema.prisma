@@ -824,6 +824,17 @@ model WebsitePage {
   content String?
   isPublished Boolean @default(true)
   updatedAt DateTime @updatedAt
+  nycDraft NycCustomPageDraft?
+}
+
+// Isolated unpublished edits for NYC custom pages. The public WebsitePage is
+// unchanged until an administrator explicitly publishes this draft.
+model NycCustomPageDraft {
+  pageId String @id
+  title String
+  content String
+  updatedAt DateTime @updatedAt
+  page WebsitePage @relation(fields: [pageId], references: [id], onDelete: Cascade)
 }
 
 model GeneralImage {

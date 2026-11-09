@@ -1281,3 +1281,21 @@ model NycEmailDeliveryEvent {
 
   @@index([providerMessageId, eventAt])
 }
+
+
+// Independent NYC physical or supplier-confirmed stock, never overwritten by
+// the Syracuse catalog mirror. These values are operational attestations,
+// not inventory counts used automatically by public checkout.
+model NycPhysicalStockVerification {
+  itemSlug String @id
+  status String @default("unverified") // unverified | confirmed | unavailable
+  verifiedQuantity Int @default(0)
+  source String @default("unknown") // nyc_stock | partner_committed | unknown
+  notes String?
+  verifiedBy String?
+  verifiedAt DateTime?
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([verifiedAt])
+}

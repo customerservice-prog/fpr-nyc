@@ -122,6 +122,7 @@ export default function ItemsPage() {
     <div className="p-4">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold text-dark">Items</h1>
+        <Link href="/admin/inventory/physical-verification" className="ml-auto text-sm font-semibold text-blue-700 underline">Verify NYC physical stock</Link>
         <Link href="/admin/items/new" className="btn-admin">Add New</Link>
       </div>
 

@@ -59,6 +59,6 @@ jobs:
           })().finally(()=>p.$disconnect()).catch(e=>{console.error(e);process.exitCode=1})
           JS
       - name: NYC isolation and delivery/payment safeguards
-        run: node --test tests/nyc-location-isolation.test.cjs tests/nyc-delivery.test.cjs tests/nyc-tracking-isolation.test.cjs tests/nyc-public-policies.test.cjs tests/nyc-google-calendar-account-isolation.test.cjs tests/nyc-resend-delivery-audit.test.cjs tests/nyc-staff-payment-alerts.test.cjs tests/nyc-payment-audit.test.cjs tests/nyc-social-profile-isolation.test.cjs
+        run: node --test tests/nyc-location-isolation.test.cjs tests/nyc-delivery.test.cjs tests/nyc-tracking-isolation.test.cjs tests/nyc-public-policies.test.cjs tests/nyc-google-calendar-account-isolation.test.cjs tests/nyc-resend-delivery-audit.test.cjs tests/nyc-staff-payment-alerts.test.cjs tests/nyc-payment-audit.test.cjs tests/nyc-social-profile-isolation.test.cjs tests/nyc-physical-inventory-verification.test.cjs
       - run: npx tsc --noEmit
       - run: npm run build

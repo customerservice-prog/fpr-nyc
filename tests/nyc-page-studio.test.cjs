@@ -122,6 +122,18 @@ test('saving a private draft cannot modify a published NYC page', async () => {
   assert.equal(f.getUpdates(),0)
 })
 
+test('server refuses to publish an empty NYC private page', async () => {
+  const f=setupApi()
+  const saved=await f.route.POST(f.request({action:'save',pageId:'page-1',title:'Empty pending page',blocks:[]}))
+  const result=await f.route.POST(f.request({
+    action:'publish',pageId:'page-1',expectedDraftUpdatedAt:saved.body.draftUpdatedAt.toISOString(),
+    adminPassword:'strong-admin-password',
+  }))
+  assert.equal(result.status,400)
+  assert.equal(f.getUpdates(),0)
+  assert.equal(f.page.title,'Live headline')
+})
+
 test('publishing requires NYC admin password and exact current draft revision', async () => {
   const f=setupApi()
   const saved=await f.route.POST(f.request({action:'save',pageId:'page-1',title:'Published from private draft',blocks:[goodBlock]}))

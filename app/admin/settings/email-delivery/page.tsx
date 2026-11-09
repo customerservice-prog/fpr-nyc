@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
 import { NYC_EMAIL_ADDRESS, NYC_NOTIFICATION_EMAIL, NYC_EMAIL_TAG } from '@/lib/nycEmail'
+import NycOfficeEmailSmokeTest from '@/components/admin/NycOfficeEmailSmokeTest'
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Riverdale Email Delivery', robots: { index: false, follow: false } }
 export default async function EmailDeliveryPage() {
@@ -22,6 +23,7 @@ export default async function EmailDeliveryPage() {
       <p className="mt-2">Active transport: {resendConfigured ? 'Resend transactional email' : smtpConfigured ? 'SMTP' : 'none'}. This screen does not send messages or expose stored credentials.</p>
     </section>
     <p><Link href="/admin/settings/email-delivery/audit" className="font-semibold text-blue-700 underline">View NYC transactional email delivery audit</Link></p>
+    <NycOfficeEmailSmokeTest />
     <section className="rounded-xl border bg-white p-5">
       <h2 className="text-lg font-bold">One inbox, unmistakable location</h2>
       <p className="mt-2 break-all">Public Riverdale email: {NYC_EMAIL_ADDRESS}</p><p className="mt-2 break-all">Staff notifications: {NYC_NOTIFICATION_EMAIL}</p>

@@ -66,5 +66,7 @@ jobs:
         run: node --test tests/nyc-website-page-publish-safety.test.cjs
       - name: NYC multi-page studio private drafts, preview and publication regressions
         run: node --test tests/nyc-page-studio.test.cjs
+      - name: NYC internal email test, no-customer/duplicate protections
+        run: node --test tests/nyc-office-email-smoke-test.test.cjs
       - run: npx tsc --noEmit
       - run: npm run build

@@ -82,3 +82,18 @@ test('public NYC availability and checkout capacity apply the same physical stoc
   assert.match(inventory,/tx\.nycPhysicalStockVerification\.findMany/)
   assert.doesNotMatch(inventory,/update.*nycPhysicalStockVerification/)
 })
+
+test('NYC new-checkout readiness requires actual staff-confirmed merchandise, not a Stripe key alone', () => {
+  const status = fs.readFileSync('app/api/payments/status/route.ts', 'utf8')
+  const admin = fs.readFileSync('components/admin/NycPaymentReadiness.tsx', 'utf8')
+  assert.match(status, /atLeastOneNycProductVerified: false/)
+  assert.match(status, /prisma\.nycPhysicalStockVerification\.findMany/)
+  assert.match(status, /verifiedAt: \{ not: null \}/)
+  assert.match(status, /checks\.atLeastOneNycProductVerified = verified\.some/)
+  assert.match(status, /onlineCheckoutAvailable = Object\.values\(checks\)\.every\(Boolean\)/)
+  assert.match(admin, /atLeastOneNycProductVerified/)
+  // Existing balances and pay links must remain independent of physical-stock
+  // verification; they are obligations already on the books.
+  const paymentFormula = status.split('const onlinePaymentsAvailable =')[1].split('const onlineCheckoutAvailable')[0]
+  assert.doesNotMatch(paymentFormula, /atLeastOneNycProductVerified/)
+})

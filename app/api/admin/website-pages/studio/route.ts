@@ -61,6 +61,10 @@ export async function GET(request: NextRequest) {
       page: { id: page.id, slug: page.slug, title: page.title, isPublished: page.isPublished, updatedAt: page.updatedAt },
       title: draft?.title ?? page.title,
       blocks: parseNycStudioContent(content ? localizeNycContactText(content) : content),
+      // Read-only snapshot of the actually published page. It must never be
+      // replaced by the private draft in the live-vs-draft preview.
+      liveTitle: page.title,
+      liveBlocks: parseNycStudioContent(page.content ? localizeNycContactText(page.content) : page.content),
       draftUpdatedAt: draft?.updatedAt ?? null,
       hasDraft: Boolean(draft),
     }, { headers: { 'Cache-Control': 'no-store' } })

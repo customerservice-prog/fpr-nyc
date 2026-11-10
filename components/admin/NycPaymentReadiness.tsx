@@ -20,6 +20,7 @@ const checks: Array<[string, string]> = [
   ['depositRuleConfigured', 'Approved NYC deposit rule stored'],
   ['checkoutPolicyConfigured', 'NYC checkout policy configured'],
   ['deliveryFeesConfigured', 'At least one approved delivery ZIP has a fee'],
+  ['atLeastOneNycProductVerified', 'At least one published NYC item has confirmed stock or supplier commitment'],
 ]
 
 export default function NycPaymentReadiness() {
@@ -65,7 +66,7 @@ export default function NycPaymentReadiness() {
           <p className={data.onlineCheckoutAvailable ? 'font-bold text-green-700' : 'font-bold text-amber-700'}>{data.onlineCheckoutAvailable ? 'Configuration checks passed' : 'Not ready / needs attention'}</p>
         </div>
       </div>
-      <p className="text-sm text-gray-600">Stripe mode: {data.mode || 'unverified'}. Passing configuration checks does not substitute for a controlled end-to-end checkout and receipt test.</p>
+      <p className="text-sm text-gray-600">Stripe mode: {data.mode || 'unverified'}. A verified item does not establish that the full NYC catalog, crews or delivery dates are ready. Passing configuration checks does not substitute for a controlled end-to-end checkout and receipt test.</p>
       <ul className="divide-y rounded-lg border">
         {checks.map(([key, label]) => <li key={key} className="flex items-start justify-between gap-3 px-3 py-2 text-sm">
           <span>{label}</span>

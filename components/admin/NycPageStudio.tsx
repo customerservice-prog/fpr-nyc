@@ -1,14 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowDown, ArrowUp, Check, ChevronLeft, ExternalLink, Eye, FilePlus2,
-  History, LayoutTemplate, Monitor, Plus, Save, Smartphone, Tablet, Trash2,
-  Undo2, UploadCloud, X,
+  ArrowDown, ArrowUp, ChevronLeft, Copy, ExternalLink, Eye, FilePlus2,
+  LayoutTemplate, Monitor, Plus, Redo2, Save, Smartphone, Tablet, Trash2,
+  Undo2, UploadCloud,
 } from 'lucide-react'
 import { RenderBlock, type Block } from '@/components/public/NycCustomPageBlocks'
 import { NYC_STUDIO_FIELDS, NYC_STUDIO_TYPES, niceNycStudioType } from '@/lib/nycPageStudio'
+import { EMPTY_NYC_PAGE_HISTORY, recordNycPageEdit, undoNycPageEdit, redoNycPageEdit, type NycPageEditHistory, type NycPageSnapshot } from '@/lib/nycPageEditHistory'
 
 type PageRow = {
   id: string; slug: string; title: string; isPublished: boolean; hasDraft: boolean
@@ -17,6 +18,8 @@ type PageDetail = {
   page: PageRow
   title: string
   blocks: Block[]
+  liveTitle: string
+  liveBlocks: Block[]
   hasDraft: boolean
   draftUpdatedAt: string | null
 }
@@ -43,6 +46,11 @@ export default function NycPageStudio() {
   const [page, setPage] = useState<PageRow | null>(null)
   const [title, setTitle] = useState('')
   const [blocks, setBlocks] = useState<Block[]>([])
+  const [liveTitle, setLiveTitle] = useState('')
+  const [liveBlocks, setLiveBlocks] = useState<Block[]>([])
+  const [previewMode, setPreviewMode] = useState<'draft' | 'live'>('draft')
+  const editsRef = useRef<NycPageEditHistory>({ ...EMPTY_NYC_PAGE_HISTORY })
+  const [historyCounts, setHistoryCounts] = useState({ undo: 0, redo: 0 })
   const [savedSnapshot, setSavedSnapshot] = useState('')
   const [draftVersion, setDraftVersion] = useState<string | null>(null)
   const [hasDraft, setHasDraft] = useState(false)
@@ -63,6 +71,30 @@ export default function NycPageStudio() {
   const legacyHtml = blocks.some(block => block.type === 'html')
   const selected = blocks.find(block => block.id === selectedBlock) as StudioBlock | undefined
   const selectedIndex = blocks.findIndex(block => block.id === selectedBlock)
+  const previewBlocks = previewMode === 'live' && page?.isPublished ? liveBlocks : blocks
+  const previewTitle = previewMode === 'live' && page?.isPublished ? liveTitle : title
+
+  function setHistory(next: NycPageEditHistory) {
+    editsRef.current = next
+    setHistoryCounts({ undo: next.past.length, redo: next.future.length })
+  }
+  function editPage(next: NycPageSnapshot, group: string) {
+    setHistory(recordNycPageEdit(editsRef.current, { title, blocks }, next, group))
+    setTitle(next.title)
+    setBlocks(next.blocks)
+    setError('')
+  }
+  function travelHistory(direction: 'undo' | 'redo') {
+    const result = direction === 'undo'
+      ? undoNycPageEdit(editsRef.current, { title, blocks })
+      : redoNycPageEdit(editsRef.current, { title, blocks })
+    if (!result) return
+    setHistory(result.history)
+    setTitle(result.snapshot.title)
+    setBlocks(result.snapshot.blocks)
+    if (!result.snapshot.blocks.some(block => block.id === selectedBlock)) setSelectedBlock(result.snapshot.blocks[0]?.id || null)
+    setError('')
+  }
 
   const fetchList = useCallback(async () => {
     const data = await api<{ pages: PageRow[] }>('/api/admin/website-pages/studio')
@@ -78,6 +110,10 @@ export default function NycPageStudio() {
       setPage(data.page)
       setTitle(data.title)
       setBlocks(data.blocks)
+      setLiveTitle(data.liveTitle)
+      setLiveBlocks(data.liveBlocks)
+      setPreviewMode('draft')
+      setHistory({ ...EMPTY_NYC_PAGE_HISTORY })
       setSelectedBlock(data.blocks[0]?.id || null)
       setHasDraft(data.hasDraft)
       setDraftVersion(data.draftUpdatedAt)
@@ -108,28 +144,34 @@ export default function NycPageStudio() {
     await loadPage(id)
   }
 
-  function changeBlock(id: string, patch: Record<string, string>) {
-    setBlocks(previous => previous.map(block => block.id === id ? { ...block, ...patch } : block))
+  function changeBlock(id: string, patch: Record<string, string>, fieldKey: string) {
+    editPage({ title, blocks: blocks.map(block => block.id === id ? { ...block, ...patch } : block) }, 'field:' + id + ':' + fieldKey)
   }
   function addBlock() {
     if (blocks.length >= 60) { setError('A page supports up to 60 sections.'); return }
     const id = 'section_' + globalThis.crypto.randomUUID().replaceAll('-', '')
     const block = { id, type: newBlockType } as Block
-    setBlocks(previous => [...previous, block])
+    editPage({ title, blocks: [...blocks, block] }, 'add:' + id)
     setSelectedBlock(id)
-    setError('')
+  }
+  function duplicateBlock(index: number) {
+    if (blocks.length >= 60) { setError('A page supports up to 60 sections.'); return }
+    const id = 'section_' + globalThis.crypto.randomUUID().replaceAll('-', '')
+    const duplicate = { ...blocks[index], id } as Block
+    const updated = [...blocks]
+    updated.splice(index + 1, 0, duplicate)
+    editPage({ title, blocks: updated }, 'duplicate:' + id)
+    setSelectedBlock(id)
   }
   function moveBlock(index: number, offset: number) {
     const nextIndex = index + offset
     if (nextIndex < 0 || nextIndex >= blocks.length) return
-    setBlocks(previous => {
-      const updated = [...previous]
-      ;[updated[index], updated[nextIndex]] = [updated[nextIndex], updated[index]]
-      return updated
-    })
+    const updated = [...blocks]
+    ;[updated[index], updated[nextIndex]] = [updated[nextIndex], updated[index]]
+    editPage({ title, blocks: updated }, 'move:' + blocks[index].id)
   }
   function deleteBlock(id: string) {
-    setBlocks(previous => previous.filter(block => block.id !== id))
+    editPage({ title, blocks: blocks.filter(block => block.id !== id) }, 'remove:' + id)
     setSelectedBlock(null)
   }
   async function saveDraft() {
@@ -138,7 +180,7 @@ export default function NycPageStudio() {
     try {
       const data = await api<{ saved: boolean; draftUpdatedAt: string }>(
         '/api/admin/website-pages/studio',
-        asJson({ action: 'save', pageId: page.id, title, blocks }),
+        asJson({ action: 'save', pageId: page.id, title, blocks, expectedDraftUpdatedAt: draftVersion }),
       )
       setSavedSnapshot(snapshot)
       setDraftVersion(data.draftUpdatedAt)
@@ -171,6 +213,8 @@ export default function NycPageStudio() {
       setHasDraft(false)
       setDraftVersion(null)
       setSavedSnapshot(snapshot)
+      setLiveTitle(title)
+      setLiveBlocks(blocks)
       setStatus('Published live — your NYC page is now visible to customers')
       await fetchList()
     } catch (cause) {
@@ -251,7 +295,7 @@ export default function NycPageStudio() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <label htmlFor="nyc-page-title" className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Page title</label>
-                    <input id="nyc-page-title" value={title} onChange={e => setTitle(e.target.value)} className="block w-full rounded-lg border px-3 py-2 text-xl font-black" />
+                    <input id="nyc-page-title" value={title} onChange={e => editPage({ title: e.target.value, blocks }, 'title')} className="block w-full rounded-lg border px-3 py-2 text-xl font-black" />
                     <p className="mt-2 truncate text-xs text-slate-500">Public URL: /{page.slug} · {page.isPublished ? 'Currently published' : 'Private / unpublished'}</p>
                   </div>
                   <div className="flex items-center gap-2 rounded-xl border p-1">
@@ -263,6 +307,8 @@ export default function NycPageStudio() {
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <button type="button" title="Undo last edit" onClick={() => travelHistory('undo')} disabled={busy || historyCounts.undo === 0} className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-sm font-semibold disabled:opacity-40"><Undo2 size={16} /> Undo</button>
+                  <button type="button" title="Redo edit" onClick={() => travelHistory('redo')} disabled={busy || historyCounts.redo === 0} className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-sm font-semibold disabled:opacity-40"><Redo2 size={16} /> Redo</button>
                   <button onClick={() => void saveDraft()} disabled={busy || legacyHtml || (!dirty && hasDraft)} className="inline-flex items-center gap-2 rounded-xl border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-bold text-blue-800 disabled:opacity-40"><Save size={16} /> Save private draft</button>
                   <button onClick={() => void publish()} disabled={busy || legacyHtml || (!dirty && !hasDraft && page.isPublished)} className="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white disabled:opacity-40"><UploadCloud size={16} /> Publish Live</button>
                   <button onClick={() => void discardDraft()} disabled={busy || (!dirty && !hasDraft)} className="inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-sm font-semibold disabled:opacity-40"><Undo2 size={16} /> Discard draft</button>
@@ -274,24 +320,27 @@ export default function NycPageStudio() {
               <div className="rounded-2xl bg-white p-3 shadow-sm sm:p-5">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                   <p className="inline-flex items-center gap-1 text-xs font-bold text-slate-600"><Eye size={15} /> Customer-style page preview · {device}</p>
-                  <p className="text-xs text-slate-500">Draft preview — not publicly accessible</p>
+                  <div className="flex items-center gap-2 text-xs">
+                    <button type="button" onClick={() => setPreviewMode('draft')} className={'rounded-lg px-3 py-2 font-bold ' + (previewMode === 'draft' ? 'bg-blue-700 text-white' : 'border')}>Private draft</button>
+                    <button type="button" disabled={!page.isPublished} onClick={() => setPreviewMode('live')} className={'rounded-lg px-3 py-2 font-bold disabled:opacity-40 ' + (previewMode === 'live' ? 'bg-blue-700 text-white' : 'border')}>Published page</button>
+                  </div>
                 </div>
                 <div className="overflow-x-auto rounded-xl border bg-slate-100 p-2 sm:p-4">
                   <div className="mx-auto min-h-[360px] bg-white px-4 py-10 shadow-lg sm:px-8"
                     style={{ width: dimensions[device], maxWidth: device === 'desktop' ? '100%' : undefined }}>
-                    <div className="mb-8 text-center"><h1 className="text-3xl font-bold text-dark">{title}</h1></div>
+                    <div className="mb-8 text-center"><h1 className="text-3xl font-bold text-dark">{previewTitle}</h1></div>
                     <div className="space-y-8 text-body">
-                      {blocks.map((block, index) => <div key={block.id}
-                        onClick={() => setSelectedBlock(block.id)}
+                      {previewBlocks.map((block, index) => <div key={block.id}
+                        onClick={() => { if (previewMode === 'draft') setSelectedBlock(block.id) }}
                         className={'group relative cursor-pointer rounded-lg border-2 p-2 ' + (block.id === selectedBlock ? 'border-blue-500' : 'border-transparent hover:border-blue-200')}>
                         <span className="absolute -top-3 left-2 z-10 rounded-full bg-blue-700 px-2 py-0.5 text-[10px] font-bold text-white">{index + 1}. {niceNycStudioType(block.type)}</span>
                         {block.type === 'html' ? <div className="rounded bg-amber-100 p-3 text-sm">Legacy HTML block · visual editing unavailable</div> : <RenderBlock block={block} />}
                       </div>)}
-                      {!blocks.length && <div className="rounded-xl border-2 border-dashed p-10 text-center text-slate-500"><LayoutTemplate className="mx-auto mb-3" /><p>Add a section on the right to design this page.</p></div>}
+                      {!previewBlocks.length && <div className="rounded-xl border-2 border-dashed p-10 text-center text-slate-500"><LayoutTemplate className="mx-auto mb-3" /><p>Add a section on the right to design this page.</p></div>}
                     </div>
                   </div>
                 </div>
-                <p className="mt-3 text-xs text-slate-500">This uses the same section renderer as the NYC storefront. Device width previews do not replace testing in real browsers.</p>
+                <p className="mt-3 text-xs text-slate-500">{previewMode === 'live' ? 'Showing the last published NYC page. Draft edits stay private.' : 'Private draft preview — not accessible to customers until published.'} Device width previews do not replace testing in real browsers.</p>
               </div>
             </> : <div className="rounded-2xl bg-white p-10 text-center text-slate-500">{loading ? 'Loading NYC page editor…' : 'Select or create a custom NYC page.'}</div>}
           </section>
@@ -310,6 +359,7 @@ export default function NycPageStudio() {
                   <button className="min-w-0 flex-1 truncate py-2 text-left font-semibold" onClick={() => setSelectedBlock(block.id)}>{index + 1}. {niceNycStudioType(block.type)}</button>
                   <button title="Move up" disabled={index===0} onClick={() => moveBlock(index, -1)} className="p-1 disabled:opacity-30"><ArrowUp size={14} /></button>
                   <button title="Move down" disabled={index===blocks.length-1} onClick={() => moveBlock(index, 1)} className="p-1 disabled:opacity-30"><ArrowDown size={14} /></button>
+                  <button title="Duplicate section" disabled={blocks.length >= 60} onClick={() => duplicateBlock(index)} className="p-1 disabled:opacity-30"><Copy size={14} /></button>
                   <button title="Remove section" onClick={() => deleteBlock(block.id)} className="p-1 text-red-700"><Trash2 size={14} /></button>
                 </div>)}
               </div>
@@ -319,9 +369,9 @@ export default function NycPageStudio() {
               {selected && selectedIndex >= 0 ? <>
                 {NYC_STUDIO_FIELDS[selected.type]?.map(field => <label key={field.key} className="mb-3 block text-xs font-bold text-slate-600">
                   {field.label}
-                  {field.kind === 'textarea' ? <textarea rows={3} value={String(selected[field.key] || '')} onChange={e => changeBlock(selected.id, { [field.key]: e.target.value })} className="mt-1 block w-full rounded-lg border p-2 text-sm font-normal" /> :
-                    field.kind === 'select' ? <select value={String(selected[field.key] || field.options?.[0] || '')} onChange={e => changeBlock(selected.id, { [field.key]: e.target.value })} className="mt-1 block w-full rounded-lg border p-2 text-sm font-normal">{field.options?.map(option => <option key={option} value={option}>{option}</option>)}</select> :
-                      <input type="text" value={String(selected[field.key] || '')} onChange={e => changeBlock(selected.id, { [field.key]: e.target.value })} placeholder={field.kind === 'url' ? 'https://... or /...' : ''} className="mt-1 block w-full rounded-lg border p-2 text-sm font-normal" />}
+                  {field.kind === 'textarea' ? <textarea rows={3} value={String(selected[field.key] || '')} onChange={e => changeBlock(selected.id, { [field.key]: e.target.value }, field.key)} className="mt-1 block w-full rounded-lg border p-2 text-sm font-normal" /> :
+                    field.kind === 'select' ? <select value={String(selected[field.key] || field.options?.[0] || '')} onChange={e => changeBlock(selected.id, { [field.key]: e.target.value }, field.key)} className="mt-1 block w-full rounded-lg border p-2 text-sm font-normal">{field.options?.map(option => <option key={option} value={option}>{option}</option>)}</select> :
+                      <input type="text" value={String(selected[field.key] || '')} onChange={e => changeBlock(selected.id, { [field.key]: e.target.value }, field.key)} placeholder={field.kind === 'url' ? 'https://... or /...' : ''} className="mt-1 block w-full rounded-lg border p-2 text-sm font-normal" />}
                 </label>)}
                 {selected.type === 'html' && <p className="text-sm text-amber-800">Legacy HTML can only be removed from this studio; its original content stays public until publishing a replacement.</p>}
                 {NYC_STUDIO_FIELDS[selected.type]?.length === 0 && <p className="text-xs text-slate-500">This section needs no additional fields.</p>}

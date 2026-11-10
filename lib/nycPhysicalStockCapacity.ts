@@ -1,8 +1,8 @@
 // Physical inventory confirmations are independent of Syracuse's catalog sync.
 // A staff-marked unavailable item can never be sold or advertised as available.
-// Confirmed quantities also cap the public catalog stock; an unverified item
-// retains its existing catalog quantity until an operator establishes its source.
-// No verification row is ever inferred from a copied catalog quantity.
+// Only an explicit, timestamped NYC stock or supplier commitment allows online
+// rental availability. Syracuse catalog quantities are never proof of NYC stock.
+// Unverified items can still be browsed and quoted manually by staff.
 export type NycPhysicalStockRecord = {
   status: string
   verifiedQuantity: number
@@ -12,13 +12,14 @@ export type NycPhysicalStockRecord = {
 
 export function effectiveNycStockQuantity(catalogQuantity: number, record?: NycPhysicalStockRecord | null): number {
   const listed = Number.isSafeInteger(catalogQuantity) && catalogQuantity > 0 ? catalogQuantity : 0
-  if (!record) return listed
-  if (record.status === 'unavailable') return 0
+  // Fail closed: neither a missing record nor an unverified status can authorize
+  // collecting a deposit for equipment whose NYC fulfillment is not confirmed.
+  if (!record || record.status !== 'confirmed') return 0
   if (record.status === 'confirmed' &&
       (record.source === 'nyc_stock' || record.source === 'partner_committed') &&
       record.verifiedAt &&
       Number.isSafeInteger(record.verifiedQuantity) && record.verifiedQuantity > 0) {
     return Math.min(listed, record.verifiedQuantity)
   }
-  return listed
+  return 0
 }

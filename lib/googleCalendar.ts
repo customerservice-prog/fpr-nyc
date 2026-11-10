@@ -1,4 +1,5 @@
 import { NYC_EMAIL_ADDRESS } from '@/lib/nycEmail'
+import { assertNycGoogleAccountEmail } from '@/lib/nycGoogleAccountGuard'
 import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes, randomUUID, timingSafeEqual } from 'crypto'
 import { prisma } from '@/lib/prisma'
 import { cleanMeetingDuration, cleanMeetingEmail, instantToEasternWall, requireFutureMeeting, wallClockToInstant } from '@/lib/meetingTime'
@@ -232,6 +233,8 @@ export async function getGoogleCalendarConnection() {
 export async function getGoogleCalendarAccessToken() {
   const connection = await getGoogleCalendarConnection()
   if (!connection) return null
+  // Do not refresh or use a Syracuse/other-account token as if it were NYC.
+  assertNycGoogleAccountEmail(connection.googleEmail, BUSINESS_GOOGLE_EMAIL)
   const refreshToken = decryptGoogleSecret(connection.encryptedRefreshToken)
   const accessToken = await refreshGoogleAccessToken(refreshToken)
   return { accessToken, connection }
@@ -245,6 +248,8 @@ export function googleConnectionHasSearchConsoleScope(connection: { scope?: stri
 export async function getGoogleSearchConsoleAccessToken() {
   const connection = await getGoogleCalendarConnection()
   if (!connection || !googleConnectionHasSearchConsoleScope(connection)) return null
+  // Search Console authorization must also originate from the NYC mailbox.
+  assertNycGoogleAccountEmail(connection.googleEmail, BUSINESS_GOOGLE_EMAIL)
   const refreshToken = decryptGoogleSecret(connection.encryptedRefreshToken)
   const accessToken = await refreshGoogleAccessToken(refreshToken)
   return { accessToken, connection }

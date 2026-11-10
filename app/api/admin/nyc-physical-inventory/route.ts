@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { lockNycCapacity } from '@/lib/nycInventory'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -85,15 +86,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Confirmation requires a positive quantity and named stock source. Unavailable and unverified items must have zero verified quantity.' }, { status: 400 })
   }
   try {
-    const item = await prisma.item.findUnique({ where: { slug: itemSlug }, select: { slug: true, displayToCustomer: true } })
-    if (!item?.displayToCustomer) return NextResponse.json({ error: 'NYC catalog item not found' }, { status: 404 })
     const reviewer = String(session.user?.email || session.user?.name || 'NYC administrator').slice(0, 150)
-    const verification = await prisma.nycPhysicalStockVerification.upsert({
-      where: { itemSlug },
-      create: { itemSlug, status, verifiedQuantity: quantity, source, notes: notes || null, verifiedBy: reviewer, verifiedAt: status === 'unverified' ? null : new Date() },
-      update: { status, verifiedQuantity: quantity, source, notes: notes || null, verifiedBy: reviewer, verifiedAt: status === 'unverified' ? null : new Date() },
-      select: { itemSlug: true, status: true, verifiedQuantity: true, source: true, notes: true, verifiedAt: true, verifiedBy: true },
-    })
+    // Serialize staff inventory changes against online booking capacity and payment
+    // checks. A concurrent checkout cannot pass a stale verification after staff
+    // marks equipment unavailable. Never alter the actual catalog quantity.
+    const verification = await prisma.$transaction(async tx => {
+      await lockNycCapacity(tx)
+      const item = await tx.item.findUnique({
+        where: { slug: itemSlug }, select: { slug: true, displayToCustomer: true },
+      })
+      if (!item?.displayToCustomer) return null
+      return tx.nycPhysicalStockVerification.upsert({
+        where: { itemSlug },
+        create: { itemSlug, status, verifiedQuantity: quantity, source, notes: notes || null, verifiedBy: reviewer, verifiedAt: status === 'unverified' ? null : new Date() },
+        update: { status, verifiedQuantity: quantity, source, notes: notes || null, verifiedBy: reviewer, verifiedAt: status === 'unverified' ? null : new Date() },
+        select: { itemSlug: true, status: true, verifiedQuantity: true, source: true, notes: true, verifiedAt: true, verifiedBy: true },
+      })
+    }, { maxWait: 10000, timeout: 20000 })
+    if (!verification) return NextResponse.json({ error: 'NYC catalog item not found' }, { status: 404 })
     return NextResponse.json({ verification }, { headers: { 'Cache-Control': 'no-store' } })
   } catch {
     return NextResponse.json({ error: 'Unable to save NYC inventory verification' }, { status: 503 })

@@ -42,7 +42,7 @@ test('NYC admin verification makes source/quantity explicit, does not claim read
   assert.match(component, /Catalog quantities below are imported from Syracuse/)
   assert.match(component, /Supplier committed \/ confirmed/)
   assert.match(component, /Marking an item unavailable blocks online availability and checkout/)
-  assert.match(component, /The catalog quantity itself was not edited/)
+  assert.match(component, /catalog quantity itself was not edited/i)
   assert.match(component, /NYC-owned \/ physically staged/)
   assert.match(settings, /\/admin\/inventory\/physical-verification/)
   assert.match(items, /\/admin\/inventory\/physical-verification/)

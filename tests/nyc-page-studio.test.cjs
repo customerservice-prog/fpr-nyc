@@ -59,7 +59,9 @@ test('draft model and migration keep published website-page data isolated', () =
   assert.match(schema, /model NycCustomPageDraft/)
   assert.match(migration, /REFERENCES "WebsitePage"\("id"\)/)
   assert.match(migration, /ON DELETE CASCADE/)
-  assert.match(api, /prisma\.nycCustomPageDraft\.upsert/)
+  assert.match(api, /nycCustomPageDraft\.create/)
+  assert.match(api, /nycCustomPageDraft\.updateMany/)
+  assert.match(api, /expectedDraftUpdatedAt/)
   assert.match(api, /confirmNycPageAdminPassword/)
   assert.match(api, /updatedAt: expected/)
   assert.match(api, /Invalid NYC origin/)
@@ -76,11 +78,22 @@ function setupApi() {
       update: async ({data}) => { updates++; Object.assign(page, data); return { ...page } },
     },
     nycCustomPageDraft: {
-      upsert: async ({create,update}) => {
-        draft = { ...(draft||create), ...update, updatedAt:new Date('2026-11-09T20:00:00Z') }
+      create: async ({data}) => {
+        if (draft) { const conflict=Error('Draft already exists'); conflict.code='P2002'; throw conflict }
+        draft = { ...data, updatedAt:new Date('2026-11-09T20:00:00Z') }
         return {updatedAt:draft.updatedAt}
       },
+      updateMany: async ({where,data}) => {
+        if (!draft || draft.pageId !== where.pageId ||
+          draft.updatedAt.getTime() !== where.updatedAt.getTime()) return {count:0}
+        draft = { ...draft, ...data }
+        return {count:1}
+      },
       findUnique: async () => draft,
+      findUniqueOrThrow: async () => {
+        if (!draft) throw Error('Draft missing')
+        return {updatedAt:draft.updatedAt}
+      },
       deleteMany: async ({where}) => {
         if (!draft || (where.updatedAt && draft.updatedAt.getTime() !== where.updatedAt.getTime())) return {count:0}
         draft = null
@@ -111,7 +124,7 @@ function setupApi() {
 
 test('saving a private draft cannot modify a published NYC page', async () => {
   const f=setupApi()
-  const r=await f.route.POST(f.request({action:'save',pageId:'page-1',title:'New draft headline',blocks:[goodBlock]}))
+  const r=await f.route.POST(f.request({action:'save',pageId:'page-1',title:'New draft headline',blocks:[goodBlock],expectedDraftUpdatedAt:null}))
   assert.equal(r.status,200)
   assert.equal(r.body.saved,true)
   assert.equal(f.getDraft().title,'New draft headline')
@@ -125,7 +138,7 @@ test('saving a private draft cannot modify a published NYC page', async () => {
 
 test('server refuses to publish an empty NYC private page', async () => {
   const f=setupApi()
-  const saved=await f.route.POST(f.request({action:'save',pageId:'page-1',title:'Empty pending page',blocks:[]}))
+  const saved=await f.route.POST(f.request({action:'save',pageId:'page-1',title:'Empty pending page',blocks:[],expectedDraftUpdatedAt:null}))
   const result=await f.route.POST(f.request({
     action:'publish',pageId:'page-1',expectedDraftUpdatedAt:saved.body.draftUpdatedAt.toISOString(),
     adminPassword:'strong-admin-password',
@@ -135,9 +148,61 @@ test('server refuses to publish an empty NYC private page', async () => {
   assert.equal(f.page.title,'Live headline')
 })
 
+test('saved NYC page drafts reject stale and missing revisions', async () => {
+  const f=setupApi()
+  const first=await f.route.POST(f.request({action:'save',pageId:'page-1',title:'First editor',blocks:[goodBlock],expectedDraftUpdatedAt:null}))
+  assert.equal(first.status,200)
+  const duplicate=await f.route.POST(f.request({action:'save',pageId:'page-1',title:'Other first editor',blocks:[goodBlock],expectedDraftUpdatedAt:null}))
+  assert.equal(duplicate.status,409)
+  const missing=await f.route.POST(f.request({action:'save',pageId:'page-1',title:'No revision',blocks:[goodBlock]}))
+  assert.equal(missing.status,409)
+  const second=await f.route.POST(f.request({action:'save',pageId:'page-1',title:'Updated from current revision',blocks:[goodBlock],
+    expectedDraftUpdatedAt:first.body.draftUpdatedAt.toISOString()}))
+  assert.equal(second.status,200)
+  assert.equal(f.getDraft().title,'Updated from current revision')
+  const stale=await f.route.POST(f.request({action:'save',pageId:'page-1',title:'Old editor overwrite attempt',blocks:[goodBlock],
+    expectedDraftUpdatedAt:first.body.draftUpdatedAt.toISOString()}))
+  assert.equal(stale.status,409)
+  assert.equal(f.getDraft().title,'Updated from current revision')
+  assert.equal(f.getUpdates(),0)
+})
+
+const editHistory = transpile('lib/nycPageEditHistory.ts')
+test('NYC page undo/redo groups typing, duplicates safely and clears redo after a fresh edit', () => {
+  const empty={past:[],future:[],lastGroup:null,lastEditAt:0}
+  const origin={title:'Live',blocks:[goodBlock]}
+  const first={title:'New title',blocks:[goodBlock]}
+  const second={title:'New title!',blocks:[goodBlock]}
+  const h1=editHistory.recordNycPageEdit(empty,origin,first,'title',1000)
+  assert.equal(h1.past.length,1)
+  const h2=editHistory.recordNycPageEdit(h1,first,second,'title',1500)
+  assert.equal(h2.past.length,1)
+  const back=editHistory.undoNycPageEdit(h2,second)
+  assert.equal(back.snapshot.title,'Live')
+  assert.equal(back.history.future.length,1)
+  const forward=editHistory.redoNycPageEdit(back.history,back.snapshot)
+  assert.equal(forward.snapshot.title,'New title!')
+  const changed=editHistory.recordNycPageEdit(back.history,back.snapshot,
+    {title:'Alternate',blocks:[goodBlock]},'title',3000)
+  assert.equal(changed.future.length,0)
+  assert.equal(editHistory.redoNycPageEdit(changed,{title:'Alternate',blocks:[goodBlock]}),null)
+})
+test('NYC page studio exposes functional section duplication and live-vs-draft preview controls', () => {
+  const ui=fs.readFileSync('components/admin/NycPageStudio.tsx','utf8')
+  const api=fs.readFileSync('app/api/admin/website-pages/studio/route.ts','utf8')
+  assert.match(ui,/duplicateBlock\(index\)/)
+  assert.match(ui,/Duplicate section/)
+  assert.match(ui,/undoNycPageEdit/)
+  assert.match(ui,/redoNycPageEdit/)
+  assert.match(ui,/expectedDraftUpdatedAt: draftVersion/)
+  assert.match(ui,/setPreviewMode\('live'\)/)
+  assert.match(ui,/previewBlocks\.map/)
+  assert.match(api,/liveBlocks: parseNycStudioContent\(page\.content/)
+})
+
 test('publishing requires NYC admin password and exact current draft revision', async () => {
   const f=setupApi()
-  const saved=await f.route.POST(f.request({action:'save',pageId:'page-1',title:'Published from private draft',blocks:[goodBlock]}))
+  const saved=await f.route.POST(f.request({action:'save',pageId:'page-1',title:'Published from private draft',blocks:[goodBlock],expectedDraftUpdatedAt:null}))
   const expectedDraftUpdatedAt=saved.body.draftUpdatedAt.toISOString()
   const noPassword=await f.route.POST(f.request({action:'publish',pageId:'page-1',expectedDraftUpdatedAt}))
   assert.equal(noPassword.status,403)

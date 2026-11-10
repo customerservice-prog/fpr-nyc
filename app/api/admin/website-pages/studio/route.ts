@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
       if (typeof data.title !== 'string' || data.title.trim().length < 2 || data.title.length > 180) {
         return replyError('Page title must be 2–180 characters')
       }
+      const validatedTitle = data.title.trim()
       let content: string
       try { content = normalizeNycStudioContent(data.blocks) }
       catch (cause) { return replyError(cause instanceof Error ? cause.message : 'Invalid page content') }
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
         if (expectedValue === null) {
           // Unique pageId makes simultaneous first-time draft creations conflict.
           return tx.nycCustomPageDraft.create({
-            data: { pageId, title: data.title.trim(), content },
+            data: { pageId, title: validatedTitle, content },
             select: { updatedAt: true },
           })
         }
@@ -119,7 +120,7 @@ export async function POST(request: NextRequest) {
         const changed = await tx.nycCustomPageDraft.updateMany({
           where: { pageId, updatedAt: expected },
           data: {
-            title: data.title.trim(),
+            title: validatedTitle,
             content,
             // Ensure a distinct revision even for two edits in the same millisecond.
             updatedAt: new Date(Math.max(Date.now(), expected.getTime() + 1)),

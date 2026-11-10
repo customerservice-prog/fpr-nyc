@@ -20,8 +20,8 @@ test('NYC calendar configuration does not alter NYC customer email or Syracuse r
 
 test('persisted NYC Google Calendar and Search Console tokens require NYC email on every use', () => {
   const src = readFileSync('lib/googleCalendar.ts', 'utf8')
-  assert.match(src, /getGoogleCalendarAccessToken\\(\\)[\\s\\S]*?assertNycGoogleAccountEmail\\(connection\\.googleEmail, BUSINESS_GOOGLE_EMAIL\\)/)
-  assert.match(src, /getGoogleSearchConsoleAccessToken\\(\\)[\\s\\S]*?assertNycGoogleAccountEmail\\(connection\\.googleEmail, BUSINESS_GOOGLE_EMAIL\\)/)
+  assert.match(src, /getGoogleCalendarAccessToken\(\)[\s\S]*?assertNycGoogleAccountEmail\(connection\.googleEmail, BUSINESS_GOOGLE_EMAIL\)/)
+  assert.match(src, /getGoogleSearchConsoleAccessToken\(\)[\s\S]*?assertNycGoogleAccountEmail\(connection\.googleEmail, BUSINESS_GOOGLE_EMAIL\)/)
 })
 
 test('NYC Google account identity guard rejects Syracuse, blanks and other accounts', () => {

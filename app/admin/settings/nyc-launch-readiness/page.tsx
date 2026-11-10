@@ -24,7 +24,7 @@ export default async function NycLaunchReadinessPage() {
   const resendWebhookConfigured = Boolean(process.env.NYC_RESEND_WEBHOOK_SECRET)
 
   // Read NYC-only staff confirmations. These records are not the Syracuse-synced
-  // public catalog quantities, and no checkout availability is altered here.
+  // public catalog quantities. Explicitly unavailable or confirmed stock now affects checkout.
   let physicalStock: NycStockReadinessSummary | null = null
   try {
     const [catalog, verifications] = await Promise.all([
@@ -58,7 +58,7 @@ export default async function NycLaunchReadinessPage() {
         {physicalStock.catalogItems === 0 && <p role="alert" className="text-sm text-amber-800">No public catalog items were found. Verify the NYC catalog sync before using these figures.</p>}
         {physicalStock.unverified > 0 && <p className="text-sm text-amber-800">NYC stock checks are incomplete. Mirrored Syracuse quantities are not confirmation that an item can be delivered in Riverdale.</p>}
       </> : <p role="alert" className="text-sm text-amber-800">Inventory verification data is currently unavailable. Do not assume that any NYC equipment is confirmed.</p>}
-      <p className="text-sm text-gray-600">These are staff-entered confirmations, not live reservations or a guarantee that stock, suppliers, drivers, crews or dates are available for a customer order. Public inventory and checkout were not changed.</p>
+      <p className="text-sm text-gray-600">These are staff-entered confirmations, not live reservations or a guarantee that stock, suppliers, drivers, crews or dates are available for a customer order. Catalog quantities are unchanged. Unavailable items are blocked from online bookings; verified NYC quantities cap availability. Unverified items still require physical or supplier confirmation.</p>
       <p><Link href="/admin/inventory/physical-verification" className="inline-flex rounded border px-4 py-2 text-sm font-semibold text-blue-700">Review and confirm NYC physical stock</Link></p>
     </section>
     <p><Link href="/admin/reports/payment-audit" className="inline-flex rounded border px-4 py-2 text-sm font-semibold text-blue-700">View NYC payment ledger and webhook audit</Link></p>

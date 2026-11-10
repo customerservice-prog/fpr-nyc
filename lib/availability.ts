@@ -2,6 +2,7 @@ import { prisma } from './prisma'
 import { startOfDay, endOfDay } from 'date-fns'
 import type { Prisma } from '@prisma/client'
 import { holdsStockWhere } from './nycInventory'
+import { effectiveNycStockQuantity } from './nycPhysicalStockCapacity'
 
 // Quote-status orders normally don't count against availability (so stale/abandoned
 // staff quotes don't lock up inventory forever). However, EVERY online checkout also
@@ -68,7 +69,7 @@ function activeOrdersCoveringDay(dayStart: Date, dayEnd: Date): Prisma.OrderWher
 
 export async function getItemAvailability(itemId: string, date: Date): Promise<number> {
   const item = await prisma.item.findUnique({ where: { id: itemId } })
-  if (!item) return 0
+  if (!item || !item.displayToCustomer || item.status !== 'Available') return 0
 
 if (item.bookableAfter && date < item.bookableAfter) return 0
 
@@ -94,7 +95,11 @@ let booked = 0
     }
   }
 
-return Math.max(0, item.quantity - booked)
+const physical = await prisma.nycPhysicalStockVerification.findUnique({
+  where: { itemSlug: item.slug },
+  select: { status: true, verifiedQuantity: true, source: true, verifiedAt: true },
+})
+return Math.max(0, effectiveNycStockQuantity(item.quantity, physical) - booked)
 }
 
 export async function getItemsWithAvailability(
@@ -131,6 +136,12 @@ const orderItems = await prisma.orderItem.findMany({
     select: { itemId: true, quantity: true },
   })
 
+const physicalRows = await prisma.nycPhysicalStockVerification.findMany({
+  where: { itemSlug: { in: items.map(item => item.slug) } },
+  select: { itemSlug: true, status: true, verifiedQuantity: true, source: true, verifiedAt: true },
+})
+const physicalBySlug = new Map(physicalRows.map(row => [row.itemSlug, row]))
+
 const bookedMap = new Map<string, number>()
   for (const oi of orderItems) {
     if (!oi.itemId) continue
@@ -138,11 +149,12 @@ const bookedMap = new Map<string, number>()
   }
 
 return items.map((item) => {
-  if (item.bookableAfter && date < item.bookableAfter) {
+  if (item.status !== 'Available' || (item.bookableAfter && date < item.bookableAfter)) {
     return withCategoryImage({ ...item, available: 0 })
   }
   const booked = bookedMap.get(item.id) || 0
-  return withCategoryImage({ ...item, available: Math.max(0, item.quantity - booked) })
+  const physicallyAllowed = effectiveNycStockQuantity(item.quantity, physicalBySlug.get(item.slug))
+  return withCategoryImage({ ...item, available: Math.max(0, physicallyAllowed - booked) })
 })
 }
 

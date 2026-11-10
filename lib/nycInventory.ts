@@ -69,6 +69,7 @@ export interface InventoryShortfall {
   name: string
   requested: number
   available: number
+  reason?: 'verification_required' | 'unavailable' | 'capacity'
 }
 
 /**
@@ -106,14 +107,27 @@ export async function findInventoryShortfalls(
     const item = byId.get(itemId)
     const sellable = !!item && item.displayToCustomer && item.status === 'Available' && !closed
       && (!item.bookableAfter || item.bookableAfter.getTime() <= period.start.getTime())
-    const physicalCount = item ? effectiveNycStockQuantity(item.quantity, physicalBySlug.get(item.slug)) : 0
+    const physical = item ? physicalBySlug.get(item.slug) : null
+    const physicalCount = item ? effectiveNycStockQuantity(item.quantity, physical) : 0
     const available = sellable ? Math.max(0, physicalCount - (booked.get(itemId) || 0)) : 0
-    if (quantity > available) shortfalls.push({ itemId, name: item?.name || 'An item', requested: quantity, available })
+    if (quantity > available) {
+      const needsConfirmation = sellable && physicalCount === 0 &&
+        physical?.status !== 'unavailable' && (!physical || physical.status !== 'confirmed' ||
+          !physical.verifiedAt || !['nyc_stock', 'partner_committed'].includes(physical.source))
+      shortfalls.push({
+        itemId, name: item?.name || 'An item', requested: quantity, available,
+        reason: needsConfirmation ? 'verification_required' : !sellable || physical?.status === 'unavailable' ? 'unavailable' : 'capacity',
+      })
+    }
   }
   return shortfalls
 }
 
 export function shortfallMessage(shortfall: InventoryShortfall): string {
+  if (shortfall.reason === 'verification_required') {
+    return 'Our NYC team needs to confirm availability for "' + shortfall.name +
+      '" before taking an online payment. Please contact the Riverdale office to request this rental.'
+  }
   return shortfall.available > 0
     ? 'Only ' + shortfall.available + ' of "' + shortfall.name + '" are available for your rental dates (all colors combined). Please adjust the quantity in your cart.'
     : '"' + shortfall.name + '" is no longer available for your rental dates. Please remove it or choose another date.'

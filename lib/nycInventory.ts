@@ -88,8 +88,8 @@ export async function findInventoryShortfalls(
     tx.closedDate.findFirst({ where: { date: { gte: period.start, lte: period.end } }, select: { id: true } }),
     tx.orderItem.findMany({ where: { itemId: { in: ids }, order: overlappingActiveOrders(period, excludeOrderId) }, select: { itemId: true, quantity: true } }),
   ])
-  // A staff-marked unavailable item must be rejected even when the mirrored
-  // catalog says "Available". Confirmed NYC quantities cap copied stock.
+  // Any item lacking a current NYC staff confirmation fails closed, even when the
+  // Syracuse-mirrored catalog says "Available". Confirmed quantities cap stock.
   const physicalRecords = await tx.nycPhysicalStockVerification.findMany({
     where: { itemSlug: { in: items.map(item => item.slug) } },
     select: { itemSlug: true, status: true, verifiedQuantity: true, source: true, verifiedAt: true },

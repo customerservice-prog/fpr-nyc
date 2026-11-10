@@ -10,6 +10,7 @@
 import { endOfDay, startOfDay } from 'date-fns'
 import type { Prisma } from '@prisma/client'
 import { effectiveEventEndDate } from './orderDates'
+import { effectiveNycStockQuantity } from './nycPhysicalStockCapacity'
 
 /** Arbitrary constant key for pg_advisory_xact_lock (NYC order capacity). */
 export const NYC_CAPACITY_LOCK_KEY = 815301
@@ -83,10 +84,17 @@ export async function findInventoryShortfalls(
   const ids = Array.from(requested.keys()).filter(Boolean)
   if (!ids.length) return []
   const [items, closed, lines] = await Promise.all([
-    tx.item.findMany({ where: { id: { in: ids } }, select: { id: true, name: true, quantity: true, displayToCustomer: true, status: true, bookableAfter: true } }),
+    tx.item.findMany({ where: { id: { in: ids } }, select: { id: true, slug: true, name: true, quantity: true, displayToCustomer: true, status: true, bookableAfter: true } }),
     tx.closedDate.findFirst({ where: { date: { gte: period.start, lte: period.end } }, select: { id: true } }),
     tx.orderItem.findMany({ where: { itemId: { in: ids }, order: overlappingActiveOrders(period, excludeOrderId) }, select: { itemId: true, quantity: true } }),
   ])
+  // A staff-marked unavailable item must be rejected even when the mirrored
+  // catalog says "Available". Confirmed NYC quantities cap copied stock.
+  const physicalRecords = await tx.nycPhysicalStockVerification.findMany({
+    where: { itemSlug: { in: items.map(item => item.slug) } },
+    select: { itemSlug: true, status: true, verifiedQuantity: true, source: true, verifiedAt: true },
+  })
+  const physicalBySlug = new Map(physicalRecords.map(row => [row.itemSlug, row]))
   const booked = new Map<string, number>()
   for (const line of lines) {
     if (!line.itemId) continue
@@ -98,7 +106,8 @@ export async function findInventoryShortfalls(
     const item = byId.get(itemId)
     const sellable = !!item && item.displayToCustomer && item.status === 'Available' && !closed
       && (!item.bookableAfter || item.bookableAfter.getTime() <= period.start.getTime())
-    const available = sellable ? Math.max(0, item!.quantity - (booked.get(itemId) || 0)) : 0
+    const physicalCount = item ? effectiveNycStockQuantity(item.quantity, physicalBySlug.get(item.slug)) : 0
+    const available = sellable ? Math.max(0, physicalCount - (booked.get(itemId) || 0)) : 0
     if (quantity > available) shortfalls.push({ itemId, name: item?.name || 'An item', requested: quantity, available })
   }
   return shortfalls

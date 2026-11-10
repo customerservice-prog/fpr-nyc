@@ -17,3 +17,24 @@ test('NYC calendar configuration does not alter NYC customer email or Syracuse r
   assert.match(src, /friendlypartyrentalnyc@gmail\.com/)
   assert.match(src, /NYC_NOTIFICATION_EMAIL/)
 })
+
+test('persisted NYC Google Calendar and Search Console tokens require NYC email on every use', () => {
+  const src = readFileSync('lib/googleCalendar.ts', 'utf8')
+  assert.match(src, /getGoogleCalendarAccessToken\(\)[\s\S]*?assertNycGoogleAccountEmail\(connection\.googleEmail, BUSINESS_GOOGLE_EMAIL\)/)
+  assert.match(src, /getGoogleSearchConsoleAccessToken\(\)[\s\S]*?assertNycGoogleAccountEmail\(connection\.googleEmail, BUSINESS_GOOGLE_EMAIL\)/)
+})
+
+test('NYC Google account identity guard rejects Syracuse, blanks and other accounts', () => {
+  const vm = require('node:vm')
+  const ts = require('typescript')
+  const code = ts.transpileModule(readFileSync('lib/nycGoogleAccountGuard.ts', 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  }).outputText
+  const module = { exports: {} }
+  vm.runInNewContext(code, { module, exports: module.exports, Error, String })
+  const check = module.exports.assertNycGoogleAccountEmail
+  assert.doesNotThrow(() => check(' FriendlyPartyRentalNYC@gmail.com ', 'friendlypartyrentalnyc@gmail.com'))
+  assert.throws(() => check('customerservice@friendlypartyrental.com', 'friendlypartyrentalnyc@gmail.com'), /does not match/)
+  assert.throws(() => check('', 'friendlypartyrentalnyc@gmail.com'), /does not match/)
+  assert.throws(() => check(null, 'friendlypartyrentalnyc@gmail.com'), /does not match/)
+})

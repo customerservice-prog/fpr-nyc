@@ -61,6 +61,10 @@ export async function GET(request: NextRequest) {
       page: { id: page.id, slug: page.slug, title: page.title, isPublished: page.isPublished, updatedAt: page.updatedAt },
       title: draft?.title ?? page.title,
       blocks: parseNycStudioContent(content ? localizeNycContactText(content) : content),
+      // Read-only snapshot of the actually published page. It must never be
+      // replaced by the private draft in the live-vs-draft preview.
+      liveTitle: page.title,
+      liveBlocks: parseNycStudioContent(page.content ? localizeNycContactText(page.content) : page.content),
       draftUpdatedAt: draft?.updatedAt ?? null,
       hasDraft: Boolean(draft),
     }, { headers: { 'Cache-Control': 'no-store' } })
@@ -86,16 +90,46 @@ export async function POST(request: NextRequest) {
       if (typeof data.title !== 'string' || data.title.trim().length < 2 || data.title.length > 180) {
         return replyError('Page title must be 2–180 characters')
       }
+      const validatedTitle = data.title.trim()
       let content: string
       try { content = normalizeNycStudioContent(data.blocks) }
       catch (cause) { return replyError(cause instanceof Error ? cause.message : 'Invalid page content') }
-      const page = await prisma.websitePage.findUnique({ where: { id: pageId }, select: { id: true } })
-      if (!page) return replyError('NYC page not found', 404)
-      // Saving never alters the public WebsitePage table, including for live pages.
-      const draft = await prisma.nycCustomPageDraft.upsert({
-        where: { pageId }, create: { pageId, title: data.title.trim(), content },
-        update: { title: data.title.trim(), content },
-        select: { updatedAt: true },
+      // Explicit optimistic revision: a second editor cannot silently overwrite
+      // another session's saved NYC draft, even if both pages were initially empty.
+      if (!Object.prototype.hasOwnProperty.call(data, 'expectedDraftUpdatedAt')) {
+        return replyError('Reload the page before saving this private draft.', 409)
+      }
+      const expectedValue = data.expectedDraftUpdatedAt
+      const expected = typeof expectedValue === 'string' ? new Date(expectedValue) : null
+      if ((expectedValue !== null && typeof expectedValue !== 'string') ||
+          (typeof expectedValue === 'string' && Number.isNaN(expected?.getTime()))) {
+        return replyError('Invalid draft revision.', 400)
+      }
+      // All changes are private; published WebsitePage content is never updated.
+      const draft = await prisma.$transaction(async tx => {
+        const page = await tx.websitePage.findUnique({ where: { id: pageId }, select: { id: true } })
+        if (!page) throw new Error('PAGE_NOT_FOUND')
+        if (expectedValue === null) {
+          // Unique pageId makes simultaneous first-time draft creations conflict.
+          return tx.nycCustomPageDraft.create({
+            data: { pageId, title: validatedTitle, content },
+            select: { updatedAt: true },
+          })
+        }
+        if (!expected) throw new Error('STALE_DRAFT')
+        const changed = await tx.nycCustomPageDraft.updateMany({
+          where: { pageId, updatedAt: expected },
+          data: {
+            title: validatedTitle,
+            content,
+            // Ensure a distinct revision even for two edits in the same millisecond.
+            updatedAt: new Date(Math.max(Date.now(), expected.getTime() + 1)),
+          },
+        })
+        if (changed.count !== 1) throw new Error('STALE_DRAFT')
+        return tx.nycCustomPageDraft.findUniqueOrThrow({
+          where: { pageId }, select: { updatedAt: true },
+        })
       })
       return NextResponse.json({ saved: true, draftUpdatedAt: draft.updatedAt }, { headers: { 'Cache-Control': 'no-store' } })
     }
@@ -132,6 +166,10 @@ export async function POST(request: NextRequest) {
     })
     return NextResponse.json({ published: true, page: published }, { headers: { 'Cache-Control': 'no-store' } })
   } catch (cause) {
+    if (cause instanceof Error && cause.message === 'PAGE_NOT_FOUND') return replyError('NYC page not found', 404)
+    if ((cause as { code?: string } | null)?.code === 'P2002') {
+      return replyError('Another editor saved this draft first. Reload and review before saving.', 409)
+    }
     if (cause instanceof Error && cause.message === 'STALE_DRAFT') {
       return replyError('This draft changed in another session. Reload and review before publishing.', 409)
     }

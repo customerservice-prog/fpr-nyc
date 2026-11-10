@@ -52,7 +52,7 @@ test('NYC launch dashboard is admin-only and does not modify reservations or sil
   assert.match(src, /summarizeNycPhysicalInventory/)
   assert.match(src, /Inventory verification data is currently unavailable/)
   assert.match(src, /Unavailable items are blocked from online bookings/)
-  assert.match(src, /Unverified items still require physical or supplier confirmation/)
+  assert.match(src, /Unverified items cannot be booked online until physical stock or supplier commitments are confirmed/)
   assert.doesNotMatch(src, /prisma\.(?:item|order|payment)\.(?:update|create|delete|upsert)/)
   assert.doesNotMatch(src, /stripe\.paymentIntents|sendEmail\(/)
 })

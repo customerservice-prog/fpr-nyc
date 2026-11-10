@@ -96,7 +96,7 @@ export default function NycInventoryVerificationManager() {
         unavailable: next.filter(row => row.verification?.status === 'unavailable').length,
         unverified: next.filter(row => !row.verification || row.verification.status === 'unverified').length,
       })
-      setNotice('Verification saved for ' + item.name + '. Staff-marked unavailable stock is blocked; confirmed NYC quantities cap online availability. The catalog quantity itself was not edited.')
+      setNotice('Verification saved for ' + item.name + '. Online bookings require confirmed NYC stock or a committed supplier. Unverified and unavailable items are blocked; the catalog quantity itself was not edited.')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not save verification')
     } finally { setWorking(null) }
@@ -117,7 +117,7 @@ export default function NycInventoryVerificationManager() {
     <p className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
       <strong>Operational inventory only.</strong> Catalog quantities below are imported from Syracuse and do not prove NYC stock.
       Confirm equipment that is physically available to NYC or explicitly committed by a supplier for your bookings.
-      These checks never edit catalog quantities. Marking an item unavailable blocks online availability and checkout. A confirmed NYC quantity caps the listed amount; unverified items still use catalog quantities and require independent physical checks.
+      These checks never edit catalog quantities. Marking an item unavailable blocks online availability and checkout. A confirmed NYC quantity caps the listed amount; unverified items have zero online availability until NYC stock or an actual supplier commitment is recorded.
       Packages can require multiple underlying items: confirm the package components separately.
     </p>
     <div className="flex flex-wrap items-end justify-between gap-3">

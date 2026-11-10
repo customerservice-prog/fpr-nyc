@@ -70,5 +70,7 @@ jobs:
         run: node --test tests/nyc-office-email-smoke-test.test.cjs
       - name: NYC staff-confirmed physical stock capacity and checkout checks
         run: node --test tests/nyc-physical-stock-capacity.test.cjs
+      - name: NYC phone identity and unverified rental contact CTA
+        run: node --test tests/nyc-phone-and-availability-contact.test.cjs
       - run: npx tsc --noEmit
       - run: npm run build
